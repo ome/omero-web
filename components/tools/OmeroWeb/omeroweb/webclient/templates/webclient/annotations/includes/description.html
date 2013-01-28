@@ -1,6 +1,6 @@
 {% comment %}
 <!--
-  Copyright (C) 2011 University of Dundee & Open Microscopy Environment.
+  Copyright (C) 2011-2013 University of Dundee & Open Microscopy Environment.
   All rights reserved.
 
   This program is free software: you can redistribute it and/or modify
@@ -18,15 +18,20 @@
 -->
 {% endcomment %}
 
-    <div id="user_dropdown">
-        <div id="show_user_dropdown">
-            <img src="{% url wamyphoto %}" />
-            <span>{{ ome.user.getFullName }}</span>
+
+<div class="description">
+    {% if obj.canEdit %}
+        <div class="data_heading" id="{{ manager.obj_type }}description-{{ manager.obj_id }}">
+            <p>
+                <span id="{{ manager.obj_type }}description-{{ manager.obj_id }}-description">
+                    {{ obj.description|default:"Add Description"|linebreaksbr}}
+                </span>
+                <button class="btn silver btn_edit" alt="e" title="edit">
+                    <span></span>
+                </button>
+            </p>
         </div>
-        <ul class="dropdown">
-            <li id="user_settings"><a href="{% url wamyaccount 'edit' %}" title="User settings"> User settings</a></li>
-			<!-- Help -->
-            <li id="help"><a href="#" onclick="return OME.openPopup('{% url csend %}')">Help</a></li>
-			<li id="logout"><a href="{% url weblogout %}">Logout</a></li>
-        </ul>
-    </div>
+    {% else %}
+        <span id='image_desc'>{{ obj.description|default:""|linebreaksbr }} </span>
+    {% endif %}
+</div>
