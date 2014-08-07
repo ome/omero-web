@@ -1,3 +1,6 @@
+{% extends "webadmin/admin_base.html" %}
+{% load i18n %}
+
 {% comment %}
 <!--
   Copyright (C) 2011 University of Dundee & Open Microscopy Environment.
@@ -16,16 +19,18 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-
 {% endcomment %}
 
+{% block title %}{% trans "OMERO Users" %}{% endblock %}
 
-<form id="search" action="{% url 'load_template' 'search' %}" method="post" title="Search OMERO">
+{% block center_details %}
+{{ block.super }}
 
-    <div id="top_search_field">
-        <label class="inline_label" for="id_search_query">Search:</label>
-        {{ global_search_form.search_query }}
-        <input type="submit" value="Go" />
-    </div>
-    
-</form>
+  <div id="announce_content">
+      <div class="one_column_content">
+        <h1>{% trans "Email Announcement Unavailable" %}</h1>
+        <p> This is because there are not sufficient settings configured to facilitate sending emails. Please configure OMERO web according to the documentation and restart the web server.</p>
+      </div>
+  </div>
+
+{% endblock %}
