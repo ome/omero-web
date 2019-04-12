@@ -1019,10 +1019,9 @@ OME.hideScriptList = function() {
 
 // Helper can be used by 'open with' plugins to add isEnabled()
 // handlers to the OPEN_WITH object.
-OME.setOpenWithEnabledHandler = function(label, fn) {
-    // look for label in OPEN_WITH
+OME.setOpenWithEnabledHandler = function(id, fn) {
     WEBCLIENT.OPEN_WITH.forEach(function(ow){
-        if (ow.label === label) {
+        if (ow.id === id) {
             ow.isEnabled = function() {
                 // wrap fn with try/catch, since error here will break jsTree menu
                 var args = Array.from(arguments);
@@ -1031,7 +1030,7 @@ OME.setOpenWithEnabledHandler = function(label, fn) {
                     enabled = fn.apply(this, args);
                 } catch (e) {
                     // Give user a clue as to what went wrong
-                    console.log("Open with " + label + ": " + e);
+                    console.log("Open with " + id + ": " + e);
                 }
                 return enabled;
             }
