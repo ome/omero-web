@@ -45,7 +45,7 @@ OmeroWeb is the container of the web clients for OMERO."
       author_email="ome-devel@lists.openmicroscopy.org.uk",
       url="https://github.com/openmicroscopy/openmicroscopy/",
       download_url="https://github.com/openmicroscopy/openmicroscopy/",
-      packages=find_packages(exclude=("test",)),
+      packages=find_packages(exclude=("test",))+["omero.plugins"],
       test_suite='test.suite',
       cmdclass={'test': PyTest},
       tests_require=['pytest<3'],
