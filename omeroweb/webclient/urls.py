@@ -229,6 +229,9 @@ urlpatterns = patterns(
     url(r'^download_orig_metadata/(?P<imageId>[0-9]+)/$',
         views.download_orig_metadata,
         name="download_orig_metadata"),
+    url(r'^omero_table/(?P<file_id>[0-9]+)/(?:(?P<mtype>((?i)json|csv))/)?$',
+        views.omero_table,
+        name="omero_table"),
 
     url(r'^avatar/(?P<oid>[0-9]+)/$', views.avatar, name="avatar"),
 
