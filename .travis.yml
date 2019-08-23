@@ -12,5 +12,6 @@ before_install:
   - git clone git://github.com/ome/omero-test-infra .omero
 
 script:
+  - pip install omero-py
   - python setup.py sdist
   # .omero/docker app
