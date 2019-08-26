@@ -424,7 +424,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
           " must end in a slash if set to a non-empty value.")],
     "omero.web.static_root":
         ["STATIC_ROOT",
-         os.path.join(os.path.dirname(__file__), 'static').replace('\\', '/'),
+         os.path.join(OMERO_HOME, 'var', 'static'),
          os.path.normpath,
          ("The absolute path to the directory where collectstatic will"
           " collect static files for deployment. If the staticfiles contrib"
