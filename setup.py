@@ -10,7 +10,7 @@ import glob
 import sys
 import os
 
-sys.path.append("../OmeroPy/src")
+import omero
 from omero_setup import PyTest
 
 for tools in glob.glob("../../../lib/repository/setuptools*.egg"):
@@ -33,22 +33,20 @@ if "test" in sys.argv:
     if django.VERSION > (1, 7):
         django.setup()
 
-from ez_setup import use_setuptools
-use_setuptools(to_dir='../../../lib/repository')
-from setuptools import setup
-from omero_version import omero_version as ov
+from setuptools import setup, find_packages
 
-setup(name="OmeroWeb",
-      version=ov,
+setup(name="omero-web",
+      version="5.5.dev1",
       description="OmeroWeb",
       long_description="""\
 OmeroWeb is the container of the web clients for OMERO."
 """,
       author="The Open Microscopy Team",
-      author_email="",
+      author_email="ome-devel@lists.openmicroscopy.org.uk",
       url="https://github.com/openmicroscopy/openmicroscopy/",
       download_url="https://github.com/openmicroscopy/openmicroscopy/",
-      packages=[''],
+      packages=find_packages(exclude=("test",))+["omero.plugins"],
+      include_package_data=True,
       test_suite='test.suite',
       cmdclass={'test': PyTest},
       tests_require=['pytest<3'],

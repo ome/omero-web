@@ -1,0 +1,8 @@
+recursive-include omeroweb/feedback/static *
+recursive-include omeroweb/feedback/templates *
+recursive-include omeroweb/webadmin/static *
+recursive-include omeroweb/webadmin/templates *
+recursive-include omeroweb/webclient/static *
+recursive-include omeroweb/webclient/templates *
+recursive-include omeroweb/webgateway/static *
+recursive-include omeroweb/webgateway/templates *

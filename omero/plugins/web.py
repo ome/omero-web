@@ -18,6 +18,7 @@ import os
 import re
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
+from path import path
 
 from omero.install.windows_warning import windows_warning, WINDOWS_WARNING
 from omero.install.python_warning import py27_only, PYTHON_WARNING
@@ -241,7 +242,8 @@ class WebControl(DiagnosticsControl):
         self.ctx.err(LONGHELP % CONFIG_TABLE)
 
     def _get_python_dir(self):
-        return self.ctx.dir / "lib" / "python"
+        import omeroweb
+        return path(omeroweb.__file__).parent.parent
 
     def _get_fallback_dir(self):
         return self.ctx.dir / "lib" / "fallback"

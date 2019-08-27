@@ -58,6 +58,8 @@ if not py27_only():
 # handler404 and handler500 works only when False
 if 'OMERO_HOME' in os.environ:
     OMERO_HOME = os.environ.get('OMERO_HOME')
+elif 'OMERODIR' in os.environ:
+    OMERO_HOME = os.environ.get('OMERODIR')
 else:
     OMERO_HOME = os.path.join(os.path.dirname(__file__), '..', '..', '..')
     OMERO_HOME = os.path.normpath(OMERO_HOME)
@@ -422,7 +424,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
           " must end in a slash if set to a non-empty value.")],
     "omero.web.static_root":
         ["STATIC_ROOT",
-         os.path.join(os.path.dirname(__file__), 'static').replace('\\', '/'),
+         os.path.join(OMERO_HOME, 'var', 'static'),
          os.path.normpath,
          ("The absolute path to the directory where collectstatic will"
           " collect static files for deployment. If the staticfiles contrib"
