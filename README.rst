@@ -66,7 +66,7 @@ OMERO.web is released under the AGPL.
 Copyright
 ---------
 
-2009-2016, The Open Microscopy Environment, Glencoe Software, Inc.
+2009-2019, The Open Microscopy Environment, Glencoe Software, Inc.
 
 .. _OMERO.py: https://openmicroscopy.org/
 .. _ZeroC IcePy: https://zeroc.com/
