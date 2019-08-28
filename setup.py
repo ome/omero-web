@@ -49,10 +49,11 @@ setup(name="omero-web",
           # No Ice included, since a native wheel is preferable
           # Otherwise, minimum requirements for `omero web start`
           'omero-py',
-          'Django>=1.8,<1.9'
+          'Django>=1.8,<1.9',
           'django-pipeline==1.3.20',
           'gunicorn>=19.3',
           'omero-marshal>=0.6.1',
+          'Pillow',
       ],
       include_package_data=True,
       tests_require=['pytest<3'],
