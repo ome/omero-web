@@ -6,3 +6,4 @@ recursive-include omeroweb/webclient/static *
 recursive-include omeroweb/webclient/templates *
 recursive-include omeroweb/webgateway/static *
 recursive-include omeroweb/webgateway/templates *
+recursive-include omeroweb/templates *
