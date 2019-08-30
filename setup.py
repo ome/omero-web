@@ -49,9 +49,8 @@ setup(name="omero-web",
       license='GPLv2+',
       packages=find_packages(exclude=("test",))+["omero.plugins"],
       install_requires=[
-          # No Ice included, since a native wheel is preferable
-          # Otherwise, minimum requirements for `omero web start`
-          'omero-py',
+          # minimum requirements for `omero web start`
+          'omero-py',  # requires Ice (use wheel for faster installs)
           'Django>=1.8,<1.9',
           'django-pipeline==1.3.20',
           'gunicorn>=19.3',
