@@ -37,8 +37,8 @@ import warnings
 from StringIO import StringIO
 from time import time
 
-from omero_version import build_year
-from omero_version import omero_version
+from omeroweb.version import omeroweb_buildyear as build_year
+from omeroweb.version import omeroweb_version as omero_version
 
 import omero
 import omero.scripts

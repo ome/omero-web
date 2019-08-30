@@ -9,10 +9,13 @@
 """
 
 import os
+import sys
 
 from setuptools import setup, find_packages
 
-VERSION = "5.5.1"
+sys.path.append(".")
+from omeroweb.version import omeroweb_version as owv  # noqa
+from omeroweb.version import omero_version as opv  # noqa
 
 
 def read(fname):
@@ -24,7 +27,7 @@ def read(fname):
 
 
 setup(name="omero-web",
-      version=VERSION,
+      version=owv,
       description="OMERO.web",
       long_description=read("README.rst"),
       classifiers=[
