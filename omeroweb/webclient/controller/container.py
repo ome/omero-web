@@ -28,7 +28,7 @@ from omero.rtypes import rstring, rlong, unwrap
 from django.utils.encoding import smart_str
 import logging
 
-from webclient.controller import BaseController
+from omeroweb.webclient.controller import BaseController
 
 logger = logging.getLogger(__name__)
 

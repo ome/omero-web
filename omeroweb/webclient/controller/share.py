@@ -28,7 +28,7 @@ import time
 
 from omero.rtypes import rtime
 
-from webclient.controller import BaseController
+from omeroweb.webclient.controller import BaseController
 
 
 class BaseShare(BaseController):

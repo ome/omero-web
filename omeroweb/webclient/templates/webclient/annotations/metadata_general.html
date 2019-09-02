@@ -343,14 +343,14 @@
                 // loading just the row we need for the current well.
                 {% if manager.well or manager.image %}
                     {% if manager.well %}
-                    var screenQuery = "{% url 'webgateway_object_table_query' 'Screen.plateLinks.child.wells' manager.well.id %}";
-                    var plateQuery = "{% url 'webgateway_object_table_query' 'Plate.wells' manager.well.id %}";
+                    var screenQuery = "{% url 'omeroweb.webgateway_object_table_query' 'Screen.plateLinks.child.wells' manager.well.id %}";
+                    var plateQuery = "{% url 'omeroweb.webgateway_object_table_query' 'Plate.wells' manager.well.id %}";
                     var query = "Well-{{ manager.well.id }}";
                     {% elif manager.image %}
-                    var screenQuery = "{% url 'webgateway_object_table_query' 'Screen.plateLinks.child.wells.wellSamples.image' manager.image.id %}";
-                    var plateQuery = "{% url 'webgateway_object_table_query' 'Plate.wells.wellSamples.image' manager.image.id %}";
-                    var projectQuery = "{% url 'webgateway_object_table_query' 'Project.datasetLinks.child.imageLinks.child' manager.image.id %}";
-                    var datasetQuery = "{% url 'webgateway_object_table_query' 'Dataset.imageLinks.child' manager.image.id %}";
+                    var screenQuery = "{% url 'omeroweb.webgateway_object_table_query' 'Screen.plateLinks.child.wells.wellSamples.image' manager.image.id %}";
+                    var plateQuery = "{% url 'omeroweb.webgateway_object_table_query' 'Plate.wells.wellSamples.image' manager.image.id %}";
+                    var projectQuery = "{% url 'omeroweb.webgateway_object_table_query' 'Project.datasetLinks.child.imageLinks.child' manager.image.id %}";
+                    var datasetQuery = "{% url 'omeroweb.webgateway_object_table_query' 'Dataset.imageLinks.child' manager.image.id %}";
                     var query = "Image-{{ manager.image.id }}";
                     var query2 = "image-{{ manager.image.id }}";
                     {% endif %}
