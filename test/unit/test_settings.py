@@ -22,7 +22,7 @@
 Simple integration tests to ensure that the settings are working correctly.
 """
 
-from connector import Server
+from omeroweb.connector import Server
 
 
 # Test model
