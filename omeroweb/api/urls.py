@@ -19,7 +19,7 @@
 
 """Handles all 'api' urls."""
 
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 from omeroweb.api import views
 from omeroweb.webgateway.views import LoginView
 from . import api_settings
@@ -300,8 +300,7 @@ api_image_rois = url(
 GET ROIs that belong to an Image, using omero-marshal to generate json
 """
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     api_versions,
     api_base,
     api_token,
@@ -336,4 +335,4 @@ urlpatterns = patterns(
     api_rois,
     api_roi,
     api_image_rois,
-)
+]
