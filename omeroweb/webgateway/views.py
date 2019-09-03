@@ -30,7 +30,7 @@ from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.conf import settings
 from django.template import RequestContext as Context
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
 from omero.util.ROI_utils import pointsStringToXYlist, xyListToBbox
