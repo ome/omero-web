@@ -132,10 +132,6 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'formatter': 'full_request',
         },
-        'null': {
-            'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
-        },
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
@@ -155,7 +151,7 @@ LOGGING = {
             'propagate': False
         },
         'django': {
-            'handlers': ['null'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True
         },
