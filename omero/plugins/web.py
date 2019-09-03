@@ -332,7 +332,7 @@ class WebControl(DiagnosticsControl):
                     self.ctx.die(121, "Failed to enable '%s'.\n" % app)
                 else:
                     self.ctx.out("App '%s' was enabled\n" % app)
-            args = [sys.executable, "manage.py", "syncdb", "--noinput"]
+            args = [sys.executable, "manage.py", "migrate", "--noinput"]
             rv = self.ctx.call(args, cwd=location)
             self.syncmedia(None)
 
