@@ -1146,6 +1146,7 @@ ROOT_URLCONF = 'omeroweb.urls'
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "pipeline.finders.PipelineFinder",
 )
 
 # STATICFILES_DIRS: This setting defines the additional locations the
@@ -1231,7 +1232,8 @@ INSTALLED_APPS += (
 logger.debug('INSTALLED_APPS=%s' % [INSTALLED_APPS])
 
 
-PIPELINE_CSS = {
+PIPELINE = {
+  'STYLESHEETS': {
     'webgateway_viewer': {
         'source_filenames': (
             'webgateway/css/reset.css',
@@ -1252,9 +1254,10 @@ PIPELINE_CSS = {
         ),
         'output_filename': 'omeroweb.viewer.min.css',
     },
-}
-
-PIPELINE_JS = {
+  },
+  'CSS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
+  'JS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
+  'JAVASCRIPT': {
     'webgateway_viewer': {
         'source_filenames': (
             '3rdparty/jquery-1.11.1.js',
@@ -1294,6 +1297,7 @@ PIPELINE_JS = {
         ),
         'output_filename': 'omeroweb.viewer.min.js',
     }
+  }
 }
 
 # Prevent scripting attacks from obtaining session cookie
