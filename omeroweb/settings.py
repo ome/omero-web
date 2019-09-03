@@ -1165,6 +1165,7 @@ TEMPLATES = [
         'DIRS': TEMPLATE_DIRS,  # noqa
         'APP_DIRS': True,
         'OPTIONS': {
+            'builtins': ['omeroweb.webgateway.templatetags.defaulttags'],
             'debug': DEBUG,  # noqa
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
