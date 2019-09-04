@@ -36,6 +36,7 @@ from django.core.urlresolvers import reverse, resolve, NoReverseMatch
 from django.template import loader as template_loader
 from django.template import RequestContext
 from django.core.cache import cache
+from django.shortcuts import render
 
 from omeroweb.utils import reverse_with_params
 from omeroweb.connector import Connector
@@ -553,7 +554,5 @@ class render_response(object):
             else:
                 # allow additional processing of context dict
                 ctx.prepare_context(request, context, *args, **kwargs)
-                t = template_loader.get_template(template)
-                c = RequestContext(request, context)
-                return HttpResponse(t.render(c))
+                return render(request, template, context)
         return update_wrapper(wrapper, f)
