@@ -133,8 +133,8 @@ Params in render_thumbnail/<iid>/<w>/<h> are:
 """
 
 render_roi_thumbnail = url(
-    r'^render_roi_thumbnail/(?P<roiId>[0-9]+)/?$',
-    views.render_roi_thumbnail)
+    r'^render_roi_thumbnail/(?P<roiId>[0-9]+)/?$', views.render_roi_thumbnail,
+    name='webgateway_render_roi_thumbnail')
 """
 Returns a thumbnail jpeg of the OMERO ROI. See L{views.render_roi_thumbnail}.
 Uses current rendering settings.
@@ -142,7 +142,8 @@ Uses current rendering settings.
 
 render_shape_thumbnail = url(
     r'^render_shape_thumbnail/(?P<shapeId>[0-9]+)/?$',
-    views.render_shape_thumbnail)
+    views.render_shape_thumbnail,
+    name='webgateway_render_shape_thumbnail')
 """
 Returns a thumbnail jpeg of the OMERO Shape. See
 L{views.render_shape_thumbnail}. Uses current rendering settings.
@@ -372,14 +373,14 @@ Returns 'true' if worked OK.
     - iid:  Image ID.
 """
 
-get_image_rdef_json = url(r'^getImgRDef/$',
-                       views.get_image_rdef_json)
+get_image_rdef_json = url(r'^getImgRDef/$', views.get_image_rdef_json,
+                          name="getImgRDef")
 """
 Gets rendering definition from the 'session' if saved.
 Returns json dict of 'c', 'm', 'z', 't'.
 """
 
-listLuts_json = url(r'^luts/$', views.listLuts_json)
+listLuts_json = url(r'^luts/$', views.listLuts_json, name="listLuts_json")
 """
 json method: returning list of all lookup tables available
 for rendering engine.
@@ -397,8 +398,8 @@ specified image is in.
     - iid:  Image ID.
 """
 
-copy_image_rdef_json = url(r'^copyImgRDef/$',
-                        views.copy_image_rdef_json)
+copy_image_rdef_json = url(r'^copyImgRDef/$', views.copy_image_rdef_json,
+                           name='copy_image_rdef_json')
 """
 Copy the rendering settings from one image to a list of images, specified in
 request by 'fromid' and list of 'toids'. See L{views.copy_image_rdef_json}

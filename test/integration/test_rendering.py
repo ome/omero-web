@@ -75,7 +75,7 @@ class TestRendering(IWebTest):
         assert img2_chan.getCoefficient() == 1.0
 
         # copy rendering settings from image1 via ID
-        request_url = reverse('webgateway.views.copy_image_rdef_json')
+        request_url = reverse('copy_image_rdef_json')
         data = {
             "fromid": iid1
         }
@@ -148,7 +148,7 @@ class TestRendering(IWebTest):
             '&maps=[' + exp_map1 + ',' + exp_map2 + ']'
 
         # copy rendering settings from image1 via URL
-        request_url = reverse('webgateway.views.copy_image_rdef_json')
+        request_url = reverse('copy_image_rdef_json')
         data = {
             "imageId": iid1,
             "c": old_c1,
