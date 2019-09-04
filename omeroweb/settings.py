@@ -1367,8 +1367,8 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 # Load custom settings from etc/grid/config.xml
 # Tue  2 Nov 2010 11:03:18 GMT -- ticket:3228
-# MIDDLEWARE_CLASSES: A tuple of middleware classes to use.
-MIDDLEWARE_CLASSES = sort_properties_to_tuple(MIDDLEWARE_CLASSES_LIST)  # noqa
+# MIDDLEWARE: A tuple of middleware classes to use.
+MIDDLEWARE = sort_properties_to_tuple(MIDDLEWARE_CLASSES_LIST)  # noqa
 
 for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
     setattr(sys.modules[__name__], k, v)
