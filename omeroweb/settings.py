@@ -133,7 +133,7 @@ LOGGING = {
             'formatter': 'full_request',
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
