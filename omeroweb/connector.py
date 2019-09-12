@@ -22,7 +22,7 @@
 import re
 import logging
 
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 
 from omero import client_wrapper
 from omeroweb.version import omeroweb_version as omero_version
@@ -91,7 +91,7 @@ class Server(ServerBase):
         return """["%s", %s, "%s"]""" % (self.host, self.port, self.server)
 
     def __str__(self):
-        return force_unicode(self).encode('utf-8')
+        return force_text(self).encode('utf-8')
 
     def __unicode__(self):
         return str(self.id)
