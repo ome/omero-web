@@ -2119,7 +2119,7 @@ class OmeroWebSafeCallWrapper(OmeroGatewaySafeCallWrapper):  # pragma: no cover
                     self.proxyObjectWrapper._create_func()
                 func = getattr(self.proxyObjectWrapper._obj, self.attr)
                 return func(*args, **kwargs)
-            except Exception, e:
+            except Exception as e:
                 self.debug(e.__class__.__name__, args, kwargs)
                 raise
         else:

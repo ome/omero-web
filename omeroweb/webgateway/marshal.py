@@ -115,7 +115,7 @@ def imageMarshal(image, key=None, request=None):
             if len(well_smpls) == 1:
                 if well_smpls[0].well is not None:
                     well = well_smpls[0].well
-    except omero.SecurityViolation, e:
+    except omero.SecurityViolation as e:
         # We're in a share so the Image's parent Dataset cannot be loaded
         # or some other permissions related issue has tripped us up.
         logger.warn('Security violation while retrieving Dataset when '
@@ -153,7 +153,7 @@ def imageMarshal(image, key=None, request=None):
             logger.debug(
                 "Failed to prepare Rendering Engine for imageMarshal")
             return rv
-    except omero.ConcurrencyException, ce:
+    except omero.ConcurrencyException as ce:
         backOff = ce.backOff
         rv = {
             'ConcurrencyException': {
@@ -161,7 +161,7 @@ def imageMarshal(image, key=None, request=None):
             }
         }
         return rv
-    except Exception, ex:   # Handle everything else.
+    except Exception as ex:   # Handle everything else.
         rv['Exception'] = ex.message
         logger.error(traceback.format_exc())
         return rv       # Return what we have already, in case it's useful

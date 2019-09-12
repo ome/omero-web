@@ -77,7 +77,7 @@ def config_required(func):
             try:
                 import omeroweb.settings as settings
                 kwargs['settings'] = settings
-            except Exception, e:
+            except Exception as e:
                 self.ctx.die(682, e)
             return func(self, *args, **kwargs)
         return wrapper
@@ -629,7 +629,7 @@ class WebControl(DiagnosticsControl):
         self._diagnostics_banner("web")
         try:
             self.status(args)
-        except Exception, e:
+        except Exception as e:
             try:
                 self.ctx.out("OMERO.web error: %s" % e.message[1].message)
             except:
