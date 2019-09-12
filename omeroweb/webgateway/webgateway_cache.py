@@ -18,7 +18,8 @@ import omero
 import logging
 from random import random
 import datetime
-from types import StringTypes
+# Support python2 and python3
+from past.builtins import basestring
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +140,7 @@ class FileCache(CacheBase):
         @param invalidateGroup:     Not used?
         """
 
-        if not isinstance(value, StringTypes):
+        if not isinstance(value, basestring):
             raise ValueError("%s not a string, can't cache" % type(value))
         fname = self._key_to_file(key)
         dirname = os.path.dirname(fname)
@@ -224,7 +225,7 @@ class FileCache(CacheBase):
         @return True if entry is valid, False if expired
         """
         try:
-            if isinstance(fname, StringTypes):
+            if isinstance(fname, basestring):
                 f = open(fname, 'rb')
                 exp = struct.unpack('d', f.read(size_of_double))[0]
             else:
