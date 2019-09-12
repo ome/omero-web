@@ -362,7 +362,7 @@ class WebControl(DiagnosticsControl):
             self.set_environ()
             self.ctx.call(cargs, cwd=location)
         except:
-            print traceback.print_exc()
+            print(traceback.print_exc())
 
     @config_required
     def collectstatic(self, settings):
