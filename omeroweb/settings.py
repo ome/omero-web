@@ -1118,7 +1118,7 @@ except NameError:
             )
             with os.fdopen(os.open(secret_path,
                                    os.O_WRONLY | os.O_CREAT,
-                                   0600), 'w') as secret_file:
+                                   0o600), 'w') as secret_file:
                 secret_file.write(secret_key)
         except IOError as e:
             raise IOError("Please create a %s file with random characters"
