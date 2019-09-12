@@ -25,7 +25,7 @@ import logging
 from django.utils.encoding import force_unicode
 
 from omero import client_wrapper
-from omero_version import omero_version
+from omeroweb.version import omeroweb_version as omero_version
 
 logger = logging.getLogger(__name__)
 
