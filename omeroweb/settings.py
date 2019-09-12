@@ -43,8 +43,8 @@ import string
 from omero_ext import portalocker
 from omero.install.python_warning import py27_only, PYTHON_WARNING
 from omero.util.concurrency import get_event
-from utils import sort_properties_to_tuple
-from connector import Server
+from omeroweb.utils import sort_properties_to_tuple
+from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
 
