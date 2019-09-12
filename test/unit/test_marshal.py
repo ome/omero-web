@@ -140,7 +140,7 @@ class TestShapeMarshal(object):
     parsing are supported correctly.
     """
 
-    DEFAULT_ID = 1L
+    DEFAULT_ID = 1
 
     def assert_marshal(self, marshaled, type):
         assert marshaled['type'] == type
