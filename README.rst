@@ -68,7 +68,8 @@ Copyright
 
 2009-2016, The Open Microscopy Environment, Glencoe Software, Inc.
 
-.. _OMERO.py: https://openmicroscopy.org/
+.. _OMERO: https://www.openmicroscopy.org/omero
+.. _OMERO.py: https://pypi.python.org/pypi/omero-py
 .. _ZeroC IcePy: https://zeroc.com/
 .. _Pillow: https://python-pillow.org/
 .. _NumPy: http://matplotlib.org/
