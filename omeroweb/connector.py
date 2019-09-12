@@ -23,6 +23,7 @@ import re
 import logging
 
 from django.utils.encoding import force_text
+from future.utils import with_metaclass
 
 from omero import client_wrapper
 from omeroweb.version import omeroweb_version as omero_version
@@ -39,9 +40,8 @@ class IterRegistry(type):
     def __iter__(cls):
         return iter(cls._registry.values())
 
-
-class ServerBase(object):
-    __metaclass__ = IterRegistry
+# with_metaclass to support python2 and python3
+class ServerBase(with_metaclass(IterRegistry)):
     _next_id = 1
 
     def __init__(self, host, port, server=None):
