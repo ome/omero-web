@@ -12,15 +12,19 @@ RUN python -m venv /py3 && /py3/bin/pip install -U pip tox future wheel
 ENV VIRTUAL_ENV=/py3
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+RUN useradd -ms /bin/bash tox
+USER tox
+
 # Optimize for fixing tests
-COPY *.py /src/
-COPY README.rst /src
-COPY MANIFEST.in /src
-COPY omero /src/omero
-COPY omeroweb /src/omeroweb
+COPY --chown=tox:tox *.py /src/
+COPY --chown=tox:tox README.rst /src
+COPY --chown=tox:tox MANIFEST.in /src
+COPY --chown=tox:tox omero /src/omero
+COPY --chown=tox:tox omeroweb /src/omeroweb
 WORKDIR /src
 
 # Copy test-related files and run
-COPY *.ini /src/
-COPY test /src/test
+COPY --chown=tox:tox *.ini /src/
+COPY --chown=tox:tox test /src/test
+ENV PIP_CACHE_DIR=/tmp/pip-cache
 ENTRYPOINT ["/py3/bin/tox"]
