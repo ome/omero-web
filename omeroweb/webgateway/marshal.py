@@ -385,9 +385,9 @@ def rgb_int2css(rgbint):
     """
     alpha = rgbint % 256
     alpha = float(alpha) / 255
-    b = rgbint / 256 % 256
-    g = rgbint / 256 / 256 % 256
-    r = rgbint / 256 / 256 / 256 % 256
+    b = rgbint // 256 % 256
+    g = rgbint // 256 // 256 % 256
+    r = rgbint // 256 // 256 // 256 % 256
     return "#%02x%02x%02x" % (r, g, b), alpha
 
 
@@ -398,9 +398,9 @@ def rgb_int2rgba(rgbint):
     """
     alpha = rgbint % 256
     alpha = float(alpha) / 255
-    b = rgbint / 256 % 256
-    g = rgbint / 256 / 256 % 256
-    r = rgbint / 256 / 256 / 256 % 256
+    b = rgbint // 256 % 256
+    g = rgbint // 256 // 256 % 256
+    r = rgbint // 256 // 256 // 256 % 256
     return (r, g, b, alpha)
 
 
