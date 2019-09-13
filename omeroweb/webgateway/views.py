@@ -1361,7 +1361,7 @@ def jsonp(f):
             # We need to support lists
             safe = type(rv) is dict
             return JsonResponse(rv, safe=safe)
-        except Exception, ex:
+        except Exception as ex:
             # Default status is 500 'server error'
             # But we try to handle all 'expected' errors appropriately
             # TODO: handle omero.ConcurrencyException
@@ -1878,7 +1878,7 @@ def search_json(request, conn=None, **kwargs):
                     rv.append(imageData_json(
                         request, server_id, iid=e.id,
                         key=opts['key'], conn=conn, _internal=True))
-                except AttributeError, x:
+                except AttributeError as x:
                     logger.debug('(iid %i) ignoring Attribute Error: %s'
                                  % (e.id, str(x)))
                     pass

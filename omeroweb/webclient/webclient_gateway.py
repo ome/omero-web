@@ -1606,7 +1606,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         message = None
         try:
             cb = self.c.submit(command, loops=120)
-        except omero.CmdError, ex:
+        except omero.CmdError as ex:
             message = ex.err.message
         finally:
             if cb:

@@ -342,7 +342,7 @@ def forgotten_password(request, **kwargs):
                         handle.close()
                     error = "Password was reset. Check your mailbox."
                     form = None
-                except omero.CmdError, exp:
+                except omero.CmdError as exp:
                     logger.error(exp.err)
                     try:
                         error = exp.err.parameters[
@@ -636,14 +636,14 @@ def manage_password(request, eid, conn=None, **kwargs):
             if conn.getEventContext().userId == int(eid):
                 try:
                     conn.changeMyPassword(password, old_password)
-                except Exception, x:
+                except Exception as x:
                     error = x.message   # E.g. old_password not valid
             elif conn.isAdmin():
                 exp = conn.getObject("Experimenter", eid)
                 try:
                     conn.changeUserPassword(exp.omeName, password,
                                             old_password)
-                except Exception, x:
+                except Exception as x:
                     error = x.message
             else:
                 raise AttributeError("Can't change another user's password"
@@ -761,7 +761,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
 
                     try:
                         msgs = conn.updateGroup(group, name, perm, description)
-                    except omero.SecurityViolation, ex:
+                    except omero.SecurityViolation as ex:
                         if ex.message.startswith('Cannot change permissions'):
                             msgs.append("Downgrade to private group not"
                                         " currently possible")
@@ -877,7 +877,7 @@ def manage_group_owner(request, action, gid, conn=None, **kwargs):
                         msg = conn.updatePermissions(group, perm)
                         if msg is not None:
                             msgs.append(msg)
-                    except omero.SecurityViolation, ex:
+                    except omero.SecurityViolation as ex:
                         if ex.message.startswith('Cannot change permissions'):
                             msgs.append("Downgrade to private group not"
                                         " currently possible")

@@ -92,17 +92,17 @@ class SendFeedback(object):
                         "Feedback server error: %s" % response.reason)
                     raise Exception(
                         "Feedback server error: %s" % response.reason)
-            except urllib2.HTTPError, e:
+            except urllib2.HTTPError as e:
                 logger.error(traceback.format_exc())
                 raise Exception(
                     "Feedback server error: %s" % e.code)
-            except urllib2.URLError, e:
+            except urllib2.URLError as e:
                 logger.error(traceback.format_exc())
                 raise Exception(
                     "Feedback server error: %s" % e.reason)
             finally:
                 if response:
                     response.close()
-        except Exception, x:
+        except Exception as x:
             logger.error(traceback.format_exc())
             raise Exception("Feedback server error: %s" % x.message)

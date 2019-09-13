@@ -385,7 +385,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     # in order to set up our initial state correctly.
     try:
         first_sel = show.first_selected
-    except IncorrectMenuError, e:
+    except IncorrectMenuError as e:
         return HttpResponseRedirect(e.uri)
     # We get the owner of the top level object, E.g. Project
     # Actual api_paths_to_object() is retrieved by jsTree once loaded

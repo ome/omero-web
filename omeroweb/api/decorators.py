@@ -118,7 +118,7 @@ class json_response(object):
             try:
                 rv = f(request, *args, **kwargs)
                 return self.handle_success(rv)
-            except Exception, ex:
+            except Exception as ex:
                 trace = traceback.format_exc()
                 return self.handle_error(ex, trace)
         return update_wrapper(wrapped, f)
