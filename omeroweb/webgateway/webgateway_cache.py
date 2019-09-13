@@ -838,7 +838,7 @@ class WebGatewayCache (object):
 webgateway_cache = WebGatewayCache(FileCache)
 
 
-class AutoLockFile (file):
+class AutoLockFile ():
     """
     Class extends file to facilitate creation and deletion of lock file.
     """
