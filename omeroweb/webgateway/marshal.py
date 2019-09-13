@@ -23,6 +23,7 @@ import time
 import re
 import logging
 import traceback
+from builtins import bytes
 
 logger = logging.getLogger(__name__)
 
@@ -350,9 +351,10 @@ def shapeMarshal(shape):
         # FIXME: units ignored for stroke width
         set_if('strokeWidth', shape.getStrokeWidth().getValue())
     if hasattr(shape, 'getMarkerStart') and shape.getMarkerStart() is not None:
-        rv['markerStart'] = shape.getMarkerStart().getValue()
+        # Handle string for python2 and bytes python3. TODO: lower level fix
+        rv['markerStart'] = bytes(shape.getMarkerStart().getValue()).decode()
     if hasattr(shape, 'getMarkerEnd') and shape.getMarkerEnd() is not None:
-        rv['markerEnd'] = shape.getMarkerEnd().getValue()
+        rv['markerEnd'] = bytes(shape.getMarkerEnd().getValue()).decode()
     return rv
 
 
