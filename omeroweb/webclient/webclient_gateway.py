@@ -24,12 +24,10 @@
 # Version: 1.0
 #
 
-import cStringIO
+from io import StringIO
 import traceback
 import logging
 import warnings
-
-from StringIO import StringIO
 
 import time
 from datetime import datetime
@@ -86,7 +84,7 @@ def defaultThumbnail(size=(120, 120)):
         size = (size[0], size[0])
     img = Image.open(settings.DEFAULT_IMG)
     img.thumbnail(size, Image.ANTIALIAS)
-    f = cStringIO.StringIO()
+    f = StringIO()
     img.save(f, "PNG")
     f.seek(0)
     return f.read()
@@ -977,7 +975,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         img = Image.open(settings.DEFAULT_USER)
         img.thumbnail((150, 150), Image.ANTIALIAS)
-        f = cStringIO.StringIO()
+        f = StringIO()
         img.save(f, "PNG")
         f.seek(0)
         return f.read()

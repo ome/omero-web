@@ -99,7 +99,7 @@ from omero import ApiUsageException, ServerError, CmdError
 from omero.rtypes import rlong, rlist
 from omeroweb.webgateway.views import LoginView
 
-import tree
+from . import tree
 
 logger = logging.getLogger(__name__)
 

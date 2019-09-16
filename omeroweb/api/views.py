@@ -28,11 +28,11 @@ from . import api_settings
 import traceback
 import json
 
-from api_query import query_objects, get_child_counts, get_wellsample_indices
+from .api_query import query_objects, get_child_counts, get_wellsample_indices
 from omero_marshal import get_encoder, get_decoder, OME_SCHEMA_URL
 from omero import ValidationException
 from omeroweb.connector import Server
-from api_exceptions import BadRequestError, \
+from .api_exceptions import BadRequestError, \
     CreatedObject, \
     MethodNotSupportedError, \
     NotFoundError

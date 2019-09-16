@@ -24,7 +24,7 @@ from omero.rtypes import unwrap, wrap
 from omero.sys import ParametersI
 from . import api_settings
 
-from api_marshal import marshal_objects
+from .api_marshal import marshal_objects
 from copy import deepcopy
 
 
