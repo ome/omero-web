@@ -17,6 +17,7 @@ import re
 import json
 import base64
 import warnings
+from functools import wraps
 import omero
 import omero.clients
 
@@ -1314,6 +1315,7 @@ def debug(f):
     @return:        The wrapped function
     """
 
+    @wraps(f)
     def wrap(request, *args, **kwargs):
         debug = request.GET.getlist('debug')
         if 'slow' in debug:
@@ -1323,7 +1325,6 @@ def debug(f):
         if 'error' in debug:
             raise AttributeError('Debug requested error')
         return f(request, *args, **kwargs)
-    wrap.func_name = f.func_name
     return wrap
 
 
@@ -1336,6 +1337,7 @@ def jsonp(f):
     @return:        The wrapped function, which will return json
     """
 
+    @wraps(f)
     def wrap(request, *args, **kwargs):
         logger.debug('jsonp')
         try:
@@ -1377,7 +1379,6 @@ def jsonp(f):
             return JsonResponse(
                 {"message": str(ex), "stacktrace": trace},
                 status=status)
-    wrap.func_name = f.func_name
     return wrap
 
 
