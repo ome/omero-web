@@ -34,7 +34,7 @@ import re
 import sys
 import warnings
 
-from StringIO import StringIO
+from io import StringIO
 from time import time
 
 from omeroweb.version import omeroweb_buildyear as build_year
