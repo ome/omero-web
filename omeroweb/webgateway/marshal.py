@@ -300,7 +300,10 @@ def shapeMarshal(shape):
         rv['radiusY'] = shape.getRadiusY().getValue()
     elif shape_type == omero.model.PolylineI:
         rv['type'] = 'PolyLine'
-        rv['points'] = stringToSvg(shape.getPoints().getValue())
+        points = shape.getPoints().getValue()
+        if points:
+            points = bytes(points).decode()
+        rv['points'] = stringToSvg(points)
     elif shape_type == omero.model.LineI:
         rv['type'] = 'Line'
         rv['x1'] = shape.getX1().getValue()
@@ -314,7 +317,10 @@ def shapeMarshal(shape):
     elif shape_type == omero.model.PolygonI:
         rv['type'] = 'Polygon'
         # z = closed line
-        rv['points'] = stringToSvg(shape.getPoints().getValue()) + " z"
+        points = shape.getPoints().getValue()
+        if points:
+            points = bytes(points).decode()
+        rv['points'] = stringToSvg(points) + " z"
     elif shape_type == omero.model.LabelI:
         rv['type'] = 'Label'
         rv['x'] = shape.getX().getValue()
