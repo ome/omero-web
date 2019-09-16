@@ -58,22 +58,23 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from webclient_utils import _formatReport, _purgeCallback
-from forms import GlobalSearchForm, ContainerForm
-from forms import ShareForm, BasketShareForm
-from forms import ContainerNameForm, ContainerDescriptionForm
-from forms import CommentAnnotationForm, TagsAnnotationForm
-from forms import MetadataFilterForm, MetadataDetectorForm
-from forms import MetadataChannelForm, MetadataEnvironmentForm
-from forms import MetadataObjectiveForm, MetadataObjectiveSettingsForm
-from forms import MetadataStageLabelForm, MetadataLightSourceForm
-from forms import MetadataDichroicForm, MetadataMicroscopeForm
-from forms import FilesAnnotationForm, WellIndexForm, NewTagsAnnotationFormSet
 
-from controller.container import BaseContainer
-from controller.history import BaseCalendar
-from controller.search import BaseSearch
-from controller.share import BaseShare
+from omeroweb.webclient.webclient_utils import _formatReport, _purgeCallback
+from .forms import GlobalSearchForm, ContainerForm
+from .forms import ShareForm, BasketShareForm
+from .forms import ContainerNameForm, ContainerDescriptionForm
+from .forms import CommentAnnotationForm, TagsAnnotationForm
+from .forms import MetadataFilterForm, MetadataDetectorForm
+from .forms import MetadataChannelForm, MetadataEnvironmentForm
+from .forms import MetadataObjectiveForm, MetadataObjectiveSettingsForm
+from .forms import MetadataStageLabelForm, MetadataLightSourceForm
+from .forms import MetadataDichroicForm, MetadataMicroscopeForm
+from .forms import FilesAnnotationForm, WellIndexForm, NewTagsAnnotationFormSet
+
+from .controller.container import BaseContainer
+from .controller.history import BaseCalendar
+from .controller.search import BaseSearch
+from .controller.share import BaseShare
 
 from omeroweb.webadmin.forms import LoginForm
 

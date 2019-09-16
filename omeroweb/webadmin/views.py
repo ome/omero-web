@@ -46,9 +46,9 @@ from django.template import RequestContext as Context
 from django.utils.translation import ugettext as _
 from django.utils.encoding import smart_str
 
-from forms import ForgottonPasswordForm, ExperimenterForm, GroupForm
-from forms import GroupOwnerForm, MyAccountForm, ChangePassword
-from forms import UploadPhotoForm, EmailForm
+from .forms import ForgottonPasswordForm, ExperimenterForm, GroupForm
+from .forms import GroupOwnerForm, MyAccountForm, ChangePassword
+from .forms import UploadPhotoForm, EmailForm
 
 from omeroweb.http import HttpJPEGResponse
 from omeroweb.webclient.decorators import login_required, render_response

@@ -37,9 +37,9 @@ from omeroweb.connector import Server
 
 from omeroweb.custom_forms import NonASCIIForm
 
-from custom_forms import ServerModelChoiceField, GroupModelChoiceField
-from custom_forms import GroupModelMultipleChoiceField, OmeNameField
-from custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
+from .custom_forms import ServerModelChoiceField, GroupModelChoiceField
+from .custom_forms import GroupModelMultipleChoiceField, OmeNameField
+from .custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
 
 logger = logging.getLogger(__name__)
 
