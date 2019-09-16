@@ -34,9 +34,9 @@ from django.core.servers.basehttp import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
 from omero.util.ROI_utils import pointsStringToXYlist, xyListToBbox
-from plategrid import PlateGrid
+from .plategrid import PlateGrid
 from omeroweb.version import omeroweb_buildyear as build_year
-from marshal import imageMarshal, shapeMarshal, rgb_int2rgba
+from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.views.generic import View
 from omeroweb.webadmin.forms import LoginForm
@@ -48,7 +48,7 @@ try:
 except:
     from md5 import md5
 
-from cStringIO import StringIO
+from io import StringIO
 import tempfile
 
 from omero import ApiUsageException
@@ -1882,7 +1882,7 @@ def search_json(request, conn=None, **kwargs):
                     logger.debug('(iid %i) ignoring Attribute Error: %s'
                                  % (e.id, str(x)))
                     pass
-                except omero.ServerError, x:
+                except omero.ServerError as x:
                     logger.debug('(iid %i) ignoring Server Error: %s'
                                  % (e.id, str(x)))
             return rv
