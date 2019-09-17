@@ -65,8 +65,8 @@ def config_required(func):
     def import_django_settings(func):
         @windows_warning
         def wrapper(self, *args, **kwargs):
-            if not py27_only():
-                self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
+            # if not py27_only():
+            #     self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
             try:
                 import django  # NOQA
             except:
