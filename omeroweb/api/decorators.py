@@ -28,7 +28,7 @@ import traceback
 from django.http import JsonResponse
 from functools import update_wrapper
 from . import api_settings
-from api_exceptions import BadRequestError, \
+from .api_exceptions import BadRequestError, \
     CreatedObject, \
     MethodNotSupportedError, \
     NotFoundError
