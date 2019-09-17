@@ -181,7 +181,7 @@ class TestTree(object):
             received = parse_permissions_css(permissions_dict,
                                              owner_id+1,
                                              mock_conn)
-            received = filter(None, received.split(' '))
+            received = list(filter(None, received.split(' ')))
             received.sort()
             assert expected == received
             # Test with matching owner_ids, which means
@@ -191,7 +191,7 @@ class TestTree(object):
             received = parse_permissions_css(permissions_dict,
                                              owner_id,
                                              mock_conn)
-            received = filter(None, received.split(' '))
+            received = list(filter(None, received.split(' ')))
             received.sort()
             assert expected == received
 
