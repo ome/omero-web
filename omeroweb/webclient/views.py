@@ -58,7 +58,7 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from omeroweb.webclient.webclient_utils import _formatReport, _purgeCallback
+from webclient_utils import _formatReport, _purgeCallback
 from forms import GlobalSearchForm, ContainerForm
 from forms import ShareForm, BasketShareForm
 from forms import ContainerNameForm, ContainerDescriptionForm
