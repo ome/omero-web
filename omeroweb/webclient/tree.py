@@ -21,6 +21,7 @@
 
 import time
 import omero
+from builtins import bytes
 
 from omero.rtypes import rlong, unwrap, wrap
 from django.conf import settings
@@ -28,6 +29,16 @@ from django.http import Http404
 from datetime import datetime
 from copy import deepcopy
 from omero.gateway import _letterGridLabel
+
+
+def unwrap_to_str(rstr):
+    ''' Handle rstring unwrapping which by default gives b'bytes' in
+        python3 and string in python2.
+    '''
+    rstr = unwrap(rstr)
+    if rstr is not None:
+        rstr = bytes(rstr).decode()
+    return rstr
 
 
 def build_clause(components, name='', join=','):
@@ -79,7 +90,7 @@ def _marshal_group(conn, row):
     group_id, name, permissions = row
     group = dict()
     group['id'] = unwrap(group_id)
-    group['name'] = unwrap(name)
+    group['name'] = unwrap_to_str(name)
     group['perm'] = unwrap(unwrap(permissions)['perm'])
 
     return group
@@ -151,12 +162,12 @@ def _marshal_experimenter(conn, row):
     experimenter_id, ome_name, first_name, last_name, email = row
     experimenter = dict()
     experimenter['id'] = unwrap(experimenter_id)
-    experimenter['omeName'] = unwrap(ome_name)
-    experimenter['firstName'] = unwrap(first_name)
-    experimenter['lastName'] = unwrap(last_name)
+    experimenter['omeName'] = unwrap_to_str(ome_name)
+    experimenter['firstName'] = unwrap_to_str(first_name)
+    experimenter['lastName'] = unwrap_to_str(last_name)
     # Email is not mandatory
     if email:
-        experimenter['email'] = unwrap(email)
+        experimenter['email'] = unwrap_to_str(email)
     return experimenter
 
 
@@ -274,7 +285,7 @@ def _marshal_project(conn, row):
     project_id, name, owner_id, permissions, child_count = row
     project = dict()
     project['id'] = unwrap(project_id)
-    project['name'] = unwrap(name)
+    project['name'] = unwrap_to_str(name)
     project['ownerId'] = unwrap(owner_id)
     project['childCount'] = unwrap(child_count)
     project['permsCss'] = \
@@ -357,7 +368,7 @@ def _marshal_dataset(conn, row):
     dataset_id, name, owner_id, permissions, child_count = row
     dataset = dict()
     dataset['id'] = unwrap(dataset_id)
-    dataset['name'] = unwrap(name)
+    dataset['name'] = unwrap_to_str(name)
     dataset['ownerId'] = unwrap(owner_id)
     dataset['childCount'] = unwrap(child_count)
     dataset['permsCss'] = \
@@ -487,7 +498,7 @@ def _marshal_image(conn, row, row_pixels=None, share_id=None,
     image_id, name, owner_id, permissions, fileset_id = row
     image = dict()
     image['id'] = unwrap(image_id)
-    image['name'] = unwrap(name)
+    image['name'] = unwrap_to_str(name)
     image['ownerId'] = unwrap(owner_id)
     image['permsCss'] = parse_permissions_css(permissions,
                                               unwrap(owner_id), conn)
@@ -750,7 +761,7 @@ def _marshal_screen(conn, row):
     screen_id, name, owner_id, permissions, child_count = row
     screen = dict()
     screen['id'] = unwrap(screen_id)
-    screen['name'] = unwrap(name)
+    screen['name'] = unwrap_to_str(name)
     screen['ownerId'] = unwrap(owner_id)
     screen['childCount'] = unwrap(child_count)
     screen['permsCss'] = \
@@ -838,7 +849,7 @@ def _marshal_plate(conn, row):
     plate_id, name, owner_id, permissions, child_count = row
     plate = dict()
     plate['id'] = unwrap(plate_id)
-    plate['name'] = unwrap(name)
+    plate['name'] = unwrap_to_str(name)
     plate['ownerId'] = unwrap(owner_id)
     plate['childCount'] = unwrap(child_count)
     plate['permsCss'] = \
@@ -958,7 +969,7 @@ def _marshal_plate_acquisition(conn, row):
     # If there is no defined name, base it on the start/end time if that
     # exists or finally default to an id based name
     if name is not None:
-        plate_acquisition['name'] = unwrap(name)
+        plate_acquisition['name'] = unwrap_to_str(name)
     elif start_time is not None and end_time is not None:
         start_time = datetime.utcfromtimestamp(unwrap(start_time) / 1000.0)
         end_time = datetime.utcfromtimestamp(unwrap(end_time) / 1000.0)
@@ -1119,15 +1130,15 @@ def _marshal_tag(conn, row):
 
     tag = dict()
     tag['id'] = unwrap(tag_id)
-    tag['value'] = unwrap(text_value)
-    desc = unwrap(description)
+    tag['value'] = unwrap_to_str(text_value)
+    desc = unwrap_to_str(description)
     if desc:
         tag['description'] = desc
     tag['ownerId'] = unwrap(owner_id)
     tag['permsCss'] = parse_permissions_css(permissions,
                                             unwrap(owner_id), conn)
 
-    if namespace and unwrap(namespace) == \
+    if namespace and unwrap_to_str(namespace) == \
             omero.constants.metadata.NSINSIGHTTAGSET:
         tag['set'] = True
     else:
@@ -1537,9 +1548,13 @@ def _marshal_well(conn, row):
     ''' Given a Well row (list) marshals it into a dictionary.  Order
         and type of columns in row is:
           * id (rlong)
-          * name (rstring)
           * details.owner.id (rlong)
           * details.permissions (dict)
+          * row (int)
+          * column (int)
+          * plate_id (rlong)
+          * rownames, e.g. 'number'
+          * colnames, e.g. 'letter'
 
         @param conn OMERO gateway.
         @type conn L{omero.gateway.BlitzGateway}
