@@ -964,8 +964,12 @@ class WebGatewayTempFile (object):
         if not self._dir:
             return None, None, None
         dn, stamp = self.newdir(key)
-        name = name.replace('/', '_').replace('#', '_').decode(
-            'utf8').encode('ascii', 'ignore')
+        name = name.replace('/', '_').replace('#', '_')
+        try:
+            name = name.decode('utf8').encode('ascii', 'ignore')
+        except AttributeError:
+            #python3
+            pass
         if len(name) > 255:
             # Try to be smart about trimming and keep up to two levels of
             # extension (ex: .ome.tiff)
