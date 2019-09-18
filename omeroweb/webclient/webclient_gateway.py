@@ -950,7 +950,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         else:
             region = None
             try:
-                im = Image.open(StringIO(photo))
+                im = Image.open(StringIO(photo.decode()))
                 region = im.crop(box)
             except IOError:
                 logger.error(traceback.format_exc())
