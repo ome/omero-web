@@ -230,12 +230,12 @@ class TestWebGatewayCache(object):
         class r:
 
             def __init__(self):
-                self.REQUEST = {'c': '1|292:1631$FF0000,2|409:5015$0000FF',
+                self.GET = {'c': '1|292:1631$FF0000,2|409:5015$0000FF',
                                 'm': 'c', 'q': '0.9'}
 
             def new(self, q):
                 rv = self.__class__()
-                rv.REQUEST.update(q)
+                rv.GET.update(q)
                 return rv
         self.request = r()
 
