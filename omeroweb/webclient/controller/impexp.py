@@ -23,7 +23,7 @@
 # Version: 1.0
 #
 
-from webclient.controller import BaseController
+from omeroweb.webclient.controller import BaseController
 
 
 class BaseImpexp(BaseController):

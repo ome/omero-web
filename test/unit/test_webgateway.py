@@ -6,8 +6,8 @@ import time
 import os
 import pytest
 
-from webgateway.webgateway_cache import FileCache, WebGatewayCache
-from webgateway.webgateway_cache import WebGatewayTempFile
+from omeroweb.webgateway.webgateway_cache import FileCache, WebGatewayCache
+from omeroweb.webgateway.webgateway_cache import WebGatewayTempFile
 import omero.gateway
 
 
