@@ -74,7 +74,7 @@ def send_feedback(request):
             sf = SendFeedback(settings.FEEDBACK_URL)
             sf.send_feedback(error=error, comment=comment, email=email,
                              user_agent=get_user_agent(request))
-        except Exception, e:
+        except Exception as e:
             logger.error('handler500: Feedback could not be sent')
             logger.error(traceback.format_exc())
             error = ("Feedback could not be sent. Please contact"

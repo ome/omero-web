@@ -24,6 +24,7 @@ import logging
 from django.utils.http import urlencode
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import NoReverseMatch
+from past.builtins import basestring
 
 
 logger = logging.getLogger(__name__)

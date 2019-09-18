@@ -30,16 +30,16 @@ except:
 
 from django import forms
 from django.forms.widgets import Textarea
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
 from omeroweb.connector import Server
 
 from omeroweb.custom_forms import NonASCIIForm
 
-from custom_forms import ServerModelChoiceField, GroupModelChoiceField
-from custom_forms import GroupModelMultipleChoiceField, OmeNameField
-from custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
+from .custom_forms import ServerModelChoiceField, GroupModelChoiceField
+from .custom_forms import GroupModelMultipleChoiceField, OmeNameField
+from .custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ class RoleRenderer(forms.RadioSelect.renderer):
                     disabled = getattr(self, 'disable_admin')
             if disabled:
                 wid.attrs['disabled'] = True
-            midList.append(u'<li>%s</li>' % force_unicode(wid))
+            midList.append(u'<li>%s</li>' % force_text(wid))
         finalList = mark_safe(u'<ul id="id_role">\n%s\n</ul>'
                               % u'\n'.join([u'<li>%s</li>'
                                            % w for w in midList]))

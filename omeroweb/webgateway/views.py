@@ -17,6 +17,7 @@ import re
 import json
 import base64
 import warnings
+from functools import wraps
 import omero
 import omero.clients
 
@@ -34,9 +35,9 @@ from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
 from omero.util.ROI_utils import pointsStringToXYlist, xyListToBbox
-from plategrid import PlateGrid
+from .plategrid import PlateGrid
 from omeroweb.version import omeroweb_buildyear as build_year
-from marshal import imageMarshal, shapeMarshal, rgb_int2rgba
+from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.views.generic import View
 from omeroweb.webadmin.forms import LoginForm
@@ -48,7 +49,7 @@ try:
 except:
     from md5 import md5
 
-from cStringIO import StringIO
+from io import StringIO
 import tempfile
 
 from omero import ApiUsageException
@@ -1314,6 +1315,7 @@ def debug(f):
     @return:        The wrapped function
     """
 
+    @wraps(f)
     def wrap(request, *args, **kwargs):
         debug = request.GET.getlist('debug')
         if 'slow' in debug:
@@ -1323,7 +1325,6 @@ def debug(f):
         if 'error' in debug:
             raise AttributeError('Debug requested error')
         return f(request, *args, **kwargs)
-    wrap.func_name = f.func_name
     return wrap
 
 
@@ -1336,6 +1337,7 @@ def jsonp(f):
     @return:        The wrapped function, which will return json
     """
 
+    @wraps(f)
     def wrap(request, *args, **kwargs):
         logger.debug('jsonp')
         try:
@@ -1361,7 +1363,7 @@ def jsonp(f):
             # We need to support lists
             safe = type(rv) is dict
             return JsonResponse(rv, safe=safe)
-        except Exception, ex:
+        except Exception as ex:
             # Default status is 500 'server error'
             # But we try to handle all 'expected' errors appropriately
             # TODO: handle omero.ConcurrencyException
@@ -1377,7 +1379,6 @@ def jsonp(f):
             return JsonResponse(
                 {"message": str(ex), "stacktrace": trace},
                 status=status)
-    wrap.func_name = f.func_name
     return wrap
 
 
@@ -1878,11 +1879,11 @@ def search_json(request, conn=None, **kwargs):
                     rv.append(imageData_json(
                         request, server_id, iid=e.id,
                         key=opts['key'], conn=conn, _internal=True))
-                except AttributeError, x:
+                except AttributeError as x:
                     logger.debug('(iid %i) ignoring Attribute Error: %s'
                                  % (e.id, str(x)))
                     pass
-                except omero.ServerError, x:
+                except omero.ServerError as x:
                     logger.debug('(iid %i) ignoring Server Error: %s'
                                  % (e.id, str(x)))
             return rv

@@ -36,7 +36,8 @@ class TestHelperObjects(object):
         assert isinstance(omero_type('rstring'), omero.RString)
         assert isinstance(omero_type(u'rstring'), omero.RString)
         assert isinstance(omero_type(1), omero.RInt)
-        assert isinstance(omero_type(1L), omero.RLong)
+        # FIXME: python3
+        # assert isinstance(omero_type(1), omero.RLong)
         assert isinstance(omero_type(False), omero.RBool)
         assert isinstance(omero_type(True), omero.RBool)
         assert not isinstance(omero_type((1, 2, 'a')), omero.RType)
@@ -229,12 +230,12 @@ class TestWebGatewayCache(object):
         class r:
 
             def __init__(self):
-                self.REQUEST = {'c': '1|292:1631$FF0000,2|409:5015$0000FF',
+                self.GET = {'c': '1|292:1631$FF0000,2|409:5015$0000FF',
                                 'm': 'c', 'q': '0.9'}
 
             def new(self, q):
                 rv = self.__class__()
-                rv.REQUEST.update(q)
+                rv.GET.update(q)
                 return rv
         self.request = r()
 

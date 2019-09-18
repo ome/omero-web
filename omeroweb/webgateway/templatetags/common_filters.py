@@ -243,17 +243,17 @@ def timeformat(value):
     all values are in seconds
     """
     from decimal import Decimal, InvalidOperation
-    from django.utils.encoding import force_unicode
+    from django.utils.encoding import force_text
 
     if value is None:
         return ''
     try:
-        value = Decimal(force_unicode(value))
+        value = Decimal(force_text(value))
     except UnicodeEncodeError:
         return u''
     except InvalidOperation:
         try:
-            value = Decimal(force_unicode(float(value)))
+            value = Decimal(force_text(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
             return u'%s s' % str(value)
     # Formatting shows integer values for all, so we round() for accuracy

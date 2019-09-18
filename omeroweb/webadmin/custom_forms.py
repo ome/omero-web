@@ -31,7 +31,7 @@ from django.forms.fields import ChoiceField, EMPTY_VALUES
 from django.forms.widgets import SelectMultiple, MultipleHiddenInput
 from django.forms import ModelChoiceField, ValidationError
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.core.validators import validate_email
 
 ##################################################################
@@ -68,7 +68,7 @@ class ServerQuerySetIterator(object):
                 name = "%s:%s" % (obj.host, obj.port)
             else:
                 name = "%s:%s" % (obj.server, obj.port)
-            yield (smart_unicode(obj.id), smart_unicode(name))
+            yield (smart_text(obj.id), smart_text(name))
 
 
 class ServerModelChoiceField(ModelChoiceField):
@@ -128,7 +128,7 @@ class GroupQuerySetIterator(object):
                 oid = obj.id.val
             else:
                 oid = obj.id
-            yield (smart_unicode(oid), smart_unicode(name))
+            yield (smart_text(oid), smart_text(name))
 
 
 class GroupModelChoiceField(ModelChoiceField):
@@ -295,7 +295,7 @@ class ExperimenterQuerySetIterator(object):
             oid = obj.id.val
         else:
             oid = obj.id
-        return (smart_unicode(oid), smart_unicode(name))
+        return (smart_text(oid), smart_text(name))
 
 
 class ExperimenterModelChoiceField(ModelChoiceField):

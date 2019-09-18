@@ -39,12 +39,13 @@ import re
 import json
 import random
 import string
+from builtins import str as text
 
 from omero_ext import portalocker
 from omero.install.python_warning import py27_only, PYTHON_WARNING
 from omero.util.concurrency import get_event
-from utils import sort_properties_to_tuple
-from connector import Server
+from omeroweb.utils import sort_properties_to_tuple
+from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ LOGDIR = os.path.join(OMERO_HOME, 'var', 'log').replace('\\', '/')
 if not os.path.isdir(LOGDIR):
     try:
         os.makedirs(LOGDIR)
-    except Exception, x:
+    except Exception as x:
         exctype, value = sys.exc_info()[:2]
         raise exctype(value)
 
@@ -1030,11 +1031,11 @@ def process_custom_settings(
                         '%s and its deprecated key %s are both set, using %s',
                         key, dep_key, key)
             setattr(module, global_name, mapping(global_value))
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError(
                 "Invalid %s (%s = %r). %s. %s" %
                 (global_name, key, global_value, e.message, description))
-        except ImportError, e:
+        except ImportError as e:
             raise ImportError(
                 "ImportError: %s. %s (%s = %r).\n%s" %
                 (e.message, global_name, key, global_value, description))
@@ -1113,15 +1114,15 @@ except NameError:
             )
             with os.fdopen(os.open(secret_path,
                                    os.O_WRONLY | os.O_CREAT,
-                                   0600), 'w') as secret_file:
+                                   0o600), 'w') as secret_file:
                 secret_file.write(secret_key)
-        except IOError, e:
+        except IOError as e:
             raise IOError("Please create a %s file with random characters"
                           " to generate your secret key!" % secret_path)
     try:
         with open(secret_path, 'r') as secret_file:
             SECRET_KEY = secret_file.read().strip()
-    except IOError, e:
+    except IOError as e:
         raise IOError("Could not find secret key in %s!" % secret_path)
 
 # USE_I18N: A boolean that specifies whether Django's internationalization
@@ -1377,8 +1378,8 @@ for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
 # Load server list and freeze
 def load_server_list():
     for s in SERVER_LIST:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
-        server = (len(s) > 2) and unicode(s[2]) or None
-        Server(host=unicode(s[0]), port=int(s[1]), server=server)
+        server = (len(s) > 2) and text(s[2]) or None
+        Server(host=text(s[0]), port=int(s[1]), server=server)
     Server.freeze()
 
 

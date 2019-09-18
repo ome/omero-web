@@ -33,8 +33,15 @@ def formatPercentFraction(value):
     """ Formats a fraction as a percentage for display """
     value = value * 100
     if value < 1:
+        # Handle python3 rounding 0.05 towards even numbers
+        # Make sure it always rounds 0.05 up
+        if (value * 10) % 1 == 0.5:
+            value += 0.01
         value = "%.1f" % round(value, 1)
     else:
+        # Make sure it always rounds 0.5 up
+        if value % 1 == 0.5:
+            value += 0.1
         value = "%s" % int(round(value))
     return value
 

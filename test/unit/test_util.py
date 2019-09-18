@@ -110,9 +110,10 @@ class TestUtil(object):
         ([{"foo": 1, "bar": "abc"}], ('abc',)),
     ])
     def test_sort_properties_to_tuple_custom(self, params):
+        param_keys = list(params[0][0].keys())
         assert sort_properties_to_tuple(
-            params[0], params[0][0].keys()[0],
-            params[0][0].keys()[1]) == params[1]
+            params[0], param_keys[0],
+            param_keys[1]) == params[1]
 
     @pytest.mark.parametrize('bad_params', [
         ([{}], KeyError, "'index'"),
