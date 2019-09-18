@@ -68,7 +68,7 @@ var linkify = function(input) {
 var linkObjects = function(input) {
     var regex = /(Project|Dataset|Image|Screen|Plate|Well|ROI)(?: ID)*:(?: )*([0-9]+)/g;
     return input.replace(regex, function($0, $1, $2) {
-        return "<a title='Browse to " + $1 + "' href='" + WEBCLIENT.URLS.webindex + "?show=" + $1.toLowerCase() + "-" + $2 + "'>" + $0 + "</a>"
+        return "<a title='Go to " + $1 + "' href='" + WEBCLIENT.URLS.webindex + "?show=" + $1.toLowerCase() + "-" + $2 + "'>" + $0 + "</a>"
     });
 };
 OME.linkify_element = function(elements) {
