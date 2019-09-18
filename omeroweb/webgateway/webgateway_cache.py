@@ -928,7 +928,12 @@ class WebGatewayTempFile (object):
                 stamp = str(time.time())
                 dn = os.path.join(self._dir, stamp)
             key = stamp
-        key = key.replace('/', '_').decode('utf8').encode('ascii', 'ignore')
+        key = key.replace('/', '_')
+        try:
+            key = key.decode('utf8').encode('ascii', 'ignore')
+        except AttributeError:
+            # python3
+            pass
         dn = os.path.join(self._dir, key)
         if not os.path.isdir(dn):
             os.makedirs(dn)
