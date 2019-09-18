@@ -77,7 +77,6 @@ def basic_polyline(request, default_id):
     'points[1.5,2.5 2,3 4.1,5.1] points1[1.5,2.5 2,3 4.1,5.1] '
     'points2[1.5,2.5 2,3 4.1,5.1] mask[0,0,0]'
 ])
-@pytest.fixture(scope='function')
 def float_polyline(request, default_id):
     points = request.param
     shape = omero.model.PolylineI()
@@ -93,7 +92,6 @@ def float_polyline(request, default_id):
     'points[1,2 2,3 4,5] points1[1,2 2,3 4,5] '
     'points2[1,2 2,3 4,5] mask[0,0,0]'
 ])
-@pytest.fixture(scope='function')
 def basic_polygon(request, default_id):
     points = request.param
     shape = omero.model.PolygonI()
