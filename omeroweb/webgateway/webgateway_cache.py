@@ -846,7 +846,8 @@ class AutoLockFile ():
 
     def __init__(self, fn, mode):
         """ creates a '.lock' file with the specified file name and mode """
-        super(AutoLockFile, self).__init__(fn, mode)
+        # FIXME: AutoLockFile previously extended file object
+        # super(AutoLockFile, self).__init__(fn, mode)
         self._lock = os.path.join(os.path.dirname(fn), '.lock')
         open(self._lock, 'a').close()
 
@@ -863,7 +864,8 @@ class AutoLockFile ():
             os.remove(self._lock)
         except:
             pass
-        super(AutoLockFile, self).close()
+        # FIXME: AutoLockFile previously extended file object
+        # super(AutoLockFile, self).close()
 
 
 class WebGatewayTempFile (object):
