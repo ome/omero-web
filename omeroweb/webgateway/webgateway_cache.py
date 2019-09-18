@@ -126,7 +126,7 @@ class FileCache(CacheBase):
                 f.close()
                 self._delete(fname)
             else:
-                return f.read()
+                return f.read().decode('utf-8')
         except (IOError, OSError, EOFError, struct.error):
             pass
         return default
@@ -168,7 +168,7 @@ class FileCache(CacheBase):
             else:
                 exp = 0
             f.write(struct.pack('d', exp))
-            f.write(value)
+            f.write(value.encode('utf-8'))
             f.close()
         except (IOError, OSError):  # pragma: nocover
             pass
