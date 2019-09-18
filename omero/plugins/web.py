@@ -16,6 +16,7 @@ import platform
 import sys
 import os
 import re
+from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
 from path import path
@@ -304,7 +305,7 @@ class WebControl(DiagnosticsControl):
                          "wsgi or wsgi-tcp.")
 
         template_file = "%s.conf.template" % server
-        c = file(self._get_web_templates_dir() / template_file).read()
+        c = open(self._get_web_templates_dir() / template_file).read()
         self.ctx.out(c % d)
 
     def syncmedia(self, args):

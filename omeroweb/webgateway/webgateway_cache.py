@@ -17,6 +17,7 @@ from django.conf import settings
 import omero
 import logging
 from random import random
+from io import open
 import datetime
 # Support python2 and python3
 from past.builtins import basestring
@@ -847,7 +848,7 @@ class AutoLockFile ():
         """ creates a '.lock' file with the specified file name and mode """
         super(AutoLockFile, self).__init__(fn, mode)
         self._lock = os.path.join(os.path.dirname(fn), '.lock')
-        file(self._lock, 'a').close()
+        open(self._lock, 'a').close()
 
     def __del__(self):
         """ tries to delete the lock file """
@@ -898,7 +899,7 @@ class WebGatewayTempFile (object):
             try:
                 ts = os.path.join(self._dir, f, '.timestamp')
                 if os.path.exists(ts):
-                    ft = float(file(ts).read()) + TMPDIR_TIME
+                    ft = float(open(ts).read()) + TMPDIR_TIME
                 else:
                     ft = float(f) + TMPDIR_TIME
                 if ft < now:
@@ -931,7 +932,7 @@ class WebGatewayTempFile (object):
         dn = os.path.join(self._dir, key)
         if not os.path.isdir(dn):
             os.makedirs(dn)
-        file(os.path.join(dn, '.timestamp'), 'w').write(stamp)
+        open(os.path.join(dn, '.timestamp'), 'w').write(stamp)
         return dn, key
 
     def abort(self, fn):
