@@ -62,7 +62,14 @@ OME.getURLParameter = function(key) {
 
 var linkify = function(input) {
     var regex = /(https?|ftp|file):\/\/[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]/g;
-    return input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
+    input = input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
+    return linkObjects(input);
+};
+var linkObjects = function(input) {
+    var regex = /(Project|Dataset|Image|Screen|Plate|Well|ROI)(?: ID)*:(?: )*([0-9]+)/g;
+    return input.replace(regex, function($0, $1, $2) {
+        return "<a title='Browse to " + $1 + "' href='" + WEBCLIENT.URLS.webindex + "?show=" + $1.toLowerCase() + "-" + $2 + "'>" + $0 + "</a>"
+    });
 };
 OME.linkify_element = function(elements) {
     elements.each(function() {
