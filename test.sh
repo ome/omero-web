@@ -1,3 +1,6 @@
+set -e
+set -u
+set -x
 IMAGE=${IMAGE:-${USER}-web-test}
 PIP_CACHE_DIR=${PIP_CACHE_DIR:-/tmp/pip-cache}
 mkdir -m 777 -p ${PIP_CACHE_DIR}
