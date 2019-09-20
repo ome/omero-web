@@ -1647,7 +1647,7 @@ def listWellImages_json(request, did, conn=None, **kwargs):
     acq = getIntOrDefault(request, 'run', None)
     if well is None:
         return HttpJavascriptResponseServerError('""')
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
 
     def urlprefix(iid):
         return reverse(prefix, args=(iid,))
