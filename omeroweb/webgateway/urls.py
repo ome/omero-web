@@ -60,7 +60,7 @@ Params in render_image/<iid>/<z>/<t>/ are:
 
 render_image_region = url(
     r'^render_image_region/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$',
-    views.render_image_region)
+    views.render_image_region, name="webgateway_render_image_region")
 """
 Returns a jpeg of the OMERO image, rendering only a region specified in query
 string as region=x,y,width,height. E.g. region=0,512,256,256 See
@@ -156,7 +156,7 @@ Returns a mask for the specified shape
 
 render_birds_eye_view = url(
     r'^render_birds_eye_view/(?P<iid>[0-9]+)/(?:(?P<size>[0-9]+)/)?$',
-    views.render_birds_eye_view)
+    views.render_birds_eye_view, name="webgateway_render_birds_eye_view")
 """
 Returns a bird's eye view JPEG of the OMERO Image.
 See L{views.render_birds_eye_view}. Uses current rendering settings.
@@ -273,7 +273,7 @@ webgateway_plategrid_json = url(
 
 webgateway_get_thumbnails_json = url(
     r'^get_thumbnails/(?:(?P<w>[0-9]+)/)?$',
-    views.get_thumbnails_json)
+    views.get_thumbnails_json, name="webgateway_get_thumbnails_json")
 """
 Returns a set of thumbnail base64 encoded of the OMERO Images,
 optionally scaled to max-longest-side.
@@ -296,7 +296,7 @@ Params in render_thumbnail/<iid>/<w>/<h> are:
 """
 
 imageData_json = url(r'^imgData/(?P<iid>[0-9]+)/(?:(?P<key>[^/]+)/)?$',
-                  views.imageData_json)
+                     views.imageData_json, name="webgateway_imageData_json")
 """
 json method: returns details of specified Image. See L{views.imageData_json}.
 Returns E.g
@@ -397,8 +397,8 @@ specified image is in.
     - iid:  Image ID.
 """
 
-copy_image_rdef_json = url(r'^copyImgRDef/$',
-                        views.copy_image_rdef_json)
+copy_image_rdef_json = url(r'^copyImgRDef/$', views.copy_image_rdef_json,
+                           name="copy_image_rdef_json")
 """
 Copy the rendering settings from one image to a list of images, specified in
 request by 'fromid' and list of 'toids'. See L{views.copy_image_rdef_json}
