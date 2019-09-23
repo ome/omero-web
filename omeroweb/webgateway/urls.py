@@ -47,7 +47,7 @@ object type and identifier, optionally traversing object model graph.
 
 render_image = url(
     r'^render_image/(?P<iid>[0-9]+)/(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$',
-    views.render_image)
+    views.render_image, name="webgateway_render_image")
 """
 Returns a jpeg of the OMERO image. See L{views.render_image}. Rendering
 settings can be specified in the request parameters. See
@@ -74,7 +74,7 @@ Params in render_image/<iid>/<z>/<t>/ are:
 
 render_split_channel = url(
     r'^render_split_channel/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$',
-    views.render_split_channel)
+    views.render_split_channel, name="webgateway_render_split_channel")
 """
 Returns a jpeg of OMERO Image with channels split into different panes in a
 grid. See L{views.render_split_channel}.
@@ -88,7 +88,7 @@ Params in render_split_channel/<iid>/<z>/<t> are:
 render_row_plot = url(
     r'^render_row_plot/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/'
     '(?P<y>[0-9]+)/(?:(?P<w>[0-9]+)/)?$',
-    views.render_row_plot)
+    views.render_row_plot, name="webgateway_render_row_plot")
 """
 Returns a gif graph of pixel values for a row of an image plane. See
 L{views.render_row_plot}.
@@ -104,7 +104,7 @@ Params in render_row_plot/<iid>/<z>/<t>/<y>/<w> are:
 render_col_plot = url(
     r'^render_col_plot/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)'
     '/(?P<x>[0-9]+)/(?:(?P<w>[0-9]+)/)?$',
-    views.render_col_plot)
+    views.render_col_plot, name="webgateway_render_col_plot")
 """
 Returns a gif graph of pixel values for a column of an image plane. See
 L{views.render_col_plot}.
@@ -134,7 +134,7 @@ Params in render_thumbnail/<iid>/<w>/<h> are:
 
 render_roi_thumbnail = url(
     r'^render_roi_thumbnail/(?P<roiId>[0-9]+)/?$',
-    views.render_roi_thumbnail)
+    views.render_roi_thumbnail, name="webgateway_render_roi_thumbnail")
 """
 Returns a thumbnail jpeg of the OMERO ROI. See L{views.render_roi_thumbnail}.
 Uses current rendering settings.
@@ -142,7 +142,7 @@ Uses current rendering settings.
 
 render_shape_thumbnail = url(
     r'^render_shape_thumbnail/(?P<shapeId>[0-9]+)/?$',
-    views.render_shape_thumbnail)
+    views.render_shape_thumbnail, name="webgateway_render_shape_thumbnail")
 """
 Returns a thumbnail jpeg of the OMERO Shape. See
 L{views.render_shape_thumbnail}. Uses current rendering settings.
@@ -167,7 +167,7 @@ Params in render_birds_eye_view/<iid>/ are:
 """
 
 render_ome_tiff = url(r'^render_ome_tiff/(?P<ctx>[^/]+)/(?P<cid>[0-9]+)/$',
-                   views.render_ome_tiff)
+                   views.render_ome_tiff, name="webgateway_render_ome_tiff")
 """
 Generates an OME-TIFF of an Image (or zip for multiple OME-TIFFs) and returns
 the file or redirects to a temp file location. See L{views.render_ome_tiff}
@@ -179,7 +179,7 @@ Image.
 
 render_movie = url(
     r'^render_movie/(?P<iid>[0-9]+)/(?P<axis>[zt])/(?P<pos>[0-9]+)/$',
-    views.render_movie)
+    views.render_movie, name="webgateway_render_movie")
 """
 Generates a movie file from the image, spanning Z or T frames. See
 L{views.render_movie}
@@ -192,7 +192,8 @@ Params in render_movie/<iid>/<axis>/<pos> are:
 
 # json methods...
 
-listProjects_json = url(r'^proj/list/$', views.listProjects_json)
+listProjects_json = url(r'^proj/list/$', views.listProjects_json,
+                        name="webgateway_listProjects_json")
 """
 json method: returning list of all projects available to current user. See
 L{views.listProjects_json} .
@@ -200,7 +201,8 @@ List of E.g. {"description": "", "id": 651, "name": "spim"}
 """
 
 projectDetail_json = url(r'^proj/(?P<pid>[0-9]+)/detail/$',
-                      views.projectDetail_json)
+                      views.projectDetail_json,
+                      name="webgateway_projectDetail_json")
 """
 json method: returns details of specified Project. See
 L{views.projectDetail_json}. Returns E.g
@@ -210,7 +212,8 @@ L{views.projectDetail_json}. Returns E.g
 """
 
 listDatasets_json = url(r'^proj/(?P<pid>[0-9]+)/children/$',
-                     views.listDatasets_json)
+                     views.listDatasets_json,
+                     name="webgateway_listDatasets_json")
 """
 json method: returns list of Datasets belonging to specified Project. See
 L{views.listDatasets_json}. Returns E.g
@@ -221,7 +224,8 @@ list of {"child_count": 4, "description": "", "type": "Dataset", "id": 901,
 """
 
 datasetDetail_json = url(r'^dataset/(?P<did>[0-9]+)/detail/$',
-                      views.datasetDetail_json)
+                      views.datasetDetail_json,
+                      name="webgateway_datasetDetail_json")
 """
 json method: returns details of specified Dataset. See
 L{views.datasetDetail_json}. Returns E.g
@@ -283,7 +287,7 @@ Image ids are specified in query string as list, e.g. id=1&id=2.
 webgateway_get_thumbnail_json = url(
     r'^get_thumbnail/(?P<iid>[0-9]+)'
     '/(?:(?P<w>[0-9]+)/)?(?:(?P<h>[0-9]+)/)?$',
-    views.get_thumbnail_json)
+    views.get_thumbnail_json, name="webgateway_get_thumbnail_json")
 """
 Returns a thumbnail base64 encoded of the OMERO Images,
 optionally scaled to max-width and max-height.
@@ -362,7 +366,8 @@ See L{views.full_viewer}.
 """
 
 save_image_rdef_json = url(r'^saveImgRDef/(?P<iid>[0-9]+)/$',
-                        views.save_image_rdef_json)
+                        views.save_image_rdef_json,
+                        name="webgateway_save_image_rdef_json")
 """
 Saves rendering definition (from request parameters) on the image. See
 L{views.save_image_rdef_json}.
@@ -373,13 +378,15 @@ Returns 'true' if worked OK.
 """
 
 get_image_rdef_json = url(r'^getImgRDef/$',
-                       views.get_image_rdef_json)
+                       views.get_image_rdef_json,
+                       name="webgateway_get_image_rdef_json")
 """
 Gets rendering definition from the 'session' if saved.
 Returns json dict of 'c', 'm', 'z', 't'.
 """
 
-listLuts_json = url(r'^luts/$', views.listLuts_json)
+listLuts_json = url(r'^luts/$', views.listLuts_json,
+                    name="webgateway_listLuts_json")
 """
 json method: returning list of all lookup tables available
 for rendering engine.
@@ -387,7 +394,8 @@ E.g. list of {path: "/luts/", size: 800, id: 37, name: "cool.lut"},
 """
 
 list_compatible_imgs_json = url(r'^compatImgRDef/(?P<iid>[0-9]+)/$',
-                             views.list_compatible_imgs_json)
+                             views.list_compatible_imgs_json,
+                             name="webgateway_list_compatible_imgs_json")
 """
 json method: returns list of IDs for images that have channels compatible with
 the specified image, such that rendering settings can be copied from the image
