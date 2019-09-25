@@ -62,7 +62,11 @@ import glob
 
 # from models import StoredConnection
 
-from omeroweb.webgateway.webgateway_cache import webgateway_cache, CacheBase, webgateway_tempfile
+from omeroweb.webgateway.webgateway_cache import (
+    webgateway_cache,
+    CacheBase,
+    webgateway_tempfile,
+)
 
 import logging
 import os

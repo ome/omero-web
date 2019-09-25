@@ -31,16 +31,16 @@ setup(name="omero-web",
       description="OMERO.web",
       long_description=read("README.rst"),
       classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: GNU General Public License v2 '
-        'or later (GPLv2+)',
-        'Natural Language :: English',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+          'Development Status :: 5 - Production/Stable',
+          'Intended Audience :: Developers',
+          'Intended Audience :: Science/Research',
+          'Intended Audience :: System Administrators',
+          'License :: OSI Approved :: GNU General Public License v2 '
+          'or later (GPLv2+)',
+          'Natural Language :: English',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python :: 2',
+          'Topic :: Software Development :: Libraries :: Python Modules',
       ],  # Get strings from
           # http://pypi.python.org/pypi?%3Aaction=list_classifiers
       author="The Open Microscopy Team",
