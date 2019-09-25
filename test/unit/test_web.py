@@ -41,14 +41,6 @@ class TestWeb(object):
         self.cli.register("web", WebControl, "TEST")
         self.args = ["web"]
 
-    def set_templates_dir(self, monkeypatch):
-
-        dist_dir = path(__file__) / ".." / ".." / ".." / ".." / ".." / ".." /\
-            ".." / "dist"  # FIXME: should not be hard-coded
-        dist_dir = dist_dir.abspath()
-        monkeypatch.setattr(WebControl, '_get_web_templates_dir',
-                            lambda x: dist_dir / "etc" / "templates" / "web")
-
     def set_python_path(self, monkeypatch, python_path=None):
         if python_path:
             monkeypatch.setenv('PYTHONPATH', python_path)
@@ -382,7 +374,6 @@ class TestWeb(object):
             self.args += ["--servername", str(servername)]
         if max_body_size:
             self.args += ["--max-body-size", max_body_size]
-        self.set_templates_dir(monkeypatch)
         self.cli.invoke(self.args, strict=True)
         o, e = capsys.readouterr()
         lines = self.clean_generated_file(o)
@@ -425,7 +416,6 @@ class TestWeb(object):
         self.mock_django_setting('STATIC_ROOT', static_root, monkeypatch)
         self.mock_django_setting('APPLICATION_SERVER', app_server, monkeypatch)
         self.args += ["config"] + server_type
-        self.set_templates_dir(monkeypatch)
         self.set_python_path(monkeypatch)
         self.cli.invoke(self.args, strict=True)
 
@@ -460,7 +450,6 @@ class TestWeb(object):
         self.add_hostport(cgihost, cgiport, monkeypatch)
 
         self.args += ["config"] + server_type
-        self.set_templates_dir(monkeypatch)
         self.set_python_path(monkeypatch)
         self.cli.invoke(self.args, strict=True)
 
