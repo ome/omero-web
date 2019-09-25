@@ -356,7 +356,6 @@ class TestWeb(object):
         assert startout == o.split(os.linesep)[1]
         assert 2 == len(o.split(os.linesep))-1
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('max_body_size', [None, '0', '1m'])
     @pytest.mark.parametrize('server_type', [
         "nginx", "nginx-development"])
@@ -412,7 +411,6 @@ class TestWeb(object):
                 ], lines)
         assert not missing, 'Line not found: ' + str(missing)
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('server_type', [
         ["nginx", 'wsgi-tcp'],
         ["nginx-development", 'wsgi-tcp'],
@@ -436,7 +434,6 @@ class TestWeb(object):
         d = self.compare_with_reference(server_type[0] + '.conf', o)
         assert not d, 'Files are different:\n' + d
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('server_type', [
         ['nginx', '--http', '1234',
          '--servername', 'omeroweb.host',
@@ -473,7 +470,6 @@ class TestWeb(object):
             server_type[0] + '-withoptions.conf', o)
         assert not d, 'Files are different:\n' + d
 
-    @pytest.mark.xfail
     def testNginxLocationComment(self):
         """
         Check the example comment in nginx-location matches the recommended
