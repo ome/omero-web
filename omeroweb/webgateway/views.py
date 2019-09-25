@@ -62,7 +62,7 @@ import glob
 
 # from models import StoredConnection
 
-from webgateway_cache import webgateway_cache, CacheBase, webgateway_tempfile
+from omeroweb.webgateway.webgateway_cache import webgateway_cache, CacheBase, webgateway_tempfile
 
 import logging
 import os
@@ -1493,7 +1493,7 @@ def wellData_json(request, conn=None, _internal=False, **kwargs):
     well = conn.getObject("Well", wid)
     if well is None:
         return HttpJavascriptResponseServerError('""')
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
 
     def urlprefix(iid):
         return reverse(prefix, args=(iid,))
@@ -1511,7 +1511,7 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         field = long(field or 0)
     except ValueError:
         field = 0
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
     thumbsize = getIntOrDefault(request, 'size', None)
     logger.debug(thumbsize)
     server_id = kwargs['server_id']
@@ -1620,7 +1620,7 @@ def listImages_json(request, did, conn=None, **kwargs):
     dataset = conn.getObject("Dataset", did)
     if dataset is None:
         return HttpJavascriptResponseServerError('""')
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
 
     def urlprefix(iid):
         return reverse(prefix, args=(iid,))
@@ -1647,7 +1647,7 @@ def listWellImages_json(request, did, conn=None, **kwargs):
     acq = getIntOrDefault(request, 'run', None)
     if well is None:
         return HttpJavascriptResponseServerError('""')
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
 
     def urlprefix(iid):
         return reverse(prefix, args=(iid,))
@@ -1851,7 +1851,7 @@ def search_json(request, conn=None, **kwargs):
     # search returns blitz_connector wrapper objects
 
     def urlprefix(iid):
-        return reverse('webgateway.views.render_thumbnail', args=(iid,))
+        return reverse('webgateway_render_thumbnail', args=(iid,))
     xtra = {'thumbUrlPrefix': kwargs.get('urlprefix', urlprefix)}
     try:
         if opts['ctx'] == 'imgs':
@@ -2285,11 +2285,11 @@ def full_viewer(request, iid, conn=None, **kwargs):
         if opengraph or twitter:
             urlargs = {'iid': iid}
             prefix = kwargs.get(
-                'thumbprefix', 'webgateway.views.render_thumbnail')
+                'thumbprefix', 'webgateway_render_thumbnail')
             image_preview = request.build_absolute_uri(
                 reverse(prefix, kwargs=urlargs))
             page_url = request.build_absolute_uri(
-                reverse('webgateway.views.full_viewer', kwargs=urlargs))
+                reverse('webgateway_full_viewer', kwargs=urlargs))
 
         d = {'blitzcon': conn,
              'image': image,

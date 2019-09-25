@@ -29,7 +29,7 @@ import time
 
 from django.conf import settings
 
-from webclient.controller import BaseController
+from omeroweb.webclient.controller import BaseController
 
 
 class BaseCalendar(BaseController):

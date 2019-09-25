@@ -29,9 +29,11 @@ from django.conf.urls import url, patterns
 from omeroweb.webclient import views
 from omeroweb.webgateway import views as webgateway
 from omeroweb.webclient.webclient_gateway import defaultThumbnail
+from django.core.urlresolvers import get_callable
 
-urlpatterns = patterns(
-    '',
+viewer_view = get_callable(settings.VIEWER_VIEW)
+
+urlpatterns = [
 
     # Home page is the main 'Data' page
     url(r'^$', views.load_template, {'menu': 'userdata'}, name="webindex"),
@@ -154,7 +156,7 @@ urlpatterns = patterns(
         {'download': True},
         name="web_render_image_download"),
     url(r'^(?:(?P<share_id>[0-9]+)/)?img_detail/(?P<iid>[0-9]+)/$',
-        settings.VIEWER_VIEW,
+        viewer_view,
         name="web_image_viewer"),
     url(r'^(?:(?P<share_id>[0-9]+)/)?imgData/(?P<iid>[0-9]+)/$',
         webgateway.imageData_json,
@@ -320,6 +322,4 @@ urlpatterns = patterns(
         name='api_annotations'),
 
     url(r'^api/shares/$', views.api_share_list, name='api_shares'),
-
-
-)
+]

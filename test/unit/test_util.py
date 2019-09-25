@@ -106,13 +106,11 @@ class TestUtil(object):
     def test_sort_properties_to_tuple(self, params):
         assert sort_properties_to_tuple(params[0]) == params[1]
 
-    @pytest.mark.parametrize('params', [
-        ([{"foo": 1, "bar": "abc"}], ('abc',)),
-    ])
-    def test_sort_properties_to_tuple_custom(self, params):
-        assert sort_properties_to_tuple(
-            params[0], params[0][0].keys()[0],
-            params[0][0].keys()[1]) == params[1]
+    def test_sort_properties_to_tuple_custom(self):
+        to_sort = [{"foo": 1, "bar": "abc"}]
+        sort_by = "foo"
+        pick_by = "bar"
+        assert sort_properties_to_tuple(to_sort, sort_by, pick_by) == ("abc",)
 
     @pytest.mark.parametrize('bad_params', [
         ([{}], KeyError, "'index'"),

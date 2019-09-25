@@ -6,8 +6,8 @@ import time
 import os
 import pytest
 
-from webgateway.webgateway_cache import FileCache, WebGatewayCache
-from webgateway.webgateway_cache import WebGatewayTempFile
+from omeroweb.webgateway.webgateway_cache import FileCache, WebGatewayCache
+from omeroweb.webgateway.webgateway_cache import WebGatewayTempFile
 import omero.gateway
 
 
@@ -229,12 +229,12 @@ class TestWebGatewayCache(object):
         class r:
 
             def __init__(self):
-                self.REQUEST = {'c': '1|292:1631$FF0000,2|409:5015$0000FF',
+                self.GET = {'c': '1|292:1631$FF0000,2|409:5015$0000FF',
                                 'm': 'c', 'q': '0.9'}
 
             def new(self, q):
                 rv = self.__class__()
-                rv.REQUEST.update(q)
+                rv.GET.update(q)
                 return rv
         self.request = r()
 
