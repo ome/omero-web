@@ -9,11 +9,19 @@ services:
   - docker
 
 before_install:
-  - git clone git://github.com/ome/omero-test-infra .omero
+  - pip install -U pip
+  - pip install https://github.com/ome/zeroc-ice-py-manylinux/releases/download/0.0.10/zeroc_ice-3.6.4-cp27-cp27mu-manylinux2010_x86_64.whl
+  # https://github.com/ome/openmicroscopy/blob/v5.5.1/Dockerfile#L32
+  - pip install flake8==2.4.0
+  - python -c "import Ice; print Ice.stringVersion()"
 
 script:
-  - docker build -t omero-web .
-  # .omero/docker app
+  - flake8
+  - python setup.py sdist
+  - pip install dist/omero-web*gz
+  - python -c "import omeroweb.version as owv; print owv.omeroweb_version"
+  - docker build -t test .
+  - docker run --rm -ti test
 
 deploy:
   provider: pypi

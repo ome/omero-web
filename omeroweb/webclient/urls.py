@@ -24,7 +24,7 @@
 #
 
 from django.conf import settings
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 
 from omeroweb.webclient import views
 from omeroweb.webgateway import views as webgateway

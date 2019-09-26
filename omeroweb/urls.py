@@ -89,8 +89,8 @@ for app in settings.ADDITIONAL_APPS:
 
 urlpatterns += [
     url(r'^favicon\.ico$',
-     lambda request: redirect('%swebgateway/img/ome.ico'
-                              % settings.STATIC_URL)),
+        lambda request: redirect('%swebgateway/img/ome.ico'
+                                 % settings.STATIC_URL)),
     url(r'^(?i)webgateway/', include('omeroweb.webgateway.urls')),
     url(r'^(?i)webadmin/', include('omeroweb.webadmin.urls')),
     url(r'^(?i)webclient/', include('omeroweb.webclient.urls')),

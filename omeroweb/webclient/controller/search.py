@@ -28,8 +28,8 @@ import omero
 import logging
 
 from omero.rtypes import rtime
-from webclient.controller import BaseController
-from webclient.webclient_utils import getDateTime
+from omeroweb.webclient.controller import BaseController
+from omeroweb.webclient.webclient_utils import getDateTime
 
 logger = logging.getLogger(__name__)
 
