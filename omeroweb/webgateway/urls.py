@@ -149,7 +149,7 @@ L{views.render_shape_thumbnail}. Uses current rendering settings.
 """
 
 render_shape_mask = url(r'^render_shape_mask/(?P<shapeId>[0-9]+)/$',
-                     views.render_shape_mask)
+                        views.render_shape_mask)
 """
 Returns a mask for the specified shape
 """
@@ -167,7 +167,7 @@ Params in render_birds_eye_view/<iid>/ are:
 """
 
 render_ome_tiff = url(r'^render_ome_tiff/(?P<ctx>[^/]+)/(?P<cid>[0-9]+)/$',
-                   views.render_ome_tiff, name="webgateway_render_ome_tiff")
+                      views.render_ome_tiff, name="webgateway_render_ome_tiff")
 """
 Generates an OME-TIFF of an Image (or zip for multiple OME-TIFFs) and returns
 the file or redirects to a temp file location. See L{views.render_ome_tiff}
@@ -201,8 +201,8 @@ List of E.g. {"description": "", "id": 651, "name": "spim"}
 """
 
 projectDetail_json = url(r'^proj/(?P<pid>[0-9]+)/detail/$',
-                      views.projectDetail_json,
-                      name="webgateway_projectDetail_json")
+                         views.projectDetail_json,
+                         name="webgateway_projectDetail_json")
 """
 json method: returns details of specified Project. See
 L{views.projectDetail_json}. Returns E.g
@@ -212,8 +212,8 @@ L{views.projectDetail_json}. Returns E.g
 """
 
 listDatasets_json = url(r'^proj/(?P<pid>[0-9]+)/children/$',
-                     views.listDatasets_json,
-                     name="webgateway_listDatasets_json")
+                        views.listDatasets_json,
+                        name="webgateway_listDatasets_json")
 """
 json method: returns list of Datasets belonging to specified Project. See
 L{views.listDatasets_json}. Returns E.g
@@ -224,8 +224,8 @@ list of {"child_count": 4, "description": "", "type": "Dataset", "id": 901,
 """
 
 datasetDetail_json = url(r'^dataset/(?P<did>[0-9]+)/detail/$',
-                      views.datasetDetail_json,
-                      name="webgateway_datasetDetail_json")
+                         views.datasetDetail_json,
+                         name="webgateway_datasetDetail_json")
 """
 json method: returns details of specified Dataset. See
 L{views.datasetDetail_json}. Returns E.g
@@ -366,8 +366,8 @@ See L{views.full_viewer}.
 """
 
 save_image_rdef_json = url(r'^saveImgRDef/(?P<iid>[0-9]+)/$',
-                        views.save_image_rdef_json,
-                        name="webgateway_save_image_rdef_json")
+                           views.save_image_rdef_json,
+                           name="webgateway_save_image_rdef_json")
 """
 Saves rendering definition (from request parameters) on the image. See
 L{views.save_image_rdef_json}.
@@ -378,8 +378,8 @@ Returns 'true' if worked OK.
 """
 
 get_image_rdef_json = url(r'^getImgRDef/$',
-                       views.get_image_rdef_json,
-                       name="webgateway_get_image_rdef_json")
+                          views.get_image_rdef_json,
+                          name="webgateway_get_image_rdef_json")
 """
 Gets rendering definition from the 'session' if saved.
 Returns json dict of 'c', 'm', 'z', 't'.
@@ -394,8 +394,8 @@ E.g. list of {path: "/luts/", size: 800, id: 37, name: "cool.lut"},
 """
 
 list_compatible_imgs_json = url(r'^compatImgRDef/(?P<iid>[0-9]+)/$',
-                             views.list_compatible_imgs_json,
-                             name="webgateway_list_compatible_imgs_json")
+                                views.list_compatible_imgs_json,
+                                name="webgateway_list_compatible_imgs_json")
 """
 json method: returns list of IDs for images that have channels compatible with
 the specified image, such that rendering settings can be copied from the image

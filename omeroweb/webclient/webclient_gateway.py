@@ -56,7 +56,10 @@ from django.utils.encoding import smart_str
 from django.conf import settings
 
 from omero.gateway.utils import toBoolean
-from omeroweb.webgateway.templatetags.common_filters import lengthunit, lengthformat
+from omeroweb.webgateway.templatetags.common_filters import (
+    lengthunit,
+    lengthformat,
+)
 
 try:
     import hashlib

@@ -69,8 +69,8 @@ class TestFileCache(object):
         self.cache = FileCache('test_cache')
 
     def testTimeouts(self):
-        assert (self.cache.get('date/test/1') is None,
-                'Key already exists in cache')
+        assert self.cache.get('date/test/1') is None, (
+            'Key already exists in cache')
         self.cache.set('date/test/1', '1', timeout=3)
         assert self.cache.get('date/test/1') == '1', 'Key not properly cached'
         time.sleep(4)
@@ -78,15 +78,15 @@ class TestFileCache(object):
         # if _default_timeout is 0, timeouts are simply not checked
         self.cache.wipe()
         self.cache._default_timeout = 0
-        assert (self.cache.get('date/test/1') is None,
-                'Key already exists in cache')
+        assert self.cache.get('date/test/1') is None, (
+            'Key already exists in cache')
         self.cache.set('date/test/1', '1', timeout=3)
-        assert (self.cache.get('date/test/1') == '1',
-                'Key not properly cached')
+        assert self.cache.get('date/test/1') == '1', (
+            'Key not properly cached')
         time.sleep(4)
         assert self.cache.has_key('date/test/1')  # noqa
-        assert (self.cache.get('date/test/1') == '1',
-                'Key got timedout and should not')
+        assert self.cache.get('date/test/1') == '1', (
+            'Key got timedout and should not')
 
     def testMaxSize(self):
         empty_size, cache_block = _testCacheFSBlockSize(self.cache)
@@ -97,8 +97,8 @@ class TestFileCache(object):
             self.cache.set('date/test/%d' % i, 'abcdefgh'*127*cache_block)
         for i in range(4):
             assert (self.cache.get('date/test/%d' % i) ==
-                    'abcdefgh' * 127 * cache_block,
-                    'Key %d not properly cached' % i)
+                    'abcdefgh' * 127 * cache_block), (
+                'Key %d not properly cached' % i)
         assert self.cache.get('date/test/5') is None, 'Size limit failed'
         self.cache._max_size = 0
         self.cache.wipe()
@@ -106,8 +106,8 @@ class TestFileCache(object):
             self.cache.set('date/test/%d' % i, 'abcdefgh'*127*cache_block)
         for i in range(6):
             assert (self.cache.get('date/test/%d' % i) ==
-                    'abcdefgh' * 127 * cache_block,
-                    'Key %d not properly cached' % i)
+                    'abcdefgh' * 127 * cache_block), (
+                'Key %d not properly cached' % i)
 
     def testMaxEntries(self):
         self.cache._max_entries = 2
@@ -116,8 +116,8 @@ class TestFileCache(object):
         self.cache.set('date/test/3', '3')
         assert self.cache.get('date/test/1') == '1', 'Key not properly cached'
         assert self.cache.get('date/test/2') == '2', 'Key not properly cached'
-        assert (self.cache.get('date/test/3') is None,
-                'File number limit failed')
+        assert self.cache.get('date/test/3') is None, (
+            'File number limit failed')
         self.cache.wipe()
         self.cache._max_entries = 0
         self.cache.set('date/test/1', '1')
@@ -135,8 +135,8 @@ class TestFileCache(object):
         self.cache.set('date/test/3', '3')
         assert self.cache.get('date/test/1') == '1', 'Key not properly cached'
         assert self.cache.get('date/test/2') == '2', 'Key not properly cached'
-        assert (self.cache.get('date/test/3') is None,
-                'File number limit failed')
+        assert self.cache.get('date/test/3') is None, (
+            'File number limit failed')
         time.sleep(4)
         self.cache.set('date/test/3', '3')
         assert self.cache.get('date/test/3') == '3', 'Purge not working'
@@ -229,8 +229,11 @@ class TestWebGatewayCache(object):
         class r:
 
             def __init__(self):
-                self.GET = {'c': '1|292:1631$FF0000,2|409:5015$0000FF',
-                                'm': 'c', 'q': '0.9'}
+                self.GET = {
+                    'c': '1|292:1631$FF0000,2|409:5015$0000FF',
+                    'm': 'c',
+                    'q': '0.9'
+                }
 
             def new(self, q):
                 rv = self.__class__()
@@ -256,33 +259,34 @@ class TestWebGatewayCache(object):
             self.wcache.setThumb(self.request, 'test', uid, i, cachestr)
         for i in range(4):
             assert (self.wcache.getThumb(self.request, 'test', uid, i) ==
-                    cachestr, 'Key %d not properly cached' % i)
-        assert (self.wcache.getThumb(self.request, 'test', uid, 5) is None,
-                'Size limit failed')
+                    cachestr), 'Key %d not properly cached' % i
+        assert self.wcache.getThumb(self.request, 'test', uid, 5) is None, (
+            'Size limit failed')
         for i in range(10):
             self.wcache.setThumb(self.request, 'test', uid, i, 'abcdefgh')
         for i in range(5):
             assert (self.wcache.getThumb(self.request, 'test', uid, i) ==
-                    'abcdefgh', 'Key %d not properly cached' % i)
-        assert (self.wcache.getThumb(self.request, 'test', uid, 5) is None,
-                'Entries limit failed')
+                    'abcdefgh'), 'Key %d not properly cached' % i
+        assert self.wcache.getThumb(self.request, 'test', uid, 5) is None, (
+            'Entries limit failed')
         time.sleep(2)
-        assert (self.wcache.getThumb(self.request, 'test', uid, 0) is None,
-                'Time limit failed')
+        assert self.wcache.getThumb(self.request, 'test', uid, 0) is None, (
+            'Time limit failed')
 
     def testThumbCache(self):
         uid = 123
         assert self.wcache.getThumb(self.request, 'test', uid, 1) is None
         self.wcache.setThumb(self.request, 'test', uid, 1, 'thumbdata')
         assert (self.wcache.getThumb(self.request, 'test', uid, 1) ==
-                'thumbdata', 'Thumb not properly cached (%s)' %
-                self.wcache.getThumb(self.request, 'test', uid, 1))
+                'thumbdata'), (
+                    'Thumb not properly cached (%s)' %
+                    self.wcache.getThumb(self.request, 'test', uid, 1))
         self.wcache.clearThumb(self.request, 'test', uid, 1)
         assert self.wcache.getThumb(self.request, 'test', uid, 1) is None
         # Make sure clear() nukes this
         self.wcache.setThumb(self.request, 'test', uid, 1, 'thumbdata')
         assert (self.wcache.getThumb(self.request, 'test', uid, 1) ==
-                'thumbdata', 'Thumb not properly cached')
+                'thumbdata'), 'Thumb not properly cached'
         assert self.wcache._thumb_cache._num_entries != 0
         self.wcache.clear()
         assert self.wcache._thumb_cache._num_entries == 0
