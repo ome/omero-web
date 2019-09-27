@@ -21,6 +21,7 @@ from io import open
 import datetime
 # Support python2 and python3
 from past.builtins import basestring
+from builtins import str
 
 logger = logging.getLogger(__name__)
 
