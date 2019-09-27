@@ -969,7 +969,7 @@ class WebGatewayTempFile (object):
         try:
             name = name.decode('utf8').encode('ascii', 'ignore')
         except AttributeError:
-            #python3
+            # python3
             pass
         if len(name) > 255:
             # Try to be smart about trimming and keep up to two levels of

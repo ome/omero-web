@@ -29,7 +29,7 @@ import logging
 try:
     # python2
     from urlparse import urljoin
-except ModuleNotFoundError:
+except ImportError:
     # python3
     from urllib.parse import urljoin
 
