@@ -1,5 +1,5 @@
 
-<div class="toolbar">
+<div id="center_toolbar" class="toolbar">
     <div id="layout_chooser">
         <button id="icon_layout" title="View as Thumbnails" class="<% if (layout === 'icon') print('checked') %>" /><button id="table_layout" title="View as List" class="<% if (layout === 'table') print('checked') %>" />
     </div>
@@ -42,18 +42,6 @@
         <div id="currentFilterTags">
             <!-- Current tags here -->
         </div>
-    </div>
-
-    <div id="filtermap" class="imagefilter filtersearch">
-        <select id="choose_map_key">
-            <!-- Keys loaded here... -->
-        </select>
-        <select id="map_greater_less" style="width: 40px">
-            <option value="more">&gt;</option>
-            <option value="less">&lt;</option>
-        </select>
-        <input id="filter_map_value" />
-        <span title="Remove all Key-Value filters" class="removefilter" style="float:left">X</span>
     </div>
 </div>
 <div id="icon_table"></div>
