@@ -10,6 +10,7 @@
             <option value="unrated">Unrated</option>
             <option value="name">Name</option>
             <option value="tag">Tag</option>
+            <option value="map">Key-Values</option>
             <option disabled>──────────</option>
             <option value="removeAll">Remove all filters</option>
         </select>
@@ -41,6 +42,18 @@
         <div id="currentFilterTags">
             <!-- Current tags here -->
         </div>
+    </div>
+
+    <div id="filtermap" class="imagefilter filtersearch">
+        <select id="choose_map_key">
+            <!-- Keys loaded here... -->
+        </select>
+        <select id="map_greater_less" style="width: 40px">
+            <option value="more">&gt;</option>
+            <option value="less">&lt;</option>
+        </select>
+        <input id="filter_map_value" />
+        <span title="Remove all Key-Value filters" class="removefilter" style="float:left">X</span>
     </div>
 </div>
 <div id="icon_table"></div>
