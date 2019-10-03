@@ -495,7 +495,7 @@ $(document).ready(function() {
                     iids.push($(this).attr("data-id"));
                 });
 
-                var f = new MapAnnFilter(iids, $('#center_toolbar'), doFiltering);
+                var f = new MapAnnFilter(iids, $('#center_toolbar'), doFiltering, filterObjects);
                 filterObjects.push(f);
                 return;
             }

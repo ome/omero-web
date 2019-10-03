@@ -1,11 +1,10 @@
 
-console.log('filter');
-
-function MapAnnFilter(image_ids, $element, callback) {
+function MapAnnFilter(image_ids, $element, callback, filterObjects) {
 
     this.image_ids = image_ids;
     this.filterText = "";
     this.moreLess = "more";
+    this.filterObjects = filterObjects;
 
     var $filter = $('<div class="imagefilter filtersearch">' +
         '<select class="choose_map_key">' +
@@ -63,6 +62,18 @@ function MapAnnFilter(image_ids, $element, callback) {
 
     $(".map_more_less", $filter).change(function(event){
         this.moreLess = $(event.target).val();
+        if (callback) {
+            callback();
+        }
+    }.bind(this));
+
+    $(".removefilter", $filter).click(function() {
+        let i = filterObjects.indexOf(this);
+        // remove this filter from array
+        filterObjects.splice(i, 1);
+        // and remove from DOM
+        $filter.remove();
+        // re-filter
         if (callback) {
             callback();
         }
