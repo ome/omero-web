@@ -350,9 +350,9 @@
                         return '<tr><td class="title ' + oddEvenClass + '">' + label + ':&nbsp;</td><td>' + values + '</td></tr>';
                     });
                     table.html(html.join(""));
-                    if (callback) {
-                        callback(result);
-                    }
+                }
+                if (callback) {
+                    callback(result);
                 }
         });
     };
