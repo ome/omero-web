@@ -17,8 +17,8 @@ function MapAnnFilter(image_ids, $element, callback) {
             '<option value="lessequal">&le;</option>' +
             '<option value="equal">=</option>' +
         '</select>' +
-        '<input class="filter_map_value" />' +
-        '<span title="Remove all Key-Value filters" class="removefilter" style="float:left">X</span>' +
+        '<input class="filter_map_value" style="float:left; margin:2px; position:relative" />' +
+        '<span title="Remove filter" class="removefilter" style="float:left">X</span>' +
     '</div>');
 
     $element.append($filter);
@@ -28,16 +28,20 @@ function MapAnnFilter(image_ids, $element, callback) {
     $(".choose_map_key", $filter).change(function(event){
         var $this = $(event.target);
         this.currentFilterKey = $this.val();
-        this.currentKeyValues = this.usedKeyValues[this.currentFilterKey].values;
-        this.keyisNumber = this.usedKeyValues[this.currentFilterKey].type === 'number';
-
+        if (this.currentFilterKey == '-') {
+            this.currentKeyValues = undefined;
+            this.keyisNumber = false;
+        } else {
+            this.currentKeyValues = this.usedKeyValues[this.currentFilterKey].values;
+            this.keyisNumber = this.usedKeyValues[this.currentFilterKey].type === 'number';
+        }
         if (this.keyisNumber) {
             $(".map_more_less", $filter).show();
         } else {
             $(".map_more_less", $filter).hide();
         }
         var placeholder = 'filter text';
-        if (this.usedKeyValues[this.currentFilterKey].type === 'number') {
+        if (this.keyisNumber) {
             let min = this.usedKeyValues[this.currentFilterKey].min;
             let max = this.usedKeyValues[this.currentFilterKey].max;
             placeholder = min + '-' + max;
@@ -74,7 +78,7 @@ function MapAnnFilter(image_ids, $element, callback) {
             k = k.escapeHTML();
             return "<option value='" + k + "'>" + k + "</option>";
         }).join("");
-        html = "<option value='0'>Choose Key</option>" + html;
+        html = "<option value='-'>Choose Key</option>" + html;
         $(".choose_map_key", $filter).html(html);
     }.bind(this));
 }
@@ -84,7 +88,9 @@ MapAnnFilter.prototype.isImageVisible = function(iid) {
     var visible;
     var text = this.filterText;
     // If image doesn't have matching key, hide
-    if (!this.currentKeyValues[iid]) {
+    if (!this.currentKeyValues) {
+        visible = true;
+    } else if (!this.currentKeyValues[iid]) {
         visible = false;
     } else if (text.length === 0) {
         visible = true;
