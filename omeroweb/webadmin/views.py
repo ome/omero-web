@@ -109,7 +109,7 @@ def prepare_experimenter(conn, eid=None):
         isLdapUser = experimenter.isLdapUser()
     except ApiUsageException as x:
         # e.g. "Cannot find unique user DistinguishedName: found=0"
-        logger.error(traceback.format_exc())
+        logger.info(traceback.format_exc())
         isLdapUser = x.message
     return experimenter, defaultGroup, otherGroups, isLdapUser, hasAvatar
 
