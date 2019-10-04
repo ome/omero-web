@@ -25,6 +25,7 @@
 #
 
 from io import StringIO
+from io import BytesIO
 import traceback
 import logging
 import warnings
@@ -978,7 +979,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         img = Image.open(settings.DEFAULT_USER)
         img.thumbnail((150, 150), Image.ANTIALIAS)
-        f = StringIO()
+        f = BytesIO()
         img.save(f, "PNG")
         f.seek(0)
         return f.read()
