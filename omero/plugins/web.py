@@ -16,6 +16,7 @@ import platform
 import sys
 import os
 import re
+from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
 from path import path
@@ -66,8 +67,8 @@ def config_required(func):
     def import_django_settings(func):
         @windows_warning
         def wrapper(self, *args, **kwargs):
-            if not py27_only():
-                self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
+            # if not py27_only():
+            #     self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
             try:
                 import django  # NOQA
             except:
@@ -78,7 +79,7 @@ def config_required(func):
             try:
                 import omeroweb.settings as settings
                 kwargs['settings'] = settings
-            except Exception, e:
+            except Exception as e:
                 self.ctx.die(682, e)
             return func(self, *args, **kwargs)
         return wrapper
@@ -360,7 +361,7 @@ class WebControl(DiagnosticsControl):
             self.set_environ()
             self.ctx.call(cargs, cwd=location)
         except:
-            print traceback.print_exc()
+            print(traceback.print_exc())
 
     @config_required
     def collectstatic(self, settings):
@@ -627,7 +628,7 @@ class WebControl(DiagnosticsControl):
         self._diagnostics_banner("web")
         try:
             self.status(args)
-        except Exception, e:
+        except Exception as e:
             try:
                 self.ctx.out("OMERO.web error: %s" % e.message[1].message)
             except:

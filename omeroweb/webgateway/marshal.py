@@ -23,6 +23,7 @@ import time
 import re
 import logging
 import traceback
+from builtins import bytes
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +116,7 @@ def imageMarshal(image, key=None, request=None):
             if len(well_smpls) == 1:
                 if well_smpls[0].well is not None:
                     well = well_smpls[0].well
-    except omero.SecurityViolation, e:
+    except omero.SecurityViolation as e:
         # We're in a share so the Image's parent Dataset cannot be loaded
         # or some other permissions related issue has tripped us up.
         logger.warn('Security violation while retrieving Dataset when '
@@ -153,7 +154,7 @@ def imageMarshal(image, key=None, request=None):
             logger.debug(
                 "Failed to prepare Rendering Engine for imageMarshal")
             return rv
-    except omero.ConcurrencyException, ce:
+    except omero.ConcurrencyException as ce:
         backOff = ce.backOff
         rv = {
             'ConcurrencyException': {
@@ -161,7 +162,7 @@ def imageMarshal(image, key=None, request=None):
             }
         }
         return rv
-    except Exception, ex:   # Handle everything else.
+    except Exception as ex:   # Handle everything else.
         rv['Exception'] = ex.message
         logger.error(traceback.format_exc())
         return rv       # Return what we have already, in case it's useful
@@ -299,7 +300,10 @@ def shapeMarshal(shape):
         rv['radiusY'] = shape.getRadiusY().getValue()
     elif shape_type == omero.model.PolylineI:
         rv['type'] = 'PolyLine'
-        rv['points'] = stringToSvg(shape.getPoints().getValue())
+        points = shape.getPoints().getValue()
+        if points:
+            points = bytes(points).decode()
+        rv['points'] = stringToSvg(points)
     elif shape_type == omero.model.LineI:
         rv['type'] = 'Line'
         rv['x1'] = shape.getX1().getValue()
@@ -313,7 +317,10 @@ def shapeMarshal(shape):
     elif shape_type == omero.model.PolygonI:
         rv['type'] = 'Polygon'
         # z = closed line
-        rv['points'] = stringToSvg(shape.getPoints().getValue()) + " z"
+        points = shape.getPoints().getValue()
+        if points:
+            points = bytes(points).decode()
+        rv['points'] = stringToSvg(points) + " z"
     elif shape_type == omero.model.LabelI:
         rv['type'] = 'Label'
         rv['x'] = shape.getX().getValue()
@@ -350,9 +357,10 @@ def shapeMarshal(shape):
         # FIXME: units ignored for stroke width
         set_if('strokeWidth', shape.getStrokeWidth().getValue())
     if hasattr(shape, 'getMarkerStart') and shape.getMarkerStart() is not None:
-        rv['markerStart'] = shape.getMarkerStart().getValue()
+        # Handle string for python2 and bytes python3. TODO: lower level fix
+        rv['markerStart'] = bytes(shape.getMarkerStart().getValue()).decode()
     if hasattr(shape, 'getMarkerEnd') and shape.getMarkerEnd() is not None:
-        rv['markerEnd'] = shape.getMarkerEnd().getValue()
+        rv['markerEnd'] = bytes(shape.getMarkerEnd().getValue()).decode()
     return rv
 
 
@@ -383,9 +391,9 @@ def rgb_int2css(rgbint):
     """
     alpha = rgbint % 256
     alpha = float(alpha) / 255
-    b = rgbint / 256 % 256
-    g = rgbint / 256 / 256 % 256
-    r = rgbint / 256 / 256 / 256 % 256
+    b = rgbint // 256 % 256
+    g = rgbint // 256 // 256 % 256
+    r = rgbint // 256 // 256 // 256 % 256
     return "#%02x%02x%02x" % (r, g, b), alpha
 
 
@@ -396,9 +404,9 @@ def rgb_int2rgba(rgbint):
     """
     alpha = rgbint % 256
     alpha = float(alpha) / 255
-    b = rgbint / 256 % 256
-    g = rgbint / 256 / 256 % 256
-    r = rgbint / 256 / 256 / 256 % 256
+    b = rgbint // 256 % 256
+    g = rgbint // 256 // 256 % 256
+    r = rgbint // 256 // 256 // 256 % 256
     return (r, g, b, alpha)
 
 

@@ -33,9 +33,9 @@ from django.forms.formsets import formset_factory
 from django.core.urlresolvers import reverse
 
 from omeroweb.custom_forms import NonASCIIForm
-from custom_forms import MetadataModelChoiceField
-from custom_forms import AnnotationModelMultipleChoiceField
-from custom_forms import ObjectModelMultipleChoiceField
+from .custom_forms import MetadataModelChoiceField
+from .custom_forms import AnnotationModelMultipleChoiceField
+from .custom_forms import ObjectModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import ExperimenterModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import GroupModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import GroupModelChoiceField

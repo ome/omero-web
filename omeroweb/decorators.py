@@ -456,7 +456,7 @@ class login_required(object):
                 logger.debug('Connection not provided, attempting to get one.')
                 try:
                     conn = ctx.get_connection(server_id, request)
-                except Exception, x:
+                except Exception as x:
                     logger.error(
                         'Error retrieving connection.', exc_info=True)
                     error = str(x)

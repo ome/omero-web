@@ -24,12 +24,11 @@
 # Version: 1.0
 #
 
-import cStringIO
+from io import StringIO
+from io import BytesIO
 import traceback
 import logging
 import warnings
-
-from StringIO import StringIO
 
 import time
 from datetime import datetime
@@ -89,7 +88,7 @@ def defaultThumbnail(size=(120, 120)):
         size = (size[0], size[0])
     img = Image.open(settings.DEFAULT_IMG)
     img.thumbnail(size, Image.ANTIALIAS)
-    f = cStringIO.StringIO()
+    f = StringIO()
     img.save(f, "PNG")
     f.seek(0)
     return f.read()
@@ -955,7 +954,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         else:
             region = None
             try:
-                im = Image.open(StringIO(photo))
+                im = Image.open(StringIO(photo.decode()))
                 region = im.crop(box)
             except IOError:
                 logger.error(traceback.format_exc())
@@ -980,7 +979,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         img = Image.open(settings.DEFAULT_USER)
         img.thumbnail((150, 150), Image.ANTIALIAS)
-        f = cStringIO.StringIO()
+        f = BytesIO()
         img.save(f, "PNG")
         f.seek(0)
         return f.read()
@@ -1609,7 +1608,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         message = None
         try:
             cb = self.c.submit(command, loops=120)
-        except omero.CmdError, ex:
+        except omero.CmdError as ex:
             message = ex.err.message
         finally:
             if cb:
@@ -2122,7 +2121,7 @@ class OmeroWebSafeCallWrapper(OmeroGatewaySafeCallWrapper):  # pragma: no cover
                     self.proxyObjectWrapper._create_func()
                 func = getattr(self.proxyObjectWrapper._obj, self.attr)
                 return func(*args, **kwargs)
-            except Exception, e:
+            except Exception as e:
                 self.debug(e.__class__.__name__, args, kwargs)
                 raise
         else:

@@ -34,7 +34,7 @@ import re
 import sys
 import warnings
 
-from StringIO import StringIO
+from io import StringIO
 from time import time
 
 from omeroweb.version import omeroweb_buildyear as build_year
@@ -58,22 +58,23 @@ from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from webclient_utils import _formatReport, _purgeCallback
-from forms import GlobalSearchForm, ContainerForm
-from forms import ShareForm, BasketShareForm
-from forms import ContainerNameForm, ContainerDescriptionForm
-from forms import CommentAnnotationForm, TagsAnnotationForm
-from forms import MetadataFilterForm, MetadataDetectorForm
-from forms import MetadataChannelForm, MetadataEnvironmentForm
-from forms import MetadataObjectiveForm, MetadataObjectiveSettingsForm
-from forms import MetadataStageLabelForm, MetadataLightSourceForm
-from forms import MetadataDichroicForm, MetadataMicroscopeForm
-from forms import FilesAnnotationForm, WellIndexForm, NewTagsAnnotationFormSet
 
-from controller.container import BaseContainer
-from controller.history import BaseCalendar
-from controller.search import BaseSearch
-from controller.share import BaseShare
+from omeroweb.webclient.webclient_utils import _formatReport, _purgeCallback
+from .forms import GlobalSearchForm, ContainerForm
+from .forms import ShareForm, BasketShareForm
+from .forms import ContainerNameForm, ContainerDescriptionForm
+from .forms import CommentAnnotationForm, TagsAnnotationForm
+from .forms import MetadataFilterForm, MetadataDetectorForm
+from .forms import MetadataChannelForm, MetadataEnvironmentForm
+from .forms import MetadataObjectiveForm, MetadataObjectiveSettingsForm
+from .forms import MetadataStageLabelForm, MetadataLightSourceForm
+from .forms import MetadataDichroicForm, MetadataMicroscopeForm
+from .forms import FilesAnnotationForm, WellIndexForm, NewTagsAnnotationFormSet
+
+from .controller.container import BaseContainer
+from .controller.history import BaseCalendar
+from .controller.search import BaseSearch
+from .controller.share import BaseShare
 
 from omeroweb.webadmin.forms import LoginForm
 
@@ -98,7 +99,7 @@ from omero import ApiUsageException, ServerError, CmdError
 from omero.rtypes import rlong, rlist
 from omeroweb.webgateway.views import LoginView
 
-import tree
+from . import tree
 
 logger = logging.getLogger(__name__)
 
@@ -385,7 +386,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     # in order to set up our initial state correctly.
     try:
         first_sel = show.first_selected
-    except IncorrectMenuError, e:
+    except IncorrectMenuError as e:
         return HttpResponseRedirect(e.uri)
     # We get the owner of the top level object, E.g. Project
     # Actual api_paths_to_object() is retrieved by jsTree once loaded
@@ -1273,7 +1274,7 @@ def load_plate(request, o1_type=None, o1_id=None, conn=None, **kwargs):
 
     try:
         manager = BaseContainer(conn, **kw)
-    except AttributeError, x:
+    except AttributeError as x:
         return handlerInternalError(request, x)
 
     # prepare forms
@@ -1558,7 +1559,7 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None,
         try:
             manager = BaseContainer(
                 conn, **{str(c_type): long(c_id), 'index': index})
-        except AttributeError, x:
+        except AttributeError as x:
             return handlerInternalError(request, x)
         if share_id is not None:
             template = "webclient/annotations/annotations_share.html"
@@ -1675,7 +1676,7 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
             template = "webclient/annotations/metadata_acquisition.html"
             manager = BaseContainer(
                 conn, **{str(c_type): long(c_id)})
-    except AttributeError, x:
+    except AttributeError as x:
         return handlerInternalError(request, x)
 
     form_environment = None
@@ -2139,7 +2140,7 @@ def annotate_file(request, conn=None, **kwargs):
                 kw[str(o_type)] = long(o_id)
             try:
                 manager = BaseContainer(conn, **kw)
-            except AttributeError, x:
+            except AttributeError as x:
                 return handlerInternalError(request, x)
 
     if manager is not None:
@@ -2604,7 +2605,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
             kw[str(o_type)] = long(o_id)
         try:
             manager = BaseContainer(conn, **kw)
-        except AttributeError, x:
+        except AttributeError as x:
             return handlerInternalError(request, x)
     elif o_type in ("share", "sharecomment", "chat"):
         manager = BaseShare(conn, o_id)
@@ -2815,7 +2816,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
         parents = request.POST['parent']
         try:
             manager.remove(parents.split('|'))
-        except Exception, x:
+        except Exception as x:
             logger.error(traceback.format_exc())
             rdict = {'bad': 'true', 'errs': str(x)}
             return JsonResponse(rdict)
@@ -2826,7 +2827,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
         image_id = request.POST.get('source')
         try:
             manager.removeImage(image_id)
-        except Exception, x:
+        except Exception as x:
             logger.error(traceback.format_exc())
             rdict = {'bad': 'true', 'errs': str(x)}
             return JsonResponse(rdict)
@@ -2848,7 +2849,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                 'dreport': _formatReport(handle),
                 'start_time': datetime.datetime.now()}
             request.session.modified = True
-        except Exception, x:
+        except Exception as x:
             logger.error(
                 'Failed to delete: %r' % {'did': o_id, 'dtype': o_type},
                 exc_info=True)
@@ -2893,7 +2894,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                         dMap['did'] = ids[0]
                     request.session['callback'][str(handle)] = dMap
             request.session.modified = True
-        except Exception, x:
+        except Exception as x:
             logger.error(
                 'Failed to delete: %r' % {'did': ids, 'dtype': key},
                 exc_info=True)
@@ -3342,7 +3343,7 @@ def activities(request, conn=None, **kwargs):
                         error=0,
                         status="finished",
                         dreport=None)
-                except Exception, x:
+                except Exception as x:
                     logger.error(traceback.format_exc())
                     logger.error("Status job '%s'error:" % cbString)
                     update_callback(
@@ -3376,7 +3377,7 @@ def activities(request, conn=None, **kwargs):
                         results = proc.getResults(0, conn.SERVICE_OPTS)
                         update_callback(request, cbString, status="finished")
                         new_results.append(cbString)
-                    except Exception, x:
+                    except Exception as x:
                         update_callback(request, cbString, status="finished",
                                         Message="Failed to get results")
                         logger.info(
@@ -3598,7 +3599,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
 
     try:
         params = scriptService.getParams(long(scriptId))
-    except Exception, ex:
+    except Exception as ex:
         if ex.message.lower().startswith("no processor available"):
             return {'template': 'webclient/scripts/no_processor.html',
                     'scriptId': scriptId}
@@ -4229,7 +4230,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
     try:
         params = scriptService.getParams(sId)
-    except Exception, x:
+    except Exception as x:
         if x.message and x.message.startswith("No processor available"):
             # Delegate to run_script() for handling 'No processor available'
             rsp = run_script(
@@ -4330,7 +4331,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 inputMap['Data_Type'].val, unwrap(inputMap['IDs'])[0])
             newGid = firstObj.getDetails().group.id.val
             conn.SERVICE_OPTS.setOmeroGroup(newGid)
-        except Exception, x:
+        except Exception as x:
             logger.debug(traceback.format_exc())
             # if inputMap values not as expected or firstObj is None
             conn.SERVICE_OPTS.setOmeroGroup(gid)
@@ -4391,7 +4392,7 @@ def run_script(request, conn, sId, inputMap, scriptName='Script'):
             'start_time': datetime.datetime.now(),
             'status': status}
         request.session.modified = True
-    except Exception, x:
+    except Exception as x:
         jobId = str(time())      # E.g. 1312803670.6076391
         if x.message and x.message.startswith("No processor available"):
             # omero.ResourceError
