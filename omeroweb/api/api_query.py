@@ -51,7 +51,7 @@ def get_wellsample_indices(conn, plate_id=None, plateacquisition_id=None):
         params.add('plate_id', rlong(plate_id))
     elif plateacquisition_id is not None:
         query += " where ws.plateAcquisition.id=:plateacquisition_id"
-        params.add('plateacquisition_id', wrap(plateacquisition_id))
+        params.add('plateacquisition_id', rlong(plateacquisition_id))
     result = conn.getQueryService().projection(query, params, ctx)
     result = [r for r in unwrap(result)[0] if r is not None]
     return result
