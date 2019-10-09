@@ -1116,7 +1116,10 @@
       // on pixel type byte width
       var bytes_per_pixel = Math.ceil(
         Math.log2(viewport.loadedImg.pixel_range[1]) / 8.0);
-      var stack_size = sizes.width * sizes.height * sizes.z * sizez.c * bytes_per_pixel;
+      var active_channel_count = viewport.loadedImg.channels
+        .filter(function(x) { return x.active }).length;
+      var stack_size = sizes.width * sizes.height * sizes.z
+                       * active_channel_count * bytes_per_pixel;
 
       // disable 'Max Intensity' projection for single-Z images or if total
       // amount of data to be projected is > 256MiB
