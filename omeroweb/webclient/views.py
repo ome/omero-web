@@ -42,7 +42,7 @@ from omeroweb.version import omeroweb_version as omero_version
 
 import omero
 import omero.scripts
-from omero.rtypes import wrap, unwrap
+from omero.rtypes import wrap, unwrap, rlong, rlist
 
 from omero.gateway.utils import toBoolean
 
@@ -96,7 +96,6 @@ from omero.model import ProjectI, DatasetI, ImageI, \
     ProjectDatasetLinkI, DatasetImageLinkI, \
     ScreenPlateLinkI, AnnotationAnnotationLinkI, TagAnnotationI
 from omero import ApiUsageException, ServerError, CmdError
-from omero.rtypes import rlong, rlist
 from omeroweb.webgateway.views import LoginView
 
 from . import tree
@@ -4365,7 +4364,8 @@ def ome_tiff_script(request, imageId, conn=None, **kwargs):
         gid = image.getDetails().group.id.val
         conn.SERVICE_OPTS.setOmeroGroup(gid)
     imageIds = [long(imageId)]
-    inputMap = {'Data_Type': wrap('Image'), 'IDs': wrap(imageIds)}
+    inputMap = {'Data_Type': wrap('Image'),
+                'IDs': rlist([rlong(id) for id in imageIds])}
     inputMap['Format'] = wrap('OME-TIFF')
     rsp = run_script(
         request, conn, sId, inputMap, scriptName='Create OME-TIFF')

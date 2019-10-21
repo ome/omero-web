@@ -954,13 +954,13 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         else:
             region = None
             try:
-                im = Image.open(StringIO(photo.decode()))
+                im = Image.open(BytesIO(photo))
                 region = im.crop(box)
             except IOError:
                 logger.error(traceback.format_exc())
                 raise IOError("Cannot open that photo.")
             else:
-                imdata = StringIO()
+                imdata = BytesIO()
                 region.save(imdata, format=im.format)
                 self.uploadMyUserPhoto(
                     ann.file.name.val, ann.file.mimetype.val,

@@ -20,7 +20,7 @@
 """Helper functions for views that handle object trees."""
 
 
-from omero.rtypes import unwrap, wrap
+from omero.rtypes import unwrap, wrap, rlong
 from omero.sys import ParametersI
 from . import api_settings
 
@@ -48,10 +48,10 @@ def get_wellsample_indices(conn, plate_id=None, plateacquisition_id=None):
             "join well.wellSamples ws"
     if plate_id is not None:
         query += " where well.plate.id=:plate_id "
-        params.add('plate_id', wrap(plate_id))
+        params.add('plate_id', rlong(plate_id))
     elif plateacquisition_id is not None:
         query += " where ws.plateAcquisition.id=:plateacquisition_id"
-        params.add('plateacquisition_id', wrap(plateacquisition_id))
+        params.add('plateacquisition_id', rlong(plateacquisition_id))
     result = conn.getQueryService().projection(query, params, ctx)
     result = [r for r in unwrap(result)[0] if r is not None]
     return result
@@ -69,7 +69,7 @@ def get_child_counts(conn, link_class, parent_ids):
     ctx = deepcopy(conn.SERVICE_OPTS)
     ctx.setOmeroGroup(-1)
     params = ParametersI()
-    params.add('ids', wrap(parent_ids))
+    params.add('ids', wrap([rlong(id) for id in parent_ids]))
     query = ("select chl.parent.id, count(chl.id) from %s chl"
              " where chl.parent.id in (:ids) group by chl.parent.id"
              % link_class)
