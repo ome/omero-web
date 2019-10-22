@@ -41,14 +41,6 @@ class TestWeb(object):
         self.cli.register("web", WebControl, "TEST")
         self.args = ["web"]
 
-    def set_templates_dir(self, monkeypatch):
-
-        dist_dir = path(__file__) / ".." / ".." / ".." / ".." / ".." / ".." /\
-            ".." / "dist"  # FIXME: should not be hard-coded
-        dist_dir = dist_dir.abspath()
-        monkeypatch.setattr(WebControl, '_get_web_templates_dir',
-                            lambda x: dist_dir / "etc" / "templates" / "web")
-
     def set_python_path(self, monkeypatch, python_path=None):
         if python_path:
             monkeypatch.setenv('PYTHONPATH', python_path)
@@ -356,7 +348,6 @@ class TestWeb(object):
         assert startout == o.split(os.linesep)[1]
         assert 2 == len(o.split(os.linesep))-1
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('max_body_size', [None, '0', '1m'])
     @pytest.mark.parametrize('server_type', [
         "nginx", "nginx-development"])
@@ -383,7 +374,6 @@ class TestWeb(object):
             self.args += ["--servername", str(servername)]
         if max_body_size:
             self.args += ["--max-body-size", max_body_size]
-        self.set_templates_dir(monkeypatch)
         self.cli.invoke(self.args, strict=True)
         o, e = capsys.readouterr()
         lines = self.clean_generated_file(o)
@@ -412,7 +402,6 @@ class TestWeb(object):
                 ], lines)
         assert not missing, 'Line not found: ' + str(missing)
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('server_type', [
         ["nginx", 'wsgi-tcp'],
         ["nginx-development", 'wsgi-tcp'],
@@ -427,7 +416,6 @@ class TestWeb(object):
         self.mock_django_setting('STATIC_ROOT', static_root, monkeypatch)
         self.mock_django_setting('APPLICATION_SERVER', app_server, monkeypatch)
         self.args += ["config"] + server_type
-        self.set_templates_dir(monkeypatch)
         self.set_python_path(monkeypatch)
         self.cli.invoke(self.args, strict=True)
 
@@ -436,7 +424,6 @@ class TestWeb(object):
         d = self.compare_with_reference(server_type[0] + '.conf', o)
         assert not d, 'Files are different:\n' + d
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('server_type', [
         ['nginx', '--http', '1234',
          '--servername', 'omeroweb.host',
@@ -463,7 +450,6 @@ class TestWeb(object):
         self.add_hostport(cgihost, cgiport, monkeypatch)
 
         self.args += ["config"] + server_type
-        self.set_templates_dir(monkeypatch)
         self.set_python_path(monkeypatch)
         self.cli.invoke(self.args, strict=True)
 
@@ -473,7 +459,6 @@ class TestWeb(object):
             server_type[0] + '-withoptions.conf', o)
         assert not d, 'Files are different:\n' + d
 
-    @pytest.mark.xfail
     def testNginxLocationComment(self):
         """
         Check the example comment in nginx-location matches the recommended

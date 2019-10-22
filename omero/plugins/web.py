@@ -20,6 +20,7 @@ from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
 from path import path
+from pkg_resources import resource_string
 
 from omero.install.windows_warning import windows_warning, WINDOWS_WARNING
 from omero.install.python_warning import py27_only, PYTHON_WARNING
@@ -249,9 +250,6 @@ class WebControl(DiagnosticsControl):
     def _get_fallback_dir(self):
         return self.ctx.dir / "lib" / "fallback"
 
-    def _get_web_templates_dir(self):
-        return self.ctx.dir / "etc" / "templates" / "web"
-
     @config_required
     @assert_config_argtype
     def config(self, args, settings):
@@ -305,7 +303,7 @@ class WebControl(DiagnosticsControl):
                          "wsgi or wsgi-tcp.")
 
         template_file = "%s.conf.template" % server
-        c = open(self._get_web_templates_dir() / template_file).read()
+        c = resource_string('omeroweb', 'templates/' + template_file)
         self.ctx.out(c % d)
 
     def syncmedia(self, args):

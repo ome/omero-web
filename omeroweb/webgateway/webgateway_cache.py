@@ -21,6 +21,7 @@ from io import open
 import datetime
 # Support python2 and python3
 from past.builtins import basestring
+from builtins import str
 
 logger = logging.getLogger(__name__)
 
@@ -968,7 +969,7 @@ class WebGatewayTempFile (object):
         try:
             name = name.decode('utf8').encode('ascii', 'ignore')
         except AttributeError:
-            #python3
+            # python3
             pass
         if len(name) > 255:
             # Try to be smart about trimming and keep up to two levels of

@@ -25,6 +25,7 @@
 #
 
 from io import StringIO
+from io import BytesIO
 import traceback
 import logging
 import warnings
@@ -54,7 +55,10 @@ from django.utils.encoding import smart_str
 from django.conf import settings
 
 from omero.gateway.utils import toBoolean
-from omeroweb.webgateway.templatetags.common_filters import lengthunit, lengthformat
+from omeroweb.webgateway.templatetags.common_filters import (
+    lengthunit,
+    lengthformat,
+)
 
 try:
     import hashlib
@@ -950,13 +954,13 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         else:
             region = None
             try:
-                im = Image.open(StringIO(photo))
+                im = Image.open(BytesIO(photo))
                 region = im.crop(box)
             except IOError:
                 logger.error(traceback.format_exc())
                 raise IOError("Cannot open that photo.")
             else:
-                imdata = StringIO()
+                imdata = BytesIO()
                 region.save(imdata, format=im.format)
                 self.uploadMyUserPhoto(
                     ann.file.name.val, ann.file.mimetype.val,
@@ -975,7 +979,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         img = Image.open(settings.DEFAULT_USER)
         img.thumbnail((150, 150), Image.ANTIALIAS)
-        f = StringIO()
+        f = BytesIO()
         img.save(f, "PNG")
         f.seek(0)
         return f.read()

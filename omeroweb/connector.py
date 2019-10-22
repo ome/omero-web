@@ -40,6 +40,7 @@ class IterRegistry(type):
     def __iter__(cls):
         return iter(cls._registry.values())
 
+
 # with_metaclass to support python2 and python3
 class ServerBase(with_metaclass(IterRegistry)):
     _next_id = 1

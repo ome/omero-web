@@ -674,7 +674,7 @@ def marshal_images(conn, dataset_id=None, orphaned=False, share_id=None,
         if not image_rids:
             return images
 
-        params.add('iids', wrap(image_rids))
+        params.add('iids', wrap([rlong(id) for id in image_rids]))
         where_clause.append('image.id in (:iids)')
 
     q += """
@@ -714,7 +714,7 @@ def marshal_images(conn, dataset_id=None, orphaned=False, share_id=None,
         iids = [i['id'] for i in images]
         params = omero.sys.ParametersI()
         params.addIds(iids)
-        params.add('thumbOwner', wrap(userId))
+        params.add('thumbOwner', rlong(userId))
         q = """select image.id, thumbs.version from Image image
             join image.pixels pix join pix.thumbnails thumbs
             where image.id in (:ids)
