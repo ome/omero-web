@@ -28,7 +28,6 @@
 
 
 import os.path
-import warnings
 import sys
 import logging
 import omero
@@ -42,15 +41,11 @@ import string
 from builtins import str as text
 
 from omero_ext import portalocker
-from omero.install.python_warning import py27_only, PYTHON_WARNING
 from omero.util.concurrency import get_event
 from omeroweb.utils import sort_properties_to_tuple
 from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
-
-if not py27_only():
-    warnings.warn("WARNING: %s" % PYTHON_WARNING, RuntimeWarning)
 
 # LOGS
 # NEVER DEPLOY a site into production with DEBUG turned on.
