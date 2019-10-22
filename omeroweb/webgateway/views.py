@@ -40,6 +40,7 @@ from omeroweb.version import omeroweb_buildyear as build_year
 from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.views.generic import View
+from django.shortcuts import render
 from omeroweb.webadmin.forms import LoginForm
 from omeroweb.decorators import get_client_ip
 from omeroweb.webadmin.webadmin_utils import upgradeCheck
@@ -2316,9 +2317,7 @@ def full_viewer(request, iid, conn=None, **kwargs):
 
         template = kwargs.get('template',
                               "webgateway/viewport/omero_image.html")
-        t = template_loader.get_template(template)
-        c = Context(request, d)
-        rsp = t.render(c)
+        rsp = render(request, template, d)
     except omero.SecurityViolation:
         logger.warn("SecurityViolation in Image:%s", iid)
         logger.warn(traceback.format_exc())
@@ -2680,10 +2679,8 @@ def su(request, user, conn=None, **kwargs):
         context = {
             'url': reverse('webgateway_su', args=[user]),
             'submit': "Do you want to su to %s" % user}
-        t = template_loader.get_template(
-            'webgateway/base/includes/post_form.html')
-        c = Context(request, context)
-        return HttpResponse(t.render(c))
+        template = 'webgateway/base/includes/post_form.html'
+        return render(request, template, context)
 
 
 def _annotations(request, objtype, objid, conn=None, **kwargs):

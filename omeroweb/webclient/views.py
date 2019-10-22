@@ -57,6 +57,7 @@ from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
+from django.shortcuts import render
 
 
 from omeroweb.webclient.webclient_utils import _formatReport, _purgeCallback
@@ -271,10 +272,7 @@ class WebclientLoginView(LoginView):
             context['client_download_repo'] = (
                 settings.CLIENT_DOWNLOAD_GITHUB_REPO)
 
-        t = template_loader.get_template(self.template)
-        c = Context(request, context)
-        rsp = t.render(c)
-        return HttpResponse(rsp)
+        return render(request, self.template, context)
 
 
 @login_required(ignore_login_fail=True)
@@ -350,10 +348,8 @@ def logout(request, conn=None, **kwargs):
         context = {
             'url': reverse('weblogout'),
             'submit': "Do you want to log out?"}
-        t = template_loader.get_template(
-            'webgateway/base/includes/post_form.html')
-        c = Context(request, context)
-        return HttpResponse(t.render(c))
+        template = 'webgateway/base/includes/post_form.html'
+        return render(request, template, context)
 
 
 ###########################################################################
