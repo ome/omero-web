@@ -38,11 +38,9 @@ import omeroweb.webclient.views
 from omeroweb.version import omeroweb_buildyear as build_year
 from omeroweb.version import omeroweb_version as omero_version
 
-from django.template import loader as template_loader
 from django.core.urlresolvers import reverse
 from django.views.decorators.debug import sensitive_post_parameters
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template import RequestContext as Context
+from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 from django.utils.encoding import smart_str
 from django.shortcuts import render

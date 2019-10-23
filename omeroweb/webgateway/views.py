@@ -24,13 +24,11 @@ import omero.clients
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseServerError, JsonResponse
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
-from django.template import loader as template_loader
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.conf import settings
-from django.template import RequestContext as Context
 from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS

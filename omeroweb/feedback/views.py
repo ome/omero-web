@@ -34,10 +34,8 @@ import traceback
 import logging
 
 from django.conf import settings
-from django.template import loader as template_loader
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.http import HttpResponseServerError, HttpResponseNotFound
-from django.template import RequestContext
 from django.views.defaults import page_not_found
 from django.core.urlresolvers import reverse
 from django.shortcuts import render

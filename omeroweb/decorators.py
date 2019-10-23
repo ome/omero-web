@@ -34,7 +34,6 @@ from django.conf import settings
 from django.utils.http import urlencode
 from functools import update_wrapper
 from django.core.urlresolvers import reverse, resolve, NoReverseMatch
-from django.template import loader as template_loader
 from django.core.cache import cache
 
 from omeroweb.utils import reverse_with_params

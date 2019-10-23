@@ -51,7 +51,6 @@ from django.template import loader as template_loader
 from django.http import Http404, HttpResponse, HttpResponseRedirect, \
     JsonResponse
 from django.http import HttpResponseServerError, HttpResponseBadRequest
-from django.template import RequestContext as Context
 from django.utils.http import urlencode
 from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_str
