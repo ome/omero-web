@@ -73,7 +73,7 @@ def config_required(func):
                 import django  # NOQA
             except:
                 self.ctx.die(681, "ERROR: Django not installed!")
-            if django.VERSION < (1, 10) or django.VERSION >= (1, 11):
+            if django.VERSION < (1, 11) or django.VERSION >= (2, 0):
                 self.ctx.err("ERROR: Django version %s is not "
                              "supported!" % django.get_version())
             try:
