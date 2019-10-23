@@ -626,9 +626,9 @@
                     $thmb.attr('color', line_color);
                 }
                 var thmb_id = parseInt($thmb.attr('id'));
-                var thmb_src = "{% url 'webgateway.views.render_roi_thumbnail' 0 %}"+ thmb_id +"/?color=" + line_color;
+                var thmb_src = "{% url 'webgateway_render_roi_thumbnail' 0 %}"+ thmb_id +"/?color=" + line_color;
                 if ($thmb.hasClass('shape_thumb')) {
-                    thmb_src = "{% url 'webgateway.views.render_shape_thumbnail' 0 %}"+ thmb_id +"/?color=" + line_color;
+                    thmb_src = "{% url 'webgateway_render_shape_thumbnail' 0 %}"+ thmb_id +"/?color=" + line_color;
                 }
                 $thmb.attr('src', thmb_src);
                 $thmb.show();
@@ -1036,7 +1036,7 @@
   $(document).ready(function () {
 
     // Load Lookup Tables - need them ASAP
-    $.getJSON("{% url 'webgateway.views.listLuts_json' %}", function(data){
+    $.getJSON("{% url 'webgateway_listLuts_json' %}", function(data){
       OME.LUTS = data.luts;
       OME.PNG_LUTS = data.png_luts;
     });
@@ -1223,7 +1223,7 @@
         }
     });
 
-    var copy_paste_rdef_url = "{% url 'webgateway.views.copy_image_rdef_json' %}";
+    var copy_paste_rdef_url = "{% url 'webgateway_copy_image_rdef_json' %}";
     // Handle clicks on Copy/paste in toolbar and left of main viewer
     // NB: Need to use IDs for robot tests
     $("#rdef-copy-btn, #rdef-copy-btn-viewer").click(function() {
