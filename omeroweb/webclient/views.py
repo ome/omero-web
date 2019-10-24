@@ -100,6 +100,11 @@ from omeroweb.webgateway.views import LoginView
 
 from . import tree
 
+try:
+    import long
+except ImportError:
+    long = int
+
 logger = logging.getLogger(__name__)
 
 logger.info("INIT '%s'" % os.getpid())

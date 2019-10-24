@@ -14,6 +14,10 @@ import logging
 
 import omero.sys
 from omero.rtypes import rint
+try:
+    import long
+except ImportError:
+    long = int
 
 logger = logging.getLogger(__name__)
 
