@@ -37,7 +37,7 @@ def unwrap_to_str(rstr):
     '''
     rstr = unwrap(rstr)
     if rstr is not None:
-        rstr = bytes(rstr).decode()
+        rstr = bytes(rstr, 'utf8').decode()
     return rstr
 
 
