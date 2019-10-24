@@ -1268,7 +1268,7 @@ def load_plate(request, o1_type=None, o1_id=None, conn=None, **kwargs):
     # 'acquisition': 301L}
     kw = dict()
     if o1_type is not None:
-        if o1_id is not None and o1_id > 0:
+        if o1_id is not None and int(o1_id) > 0:
             kw[str(o1_type)] = long(o1_id)
 
     try:
