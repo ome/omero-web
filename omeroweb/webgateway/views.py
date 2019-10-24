@@ -1569,7 +1569,8 @@ def get_thumbnails_json(request, w=None, conn=None, **kwargs):
         iid = image_ids[0]
         try:
             data = _render_thumbnail(request, iid, w=w, conn=conn)
-            return {iid: "data:image/jpeg;base64,%s" % base64.b64encode(data)}
+            return {iid: "data:image/jpeg;base64,%s" %
+                    base64.b64encode(data).decode("utf-8")}
         except:
             return {iid: None}
     logger.debug("Image ids: %r" % image_ids)
@@ -1584,7 +1585,8 @@ def get_thumbnails_json(request, w=None, conn=None, **kwargs):
             t = thumbnails[i]
             if len(t) > 0:
                 # replace thumbnail urls by base64 encoded image
-                rv[i] = ("data:image/jpeg;base64,%s" % base64.b64encode(t))
+                rv[i] = ("data:image/jpeg;base64,%s" %
+                         base64.b64encode(t).decode("utf-8"))
         except KeyError:
             logger.error("Thumbnail not available. (img id: %d)" % i)
         except Exception:
