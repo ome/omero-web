@@ -225,8 +225,7 @@ def imageMarshal(image, key=None, request=None):
             rv.update({'nominalMagnification': nominalMagnification})
         try:
             rv['pixel_range'] = image.getPixelRange()
-            rv['channels'] = map(lambda x: channelMarshal(x),
-                                 image.getChannels())
+            rv['channels'] = [channelMarshal(x) for x in image.getChannels()]
             rv['split_channel'] = image.splitChannelDims()
             rv['rdefs'] = {'model': (image.isGreyscaleRenderingModel() and
                                      'greyscale' or 'color'),

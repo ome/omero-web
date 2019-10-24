@@ -2185,7 +2185,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         # If we have both, apply settings...
         try:
             fromid = long(fromid)
-            toids = map(lambda x: long(x), toids)
+            toids = [long(x) for x in toids]
         except TypeError:
             fromid = None
         except ValueError:
