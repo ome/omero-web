@@ -48,12 +48,17 @@ try:
 except:
     from md5 import md5
 
+try:
+    import long
+except ImportError:
+    long = int
+
 from io import StringIO
 import tempfile
 
 from omero import ApiUsageException
 from omero.util.decorators import timeit, TimeIt
-from omeroweb.http import HttpJavascriptResponse, \
+from omeroweb.httprsp import HttpJavascriptResponse, \
     HttpJavascriptResponseServerError
 from omeroweb.connector import Server
 
