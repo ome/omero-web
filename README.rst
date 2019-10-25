@@ -32,6 +32,27 @@ Contributing
 
 See: `OMERO`_ documentation
 
+Developer installation
+----------------------
+
+OMERO.web depends on OMERO.py. If you want a developer installation of OMERO.py, replace ``pip install omero-py``
+with instructions at https://github.com/ome/omero-py.
+
+For a development installation we recommend creating a virtualenv with the following setup (example assumes ``python3.6`` but you can create and activate the virtualenv using any compatible Python):
+
+::
+
+    python3.6 -mvenv venv
+    . venv/bin/activate
+    pip install zeroc-ice==3.6.5
+    pip install omero-py          # OR dev install (see above)
+    git clone https://github.com/ome/omero-web
+    cd omero-web
+    pip install -e .
+
+This will install OMERO.web into your virtualenv as an editable package, so any edits to source files should be reflected in your installation.
+Note that if you add or remove files you must rerun the last step.
+
 Running tests
 -------------
 
