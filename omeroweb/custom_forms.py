@@ -22,10 +22,7 @@
 from django import forms
 from django.utils.encoding import smart_str
 
-try:
-    from django.forms.utils import ErrorDict, ValidationError
-except ImportError:
-    from django.forms.util import ErrorDict, ValidationError
+from django.forms.utils import ErrorDict, ValidationError
 from django.forms.fields import FileField, CharField
 
 

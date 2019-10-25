@@ -24,14 +24,12 @@ import omero.clients
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseServerError, JsonResponse
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
-from django.template import loader as template_loader
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.conf import settings
-from django.template import RequestContext as Context
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
 from omero.util.ROI_utils import pointsStringToXYlist, xyListToBbox
@@ -40,6 +38,7 @@ from omeroweb.version import omeroweb_buildyear as build_year
 from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.views.generic import View
+from django.shortcuts import render
 from omeroweb.webadmin.forms import LoginForm
 from omeroweb.decorators import get_client_ip
 from omeroweb.webadmin.webadmin_utils import upgradeCheck
@@ -2316,9 +2315,7 @@ def full_viewer(request, iid, conn=None, **kwargs):
 
         template = kwargs.get('template',
                               "webgateway/viewport/omero_image.html")
-        t = template_loader.get_template(template)
-        c = Context(request, d)
-        rsp = t.render(c)
+        rsp = render(request, template, d)
     except omero.SecurityViolation:
         logger.warn("SecurityViolation in Image:%s", iid)
         logger.warn(traceback.format_exc())
@@ -2680,10 +2677,8 @@ def su(request, user, conn=None, **kwargs):
         context = {
             'url': reverse('webgateway_su', args=[user]),
             'submit': "Do you want to su to %s" % user}
-        t = template_loader.get_template(
-            'webgateway/base/includes/post_form.html')
-        c = Context(request, context)
-        return HttpResponse(t.render(c))
+        template = 'webgateway/base/includes/post_form.html'
+        return render(request, template, context)
 
 
 def _annotations(request, objtype, objid, conn=None, **kwargs):

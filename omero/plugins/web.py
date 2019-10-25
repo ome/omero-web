@@ -74,7 +74,7 @@ def config_required(func):
                 import django  # NOQA
             except:
                 self.ctx.die(681, "ERROR: Django not installed!")
-            if django.VERSION < (1, 6) or django.VERSION >= (1, 9):
+            if django.VERSION < (1, 9) or django.VERSION >= (1, 10):
                 self.ctx.err("ERROR: Django version %s is not "
                              "supported!" % django.get_version())
             try:
@@ -333,7 +333,7 @@ class WebControl(DiagnosticsControl):
                     self.ctx.die(121, "Failed to enable '%s'.\n" % app)
                 else:
                     self.ctx.out("App '%s' was enabled\n" % app)
-            args = [sys.executable, "manage.py", "syncdb", "--noinput"]
+            args = [sys.executable, "manage.py", "migrate", "--noinput"]
             rv = self.ctx.call(args, cwd=location)
             self.syncmedia(None)
 
