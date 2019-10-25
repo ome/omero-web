@@ -9,6 +9,7 @@
 """
 
 import traceback
+from future.utils import bytes_to_native_str
 from datetime import datetime
 from omero.cli import DiagnosticsControl
 from omero.cli import CLI
@@ -303,7 +304,8 @@ class WebControl(DiagnosticsControl):
                          "wsgi or wsgi-tcp.")
 
         template_file = "%s.conf.template" % server
-        c = resource_string('omeroweb', 'templates/' + template_file)
+        c = bytes_to_native_str(
+            resource_string('omeroweb', 'templates/' + template_file))
         self.ctx.out(c % d)
 
     def syncmedia(self, args):
