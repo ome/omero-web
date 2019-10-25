@@ -50,7 +50,7 @@ For a development installation we recommend creating a virtualenv with the follo
     cd omero-web
     pip install -e .
 
-This will install OMERO.web into your virtualenv as an editable package, so any edits to ``src`` files should be reflected in your installation.
+This will install OMERO.web into your virtualenv as an editable package, so any edits to source files should be reflected in your installation.
 Note that if you add or remove files you must rerun the last step.
 
 Running tests
