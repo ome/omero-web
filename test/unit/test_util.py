@@ -129,8 +129,8 @@ class TestUtil(object):
         [['5', '3', '4'], ['5', '4', '4'], False],      # minor mismatch
         [['5', '5', '0'], ['5', '6', '0'], True],       # web 5.6+ matches 5.5+
         [['5', '5', '0'], ['5', '8', '0'], True],
-        [['5', '5', '0'], ['6', '7', '0'], False],      # major mismatch ( >= 5)
-        [['6', '5', '0'], ['6', '7', '0'], False],      # minor mismatch ( >= 5)
+        [['5', '5', '0'], ['6', '7', '0'], False],      # major mismatch, >=5
+        [['6', '5', '0'], ['6', '7', '0'], False],      # minor mismatch, >=5
     ])
     def test_version_compatible(self, versions):
         server = versions[0]
