@@ -239,13 +239,22 @@ class Connector(object):
                 client_version = client_version.group(1).split('.')
                 logger.info("Client version: '%s'; Server version: '%s'"
                             % (client_version, server_version))
-                # Compatibility is determined by matching the major version
-                # If OMERO moves to semver only the first element will need
-                # to be checked
-                return server_version[:2] == client_version[:2]
+                return self.is_compatible(server_version, client_version)
             except:
                 logger.error('Cannot compare server to client version.',
                              exc_info=True)
             return False
         finally:
             connection.close()
+
+    @staticmethod
+    def is_compatible(server_version, client_version):
+        # Compatibility is determined by matching the major version
+        # If OMERO moves to semver only the first element will need
+        # to be checked
+        if server_version[0] != client_version[0]:
+            return False
+        # Currently, web 5.6+ is compatible with server 5.5+
+        if client_version[0] == '5' and int(client_version[1]) >= 6:
+            return int(server_version[1]) >= 5
+        return server_version[:2] == client_version[:2]
