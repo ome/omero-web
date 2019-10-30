@@ -22,6 +22,10 @@ import tempfile
 import zipfile
 import shutil
 import logging
+try:
+    import long
+except ImportError:
+    long = int
 
 logger = logging.getLogger(__name__)
 

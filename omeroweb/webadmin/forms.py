@@ -86,7 +86,7 @@ ROLE_CHOICES = (
 )
 
 
-class RoleRenderer(forms.RadioSelect.renderer):
+class RoleRenderer(forms.RadioSelect):
     """Allows disabling of 'administrator' Radio button."""
     def render(self):
         midList = []

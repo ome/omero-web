@@ -34,6 +34,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
 from django.core.validators import validate_email
 
+try:
+    import long
+except ImportError:
+    long = int
+
+
 ##################################################################
 # Fields
 

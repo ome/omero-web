@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from past.builtins import basestring
 from django import forms
 from django.utils.encoding import smart_str
 

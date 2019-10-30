@@ -51,7 +51,7 @@ setup(name="omero-web",
       install_requires=[
           # minimum requirements for `omero web start`
           'omero-py>=5.6.dev1',  # requires Ice (use wheel for faster installs)
-          'Django>=1.9,<1.10',
+          'Django>=1.11,<2.0',
           'django-pipeline==1.6.14',
           'gunicorn>=19.3',
           'omero-marshal>=0.6.1',
