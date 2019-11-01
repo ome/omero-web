@@ -27,6 +27,7 @@ import calendar
 import datetime
 import time
 
+from past.builtins import long
 from django.conf import settings
 
 from omeroweb.webclient.controller import BaseController
@@ -113,8 +114,8 @@ class BaseCalendar(BaseController):
         items = self.calendar_items(self.month, self.monthrange)
 
         for week, day in [(week, day) for week
-                          in xrange(0, len(self.cal_weeks))
-                          for day in xrange(0, 7)]:
+                          in range(0, len(self.cal_weeks))
+                          for day in range(0, 7)]:
             imgCounter = dict()
             dsCounter = dict()
             prCounter = dict()
@@ -169,7 +170,7 @@ class BaseCalendar(BaseController):
         all_logs = self.conn.getEventsByPeriod(start, end, self.eid)
 
         items = dict()
-        for d in xrange(1, monthrange+1):
+        for d in range(1, monthrange+1):
             items[d] = list()
         for i in all_logs:
             for d in items:
