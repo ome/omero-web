@@ -161,7 +161,7 @@ class ObjectView(ApiView):
     def get(self, request, object_id, conn=None, **kwargs):
         """Simply GET a single Object and marshal it or 404 if not found."""
         opts = self.get_opts(request)
-        object_id = long(object_id)
+        object_id = int(object_id)
         query, params, wrapper = conn.buildQuery(
             self.OMERO_TYPE, [object_id], opts=opts)
         result = conn.getQueryService().findByQuery(
@@ -193,7 +193,7 @@ class ObjectView(ApiView):
             raise MethodNotSupportedError(
                 "Delete of %s not supported" % self.OMERO_TYPE)
         try:
-            obj = conn.getQueryService().get(self.OMERO_TYPE, long(object_id),
+            obj = conn.getQueryService().get(self.OMERO_TYPE, int(object_id),
                                              conn.SERVICE_OPTS)
         except ValidationException:
             raise NotFoundError('%s %s not found' % (self.OMERO_TYPE,
