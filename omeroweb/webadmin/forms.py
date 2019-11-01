@@ -146,12 +146,12 @@ class ExperimenterForm(NonASCIIForm):
         # so required=False to avoid validation error.
         self.fields['role'] = forms.ChoiceField(
             choices=ROLE_CHOICES,
-            widget=forms.RadioSelect(renderer=RoleRenderer),
+            widget=forms.RadioSelect(),
             required=False,
             initial='user')
         # If current user is restricted Admin, can't create full Admin
         restricted_admin = "ReadSession" not in self.user_privileges
-        self.fields['role'].widget.renderer.disable_admin = \
+        self.fields['role'].widget.disable_admin = \
             restricted_admin or experimenter_root
 
         if ('with_password' in kwargs['initial'] and
