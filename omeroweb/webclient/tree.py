@@ -22,6 +22,7 @@
 import time
 import omero
 from builtins import bytes
+from past.utils import old_div
 
 from omero.rtypes import rlong, unwrap, wrap
 from django.conf import settings
@@ -467,7 +468,7 @@ def marshal_datasets(conn, project_id=None, orphaned=False, group_id=-1,
 
 def _marshal_date(time):
     try:
-        d = datetime.fromtimestamp(time/1000)
+        d = datetime.fromtimestamp(old_div(time, 1000))
         return d.isoformat() + 'Z'
     except ValueError:
         return ''
