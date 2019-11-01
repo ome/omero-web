@@ -436,7 +436,7 @@ class BaseContainer(BaseController):
         if gid is None:
             return False
         try:
-            group = self.conn.getObject("ExperimenterGroup", long(gid))
+            group = self.conn.getObject("ExperimenterGroup", int(gid))
         except:
             return False
         if group is None:
@@ -781,7 +781,7 @@ class BaseContainer(BaseController):
         for p in parents:
             parent = p.split('-')
             dtype = str(parent[0])
-            parentId = long(parent[1])
+            parentId = int(parent[1])
             if dtype == "acquisition":
                 dtype = "PlateAcquisition"
             if self.tag:
