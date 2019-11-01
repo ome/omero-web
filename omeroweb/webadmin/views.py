@@ -33,6 +33,7 @@ import traceback
 import logging
 import datetime
 
+from past.builtins import long
 import omeroweb.webclient.views
 
 from omeroweb.version import omeroweb_buildyear as build_year
