@@ -63,9 +63,9 @@ class PlateGrid(object):
                     create_date, description = res
 
                 if acq_date is not None and acq_date.val > 0:
-                    date = acq_date.val / 1000
+                    date = acq_date.val // 1000
                 else:
-                    date = create_date.val / 1000
+                    date = create_date.val // 1000
                 description = (description and description.val) or ''
 
                 wellmeta = {'type': 'Image',
