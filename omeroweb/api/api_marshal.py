@@ -42,8 +42,8 @@ def normalize_objects(objects):
         groups[grp['@id']] = grp
         o['omero:details']['group'] = {'@id': grp['@id']}
         objs.append(o)
-    experimenters = experimenters.values()
-    groups = groups.values()
+    experimenters = list(experimenters.values())
+    groups = list(groups.values())
     return objs, {'experimenters': experimenters, 'experimenterGroups': groups}
 
 
