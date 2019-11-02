@@ -2135,8 +2135,8 @@ def annotate_file(request, conn=None, **kwargs):
                 # TODO: this should be handled by the BaseContainer
                 o_type = 'tag'
             kw = {}
-            if o_type is not None and o_id > 0:
-                kw[str(o_type)] = long(o_id)
+            if o_type is not None and int(o_id) > 0:
+                kw[str(o_type)] = int(o_id)
             try:
                 manager = BaseContainer(conn, **kw)
             except AttributeError as x:
