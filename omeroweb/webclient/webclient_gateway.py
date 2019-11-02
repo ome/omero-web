@@ -1753,7 +1753,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         sh_serv = self.getShareService()
-        sh = sh_serv.getShare(long(oid))
+        sh = sh_serv.getShare(int(oid))
         if sh is not None:
             return ShareWrapper(self, sh)
         else:
