@@ -2600,8 +2600,9 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
     if o_type in ("dataset", "project", "image", "screen", "plate",
                   "acquisition", "well", "comment", "file", "tag", "tagset"):
         kw = {}
-        if o_type is not None and o_id > 0:
-            kw[str(o_type)] = long(o_id)
+        if o_type is not None and int(o_id) > 0:
+            o_id = int(o_id)
+            kw[str(o_type)] = o_id
         try:
             manager = BaseContainer(conn, **kw)
         except AttributeError as x:
