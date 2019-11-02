@@ -314,7 +314,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         admin_serv = self.getAdminService()
-        return admin_serv.lookupLdapAuthExperimenter(long(eid))
+        return admin_serv.lookupLdapAuthExperimenter(int(eid))
 
     def getExperimenters(self):
         """
@@ -354,7 +354,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
     #
     # def getScriptwithDetails(self, sid):
     #    script_serv = self.getScriptService()
-    #    return script_serv.getScriptWithDetails(long(sid))
+    #    return script_serv.getScriptWithDetails(int(sid))
     #
     # def lookupScripts(self):
     #    script_serv = self.getScriptService()
@@ -420,7 +420,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                "or (not exists ( select aal from AnnotationAnnotationLink"
                " as aal where aal.child=tg.id))) ")
         if eid is not None:
-            params.map["eid"] = rlong(long(eid))
+            params.map["eid"] = rlong(int(eid))
             sql += " and tg.details.owner.id = :eid"
 
         q = self.getQueryService()
@@ -446,7 +446,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         params.map = {}
         params.map['ns'] = rstring(omero.constants.metadata.NSINSIGHTTAGSET)
         if eid is not None:
-            params.map["eid"] = rlong(long(eid))
+            params.map["eid"] = rlong(int(eid))
 
         q = self.getQueryService()
 
@@ -520,7 +520,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             """
 
         if eid is not None:
-            params.map["eid"] = rlong(long(eid))
+            params.map["eid"] = rlong(int(eid))
             sql += " where ann.details.owner.id = :eid"
 
         return unwrap(q.projection(sql, params, self.SERVICE_OPTS)[0][0])
@@ -553,7 +553,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         p.map = {}
 
         if eid is not None:
-            p.map["eid"] = rlong(long(eid))
+            p.map["eid"] = rlong(int(eid))
             eidFilter = "obj.details.owner.id=:eid and "
             eidWsFilter = " and ws.details.owner.id=:eid"
         else:
@@ -598,7 +598,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         q = self.getQueryService()
         p = omero.sys.ParametersI()
-        p.map["oid"] = rlong(long(oid))
+        p.map["oid"] = rlong(int(oid))
         if page is not None:
             p.page(((int(page)-1)*settings.PAGE), settings.PAGE)
         if load_pixels:
@@ -613,7 +613,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                "left outer join fetch dil.parent d %s"
                "where d.id = :oid" % pixels)
         if eid is not None:
-            p.map["eid"] = rlong(long(eid))
+            p.map["eid"] = rlong(int(eid))
             sql += " and im.details.owner.id=:eid"
         sql += " order by lower(im.name), im.id"
 
@@ -798,8 +798,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                     None, None).get(self.getEventContext().userId, [])
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [long(oid)], None, None,
-                    None).get(long(oid), [])
+                    "Experimenter", [int(oid)], None, None,
+                    None).get(int(oid), [])
             if len(ann) > 0:
                 return True
             else:
@@ -830,14 +830,14 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                     None, None).get(self.getEventContext().userId, [])
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [long(oid)], None, None,
-                    None).get(long(oid), [])
+                    "Experimenter", [int(oid)], None, None,
+                    None).get(int(oid), [])
             if len(ann) > 0:
                 ann = ann[0]
                 store = self.createRawFileStore()
                 try:
                     store.setFileId(ann.file.id.val)
-                    photo = store.read(0, long(ann.file.size.val))
+                    photo = store.read(0, int(ann.file.size.val))
                 finally:
                     store.close()
             else:
@@ -871,12 +871,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                     None, None).get(self.getEventContext().userId, [])[0]
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [long(oid)], None, None,
-                    None).get(long(oid), [])[0]
+                    "Experimenter", [int(oid)], None, None,
+                    None).get(int(oid), [])[0]
             store = self.createRawFileStore()
             try:
                 store.setFileId(ann.file.id.val)
-                photo = store.read(0, long(ann.file.size.val))
+                photo = store.read(0, int(ann.file.size.val))
             finally:
                 store.close()
             try:
@@ -899,8 +899,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                     None, None).get(self.getEventContext().userId, [])[0]
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [long(oid)], None, None,
-                    None).get(long(oid), [])[0]
+                    "Experimenter", [int(oid)], None, None,
+                    None).get(int(oid), [])[0]
         except:
             logger.error(traceback.format_exc())
             raise IOError("Photo does not exist.")
@@ -940,12 +940,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                     None, None).get(self.getEventContext().userId, [])[0]
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [long(oid)], None, None,
-                    None).get(long(oid), [])[0]
+                    "Experimenter", [int(oid)], None, None,
+                    None).get(int(oid), [])[0]
             store = self.createRawFileStore()
             try:
                 store.setFileId(ann.file.id.val)
-                photo = store.read(0, long(ann.file.size.val))
+                photo = store.read(0, int(ann.file.size.val))
             finally:
                 store.close()
         except:
@@ -1573,7 +1573,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         admin_serv = self.getAdminService()
         admin_serv.updateSelf(up_exp)
         defaultGroup = self.getObject(
-            "ExperimenterGroup", long(defaultGroupId))._obj
+            "ExperimenterGroup", int(defaultGroupId))._obj
         admin_serv.setDefaultGroup(up_exp, defaultGroup)
         self.changeActiveGroup(defaultGroup.id)
 
@@ -1582,8 +1582,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         Sets the default group for the specified experimenter, or current user
         if not specified.
         """
-        group_id = long(group_id)
-        exp_id = (exp_id is not None and long(exp_id) or
+        group_id = int(group_id)
+        exp_id = (exp_id is not None and int(exp_id) or
                   self.getEventContext().userId)
         admin_serv = self.getAdminService()
         admin_serv.setDefaultGroup(
@@ -1753,7 +1753,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         sh_serv = self.getShareService()
-        sh = sh_serv.getShare(long(oid))
+        sh = sh_serv.getShare(int(oid))
         if sh is not None:
             return ShareWrapper(self, sh)
         else:
@@ -1821,7 +1821,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         sh = self.getShareService()
-        for e in sh.getContents(long(share_id)):
+        for e in sh.getContents(int(share_id)):
             if isinstance(e, omero.model.ImageI):
                 try:
                     obj = omero.gateway.ImageWrapper(self, e)
@@ -1843,7 +1843,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         sh = self.getShareService()
-        for e in sh.getComments(long(share_id)):
+        for e in sh.getComments(int(share_id)):
             yield AnnotationWrapper(self, e)
 
     def getAllMembers(self, share_id):
@@ -1857,7 +1857,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         sh = self.getShareService()
-        for e in sh.getAllMembers(long(share_id)):
+        for e in sh.getAllMembers(int(share_id)):
             yield ExperimenterWrapper(self, e)
 
     def getAllGuests(self, share_id):
@@ -1871,7 +1871,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         sh = self.getShareService()
-        return sh.getAllGuests(long(share_id))
+        return sh.getAllGuests(int(share_id))
 
     def getAllUsers(self, share_id):
         """
@@ -1885,25 +1885,25 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         sh = self.getShareService()
-        return sh.getAllUsers(long(share_id))
+        return sh.getAllUsers(int(share_id))
 
     def addComment(self, host, share_id, comment):
         sh = self.getShareService()
-        new_cm = sh.addComment(long(share_id), str(comment))
+        new_cm = sh.addComment(int(share_id), str(comment))
 
-        self.getShare(long(share_id))
+        self.getShare(int(share_id))
         sh_type = sh.getContentSize(share_id) > 0 and "share" or "discussion"
         subject = "OMERO.%s %s" % (sh_type, share_id)
         body = "%s added new comment.\n\n%s\n\n%s URL: %s\n" % (
             self.getUser().getFullName(), str(comment), sh_type.title(), host)
-        sh.notifyMembersOfShare(long(share_id), subject, body, False)
+        sh.notifyMembersOfShare(int(share_id), subject, body, False)
         return CommentAnnotationWrapper(self, new_cm)
 
     def removeImage(self, share_id, image_id):
         sh = self.getShareService()
         self.SERVICE_OPTS.setOmeroGroup('-1')
         img = self.getObject("Image", image_id)
-        sh.removeObject(long(share_id), img._obj)
+        sh.removeObject(int(share_id), img._obj)
 
     def createShare(self, host, images, message, members, enable,
                     expiration=None):
@@ -1920,20 +1920,21 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
     def updateShareOrDiscussion(self, host, share_id, message, add_members,
                                 rm_members, enable, expiration=None):
+        share_id = int(share_id)
         sh = self.getShareService()
-        sh.setDescription(long(share_id), message)
-        sh.setExpiration(long(share_id), rtime(expiration))
-        sh.setActive(long(share_id), enable)
+        sh.setDescription(share_id, message)
+        sh.setExpiration(share_id, rtime(expiration))
+        sh.setActive(share_id, enable)
         sh_type = sh.getContentSize(share_id) > 0 and "share" or "discussion"
         if len(add_members) > 0:
-            sh.addUsers(long(share_id), add_members)
-            share = self.getShare(long(share_id))
+            sh.addUsers(share_id, add_members)
+            share = self.getShare(share_id)
             body = "%s\n\n%s URL: %s\n" % (
                 share.message, sh_type.title(), host)
             subject = "OMERO.%s %s" % (sh_type, share_id)
             sh.notifyMembersOfShare(share_id, subject, body, False)
         if len(rm_members) > 0:
-            sh.removeUsers(long(share_id), rm_members)
+            sh.removeUsers(share_id, rm_members)
         return share_id
 
     ##############################################
@@ -1969,14 +1970,14 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         if otype is not None and otype in ("Image", "Dataset", "Project"):
             otype = otype.title()
             for e in tm.getByPeriod(
-                    [otype], rtime(long(start)), rtime(long(end)), p, True,
+                    [otype], rtime(int(start)), rtime(int(end)), p, True,
                     self.SERVICE_OPTS)[otype]:
                 wrapper = KNOWN_WRAPPERS.get(otype.title(), None)
                 im_list.append(wrapper(self, e))
         else:
             res = tm.getByPeriod(
-                ['Image', 'Dataset', 'Project'], rtime(long(start)),
-                rtime(long(end)), p, True, self.SERVICE_OPTS)
+                ['Image', 'Dataset', 'Project'], rtime(int(start)),
+                rtime(int(end)), p, True, self.SERVICE_OPTS)
             try:
                 for e in res['Image']:
                     im_list.append(ImageWrapper(self, e))
@@ -2017,20 +2018,20 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         p.theFilter = f
         if otype == 'image':
             return tm.countByPeriod(
-                ['Image'], rtime(long(start)), rtime(long(end)), p,
+                ['Image'], rtime(int(start)), rtime(int(end)), p,
                 self.SERVICE_OPTS)['Image']
         elif otype == 'dataset':
             return tm.countByPeriod(
-                ['Dataset'], rtime(long(start)), rtime(long(end)), p,
+                ['Dataset'], rtime(int(start)), rtime(int(end)), p,
                 self.SERVICE_OPTS)['Dataset']
         elif otype == 'project':
             return tm.countByPeriod(
-                ['Project'], rtime(long(start)), rtime(long(end)), p,
+                ['Project'], rtime(int(start)), rtime(int(end)), p,
                 self.SERVICE_OPTS)['Project']
         else:
             c = tm.countByPeriod(
-                ['Image', 'Dataset', 'Project'], rtime(long(start)),
-                rtime(long(end)), p, self.SERVICE_OPTS)
+                ['Image', 'Dataset', 'Project'], rtime(int(start)),
+                rtime(int(end)), p, self.SERVICE_OPTS)
             return c['Image']+c['Dataset']+c['Project']
 
     def getEventsByPeriod(self, start, end, eid):
@@ -2736,7 +2737,7 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
         # workaround for problem of year 2038
         now = time.time()
         try:
-            d = long(self.started+self.timeToLive)
+            d = int(self.started+self.timeToLive)
             if (d / 1000) > now:
                 return False
             return True
