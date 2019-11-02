@@ -280,7 +280,7 @@ def drivespace_json(request, query=None, groupId=None, userId=None, conn=None,
                                   "userId": e.getId()})
 
     elif userId is not None:
-        eid = long(userId)
+        eid = int(userId)
         for g in conn.getOtherGroups(eid):
             # ignore 'user' and 'guest' groups
             if g.getId() in (sr.guestGroupId, sr.userGroupId):
@@ -505,8 +505,8 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
 
         root_id = conn.getAdminService().getSecurityRoles().rootId
         user_id = conn.getUserId()
-        experimenter_root = long(eid) == root_id
-        experimenter_me = long(eid) == user_id
+        experimenter_root = int(eid) == root_id
+        experimenter_me = int(eid) == user_id
         form = ExperimenterForm(
             can_modify_user=can_modify_user,
             user_privileges=user_privileges,
@@ -569,7 +569,7 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
                 if defaultGroup is None:
                     defaultGroup = otherGroups[0]
                 for g in groups:
-                    if long(defaultGroup) == g.id:
+                    if int(defaultGroup) == g.id:
                         dGroup = g
                         break
 
@@ -578,9 +578,9 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
                 for g in groups:
                     for og in otherGroups:
                         # remove defaultGroup from otherGroups if contains
-                        if long(og) == long(dGroup.id):
+                        if int(og) == int(dGroup.id):
                             pass
-                        elif long(og) == g.id:
+                        elif int(og) == g.id:
                             listOfOtherGroups.add(g)
 
                 # Update 'AdminPrivilege' config roles for user
@@ -696,7 +696,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
         initial['owners'] = [e.id for e in group.getOwners()]
         initial['members'] = [m.id for m in group.getMembers()]
         initial['permissions'] = getActualPermissions(group)
-        group_is_system = long(gid) in system_groups
+        group_is_system = int(gid) in system_groups
     if request.method == 'POST':
         data = request.POST.copy()
         # name needs to be unique
@@ -987,10 +987,10 @@ def manage_avatar(request, action=None, conn=None, **kwargs):
                     reverse(viewname="wamanageavatar",
                             args=[conn.getEventContext().userId]))
     elif action == "crop":
-        x1 = long(request.POST.get('x1'))
-        x2 = long(request.POST.get('x2'))
-        y1 = long(request.POST.get('y1'))
-        y2 = long(request.POST.get('y2'))
+        x1 = int(request.POST.get('x1'))
+        x2 = int(request.POST.get('x2'))
+        y1 = int(request.POST.get('y1'))
+        y2 = int(request.POST.get('y2'))
         box = (x1, y1, x2, y2)
         conn.cropExperimenterPhoto(box)
         return HttpResponseRedirect(reverse("wamyaccount"))
