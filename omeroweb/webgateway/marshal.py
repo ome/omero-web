@@ -481,9 +481,9 @@ def chgrpMarshal(conn, rsp):
                     else:
                         others += 1
         # sort tags & comments
-        tags = tags.values()
+        tags = list(tags.values())
         tags.sort(key=lambda x: x['name'])
-        files = files.values()
+        files = list(files.values())
         files.sort(key=lambda x: x['name'])
         rv['unlinkedDetails'] = {'Tags': tags,
                                  'Files': files,
@@ -523,7 +523,7 @@ def chgrpMarshal(conn, rsp):
                                                      'name': name}
         # sort objects
         for otype, objs in objects.items():
-            objs = objs.values()
+            objs = list(objs.values())
             objs.sort(key=lambda x: x['name'])
             # E.g. 'Dataset' objects in 'Datasets'
             rv['unlinkedDetails'][otype] = objs
