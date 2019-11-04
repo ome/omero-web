@@ -2492,7 +2492,7 @@ def annotate_tags(request, conn=None, **kwargs):
             selected_tag_ids = [stag[0] for stag in selected_tags if stag[5]]
             # Remove duplicates from tag IDs
             selected_tag_ids = list(set(selected_tag_ids))
-            post_tags = form_tags.cleaned_data['tags']
+            post_tags = list(form_tags.cleaned_data['tags'])
             tags = [tag for tag in post_tags
                     if tag not in selected_tag_ids]
             removed = [tag for tag in selected_tag_ids

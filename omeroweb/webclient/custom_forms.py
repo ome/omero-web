@@ -119,7 +119,7 @@ class MetadataModelChoiceField(ModelChoiceField):
             return None
         res = False
         for q in self.queryset:
-            if long(value) == q.id:
+            if int(value) == q.id:
                 res = True
         if not res:
             raise ValidationError(self.error_messages['invalid_choice'])
@@ -197,7 +197,7 @@ class AnnotationModelChoiceField(ModelChoiceField):
             return None
         res = False
         for q in self.queryset:
-            if long(value) == q.id:
+            if int(value) == q.id:
                 res = True
         if not res:
             raise ValidationError(self.error_messages['invalid_choice'])
@@ -230,13 +230,13 @@ class AnnotationModelMultipleChoiceField(AnnotationModelChoiceField):
         final_values = []
         for val in value:
             try:
-                long(val)
+                int(val)
             except:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
                 for q in self.queryset:
-                    if long(val) == q.id:
+                    if int(val) == q.id:
                         res = True
                 if not res:
                     raise ValidationError(
@@ -292,10 +292,10 @@ class ObjectModelChoiceField(ModelChoiceField):
         res = False
         for q in self.queryset:
             if hasattr(q.id, 'val'):
-                if long(value) == q.id.val:
+                if int(value) == q.id.val:
                     res = True
             else:
-                if long(value) == q.id:
+                if int(value) == q.id:
                     res = True
         if not res:
             raise ValidationError(self.error_messages['invalid_choice'])
@@ -329,17 +329,17 @@ class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
         final_values = []
         for val in value:
             try:
-                long(val)
+                int(val)
             except:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
                 for q in self.queryset:
                     if hasattr(q.id, 'val'):
-                        if long(val) == q.id.val:
+                        if int(val) == q.id.val:
                             res = True
                     else:
-                        if long(val) == q.id:
+                        if int(val) == q.id:
                             res = True
                 if not res:
                     raise ValidationError(

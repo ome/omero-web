@@ -446,7 +446,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         params.map = {}
         params.map['ns'] = rstring(omero.constants.metadata.NSINSIGHTTAGSET)
         if eid is not None:
-            params.map["eid"] = rlong(long(eid))
+            params.map["eid"] = rlong(int(eid))
 
         q = self.getQueryService()
 
