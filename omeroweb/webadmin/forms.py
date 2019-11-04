@@ -86,24 +86,6 @@ ROLE_CHOICES = (
 )
 
 
-class RoleRenderer(forms.RadioSelect):
-    """Allows disabling of 'administrator' Radio button."""
-    def render(self):
-        midList = []
-        for x, wid in enumerate(self):
-            disabled = self.attrs.get('disabled')
-            if ROLE_CHOICES[x][0] == 'administrator':
-                if hasattr(self, 'disable_admin'):
-                    disabled = getattr(self, 'disable_admin')
-            if disabled:
-                wid.attrs['disabled'] = True
-            midList.append(u'<li>%s</li>' % force_text(wid))
-        finalList = mark_safe(u'<ul id="id_role">\n%s\n</ul>'
-                              % u'\n'.join([u'<li>%s</li>'
-                                           % w for w in midList]))
-        return finalList
-
-
 class ExperimenterForm(NonASCIIForm):
 
     def __init__(self, name_check=False, email_check=False,
@@ -144,15 +126,14 @@ class ExperimenterForm(NonASCIIForm):
 
         # 'Role' is disabled if experimenter is 'admin' or self,
         # so required=False to avoid validation error.
-        self.fields['role'] = forms.ChoiceField(
-            choices=ROLE_CHOICES,
-            widget=forms.RadioSelect(),
-            required=False,
-            initial='user')
         # If current user is restricted Admin, can't create full Admin
         restricted_admin = "ReadSession" not in self.user_privileges
-        self.fields['role'].widget.disable_admin = \
-            restricted_admin or experimenter_root
+        self.fields['role'] = forms.ChoiceField(
+            choices=ROLE_CHOICES,
+            widget=forms.RadioSelect(
+                {'disabled': restricted_admin or experimenter_root}),
+            required=False,
+            initial='user')
 
         if ('with_password' in kwargs['initial'] and
                 kwargs['initial']['with_password']):
