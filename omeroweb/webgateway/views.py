@@ -2037,7 +2037,7 @@ def reset_rdef_json(request, toOwners=False, conn=None, **kwargs):
         raise Http404("Need to specify objects in request, E.g."
                       " ?totype=dataset&toids=1&toids=2")
 
-    toids = map(lambda x: long(x), toids)
+    toids = [int(id) for id in toids]
 
     rss = conn.getRenderingSettingsService()
 
