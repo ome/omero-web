@@ -2652,7 +2652,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
             return JsonResponse(rdict)
         else:
             d = dict()
-            for e in form.errors.iteritems():
+            for e in form.errors.items():
                 d.update({e[0]: unicode(e[1])})
             rdict = {'bad': 'true', 'errs': d}
             return JsonResponse(rdict)
@@ -2771,7 +2771,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                 return JsonResponse(rdict)
             else:
                 d = dict()
-                for e in form.errors.iteritems():
+                for e in form.errors.items():
                     d.update({e[0]: unicode(e[1])})
                 rdict = {'bad': 'true', 'errs': d}
                 return JsonResponse(rdict)
@@ -2803,7 +2803,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                 return JsonResponse(rdict)
             else:
                 d = dict()
-                for e in form.errors.iteritems():
+                for e in form.errors.items():
                     d.update({e[0]: unicode(e[1])})
                 rdict = {'bad': 'true', 'errs': d}
                 return JsonResponse(rdict)
@@ -2874,7 +2874,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
             "Delete many: child? %s anns? %s object_ids %s"
             % (child, anns, object_ids))
         try:
-            for key, ids in object_ids.iteritems():
+            for key, ids in object_ids.items():
                 if ids is not None and len(ids) > 0:
                     handle = manager.deleteObjects(key, ids, child, anns)
                     if key == "PlateAcquisition":
@@ -3153,7 +3153,7 @@ def getObjectUrl(conn, obj):
 # Activities window & Progressbar
 def update_callback(request, cbString, **kwargs):
     """Update a callback handle with  key/value pairs"""
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
         request.session['callback'][cbString][key] = value
 
 
