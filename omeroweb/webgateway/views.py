@@ -2512,7 +2512,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
     for image in images:
         for f in image.getImportedImageFiles():
             fileMap[f.getId()] = f
-    files = fileMap.values()
+    files = list(fileMap.values())
 
     if len(files) == 0:
         message = 'Tried downloading archived files from image with no' \
