@@ -217,7 +217,7 @@ class Show(object):
                 if key is None:
                     key = 'id'
                 if key == 'id':
-                    value = long(value)
+                    value = int(value)
                 parent_attributes = {key: value}
                 parent, = self.conn.getObjects(
                     object_type, attributes=parent_attributes
@@ -343,7 +343,7 @@ class Show(object):
             key = m.group('key')
             value = m.group('value')
             if key == 'id':
-                value = long(value)
+                value = int(value)
             attributes = {key: value}
             # Set context to 'cross-group'
             self.conn.SERVICE_OPTS.setOmeroGroup('-1')
