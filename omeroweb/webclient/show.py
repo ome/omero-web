@@ -584,7 +584,7 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     # Need to know which page image is on
                     iids = get_image_ids(conn, datasetId)
                     index = iids.index(imageId)
-                    page = (index / page_size) + 1  # 1-based index
+                    page = (index // page_size) + 1  # 1-based index
                     ds['childIndex'] = index
                     ds['childPage'] = page
                 path.append(ds)
@@ -611,7 +611,7 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     if len(iids) > page_size:
                         try:
                             index = iids.index(imageId)
-                            page = (index / page_size) + 1  # 1-based index
+                            page = (index // page_size) + 1  # 1-based index
                             orph['childCount'] = len(iids)
                             orph['childIndex'] = index
                             orph['childPage'] = page
