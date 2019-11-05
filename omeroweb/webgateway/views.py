@@ -1611,7 +1611,8 @@ def get_thumbnail_json(request, iid, w=None, h=None, conn=None, _defcb=None,
     jpeg_data = _render_thumbnail(
         request=request, iid=iid, w=w, h=h,
         conn=conn, _defcb=_defcb, **kwargs)
-    rv = "data:image/jpeg;base64,%s" % base64.b64encode(jpeg_data)
+    rv = "data:image/jpeg;base64,%s" % \
+        base64.b64encode(jpeg_data).decode("utf-8")
     return rv
 
 
