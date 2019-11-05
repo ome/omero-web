@@ -31,7 +31,7 @@ import logging
 import json
 import random
 
-# from past.builtins import basestring
+from past.builtins import basestring
 
 from django import template
 
