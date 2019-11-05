@@ -34,10 +34,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
 from django.core.validators import validate_email
 
-try:
-    import long
-except ImportError:
-    long = int
+from past.builtins import long
 
 
 ##################################################################
@@ -126,8 +123,8 @@ class GroupQuerySetIterator(object):
                 name = obj.name.val
             else:
                 name = obj.name
-            l = len(name)
-            if l > 35:
+            length = len(name)
+            if length > 35:
                 name = name[:35] + "..."
             name += " (%s)" % str(obj.getDetails().permissions)
             if hasattr(obj.id, 'val'):
@@ -169,7 +166,7 @@ class GroupModelChoiceField(ModelChoiceField):
             for experimenter_type, experimenters in self.queryset:
                 for experimenter in experimenters:
                     exps.append(experimenter)
-        except:
+        except Exception:
             exps = self.queryset
         for experimenter in exps:
             if hasattr(experimenter.id, 'val'):
@@ -211,7 +208,7 @@ class GroupModelMultipleChoiceField(GroupModelChoiceField):
         for val in value:
             try:
                 long(val)
-            except:
+            except Exception:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
@@ -234,7 +231,6 @@ class GroupModelMultipleChoiceField(GroupModelChoiceField):
 class ExperimenterQuerySetIterator(object):
     def __init__(self, queryset, empty_label):
         self.queryset = queryset
-
         self.empty_label = empty_label
 
         self.rendered_set = []
@@ -291,10 +287,10 @@ class ExperimenterQuerySetIterator(object):
                     name = "%s%s %s (%s)" % (
                         myself, firstName, lastName, omeName)
 
-            l = len(name)
-            if l > 50:
+            length = len(name)
+            if length > 50:
                 name = name[:50] + "..."
-        except:
+        except Exception:
             name = _("Unknown")
 
         if hasattr(obj.id, 'val'):
@@ -394,7 +390,7 @@ class ExperimenterModelMultipleChoiceField(ExperimenterModelChoiceField):
         for val in value:
             try:
                 long(val)
-            except:
+            except Exception:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
