@@ -31,6 +31,8 @@ import logging
 import json
 import random
 
+# from past.builtins import basestring
+
 from django import template
 
 register = template.Library()
