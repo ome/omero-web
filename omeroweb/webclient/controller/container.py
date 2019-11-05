@@ -307,8 +307,9 @@ class BaseContainer(BaseController):
         # Split View Figure is enabled if we have at least one image with
         # SizeC > 1
         if image:
-            splitView['enabled'] = (image.getSizeC() > 1) and \
-                'Split_View_Figure.py' in availableScripts
+            splitView['enabled'] = (
+                image.getSizeC() and image.getSizeC() > 1
+                and 'Split_View_Figure.py' in availableScripts)
         elif objDict is not None:
             if 'image' in objDict:
                 for i in objDict['image']:
@@ -335,7 +336,8 @@ class BaseContainer(BaseController):
             'name': 'Make Movie',
             'enabled': False,
             'tooltip': "Create a movie of the image"}
-        if (image and (image.getSizeT() > 1 or image.getSizeZ() > 1)):
+        if (image and image.getSizeT() and image.getSizeZ() and
+                (image.getSizeT() > 1 or image.getSizeZ() > 1)):
             makeMovie['enabled'] = 'Make_Movie.py' in availableScripts
 
         figureScripts.append(splitView)
