@@ -23,7 +23,6 @@ import time
 import re
 import logging
 import traceback
-from builtins import bytes
 from future.utils import isbytes, bytes_to_native_str
 
 logger = logging.getLogger(__name__)
@@ -278,7 +277,7 @@ def shapeMarshal(shape):
     def decode(shape_field):
         value = shape_field.getValue()
         if value and isbytes(value):
-            points = bytes_to_native_str(value)
+            value = bytes_to_native_str(value)
         return value
 
     rv['id'] = shape.getId().getValue()
