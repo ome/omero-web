@@ -7,5 +7,5 @@ except ImportError as ie:
     omero_buildyear = "unknown"
 
 
-omeroweb_version = "5.6.dev3"
+omeroweb_version = "5.6.dev4"
 omeroweb_buildyear = "2019"
