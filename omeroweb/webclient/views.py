@@ -466,7 +466,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             g.loadLeadersAndMembers()
             for c in g.leaders + g.colleagues:
                 myColleagues[c.id] = c
-        myColleagues = myColleagues.values()
+        myColleagues = list(myColleagues.values())
         myColleagues.sort(key=lambda x: x.getLastName().lower())
 
     context = {
