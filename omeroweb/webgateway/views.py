@@ -2736,6 +2736,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
     query += """
         left outer join fetch obj0.annotationLinks links
         left outer join fetch links.child
+        left outer join fetch links.parent
         join fetch links.details.owner
         join fetch links.details.creationEvent
         where obj%d.id=:id""" % (len(objtype) - 1)
@@ -2770,7 +2771,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
         data.append(dict(id=annotation.id.val,
                          file=annotation.file.id.val,
                          parentType=objtype[0],
-                         parentId=obj.id.val,
+                         parentId=link.parent.id.val,
                          owner=ownerName,
                          addedBy=addedByName,
                          addedOn=unwrap(link.details.creationEvent._time)))
