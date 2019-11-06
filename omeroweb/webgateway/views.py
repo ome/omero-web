@@ -45,7 +45,7 @@ from omeroweb.webadmin.webadmin_utils import upgradeCheck
 
 try:
     from hashlib import md5
-except:
+except Exception:
     from md5 import md5
 
 try:
@@ -91,11 +91,11 @@ logger = logging.getLogger(__name__)
 try:
     from PIL import Image
     from PIL import ImageDraw
-except:  # pragma: nocover
+except Exception:  # pragma: nocover
     try:
         import Image
         import ImageDraw
-    except:
+    except Exception:
         logger.error('No Pillow installed')
 
 try:
@@ -575,7 +575,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
     def getConfigValue(key):
         try:
             return conn.getConfigService().getConfigValue(key)
-        except:
+        except Exception:
             logger.warn("webgateway: get_shape_thumbnail() could not get"
                         " Config-Value for %s" % key)
             pass
@@ -796,7 +796,7 @@ def _get_maps_enabled(request, name, sizeC=0):
                     if m is not None:
                         enabled = m.get('enabled') in (True, 'true')
                 codomains.append(enabled)
-        except:
+        except Exception:
             logger.debug('Invalid json for query ?maps=%s' % map_json)
             codomains = None
     return codomains
@@ -837,7 +837,7 @@ def _get_prepared_image(request, iid, server_id=None, conn=None,
             # quantization maps (just applied, not saved at the moment)
             qm = [m.get('quantization') for m in json.loads(r['maps'])]
             img.setQuantizationMaps(qm)
-        except:
+        except Exception:
             logger.debug('Failed to set quantization maps')
 
     if 'c' in r:
@@ -926,7 +926,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
                     max_tile_length = int(
                         conn.getConfigService().getConfigValue(
                             "omero.pixeldata.max_tile_length"))
-                except:
+                except Exception:
                     pass
                 for i, tile_length in enumerate(tile_size):
                     # use default tile size if <= 0
@@ -958,7 +958,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
                     return HttpResponseBadRequest(msg)
             x = int(zxyt[1])*w
             y = int(zxyt[2])*h
-        except:
+        except Exception:
             msg = "malformed tile argument, tile=%s" % tile
             logger.debug(msg, exc_info=True)
             return HttpResponseBadRequest(msg)
@@ -970,7 +970,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
             y = int(xywh[1])
             w = int(xywh[2])
             h = int(xywh[3])
-        except:
+        except Exception:
             msg = "malformed region argument, region=%s" % region
             logger.debug(msg, exc_info=True)
             return HttpResponseBadRequest(msg)
@@ -1136,7 +1136,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
         if tiff_data is None:
             try:
                 tiff_data = imgs[0].exportOmeTiff()
-            except:
+            except Exception:
                 logger.debug('Failed to export image (2)', exc_info=True)
                 tiff_data = None
             if tiff_data is None:
@@ -1194,7 +1194,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                     'attachment; filename="%s.zip"' % name)
                 rsp['Content-Length'] = len(zip_data)
                 return rsp
-        except:
+        except Exception:
             logger.debug(traceback.format_exc())
             raise
         return HttpResponseRedirect(settings.STATIC_URL +
@@ -1277,7 +1277,7 @@ def render_movie(request, iid, axis, pos, conn=None, **kwargs):
             return HttpResponseRedirect(settings.STATIC_URL +
                                         'webgateway/tfiles/' + rpath)
             # os.path.join(rpath, img.getName() + ext))
-    except:
+    except Exception:
         logger.debug(traceback.format_exc())
         raise
 
@@ -1419,7 +1419,7 @@ def render_row_plot(request, iid, z, t, y, conn=None, w=1, **kwargs):
     img, compress_quality = pi
     try:
         gif_data = img.renderRowLinePlotGif(int(z), int(t), int(y), int(w))
-    except:
+    except Exception:
         logger.debug('a', exc_info=True)
         raise
     if gif_data is None:
@@ -1571,7 +1571,7 @@ def get_thumbnails_json(request, w=None, conn=None, **kwargs):
             data = _render_thumbnail(request, iid, w=w, conn=conn)
             return {iid: "data:image/jpeg;base64,%s" %
                     base64.b64encode(data).decode("utf-8")}
-        except:
+        except Exception:
             return {iid: None}
     logger.debug("Image ids: %r" % image_ids)
     if len(image_ids) > settings.THUMBNAILS_BATCH:
@@ -1789,7 +1789,7 @@ def open_with_options(request, **kwargs):
                         viewer['script_url'] = static(ow[2]['script_url'])
                 if 'label' in ow[2]:
                     viewer['label'] = ow[2]['label']
-        except:
+        except Exception:
             # ignore invalid params
             pass
         viewers.append(viewer)
@@ -1828,7 +1828,7 @@ def searchOptFromRequest(request):
         if author:
             opts['search'] += ' author:'+author
         return opts
-    except:
+    except Exception:
         logger.error(traceback.format_exc())
         return {}
 
@@ -2105,7 +2105,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         if r.get('maps'):
             try:
                 rdef['maps'] = json.loads(r.get('maps'))
-            except:
+            except Exception:
                 pass
         if r.get('pixel_range'):
             rdef['pixel_range'] = str(r.get('pixel_range'))
@@ -2494,7 +2494,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         well = None
         try:
             well = ob.getParent().getParent()
-        except:
+        except Exception:
             if hasattr(ob, 'canDownload'):
                 if not ob.canDownload():
                     rsp = ConnCleaningHttpResponse(status=404)
@@ -2991,7 +2991,7 @@ class LoginView(View):
                         # only
                         try:
                             upgrades_url = settings.UPGRADES_URL
-                        except:
+                        except Exception:
                             upgrades_url = conn.getUpgradesUrl()
                         upgradeCheck(url=upgrades_url)
                         return self.handle_logged_in(request, conn, connector)
@@ -3037,6 +3037,6 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
             return {'error': 'No image with id ' + str(img_id)}
 
         return {'rdefs': img.getAllRenderingDefs()}
-    except:
+    except Exception:
         logger.debug(traceback.format_exc())
         return {'error': 'Failed to retrieve rdefs'}
