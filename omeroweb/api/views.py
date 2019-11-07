@@ -161,7 +161,7 @@ class ObjectView(ApiView):
     def get(self, request, object_id, conn=None, **kwargs):
         """Simply GET a single Object and marshal it or 404 if not found."""
         opts = self.get_opts(request)
-        object_id = long(object_id)
+        object_id = int(object_id)
         query, params, wrapper = conn.buildQuery(
             self.OMERO_TYPE, [object_id], opts=opts)
         result = conn.getQueryService().findByQuery(
@@ -193,7 +193,7 @@ class ObjectView(ApiView):
             raise MethodNotSupportedError(
                 "Delete of %s not supported" % self.OMERO_TYPE)
         try:
-            obj = conn.getQueryService().get(self.OMERO_TYPE, long(object_id),
+            obj = conn.getQueryService().get(self.OMERO_TYPE, int(object_id),
                                              conn.SERVICE_OPTS)
         except ValidationException:
             raise NotFoundError('%s %s not found' % (self.OMERO_TYPE,
@@ -427,7 +427,7 @@ class ProjectsView(ObjectsView):
         opts['order_by'] = 'lower(obj.name)'
         # at /datasets/:dataset_id/projects/ we have 'dataset_id' in kwargs
         if 'dataset_id' in kwargs:
-            opts['dataset'] = long(kwargs['dataset_id'])
+            opts['dataset'] = int(kwargs['dataset_id'])
         else:
             # Filter Projects by child 'dataset'
             dataset = getIntOrDefault(request, 'dataset', None)
@@ -458,7 +458,7 @@ class DatasetsView(ObjectsView):
         opts['order_by'] = 'lower(obj.name)'
         # at /projects/:project_id/datasets/ we have 'project_id' in kwargs
         if 'project_id' in kwargs:
-            opts['project'] = long(kwargs['project_id'])
+            opts['project'] = int(kwargs['project_id'])
         else:
             # otherwise we filter by query /datasets/?project=:id
             project = getIntOrDefault(request, 'project', None)
@@ -466,7 +466,7 @@ class DatasetsView(ObjectsView):
                 opts['project'] = project
         # Filter Datasets by child 'image'
         if 'image_id' in kwargs:
-            opts['image'] = long(kwargs['image_id'])
+            opts['image'] = int(kwargs['image_id'])
         else:
             image = getIntOrDefault(request, 'image', None)
             if image is not None:
@@ -495,7 +495,7 @@ class ScreensView(ObjectsView):
         opts['order_by'] = 'lower(obj.name)'
         # at /plate/:plate_id/screens/ we have 'plate_id' in kwargs
         if 'plate_id' in kwargs:
-            opts['plate'] = long(kwargs['plate_id'])
+            opts['plate'] = int(kwargs['plate_id'])
         else:
             # filter by query /screens/?plate=:id
             plate = getIntOrDefault(request, 'plate', None)
@@ -523,7 +523,7 @@ class PlatesView(ObjectsView):
         opts['order_by'] = 'lower(obj.name)'
         # at /screens/:screen_id/plates/ we have 'screen_id' in kwargs
         if 'screen_id' in kwargs:
-            opts['screen'] = long(kwargs['screen_id'])
+            opts['screen'] = int(kwargs['screen_id'])
         else:
             # filter by query /plates/?screen=:id
             screen = getIntOrDefault(request, 'screen', None)
@@ -531,7 +531,7 @@ class PlatesView(ObjectsView):
                 opts['screen'] = screen
         # Filter Plates by Well
         if 'well_id' in kwargs:
-            opts['well'] = long(kwargs['well_id'])
+            opts['well'] = int(kwargs['well_id'])
         else:
             # filter by query /plates/?well=:id
             well = getIntOrDefault(request, 'well', None)
@@ -571,7 +571,7 @@ class ImagesView(ObjectsView):
         opts['order_by'] = 'lower(obj.name)'
         # at /datasets/:dataset_id/images/ we have 'dataset_id' in kwargs
         if 'dataset_id' in kwargs:
-            opts['dataset'] = long(kwargs['dataset_id'])
+            opts['dataset'] = int(kwargs['dataset_id'])
         else:
             # filter by query /images/?dataset=:id
             dataset = getIntOrDefault(request, 'dataset', None)
@@ -599,7 +599,7 @@ class PlateAcquisitionsView(ObjectsView):
         opts['order_by'] = 'lower(obj.name)'
         # at /plates/:plate_id/plateacquisitions/ we have 'plate_id' in kwargs
         if 'plate_id' in kwargs:
-            opts['plate'] = long(kwargs['plate_id'])
+            opts['plate'] = int(kwargs['plate_id'])
         return opts
 
     def add_data(self, marshalled, request, conn, urls=None, **kwargs):
@@ -644,9 +644,9 @@ class WellsView(ObjectsView):
         opts['order_by'] = 'obj.column, obj.row'
         # at /plates/:plate_id/wells/ we have 'plate_id' in kwargs
         if 'plate_id' in kwargs:
-            opts['plate'] = long(kwargs['plate_id'])
+            opts['plate'] = int(kwargs['plate_id'])
         elif 'plateacquisition_id' in kwargs:
-            opts['plateacquisition'] = long(kwargs['plateacquisition_id'])
+            opts['plateacquisition'] = int(kwargs['plateacquisition_id'])
         else:
             # filter by query /wells/?plate=:id
             plate = getIntOrDefault(request, 'plate', None)
@@ -696,7 +696,7 @@ class RoisView(ObjectsView):
 
         # at /images/:image_id/rois/ we have 'image_id' in kwargs
         if 'image_id' in kwargs:
-            opts['image'] = long(kwargs['image_id'])
+            opts['image'] = int(kwargs['image_id'])
         else:
             # filter by query /rois/?image=:id
             image = getIntOrDefault(request, 'image', None)
