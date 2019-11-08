@@ -25,10 +25,10 @@ import logging
 import traceback
 from future.utils import isbytes, bytes_to_native_str
 
-logger = logging.getLogger(__name__)
-
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
+
+logger = logging.getLogger(__name__)
 
 # OMERO.insight point list regular expression
 INSIGHT_POINT_LIST_RE = re.compile(r'points\[([^\]]+)\]')

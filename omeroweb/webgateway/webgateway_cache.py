@@ -23,7 +23,6 @@ import datetime
 from past.builtins import basestring
 from builtins import str
 
-logger = logging.getLogger(__name__)
 
 import struct
 import time
@@ -31,6 +30,9 @@ import os
 import re
 import shutil
 import stat
+
+logger = logging.getLogger(__name__)
+
 size_of_double = len(struct.pack('d', 0))
 # string_type = type('')
 

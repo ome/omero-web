@@ -23,7 +23,6 @@
 from __future__ import print_function
 
 from future import standard_library
-standard_library.install_aliases()
 import json
 import warnings
 
@@ -33,6 +32,8 @@ from django.core.urlresolvers import reverse
 from urllib.parse import urlencode
 
 from omero.testlib import ITest
+
+standard_library.install_aliases()
 
 
 class IWebTest(ITest):

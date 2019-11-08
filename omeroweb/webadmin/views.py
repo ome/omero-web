@@ -49,6 +49,9 @@ from .forms import ForgottonPasswordForm, ExperimenterForm, GroupForm
 from .forms import GroupOwnerForm, MyAccountForm, ChangePassword
 from .forms import UploadPhotoForm, EmailForm
 
+import omero
+from omero.model import PermissionsI
+
 from omeroweb.httprsp import HttpJPEGResponse
 from omeroweb.webclient.decorators import login_required, render_response
 from omeroweb.connector import Connector
@@ -91,10 +94,6 @@ class render_response_admin(omeroweb.webclient.decorators.render_response):
 
 ##############################################################################
 # utils
-
-
-import omero
-from omero.model import PermissionsI
 
 
 def prepare_experimenter(conn, eid=None):
