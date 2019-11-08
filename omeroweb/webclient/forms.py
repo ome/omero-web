@@ -321,6 +321,7 @@ class NewTagsAnnotationForm(forms.Form):
     tagset = forms.IntegerField(
         min_value=1, required=False, widget=forms.HiddenInput)
 
+
 NewTagsAnnotationFormSet = formset_factory(NewTagsAnnotationForm, extra=0)
 
 

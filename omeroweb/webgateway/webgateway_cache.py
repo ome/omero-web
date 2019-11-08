@@ -357,6 +357,7 @@ class FileCache(CacheBase):
         return count
     _num_entries = property(_get_num_entries)
 
+
 FN_REGEX = re.compile('[#$,|]')
 
 
@@ -837,6 +838,7 @@ class WebGatewayCache (object):
         self._cache_clear(self._json_cache, k)
         return True
 
+
 webgateway_cache = WebGatewayCache(FileCache)
 
 
@@ -1006,5 +1008,6 @@ class WebGatewayTempFile (object):
         if os.path.exists(fn):
             return fn, rn, True
         return fn, rn, AutoLockFile(fn, 'wb')
+
 
 webgateway_tempfile = WebGatewayTempFile()

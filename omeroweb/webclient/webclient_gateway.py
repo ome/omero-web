@@ -2103,6 +2103,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         # conn.chgrpObjects(dtype, obj_ids, group_id, container_id)
 
+
 omero.gateway.BlitzGateway = OmeroWebGateway
 
 
@@ -2329,6 +2330,7 @@ class ExperimenterWrapper(OmeroWebObjectWrapper,
             if not flag:
                 yield ExperimenterGroupWrapper(self._conn, gem.parent)
 
+
 omero.gateway.ExperimenterWrapper = ExperimenterWrapper
 
 
@@ -2400,6 +2402,7 @@ class ExperimenterGroupWrapper(OmeroWebObjectWrapper,
         else:
             False
 
+
 omero.gateway.ExperimenterGroupWrapper = ExperimenterGroupWrapper
 
 
@@ -2415,6 +2418,7 @@ class ProjectWrapper(OmeroWebObjectWrapper, omero.gateway.ProjectWrapper):
         super(ProjectWrapper, self).__prepare__(**kwargs)
         if 'annotation_counter' in kwargs:
             self.annotation_counter = kwargs['annotation_counter']
+
 
 omero.gateway.ProjectWrapper = ProjectWrapper
 
@@ -2433,6 +2437,7 @@ class DatasetWrapper(OmeroWebObjectWrapper, omero.gateway.DatasetWrapper):
             self.annotation_counter = kwargs['annotation_counter']
         if 'link' in kwargs:
             self.link = 'link' in kwargs and kwargs['link'] or None
+
 
 omero.gateway.DatasetWrapper = DatasetWrapper
 
@@ -2618,6 +2623,7 @@ class PlateWrapper(OmeroWebObjectWrapper, omero.gateway.PlateWrapper):
         if 'link' in kwargs:
             self.link = 'link' in kwargs and kwargs['link'] or None
 
+
 omero.gateway.PlateWrapper = PlateWrapper
 
 
@@ -2635,6 +2641,7 @@ class WellWrapper(OmeroWebObjectWrapper, omero.gateway.WellWrapper):
             self.annotation_counter = kwargs['annotation_counter']
         if 'link' in kwargs:
             self.link = 'link' in kwargs and kwargs['link'] or None
+
 
 omero.gateway.WellWrapper = WellWrapper
 
@@ -2654,6 +2661,7 @@ class PlateAcquisitionWrapper(OmeroWebObjectWrapper,
         if 'annotation_counter' in kwargs:
             self.annotation_counter = kwargs['annotation_counter']
 
+
 omero.gateway.PlateAcquisitionWrapper = PlateAcquisitionWrapper
 
 
@@ -2669,6 +2677,7 @@ class ScreenWrapper (OmeroWebObjectWrapper, omero.gateway.ScreenWrapper):
         super(ScreenWrapper, self).__prepare__(**kwargs)
         if 'annotation_counter' in kwargs:
             self.annotation_counter = kwargs['annotation_counter']
+
 
 omero.gateway.ScreenWrapper = ScreenWrapper
 
@@ -2769,5 +2778,6 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
         """
 
         return omero.gateway.ExperimenterWrapper(self._conn, self.owner)
+
 
 omero.gateway.refreshWrappers()

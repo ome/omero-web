@@ -655,6 +655,7 @@ class WebControl(DiagnosticsControl):
                 self._item("Log file ", log_file)
                 self._exists(log_dir / log_file)
 
+
 try:
     register("web", WebControl, HELP)
 except NameError:
