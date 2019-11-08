@@ -23,7 +23,7 @@ import time
 import re
 import logging
 import traceback
-from builtins import bytes
+from future.utils import isbytes, bytes_to_native_str
 
 logger = logging.getLogger(__name__)
 
@@ -274,6 +274,12 @@ def shapeMarshal(shape):
         if func(v):
             rv[k] = v
 
+    def decode(shape_field):
+        value = shape_field.getValue()
+        if value and isbytes(value):
+            value = bytes_to_native_str(value)
+        return value
+
     rv['id'] = shape.getId().getValue()
     set_if('theT', shape.getTheT())
     set_if('theZ', shape.getTheZ())
@@ -299,9 +305,7 @@ def shapeMarshal(shape):
         rv['radiusY'] = shape.getRadiusY().getValue()
     elif shape_type == omero.model.PolylineI:
         rv['type'] = 'PolyLine'
-        points = shape.getPoints().getValue()
-        if points:
-            points = bytes(points).decode()
+        points = decode(shape.getPoints())
         rv['points'] = stringToSvg(points)
     elif shape_type == omero.model.LineI:
         rv['type'] = 'Line'
@@ -316,9 +320,7 @@ def shapeMarshal(shape):
     elif shape_type == omero.model.PolygonI:
         rv['type'] = 'Polygon'
         # z = closed line
-        points = shape.getPoints().getValue()
-        if points:
-            points = bytes(points).decode()
+        points = decode(shape.getPoints())
         rv['points'] = stringToSvg(points) + " z"
     elif shape_type == omero.model.LabelI:
         rv['type'] = 'Label'
@@ -357,9 +359,9 @@ def shapeMarshal(shape):
         set_if('strokeWidth', shape.getStrokeWidth().getValue())
     if hasattr(shape, 'getMarkerStart') and shape.getMarkerStart() is not None:
         # Handle string for python2 and bytes python3. TODO: lower level fix
-        rv['markerStart'] = bytes(shape.getMarkerStart().getValue()).decode()
+        rv['markerStart'] = decode(shape.getMarkerStart())
     if hasattr(shape, 'getMarkerEnd') and shape.getMarkerEnd() is not None:
-        rv['markerEnd'] = bytes(shape.getMarkerEnd().getValue()).decode()
+        rv['markerEnd'] = decode(shape.getMarkerEnd())
     return rv
 
 
