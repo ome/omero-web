@@ -9,6 +9,7 @@
 """
 
 import traceback
+from future.utils import bytes_to_native_str
 from datetime import datetime
 from omero.cli import DiagnosticsControl
 from omero.cli import CLI
@@ -16,8 +17,11 @@ import platform
 import sys
 import os
 import re
+from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
+from path import path
+from pkg_resources import resource_string
 
 from omero.install.windows_warning import windows_warning, WINDOWS_WARNING
 from omero.install.python_warning import py27_only, PYTHON_WARNING
@@ -64,19 +68,19 @@ def config_required(func):
     def import_django_settings(func):
         @windows_warning
         def wrapper(self, *args, **kwargs):
-            if not py27_only():
-                self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
+            # if not py27_only():
+            #     self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
             try:
                 import django  # NOQA
             except:
                 self.ctx.die(681, "ERROR: Django not installed!")
-            if django.VERSION < (1, 6) or django.VERSION >= (1, 9):
+            if django.VERSION < (1, 11) or django.VERSION >= (2, 0):
                 self.ctx.err("ERROR: Django version %s is not "
                              "supported!" % django.get_version())
             try:
                 import omeroweb.settings as settings
                 kwargs['settings'] = settings
-            except Exception, e:
+            except Exception as e:
                 self.ctx.die(682, e)
             return func(self, *args, **kwargs)
         return wrapper
@@ -241,13 +245,11 @@ class WebControl(DiagnosticsControl):
         self.ctx.err(LONGHELP % CONFIG_TABLE)
 
     def _get_python_dir(self):
-        return self.ctx.dir / "lib" / "python"
+        import omeroweb
+        return path(omeroweb.__file__).parent.parent
 
     def _get_fallback_dir(self):
         return self.ctx.dir / "lib" / "fallback"
-
-    def _get_web_templates_dir(self):
-        return self.ctx.dir / "etc" / "templates" / "web"
 
     @config_required
     @assert_config_argtype
@@ -302,7 +304,8 @@ class WebControl(DiagnosticsControl):
                          "wsgi or wsgi-tcp.")
 
         template_file = "%s.conf.template" % server
-        c = file(self._get_web_templates_dir() / template_file).read()
+        c = bytes_to_native_str(
+            resource_string('omeroweb', 'templates/' + template_file))
         self.ctx.out(c % d)
 
     def syncmedia(self, args):
@@ -330,7 +333,7 @@ class WebControl(DiagnosticsControl):
                     self.ctx.die(121, "Failed to enable '%s'.\n" % app)
                 else:
                     self.ctx.out("App '%s' was enabled\n" % app)
-            args = [sys.executable, "manage.py", "syncdb", "--noinput"]
+            args = [sys.executable, "manage.py", "migrate", "--noinput"]
             rv = self.ctx.call(args, cwd=location)
             self.syncmedia(None)
 
@@ -360,7 +363,7 @@ class WebControl(DiagnosticsControl):
             self.set_environ()
             self.ctx.call(cargs, cwd=location)
         except:
-            print traceback.print_exc()
+            print(traceback.print_exc())
 
     @config_required
     def collectstatic(self, settings):
@@ -627,7 +630,7 @@ class WebControl(DiagnosticsControl):
         self._diagnostics_banner("web")
         try:
             self.status(args)
-        except Exception, e:
+        except Exception as e:
             try:
                 self.ctx.out("OMERO.web error: %s" % e.message[1].message)
             except:

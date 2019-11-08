@@ -35,22 +35,21 @@ import datetime
 
 import omeroweb.webclient.views
 
-from omero_version import build_year
-from omero_version import omero_version
+from omeroweb.version import omeroweb_buildyear as build_year
+from omeroweb.version import omeroweb_version as omero_version
 
-from django.template import loader as template_loader
 from django.core.urlresolvers import reverse
 from django.views.decorators.debug import sensitive_post_parameters
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template import RequestContext as Context
+from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 from django.utils.encoding import smart_str
+from django.shortcuts import render
 
-from forms import ForgottonPasswordForm, ExperimenterForm, GroupForm
-from forms import GroupOwnerForm, MyAccountForm, ChangePassword
-from forms import UploadPhotoForm, EmailForm
+from .forms import ForgottonPasswordForm, ExperimenterForm, GroupForm
+from .forms import GroupOwnerForm, MyAccountForm, ChangePassword
+from .forms import UploadPhotoForm, EmailForm
 
-from omeroweb.http import HttpJPEGResponse
+from omeroweb.httprsp import HttpJPEGResponse
 from omeroweb.webclient.decorators import login_required, render_response
 from omeroweb.connector import Connector
 
@@ -281,7 +280,7 @@ def drivespace_json(request, query=None, groupId=None, userId=None, conn=None,
                                   "userId": e.getId()})
 
     elif userId is not None:
-        eid = long(userId)
+        eid = int(userId)
         for g in conn.getOtherGroups(eid):
             # ignore 'user' and 'guest' groups
             if g.getId() in (sr.guestGroupId, sr.userGroupId):
@@ -342,7 +341,7 @@ def forgotten_password(request, **kwargs):
                         handle.close()
                     error = "Password was reset. Check your mailbox."
                     form = None
-                except omero.CmdError, exp:
+                except omero.CmdError as exp:
                     logger.error(exp.err)
                     try:
                         error = exp.err.parameters[
@@ -354,10 +353,7 @@ def forgotten_password(request, **kwargs):
 
     context = {'error': error, 'form': form, 'build_year': build_year,
                'omero_version': omero_version}
-    t = template_loader.get_template(template)
-    c = Context(request, context)
-    rsp = t.render(c)
-    return HttpResponse(rsp)
+    return render(request, template, context)
 
 
 @login_required()
@@ -509,8 +505,8 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
 
         root_id = conn.getAdminService().getSecurityRoles().rootId
         user_id = conn.getUserId()
-        experimenter_root = long(eid) == root_id
-        experimenter_me = long(eid) == user_id
+        experimenter_root = int(eid) == root_id
+        experimenter_me = int(eid) == user_id
         form = ExperimenterForm(
             can_modify_user=can_modify_user,
             user_privileges=user_privileges,
@@ -573,7 +569,7 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
                 if defaultGroup is None:
                     defaultGroup = otherGroups[0]
                 for g in groups:
-                    if long(defaultGroup) == g.id:
+                    if int(defaultGroup) == g.id:
                         dGroup = g
                         break
 
@@ -582,9 +578,9 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
                 for g in groups:
                     for og in otherGroups:
                         # remove defaultGroup from otherGroups if contains
-                        if long(og) == long(dGroup.id):
+                        if int(og) == int(dGroup.id):
                             pass
-                        elif long(og) == g.id:
+                        elif int(og) == g.id:
                             listOfOtherGroups.add(g)
 
                 # Update 'AdminPrivilege' config roles for user
@@ -636,14 +632,14 @@ def manage_password(request, eid, conn=None, **kwargs):
             if conn.getEventContext().userId == int(eid):
                 try:
                     conn.changeMyPassword(password, old_password)
-                except Exception, x:
+                except Exception as x:
                     error = x.message   # E.g. old_password not valid
             elif conn.isAdmin():
                 exp = conn.getObject("Experimenter", eid)
                 try:
                     conn.changeUserPassword(exp.omeName, password,
                                             old_password)
-                except Exception, x:
+                except Exception as x:
                     error = x.message
             else:
                 raise AttributeError("Can't change another user's password"
@@ -700,7 +696,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
         initial['owners'] = [e.id for e in group.getOwners()]
         initial['members'] = [m.id for m in group.getMembers()]
         initial['permissions'] = getActualPermissions(group)
-        group_is_system = long(gid) in system_groups
+        group_is_system = int(gid) in system_groups
     if request.method == 'POST':
         data = request.POST.copy()
         # name needs to be unique
@@ -761,7 +757,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
 
                     try:
                         msgs = conn.updateGroup(group, name, perm, description)
-                    except omero.SecurityViolation, ex:
+                    except omero.SecurityViolation as ex:
                         if ex.message.startswith('Cannot change permissions'):
                             msgs.append("Downgrade to private group not"
                                         " currently possible")
@@ -877,7 +873,7 @@ def manage_group_owner(request, action, gid, conn=None, **kwargs):
                         msg = conn.updatePermissions(group, perm)
                         if msg is not None:
                             msgs.append(msg)
-                    except omero.SecurityViolation, ex:
+                    except omero.SecurityViolation as ex:
                         if ex.message.startswith('Cannot change permissions'):
                             msgs.append("Downgrade to private group not"
                                         " currently possible")
@@ -991,10 +987,10 @@ def manage_avatar(request, action=None, conn=None, **kwargs):
                     reverse(viewname="wamanageavatar",
                             args=[conn.getEventContext().userId]))
     elif action == "crop":
-        x1 = long(request.POST.get('x1'))
-        x2 = long(request.POST.get('x2'))
-        y1 = long(request.POST.get('y1'))
-        y2 = long(request.POST.get('y2'))
+        x1 = int(request.POST.get('x1'))
+        x2 = int(request.POST.get('x2'))
+        y1 = int(request.POST.get('y1'))
+        y2 = int(request.POST.get('y2'))
         box = (x1, y1, x2, y2)
         conn.cropExperimenterPhoto(box)
         return HttpResponseRedirect(reverse("wamyaccount"))

@@ -28,7 +28,7 @@ from omero.rtypes import rstring, rlong, unwrap
 from django.utils.encoding import smart_str
 import logging
 
-from webclient.controller import BaseController
+from omeroweb.webclient.controller import BaseController
 
 logger = logging.getLogger(__name__)
 
@@ -307,8 +307,9 @@ class BaseContainer(BaseController):
         # Split View Figure is enabled if we have at least one image with
         # SizeC > 1
         if image:
-            splitView['enabled'] = (image.getSizeC() > 1) and \
-                'Split_View_Figure.py' in availableScripts
+            splitView['enabled'] = (
+                image.getSizeC() and image.getSizeC() > 1
+                and 'Split_View_Figure.py' in availableScripts)
         elif objDict is not None:
             if 'image' in objDict:
                 for i in objDict['image']:
@@ -335,7 +336,8 @@ class BaseContainer(BaseController):
             'name': 'Make Movie',
             'enabled': False,
             'tooltip': "Create a movie of the image"}
-        if (image and (image.getSizeT() > 1 or image.getSizeZ() > 1)):
+        if (image and image.getSizeT() and image.getSizeZ() and
+                (image.getSizeT() > 1 or image.getSizeZ() > 1)):
             makeMovie['enabled'] = 'Make_Movie.py' in availableScripts
 
         figureScripts.append(splitView)
@@ -436,7 +438,7 @@ class BaseContainer(BaseController):
         if gid is None:
             return False
         try:
-            group = self.conn.getObject("ExperimenterGroup", long(gid))
+            group = self.conn.getObject("ExperimenterGroup", int(gid))
         except:
             return False
         if group is None:
@@ -781,7 +783,7 @@ class BaseContainer(BaseController):
         for p in parents:
             parent = p.split('-')
             dtype = str(parent[0])
-            parentId = long(parent[1])
+            parentId = int(parent[1])
             if dtype == "acquisition":
                 dtype = "PlateAcquisition"
             if self.tag:

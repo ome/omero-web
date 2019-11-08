@@ -17,43 +17,48 @@ import re
 import json
 import base64
 import warnings
+from functools import wraps
 import omero
 import omero.clients
 
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseServerError, JsonResponse
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
-from django.template import loader as template_loader
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.conf import settings
-from django.template import RequestContext as Context
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
 from omero.util.ROI_utils import pointsStringToXYlist, xyListToBbox
-from plategrid import PlateGrid
-from omero_version import build_year
-from marshal import imageMarshal, shapeMarshal, rgb_int2rgba
+from .plategrid import PlateGrid
+from omeroweb.version import omeroweb_buildyear as build_year
+from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.views.generic import View
+from django.shortcuts import render
 from omeroweb.webadmin.forms import LoginForm
 from omeroweb.decorators import get_client_ip
 from omeroweb.webadmin.webadmin_utils import upgradeCheck
 
 try:
     from hashlib import md5
-except:
+except Exception:
     from md5 import md5
 
-from cStringIO import StringIO
+try:
+    import long
+except ImportError:
+    long = int
+
+from io import StringIO
 import tempfile
 
 from omero import ApiUsageException
 from omero.util.decorators import timeit, TimeIt
-from omeroweb.http import HttpJavascriptResponse, \
+from omeroweb.httprsp import HttpJavascriptResponse, \
     HttpJavascriptResponseServerError
 from omeroweb.connector import Server
 
@@ -62,7 +67,11 @@ import glob
 
 # from models import StoredConnection
 
-from webgateway_cache import webgateway_cache, CacheBase, webgateway_tempfile
+from omeroweb.webgateway.webgateway_cache import (
+    webgateway_cache,
+    CacheBase,
+    webgateway_tempfile,
+)
 
 import logging
 import os
@@ -82,11 +91,11 @@ logger = logging.getLogger(__name__)
 try:
     from PIL import Image
     from PIL import ImageDraw
-except:  # pragma: nocover
+except Exception:  # pragma: nocover
     try:
         import Image
         import ImageDraw
-    except:
+    except Exception:
         logger.error('No Pillow installed')
 
 try:
@@ -566,7 +575,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
     def getConfigValue(key):
         try:
             return conn.getConfigService().getConfigValue(key)
-        except:
+        except Exception:
             logger.warn("webgateway: get_shape_thumbnail() could not get"
                         " Config-Value for %s" % key)
             pass
@@ -787,7 +796,7 @@ def _get_maps_enabled(request, name, sizeC=0):
                     if m is not None:
                         enabled = m.get('enabled') in (True, 'true')
                 codomains.append(enabled)
-        except:
+        except Exception:
             logger.debug('Invalid json for query ?maps=%s' % map_json)
             codomains = None
     return codomains
@@ -828,7 +837,7 @@ def _get_prepared_image(request, iid, server_id=None, conn=None,
             # quantization maps (just applied, not saved at the moment)
             qm = [m.get('quantization') for m in json.loads(r['maps'])]
             img.setQuantizationMaps(qm)
-        except:
+        except Exception:
             logger.debug('Failed to set quantization maps')
 
     if 'c' in r:
@@ -917,7 +926,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
                     max_tile_length = int(
                         conn.getConfigService().getConfigValue(
                             "omero.pixeldata.max_tile_length"))
-                except:
+                except Exception:
                     pass
                 for i, tile_length in enumerate(tile_size):
                     # use default tile size if <= 0
@@ -949,7 +958,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
                     return HttpResponseBadRequest(msg)
             x = int(zxyt[1])*w
             y = int(zxyt[2])*h
-        except:
+        except Exception:
             msg = "malformed tile argument, tile=%s" % tile
             logger.debug(msg, exc_info=True)
             return HttpResponseBadRequest(msg)
@@ -961,7 +970,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
             y = int(xywh[1])
             w = int(xywh[2])
             h = int(xywh[3])
-        except:
+        except Exception:
             msg = "malformed region argument, region=%s" % region
             logger.debug(msg, exc_info=True)
             return HttpResponseBadRequest(msg)
@@ -1127,7 +1136,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
         if tiff_data is None:
             try:
                 tiff_data = imgs[0].exportOmeTiff()
-            except:
+            except Exception:
                 logger.debug('Failed to export image (2)', exc_info=True)
                 tiff_data = None
             if tiff_data is None:
@@ -1185,7 +1194,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                     'attachment; filename="%s.zip"' % name)
                 rsp['Content-Length'] = len(zip_data)
                 return rsp
-        except:
+        except Exception:
             logger.debug(traceback.format_exc())
             raise
         return HttpResponseRedirect(settings.STATIC_URL +
@@ -1268,7 +1277,7 @@ def render_movie(request, iid, axis, pos, conn=None, **kwargs):
             return HttpResponseRedirect(settings.STATIC_URL +
                                         'webgateway/tfiles/' + rpath)
             # os.path.join(rpath, img.getName() + ext))
-    except:
+    except Exception:
         logger.debug(traceback.format_exc())
         raise
 
@@ -1314,6 +1323,7 @@ def debug(f):
     @return:        The wrapped function
     """
 
+    @wraps(f)
     def wrap(request, *args, **kwargs):
         debug = request.GET.getlist('debug')
         if 'slow' in debug:
@@ -1323,7 +1333,6 @@ def debug(f):
         if 'error' in debug:
             raise AttributeError('Debug requested error')
         return f(request, *args, **kwargs)
-    wrap.func_name = f.func_name
     return wrap
 
 
@@ -1336,6 +1345,7 @@ def jsonp(f):
     @return:        The wrapped function, which will return json
     """
 
+    @wraps(f)
     def wrap(request, *args, **kwargs):
         logger.debug('jsonp')
         try:
@@ -1361,7 +1371,7 @@ def jsonp(f):
             # We need to support lists
             safe = type(rv) is dict
             return JsonResponse(rv, safe=safe)
-        except Exception, ex:
+        except Exception as ex:
             # Default status is 500 'server error'
             # But we try to handle all 'expected' errors appropriately
             # TODO: handle omero.ConcurrencyException
@@ -1377,7 +1387,6 @@ def jsonp(f):
             return JsonResponse(
                 {"message": str(ex), "stacktrace": trace},
                 status=status)
-    wrap.func_name = f.func_name
     return wrap
 
 
@@ -1410,7 +1419,7 @@ def render_row_plot(request, iid, z, t, y, conn=None, w=1, **kwargs):
     img, compress_quality = pi
     try:
         gif_data = img.renderRowLinePlotGif(int(z), int(t), int(y), int(w))
-    except:
+    except Exception:
         logger.debug('a', exc_info=True)
         raise
     if gif_data is None:
@@ -1493,7 +1502,7 @@ def wellData_json(request, conn=None, _internal=False, **kwargs):
     well = conn.getObject("Well", wid)
     if well is None:
         return HttpJavascriptResponseServerError('""')
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
 
     def urlprefix(iid):
         return reverse(prefix, args=(iid,))
@@ -1511,7 +1520,7 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         field = long(field or 0)
     except ValueError:
         field = 0
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
     thumbsize = getIntOrDefault(request, 'size', None)
     logger.debug(thumbsize)
     server_id = kwargs['server_id']
@@ -1560,8 +1569,9 @@ def get_thumbnails_json(request, w=None, conn=None, **kwargs):
         iid = image_ids[0]
         try:
             data = _render_thumbnail(request, iid, w=w, conn=conn)
-            return {iid: "data:image/jpeg;base64,%s" % base64.b64encode(data)}
-        except:
+            return {iid: "data:image/jpeg;base64,%s" %
+                    base64.b64encode(data).decode("utf-8")}
+        except Exception:
             return {iid: None}
     logger.debug("Image ids: %r" % image_ids)
     if len(image_ids) > settings.THUMBNAILS_BATCH:
@@ -1575,7 +1585,8 @@ def get_thumbnails_json(request, w=None, conn=None, **kwargs):
             t = thumbnails[i]
             if len(t) > 0:
                 # replace thumbnail urls by base64 encoded image
-                rv[i] = ("data:image/jpeg;base64,%s" % base64.b64encode(t))
+                rv[i] = ("data:image/jpeg;base64,%s" %
+                         base64.b64encode(t).decode("utf-8"))
         except KeyError:
             logger.error("Thumbnail not available. (img id: %d)" % i)
         except Exception:
@@ -1600,7 +1611,8 @@ def get_thumbnail_json(request, iid, w=None, h=None, conn=None, _defcb=None,
     jpeg_data = _render_thumbnail(
         request=request, iid=iid, w=w, h=h,
         conn=conn, _defcb=_defcb, **kwargs)
-    rv = "data:image/jpeg;base64,%s" % base64.b64encode(jpeg_data)
+    rv = "data:image/jpeg;base64,%s" % \
+        base64.b64encode(jpeg_data).decode("utf-8")
     return rv
 
 
@@ -1620,7 +1632,7 @@ def listImages_json(request, did, conn=None, **kwargs):
     dataset = conn.getObject("Dataset", did)
     if dataset is None:
         return HttpJavascriptResponseServerError('""')
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
 
     def urlprefix(iid):
         return reverse(prefix, args=(iid,))
@@ -1647,7 +1659,7 @@ def listWellImages_json(request, did, conn=None, **kwargs):
     acq = getIntOrDefault(request, 'run', None)
     if well is None:
         return HttpJavascriptResponseServerError('""')
-    prefix = kwargs.get('thumbprefix', 'webgateway.views.render_thumbnail')
+    prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
 
     def urlprefix(iid):
         return reverse(prefix, args=(iid,))
@@ -1778,7 +1790,7 @@ def open_with_options(request, **kwargs):
                         viewer['script_url'] = static(ow[2]['script_url'])
                 if 'label' in ow[2]:
                     viewer['label'] = ow[2]['label']
-        except:
+        except Exception:
             # ignore invalid params
             pass
         viewers.append(viewer)
@@ -1817,7 +1829,7 @@ def searchOptFromRequest(request):
         if author:
             opts['search'] += ' author:'+author
         return opts
-    except:
+    except Exception:
         logger.error(traceback.format_exc())
         return {}
 
@@ -1851,7 +1863,7 @@ def search_json(request, conn=None, **kwargs):
     # search returns blitz_connector wrapper objects
 
     def urlprefix(iid):
-        return reverse('webgateway.views.render_thumbnail', args=(iid,))
+        return reverse('webgateway_render_thumbnail', args=(iid,))
     xtra = {'thumbUrlPrefix': kwargs.get('urlprefix', urlprefix)}
     try:
         if opts['ctx'] == 'imgs':
@@ -1878,11 +1890,11 @@ def search_json(request, conn=None, **kwargs):
                     rv.append(imageData_json(
                         request, server_id, iid=e.id,
                         key=opts['key'], conn=conn, _internal=True))
-                except AttributeError, x:
+                except AttributeError as x:
                     logger.debug('(iid %i) ignoring Attribute Error: %s'
                                  % (e.id, str(x)))
                     pass
-                except omero.ServerError, x:
+                except omero.ServerError as x:
                     logger.debug('(iid %i) ignoring Server Error: %s'
                                  % (e.id, str(x)))
             return rv
@@ -2026,7 +2038,7 @@ def reset_rdef_json(request, toOwners=False, conn=None, **kwargs):
         raise Http404("Need to specify objects in request, E.g."
                       " ?totype=dataset&toids=1&toids=2")
 
-    toids = map(lambda x: long(x), toids)
+    toids = [int(id) for id in toids]
 
     rss = conn.getRenderingSettingsService()
 
@@ -2094,7 +2106,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         if r.get('maps'):
             try:
                 rdef['maps'] = json.loads(r.get('maps'))
-            except:
+            except Exception:
                 pass
         if r.get('pixel_range'):
             rdef['pixel_range'] = str(r.get('pixel_range'))
@@ -2176,7 +2188,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         # If we have both, apply settings...
         try:
             fromid = long(fromid)
-            toids = map(lambda x: long(x), toids)
+            toids = [long(x) for x in toids]
         except TypeError:
             fromid = None
         except ValueError:
@@ -2285,11 +2297,11 @@ def full_viewer(request, iid, conn=None, **kwargs):
         if opengraph or twitter:
             urlargs = {'iid': iid}
             prefix = kwargs.get(
-                'thumbprefix', 'webgateway.views.render_thumbnail')
+                'thumbprefix', 'webgateway_render_thumbnail')
             image_preview = request.build_absolute_uri(
                 reverse(prefix, kwargs=urlargs))
             page_url = request.build_absolute_uri(
-                reverse('webgateway.views.full_viewer', kwargs=urlargs))
+                reverse('webgateway_full_viewer', kwargs=urlargs))
 
         d = {'blitzcon': conn,
              'image': image,
@@ -2311,9 +2323,7 @@ def full_viewer(request, iid, conn=None, **kwargs):
 
         template = kwargs.get('template',
                               "webgateway/viewport/omero_image.html")
-        t = template_loader.get_template(template)
-        c = Context(request, d)
-        rsp = t.render(c)
+        rsp = render(request, template, d)
     except omero.SecurityViolation:
         logger.warn("SecurityViolation in Image:%s", iid)
         logger.warn(traceback.format_exc())
@@ -2485,7 +2495,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         well = None
         try:
             well = ob.getParent().getParent()
-        except:
+        except Exception:
             if hasattr(ob, 'canDownload'):
                 if not ob.canDownload():
                     rsp = ConnCleaningHttpResponse(status=404)
@@ -2503,7 +2513,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
     for image in images:
         for f in image.getImportedImageFiles():
             fileMap[f.getId()] = f
-    files = fileMap.values()
+    files = list(fileMap.values())
 
     if len(files) == 0:
         message = 'Tried downloading archived files from image with no' \
@@ -2675,10 +2685,8 @@ def su(request, user, conn=None, **kwargs):
         context = {
             'url': reverse('webgateway_su', args=[user]),
             'submit': "Do you want to su to %s" % user}
-        t = template_loader.get_template(
-            'webgateway/base/includes/post_form.html')
-        c = Context(request, context)
-        return HttpResponse(t.render(c))
+        template = 'webgateway/base/includes/post_form.html'
+        return render(request, template, context)
 
 
 def _annotations(request, objtype, objid, conn=None, **kwargs):
@@ -2734,6 +2742,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
     query += """
         left outer join fetch obj0.annotationLinks links
         left outer join fetch links.child as f
+        left outer join fetch links.parent
         left outer join fetch f.file
         join fetch links.details.owner
         join fetch links.details.creationEvent
@@ -2764,7 +2773,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
         data.append(dict(id=annotation.id.val,
                          file=annotation.file.id.val,
                          parentType=objtype[0],
-                         parentId=obj.id.val,
+                         parentId=link.parent.id.val,
                          owner=ownerName,
                          addedBy=addedByName,
                          addedOn=unwrap(link.details.creationEvent._time)))
@@ -3004,7 +3013,7 @@ class LoginView(View):
                         # only
                         try:
                             upgrades_url = settings.UPGRADES_URL
-                        except:
+                        except Exception:
                             upgrades_url = conn.getUpgradesUrl()
                         upgradeCheck(url=upgrades_url)
                         return self.handle_logged_in(request, conn, connector)
@@ -3050,6 +3059,6 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
             return {'error': 'No image with id ' + str(img_id)}
 
         return {'rdefs': img.getAllRenderingDefs()}
-    except:
+    except Exception:
         logger.debug(traceback.format_exc())
         return {'error': 'Failed to retrieve rdefs'}

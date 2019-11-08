@@ -1,4 +1,4 @@
-from omero_version import omero_version
+from omeroweb.version import omeroweb_version as omero_version
 from django.conf import settings
 
 

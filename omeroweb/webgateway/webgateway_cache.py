@@ -17,8 +17,11 @@ from django.conf import settings
 import omero
 import logging
 from random import random
+from io import open
 import datetime
-from types import StringTypes
+# Support python2 and python3
+from past.builtins import basestring
+from builtins import str
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +127,7 @@ class FileCache(CacheBase):
                 f.close()
                 self._delete(fname)
             else:
-                return f.read()
+                return f.read().decode('utf-8')
         except (IOError, OSError, EOFError, struct.error):
             pass
         return default
@@ -139,7 +142,7 @@ class FileCache(CacheBase):
         @param invalidateGroup:     Not used?
         """
 
-        if not isinstance(value, StringTypes):
+        if not isinstance(value, basestring):
             raise ValueError("%s not a string, can't cache" % type(value))
         fname = self._key_to_file(key)
         dirname = os.path.dirname(fname)
@@ -166,7 +169,7 @@ class FileCache(CacheBase):
             else:
                 exp = 0
             f.write(struct.pack('d', exp))
-            f.write(value)
+            f.write(value.encode('utf-8'))
             f.close()
         except (IOError, OSError):  # pragma: nocover
             pass
@@ -224,7 +227,7 @@ class FileCache(CacheBase):
         @return True if entry is valid, False if expired
         """
         try:
-            if isinstance(fname, StringTypes):
+            if isinstance(fname, basestring):
                 f = open(fname, 'rb')
                 exp = struct.unpack('d', f.read(size_of_double))[0]
             else:
@@ -837,16 +840,17 @@ class WebGatewayCache (object):
 webgateway_cache = WebGatewayCache(FileCache)
 
 
-class AutoLockFile (file):
+class AutoLockFile ():
     """
     Class extends file to facilitate creation and deletion of lock file.
     """
 
     def __init__(self, fn, mode):
         """ creates a '.lock' file with the specified file name and mode """
-        super(AutoLockFile, self).__init__(fn, mode)
+        # FIXME: AutoLockFile previously extended file object
+        # super(AutoLockFile, self).__init__(fn, mode)
         self._lock = os.path.join(os.path.dirname(fn), '.lock')
-        file(self._lock, 'a').close()
+        open(self._lock, 'a').close()
 
     def __del__(self):
         """ tries to delete the lock file """
@@ -861,7 +865,8 @@ class AutoLockFile (file):
             os.remove(self._lock)
         except:
             pass
-        super(AutoLockFile, self).close()
+        # FIXME: AutoLockFile previously extended file object
+        # super(AutoLockFile, self).close()
 
 
 class WebGatewayTempFile (object):
@@ -897,7 +902,7 @@ class WebGatewayTempFile (object):
             try:
                 ts = os.path.join(self._dir, f, '.timestamp')
                 if os.path.exists(ts):
-                    ft = float(file(ts).read()) + TMPDIR_TIME
+                    ft = float(open(ts).read()) + TMPDIR_TIME
                 else:
                     ft = float(f) + TMPDIR_TIME
                 if ft < now:
@@ -926,11 +931,16 @@ class WebGatewayTempFile (object):
                 stamp = str(time.time())
                 dn = os.path.join(self._dir, stamp)
             key = stamp
-        key = key.replace('/', '_').decode('utf8').encode('ascii', 'ignore')
+        key = key.replace('/', '_')
+        try:
+            key = key.decode('utf8').encode('ascii', 'ignore')
+        except AttributeError:
+            # python3
+            pass
         dn = os.path.join(self._dir, key)
         if not os.path.isdir(dn):
             os.makedirs(dn)
-        file(os.path.join(dn, '.timestamp'), 'w').write(stamp)
+        open(os.path.join(dn, '.timestamp'), 'w').write(stamp)
         return dn, key
 
     def abort(self, fn):
@@ -955,8 +965,12 @@ class WebGatewayTempFile (object):
         if not self._dir:
             return None, None, None
         dn, stamp = self.newdir(key)
-        name = name.replace('/', '_').replace('#', '_').decode(
-            'utf8').encode('ascii', 'ignore')
+        name = name.replace('/', '_').replace('#', '_')
+        try:
+            name = name.decode('utf8').encode('ascii', 'ignore')
+        except AttributeError:
+            # python3
+            pass
         if len(name) > 255:
             # Try to be smart about trimming and keep up to two levels of
             # extension (ex: .ome.tiff)

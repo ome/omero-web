@@ -22,10 +22,11 @@
 import re
 import logging
 
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
+from future.utils import with_metaclass
 
 from omero import client_wrapper
-from omero_version import omero_version
+from omeroweb.version import omeroweb_version as omero_version
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +41,8 @@ class IterRegistry(type):
         return iter(cls._registry.values())
 
 
-class ServerBase(object):
-    __metaclass__ = IterRegistry
+# with_metaclass to support python2 and python3
+class ServerBase(with_metaclass(IterRegistry)):
     _next_id = 1
 
     def __init__(self, host, port, server=None):
@@ -91,7 +92,7 @@ class Server(ServerBase):
         return """["%s", %s, "%s"]""" % (self.host, self.port, self.server)
 
     def __str__(self):
-        return force_unicode(self).encode('utf-8')
+        return force_text(self).encode('utf-8')
 
     def __unicode__(self):
         return str(self.id)
@@ -238,13 +239,22 @@ class Connector(object):
                 client_version = client_version.group(1).split('.')
                 logger.info("Client version: '%s'; Server version: '%s'"
                             % (client_version, server_version))
-                # Compatibility is determined by matching the major version
-                # If OMERO moves to semver only the first element will need
-                # to be checked
-                return server_version[:2] == client_version[:2]
+                return self.is_compatible(server_version, client_version)
             except:
                 logger.error('Cannot compare server to client version.',
                              exc_info=True)
             return False
         finally:
             connection.close()
+
+    @staticmethod
+    def is_compatible(server_version, client_version):
+        # Compatibility is determined by matching the major version
+        # If OMERO moves to semver only the first element will need
+        # to be checked
+        if server_version[0] != client_version[0]:
+            return False
+        # Currently, web 5.6+ is compatible with server 5.5+
+        if client_version[0] == '5' and int(client_version[1]) >= 6:
+            return int(server_version[1]) >= 5
+        return server_version[:2] == client_version[:2]

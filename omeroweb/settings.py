@@ -28,7 +28,6 @@
 
 
 import os.path
-import warnings
 import sys
 import logging
 import omero
@@ -39,17 +38,14 @@ import re
 import json
 import random
 import string
+from builtins import str as text
 
 from omero_ext import portalocker
-from omero.install.python_warning import py27_only, PYTHON_WARNING
 from omero.util.concurrency import get_event
-from utils import sort_properties_to_tuple
-from connector import Server
+from omeroweb.utils import sort_properties_to_tuple
+from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
-
-if not py27_only():
-    warnings.warn("WARNING: %s" % PYTHON_WARNING, RuntimeWarning)
 
 # LOGS
 # NEVER DEPLOY a site into production with DEBUG turned on.
@@ -58,6 +54,8 @@ if not py27_only():
 # handler404 and handler500 works only when False
 if 'OMERO_HOME' in os.environ:
     OMERO_HOME = os.environ.get('OMERO_HOME')
+elif 'OMERODIR' in os.environ:
+    OMERO_HOME = os.environ.get('OMERODIR')
 else:
     OMERO_HOME = os.path.join(os.path.dirname(__file__), '..', '..', '..')
     OMERO_HOME = os.path.normpath(OMERO_HOME)
@@ -68,7 +66,7 @@ LOGDIR = os.path.join(OMERO_HOME, 'var', 'log').replace('\\', '/')
 if not os.path.isdir(LOGDIR):
     try:
         os.makedirs(LOGDIR)
-    except Exception, x:
+    except Exception as x:
         exctype, value = sys.exc_info()[:2]
         raise exctype(value)
 
@@ -130,12 +128,8 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'formatter': 'full_request',
         },
-        'null': {
-            'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
-        },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'standard'
@@ -153,7 +147,7 @@ LOGGING = {
             'propagate': False
         },
         'django': {
-            'handlers': ['null'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True
         },
@@ -422,7 +416,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
           " must end in a slash if set to a non-empty value.")],
     "omero.web.static_root":
         ["STATIC_ROOT",
-         os.path.join(os.path.dirname(__file__), 'static').replace('\\', '/'),
+         os.path.join(OMERO_HOME, 'var', 'static'),
          os.path.normpath,
          ("The absolute path to the directory where collectstatic will"
           " collect static files for deployment. If the staticfiles contrib"
@@ -1032,11 +1026,11 @@ def process_custom_settings(
                         '%s and its deprecated key %s are both set, using %s',
                         key, dep_key, key)
             setattr(module, global_name, mapping(global_value))
-        except ValueError, e:
+        except ValueError as e:
             raise ValueError(
                 "Invalid %s (%s = %r). %s. %s" %
                 (global_name, key, global_value, e.message, description))
-        except ImportError, e:
+        except ImportError as e:
             raise ImportError(
                 "ImportError: %s. %s (%s = %r).\n%s" %
                 (e.message, global_name, key, global_value, description))
@@ -1115,15 +1109,15 @@ except NameError:
             )
             with os.fdopen(os.open(secret_path,
                                    os.O_WRONLY | os.O_CREAT,
-                                   0600), 'w') as secret_file:
+                                   0o600), 'w') as secret_file:
                 secret_file.write(secret_key)
-        except IOError, e:
+        except IOError as e:
             raise IOError("Please create a %s file with random characters"
                           " to generate your secret key!" % secret_path)
     try:
         with open(secret_path, 'r') as secret_file:
             SECRET_KEY = secret_file.read().strip()
-    except IOError, e:
+    except IOError as e:
         raise IOError("Could not find secret key in %s!" % secret_path)
 
 # USE_I18N: A boolean that specifies whether Django's internationalization
@@ -1148,6 +1142,7 @@ ROOT_URLCONF = 'omeroweb.urls'
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "pipeline.finders.PipelineFinder",
 )
 
 # STATICFILES_DIRS: This setting defines the additional locations the
@@ -1166,6 +1161,7 @@ TEMPLATES = [
         'DIRS': TEMPLATE_DIRS,  # noqa
         'APP_DIRS': True,
         'OPTIONS': {
+            'builtins': ['omeroweb.webgateway.templatetags.defaulttags'],
             'debug': DEBUG,  # noqa
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
@@ -1233,68 +1229,71 @@ INSTALLED_APPS += (
 logger.debug('INSTALLED_APPS=%s' % [INSTALLED_APPS])
 
 
-PIPELINE_CSS = {
-    'webgateway_viewer': {
-        'source_filenames': (
-            'webgateway/css/reset.css',
-            'webgateway/css/ome.body.css',
-            'webclient/css/dusty.css',
-            'webgateway/css/ome.viewport.css',
-            'webgateway/css/ome.toolbar.css',
-            'webgateway/css/ome.gs_slider.css',
-            'webgateway/css/base.css',
-            'webgateway/css/ome.snippet_header_logo.css',
-            'webgateway/css/ome.postit.css',
-            '3rdparty/farbtastic-1.2/farbtastic.css',
-            'webgateway/css/ome.colorbtn.css',
-            '3rdparty/JQuerySpinBtn-1.3a/JQuerySpinBtn.css',
-            '3rdparty/jquery-ui-1.10.4/themes/base/jquery-ui.all.css',
-            'webgateway/css/omero_image.css',
-            '3rdparty/panojs-2.0.0/panojs.css',
-        ),
-        'output_filename': 'omeroweb.viewer.min.css',
+PIPELINE = {
+    'STYLESHEETS': {
+        'webgateway_viewer': {
+            'source_filenames': (
+                'webgateway/css/reset.css',
+                'webgateway/css/ome.body.css',
+                'webclient/css/dusty.css',
+                'webgateway/css/ome.viewport.css',
+                'webgateway/css/ome.toolbar.css',
+                'webgateway/css/ome.gs_slider.css',
+                'webgateway/css/base.css',
+                'webgateway/css/ome.snippet_header_logo.css',
+                'webgateway/css/ome.postit.css',
+                '3rdparty/farbtastic-1.2/farbtastic.css',
+                'webgateway/css/ome.colorbtn.css',
+                '3rdparty/JQuerySpinBtn-1.3a/JQuerySpinBtn.css',
+                '3rdparty/jquery-ui-1.10.4/themes/base/jquery-ui.all.css',
+                'webgateway/css/omero_image.css',
+                '3rdparty/panojs-2.0.0/panojs.css',
+            ),
+            'output_filename': 'omeroweb.viewer.min.css',
+        },
     },
-}
-
-PIPELINE_JS = {
-    'webgateway_viewer': {
-        'source_filenames': (
-            '3rdparty/jquery-1.11.1.js',
-            '3rdparty/jquery-migrate-1.2.1.js',
-            '3rdparty/jquery-ui-1.10.4/js/jquery-ui.1.10.4.js',
-            'webgateway/js/ome.popup.js',
-            '3rdparty/aop-1.3.js',
-            '3rdparty/raphael-2.1.0/raphael.js',
-            '3rdparty/raphael-2.1.0/scale.raphael.js',
-            '3rdparty/panojs-2.0.0/utils.js',
-            '3rdparty/panojs-2.0.0/PanoJS.js',
-            '3rdparty/panojs-2.0.0/controls.js',
-            '3rdparty/panojs-2.0.0/pyramid_Bisque.js',
-            '3rdparty/panojs-2.0.0/pyramid_imgcnv.js',
-            '3rdparty/panojs-2.0.0/pyramid_Zoomify.js',
-            '3rdparty/panojs-2.0.0/control_thumbnail.js',
-            '3rdparty/panojs-2.0.0/control_info.js',
-            '3rdparty/panojs-2.0.0/control_svg.js',
-            '3rdparty/panojs-2.0.0/control_roi.js',
-            '3rdparty/panojs-2.0.0/control_scalebar.js',
-            '3rdparty/hammer-2.0.2/hammer.min.js',
-            'webgateway/js/ome.gs_utils.js',
-            'webgateway/js/ome.viewportImage.js',
-            'webgateway/js/ome.gs_slider.js',
-            'webgateway/js/ome.viewport.js',
-            'webgateway/js/omero_image.js',
-            'webgateway/js/ome.roidisplay.js',
-            'webgateway/js/ome.scalebardisplay.js',
-            'webgateway/js/ome.smartdialog.js',
-            'webgateway/js/ome.roiutils.js',
-            '3rdparty/JQuerySpinBtn-1.3a/JQuerySpinBtn.js',
-            'webgateway/js/ome.colorbtn.js',
-            'webgateway/js/ome.postit.js',
-            '3rdparty/jquery.selectboxes-2.2.6.js',
-            '3rdparty/farbtastic-1.2/farbtastic.js',
-            '3rdparty/jquery.mousewheel-3.0.6.js',
-        ),
-        'output_filename': 'omeroweb.viewer.min.js',
+    'CSS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
+    'JS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
+    'JAVASCRIPT': {
+        'webgateway_viewer': {
+            'source_filenames': (
+                '3rdparty/jquery-1.11.1.js',
+                '3rdparty/jquery-migrate-1.2.1.js',
+                '3rdparty/jquery-ui-1.10.4/js/jquery-ui.1.10.4.js',
+                'webgateway/js/ome.popup.js',
+                '3rdparty/aop-1.3.js',
+                '3rdparty/raphael-2.1.0/raphael.js',
+                '3rdparty/raphael-2.1.0/scale.raphael.js',
+                '3rdparty/panojs-2.0.0/utils.js',
+                '3rdparty/panojs-2.0.0/PanoJS.js',
+                '3rdparty/panojs-2.0.0/controls.js',
+                '3rdparty/panojs-2.0.0/pyramid_Bisque.js',
+                '3rdparty/panojs-2.0.0/pyramid_imgcnv.js',
+                '3rdparty/panojs-2.0.0/pyramid_Zoomify.js',
+                '3rdparty/panojs-2.0.0/control_thumbnail.js',
+                '3rdparty/panojs-2.0.0/control_info.js',
+                '3rdparty/panojs-2.0.0/control_svg.js',
+                '3rdparty/panojs-2.0.0/control_roi.js',
+                '3rdparty/panojs-2.0.0/control_scalebar.js',
+                '3rdparty/hammer-2.0.2/hammer.min.js',
+                'webgateway/js/ome.gs_utils.js',
+                'webgateway/js/ome.viewportImage.js',
+                'webgateway/js/ome.gs_slider.js',
+                'webgateway/js/ome.viewport.js',
+                'webgateway/js/omero_image.js',
+                'webgateway/js/ome.roidisplay.js',
+                'webgateway/js/ome.scalebardisplay.js',
+                'webgateway/js/ome.smartdialog.js',
+                'webgateway/js/ome.roiutils.js',
+                '3rdparty/JQuerySpinBtn-1.3a/JQuerySpinBtn.js',
+                'webgateway/js/ome.colorbtn.js',
+                'webgateway/js/ome.postit.js',
+                '3rdparty/jquery.selectboxes-2.2.6.js',
+                '3rdparty/farbtastic-1.2/farbtastic.js',
+                '3rdparty/jquery.mousewheel-3.0.6.js',
+            ),
+            'output_filename': 'omeroweb.viewer.min.js',
+        }
     }
 }
 
@@ -1364,8 +1363,8 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 # Load custom settings from etc/grid/config.xml
 # Tue  2 Nov 2010 11:03:18 GMT -- ticket:3228
-# MIDDLEWARE_CLASSES: A tuple of middleware classes to use.
-MIDDLEWARE_CLASSES = sort_properties_to_tuple(MIDDLEWARE_CLASSES_LIST)  # noqa
+# MIDDLEWARE: A tuple of middleware classes to use.
+MIDDLEWARE = sort_properties_to_tuple(MIDDLEWARE_CLASSES_LIST)  # noqa
 
 for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
     setattr(sys.modules[__name__], k, v)
@@ -1374,8 +1373,8 @@ for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
 # Load server list and freeze
 def load_server_list():
     for s in SERVER_LIST:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
-        server = (len(s) > 2) and unicode(s[2]) or None
-        Server(host=unicode(s[0]), port=int(s[1]), server=server)
+        server = (len(s) > 2) and text(s[2]) or None
+        Server(host=text(s[0]), port=int(s[1]), server=server)
     Server.freeze()
 
 

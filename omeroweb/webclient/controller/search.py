@@ -28,8 +28,8 @@ import omero
 import logging
 
 from omero.rtypes import rtime
-from webclient.controller import BaseController
-from webclient.webclient_utils import getDateTime
+from omeroweb.webclient.controller import BaseController
+from omeroweb.webclient.webclient_utils import getDateTime
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class BaseSearch(BaseController):
                     if len(self.containers[dt]) == batchSize:
                         self.moreResults = True
                     resultCount += len(self.containers[dt])
-        except Exception, x:
+        except Exception as x:
             logger.info("Search Exception: %s" % x.message)
             if isinstance(x, omero.ServerError):
                 # Only show message to user if we can be helpful

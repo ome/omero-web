@@ -25,21 +25,19 @@ import logging
 
 try:
     from collections import OrderedDict  # Python 2.7+ only
-except:
+except Exception:
     pass
 
 from django import forms
 from django.forms.widgets import Textarea
-from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
 
 from omeroweb.connector import Server
 
 from omeroweb.custom_forms import NonASCIIForm
 
-from custom_forms import ServerModelChoiceField, GroupModelChoiceField
-from custom_forms import GroupModelMultipleChoiceField, OmeNameField
-from custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
+from .custom_forms import ServerModelChoiceField, GroupModelChoiceField
+from .custom_forms import GroupModelMultipleChoiceField, OmeNameField
+from .custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
 
 logger = logging.getLogger(__name__)
 
@@ -71,12 +69,16 @@ class LoginForm(NonASCIIForm):
 
 class ForgottonPasswordForm(NonASCIIForm):
 
-    server = ServerModelChoiceField(Server, empty_label=None)
-    username = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={'size': 28, 'autocomplete': 'off'}))
-    email = forms.EmailField(
-        widget=forms.TextInput(attrs={'size': 28, 'autocomplete': 'off'}))
+    def __init__(self, *args, **kwargs):
+        super(ForgottonPasswordForm, self).__init__(*args, **kwargs)
+        self.fields['server'] = ServerModelChoiceField(Server,
+                                                       empty_label=None)
+        f = forms.CharField(max_length=50,
+                            widget=forms.TextInput(
+                                attrs={'size': 28, 'autocomplete': 'off'}))
+        self.fields['username'] = f
+        self.fields['email'] = forms.EmailField(
+            widget=forms.TextInput(attrs={'size': 28, 'autocomplete': 'off'}))
 
 
 ROLE_CHOICES = (
@@ -84,24 +86,6 @@ ROLE_CHOICES = (
     ('administrator', 'Administrator'),
     ('restricted_administrator', 'Administrator with restricted privileges')
 )
-
-
-class RoleRenderer(forms.RadioSelect.renderer):
-    """Allows disabling of 'administrator' Radio button."""
-    def render(self):
-        midList = []
-        for x, wid in enumerate(self):
-            disabled = self.attrs.get('disabled')
-            if ROLE_CHOICES[x][0] == 'administrator':
-                if hasattr(self, 'disable_admin'):
-                    disabled = getattr(self, 'disable_admin')
-            if disabled:
-                wid.attrs['disabled'] = True
-            midList.append(u'<li>%s</li>' % force_unicode(wid))
-        finalList = mark_safe(u'<ul id="id_role">\n%s\n</ul>'
-                              % u'\n'.join([u'<li>%s</li>'
-                                           % w for w in midList]))
-        return finalList
 
 
 class ExperimenterForm(NonASCIIForm):
@@ -123,7 +107,7 @@ class ExperimenterForm(NonASCIIForm):
                 queryset=kwargs['initial']['groups'],
                 initial=kwargs['initial']['other_groups'], required=False,
                 label="Groups")
-        except:
+        except Exception:
             self.fields['other_groups'] = GroupModelMultipleChoiceField(
                 queryset=kwargs['initial']['groups'], required=False,
                 label="Groups")
@@ -133,26 +117,25 @@ class ExperimenterForm(NonASCIIForm):
                 queryset=kwargs['initial']['my_groups'],
                 initial=kwargs['initial']['default_group'],
                 empty_label=u"", required=False)
-        except:
+        except Exception:
             try:
                 self.fields['default_group'] = GroupModelChoiceField(
                     queryset=kwargs['initial']['my_groups'],
                     empty_label=u"", required=False)
-            except:
+            except Exception:
                 self.fields['default_group'] = GroupModelChoiceField(
                     queryset=list(), empty_label=u"", required=False)
 
         # 'Role' is disabled if experimenter is 'admin' or self,
         # so required=False to avoid validation error.
-        self.fields['role'] = forms.ChoiceField(
-            choices=ROLE_CHOICES,
-            widget=forms.RadioSelect(renderer=RoleRenderer),
-            required=False,
-            initial='user')
         # If current user is restricted Admin, can't create full Admin
         restricted_admin = "ReadSession" not in self.user_privileges
-        self.fields['role'].widget.renderer.disable_admin = \
-            restricted_admin or experimenter_root
+        self.fields['role'] = forms.ChoiceField(
+            choices=ROLE_CHOICES,
+            widget=forms.RadioSelect(
+                {'disabled': restricted_admin or experimenter_root}),
+            required=False,
+            initial='user')
 
         if ('with_password' in kwargs['initial'] and
                 kwargs['initial']['with_password']):
@@ -315,7 +298,7 @@ class GroupForm(NonASCIIForm):
                 self.fields['owners'] = ExperimenterModelMultipleChoiceField(
                     queryset=kwargs['initial']['experimenters'],
                     initial=kwargs['initial']['owners'], required=False)
-            except:
+            except Exception:
                 self.fields['owners'] = ExperimenterModelMultipleChoiceField(
                     queryset=kwargs['initial']['experimenters'],
                     required=False)
@@ -326,7 +309,7 @@ class GroupForm(NonASCIIForm):
                 self.fields['members'] = ExperimenterModelMultipleChoiceField(
                     queryset=kwargs['initial']['experimenters'],
                     initial=kwargs['initial']['members'], required=False)
-            except:
+            except Exception:
                 self.fields['members'] = ExperimenterModelMultipleChoiceField(
                     queryset=kwargs['initial']['experimenters'],
                     required=False)
@@ -367,7 +350,7 @@ class GroupOwnerForm(forms.Form):
             self.fields['owners'] = ExperimenterModelMultipleChoiceField(
                 queryset=kwargs['initial']['experimenters'],
                 initial=kwargs['initial']['owners'], required=False)
-        except:
+        except Exception:
             self.fields['owners'] = ExperimenterModelMultipleChoiceField(
                 queryset=kwargs['initial']['experimenters'], required=False)
 
@@ -377,7 +360,7 @@ class GroupOwnerForm(forms.Form):
             self.fields['members'] = ExperimenterModelMultipleChoiceField(
                 queryset=kwargs['initial']['experimenters'],
                 initial=kwargs['initial']['members'], required=False)
-        except:
+        except Exception:
             self.fields['members'] = ExperimenterModelMultipleChoiceField(
                 queryset=kwargs['initial']['experimenters'], required=False)
 
@@ -400,7 +383,7 @@ class MyAccountForm(NonASCIIForm):
                 queryset=kwargs['initial']['groups'],
                 initial=kwargs['initial']['default_group'],
                 empty_label=None)
-        except:
+        except Exception:
             self.fields['default_group'] = GroupModelChoiceField(
                 queryset=kwargs['initial']['groups'],
                 empty_label=None)
@@ -449,7 +432,7 @@ class ContainedExperimentersForm(NonASCIIForm):
                 queryset=kwargs['initial']['experimenters'],
                 initial=kwargs['initial']['members'],
                 required=False)
-        except:
+        except Exception:
             self.fields['members'] = ExperimenterModelMultipleChoiceField(
                 queryset=kwargs['initial']['experimenters'],
                 required=False)
@@ -530,7 +513,7 @@ class EnumerationEntries(NonASCIIForm):
                         max_length=250,
                         widget=forms.TextInput(attrs={'size': 30}),
                         label=i+1)
-            except:
+            except Exception:
                 self.fields[str(e.id)] = forms.CharField(
                     max_length=250,
                     widget=forms.TextInput(attrs={'size': 30}),

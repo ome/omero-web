@@ -27,7 +27,7 @@ from django.forms.widgets import SelectMultiple, MultipleHiddenInput
 from django.forms.fields import Field, EMPTY_VALUES
 from django.forms import ModelChoiceField, ValidationError
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 
 from omero_model_FileAnnotationI import FileAnnotationI
 from omero_model_TagAnnotationI import TagAnnotationI
@@ -87,7 +87,7 @@ class MetadataQuerySetIterator(object):
         if self.empty_label is not None:
             yield (u"", self.empty_label)
         for obj in self.queryset:
-            yield (obj.value, smart_unicode(obj.value))
+            yield (obj.value, smart_text(obj.value))
 
 
 class MetadataModelChoiceField(ModelChoiceField):
@@ -119,7 +119,7 @@ class MetadataModelChoiceField(ModelChoiceField):
             return None
         res = False
         for q in self.queryset:
-            if long(value) == q.id:
+            if int(value) == q.id:
                 res = True
         if not res:
             raise ValidationError(self.error_messages['invalid_choice'])
@@ -165,7 +165,7 @@ class AnnotationQuerySetIterator(object):
                 if l > 55:
                     textValue = "%s..." % textValue[:55]
             oid = obj.id
-            yield (oid, smart_unicode(textValue))
+            yield (oid, smart_text(textValue))
 
 
 class AnnotationModelChoiceField(ModelChoiceField):
@@ -197,7 +197,7 @@ class AnnotationModelChoiceField(ModelChoiceField):
             return None
         res = False
         for q in self.queryset:
-            if long(value) == q.id:
+            if int(value) == q.id:
                 res = True
         if not res:
             raise ValidationError(self.error_messages['invalid_choice'])
@@ -230,13 +230,13 @@ class AnnotationModelMultipleChoiceField(AnnotationModelChoiceField):
         final_values = []
         for val in value:
             try:
-                long(val)
+                int(val)
             except:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
                 for q in self.queryset:
-                    if long(val) == q.id:
+                    if int(val) == q.id:
                         res = True
                 if not res:
                     raise ValidationError(
@@ -257,9 +257,9 @@ class ObjectQuerySetIterator(object):
             yield (u"", self.empty_label)
         for obj in self.queryset:
             if hasattr(obj.id, 'val'):
-                yield (obj.id.val, smart_unicode(obj.id.val))
+                yield (obj.id.val, smart_text(obj.id.val))
             else:
-                yield (obj.id, smart_unicode(obj.id))
+                yield (obj.id, smart_text(obj.id))
 
 
 class ObjectModelChoiceField(ModelChoiceField):
@@ -292,10 +292,10 @@ class ObjectModelChoiceField(ModelChoiceField):
         res = False
         for q in self.queryset:
             if hasattr(q.id, 'val'):
-                if long(value) == q.id.val:
+                if int(value) == q.id.val:
                     res = True
             else:
-                if long(value) == q.id:
+                if int(value) == q.id:
                     res = True
         if not res:
             raise ValidationError(self.error_messages['invalid_choice'])
@@ -329,17 +329,17 @@ class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
         final_values = []
         for val in value:
             try:
-                long(val)
+                int(val)
             except:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
                 for q in self.queryset:
                     if hasattr(q.id, 'val'):
-                        if long(val) == q.id.val:
+                        if int(val) == q.id.val:
                             res = True
                     else:
-                        if long(val) == q.id:
+                        if int(val) == q.id:
                             res = True
                 if not res:
                     raise ValidationError(

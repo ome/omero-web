@@ -27,5 +27,5 @@ def upgradeCheck(url):
                     " https://downloads.openmicroscopy.org/latest/omero/.\n")
             else:
                 logger.debug("Up to date.\n")
-    except Exception, x:
+    except Exception as x:
         logger.error("Upgrade check error: %s" % x)

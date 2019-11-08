@@ -30,6 +30,7 @@ from django.core.urlresolvers import reverse
 from omeroweb.utils import reverse_with_params, sort_properties_to_tuple
 from omeroweb.webclient.webclient_utils import formatPercentFraction
 from omeroweb.webclient.webclient_utils import getDateTime
+from omeroweb.connector import Connector
 
 
 class TestUtil(object):
@@ -106,13 +107,11 @@ class TestUtil(object):
     def test_sort_properties_to_tuple(self, params):
         assert sort_properties_to_tuple(params[0]) == params[1]
 
-    @pytest.mark.parametrize('params', [
-        ([{"foo": 1, "bar": "abc"}], ('abc',)),
-    ])
-    def test_sort_properties_to_tuple_custom(self, params):
-        assert sort_properties_to_tuple(
-            params[0], params[0][0].keys()[0],
-            params[0][0].keys()[1]) == params[1]
+    def test_sort_properties_to_tuple_custom(self):
+        to_sort = [{"foo": 1, "bar": "abc"}]
+        sort_by = "foo"
+        pick_by = "bar"
+        assert sort_properties_to_tuple(to_sort, sort_by, pick_by) == ("abc",)
 
     @pytest.mark.parametrize('bad_params', [
         ([{}], KeyError, "'index'"),
@@ -123,3 +122,21 @@ class TestUtil(object):
         with pytest.raises(bad_params[1]) as excinfo:
             sort_properties_to_tuple(bad_params[0])
         assert bad_params[2] in str(excinfo.value)
+
+    @pytest.mark.parametrize('versions', [
+        [['4', '4', '4'], ['4', '4', '5'], True],       # major & minor match
+        [['5', '4', '4'], ['4', '4', '4'], False],      # major mismatch
+        [['5', '3', '4'], ['5', '4', '4'], False],      # minor mismatch
+        [['5', '5', '0'], ['5', '4', '4'], False],
+        [['5', '5', '0'], ['5', '5', '0'], True],
+        [['5', '5', '0'], ['5', '5', '2'], True],
+        [['5', '5', '0'], ['5', '6', '0'], True],       # web 5.6+ matches 5.5+
+        [['5', '5', '0'], ['5', '8', '0'], True],
+        [['5', '5', '0'], ['6', '7', '0'], False],      # major mismatch, >=5
+        [['6', '5', '0'], ['6', '7', '0'], False],      # minor mismatch, >=5
+    ])
+    def test_version_compatible(self, versions):
+        server = versions[0]
+        client = versions[1]
+        compatible = versions[2]
+        assert Connector.is_compatible(server, client) == compatible
