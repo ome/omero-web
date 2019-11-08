@@ -64,7 +64,7 @@ class SettingNode (template.Node):
             if setting is None:
                 return ""
             return str(setting)
-        except:
+        except Exception:
             # if FAILURE then FAIL silently
             return ""
 

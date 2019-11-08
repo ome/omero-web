@@ -231,7 +231,7 @@ class AnnotationModelMultipleChoiceField(AnnotationModelChoiceField):
         for val in value:
             try:
                 int(val)
-            except:
+            except Exception:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
@@ -330,7 +330,7 @@ class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
         for val in value:
             try:
                 int(val)
-            except:
+            except Exception:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False

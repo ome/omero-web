@@ -63,7 +63,7 @@ from omeroweb.webgateway.templatetags.common_filters import (
 try:
     import hashlib
     hash_sha1 = hashlib.sha1
-except:
+except Exception:
     import sha
     hash_sha1 = sha.new
 
@@ -74,7 +74,7 @@ try:
 except ImportError:
     try:
         import Image  # see ticket:2597
-    except:
+    except Exception:
         logger.error(
             "You need to install the Python Imaging Library. Get it at"
             " http://www.pythonware.com/products/pil/")
@@ -179,7 +179,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         except omero.SecurityViolation:
             logger.error(traceback.format_exc())
             return False
-        except:
+        except Exception:
             logger.error(traceback.format_exc())
             return False
 
@@ -804,7 +804,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 return True
             else:
                 return False
-        except:
+        except Exception:
             logger.error(traceback.format_exc())
             return False
 
@@ -842,7 +842,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                     store.close()
             else:
                 photo = self.getExperimenterDefaultPhoto()
-        except:
+        except Exception:
             logger.error(traceback.format_exc())
             photo = self.getExperimenterDefaultPhoto()
         if photo is None:
@@ -881,12 +881,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 store.close()
             try:
                 im = Image.open(StringIO(photo))
-            except:
+            except Exception:
                 logger.error(traceback.format_exc())
                 return None
             else:
                 return (im.size, ann.file.size.val)
-        except:
+        except Exception:
             return None
 
     def deleteExperimenterPhoto(self, oid=None):
@@ -901,7 +901,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 ann = meta.loadAnnotations(
                     "Experimenter", [int(oid)], None, None,
                     None).get(int(oid), [])[0]
-        except:
+        except Exception:
             logger.error(traceback.format_exc())
             raise IOError("Photo does not exist.")
         else:
@@ -948,7 +948,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 photo = store.read(0, int(ann.file.size.val))
             finally:
                 store.close()
-        except:
+        except Exception:
             logger.error(traceback.format_exc())
             raise IOError("Photo does not exist.")
         else:
@@ -1981,17 +1981,17 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             try:
                 for e in res['Image']:
                     im_list.append(ImageWrapper(self, e))
-            except:
+            except Exception:
                 pass
             try:
                 for e in res['Dataset']:
                     ds_list.append(DatasetWrapper(self, e))
-            except:
+            except Exception:
                 pass
             try:
                 for e in res['Project']:
                     pr_list.append(ProjectWrapper(self, e))
-            except:
+            except Exception:
                 pass
         return {'project': pr_list, 'dataset': ds_list, 'image': im_list}
 
@@ -2053,7 +2053,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         f.limit = rint(100000)
         try:
             f.groupId = rlong(self.SERVICE_OPTS.getOmeroGroup())
-        except:
+        except Exception:
             f.groupId = rlong(self.getEventContext().groupId)
         f.ownerId = rlong(eid or self.getEventContext().userId)
         p.theFilter = f
@@ -2197,7 +2197,7 @@ class OmeroWebObjectWrapper (object):
                 for v in range(0, len(self.name), 30):
                     splited.append(self.name[v:v+30]+"\n")
                 return "".join(splited)
-        except:
+        except Exception:
             logger.info(traceback.format_exc())
             return self.name
 
@@ -2464,7 +2464,7 @@ class ImageWrapper (OmeroWebObjectWrapper,
         """
         try:
             size = self.getPixelSizeX(units="MICROMETER")
-        except:
+        except Exception:
             size = self.getPixelSizeX(True)
             if size is not None:
                 return size.getSymbol()
@@ -2480,7 +2480,7 @@ class ImageWrapper (OmeroWebObjectWrapper,
         """
         try:
             size = self.getPixelSizeX(units="MICROMETER")
-        except:
+        except Exception:
             size = self.getPixelSizeX(True)
         if size is None:
             return 0
@@ -2492,7 +2492,7 @@ class ImageWrapper (OmeroWebObjectWrapper,
         """
         try:
             size = self.getPixelSizeY(units="MICROMETER")
-        except:
+        except Exception:
             size = self.getPixelSizeY(True)
         if size is None:
             return 0
@@ -2504,7 +2504,7 @@ class ImageWrapper (OmeroWebObjectWrapper,
         """
         try:
             size = self.getPixelSizeZ(units="MICROMETER")
-        except:
+        except Exception:
             size = self.getPixelSizeZ(True)
         if size is None:
             return 0
@@ -2712,7 +2712,7 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
             if d > 2051222400000:
                 return datetime(2035, 1, 1, 0, 0, 0)
             return datetime.fromtimestamp(d / 1000)
-        except:
+        except Exception:
             logger.info(traceback.format_exc())
         return None
 
@@ -2741,7 +2741,7 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
             if (d / 1000) > now:
                 return False
             return True
-        except:
+        except Exception:
             logger.info(traceback.format_exc())
         return None
 
@@ -2756,7 +2756,7 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
         try:
             if self.owner.id.val == self._conn.getEventContext().userId:
                 return True
-        except:
+        except Exception:
             logger.error(traceback.format_exc())
         return False
 

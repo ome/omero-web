@@ -58,7 +58,7 @@ def parse_url(lookup_view):
         try:
             resolve(lookup_view)
             url = lookup_view
-        except:
+        except Exception:
             pass
     if url is None:
         logger.error("Reverse for '%s' not found." % lookup_view)
@@ -84,7 +84,7 @@ class ConnCleaningHttpResponse(StreamingHttpResponse):
             logger.debug('Closing OMERO connection in %r' % self)
             if self.conn is not None and self.conn.c is not None:
                 self.conn.close(hard=False)
-        except:
+        except Exception:
             logger.error('Failed to clean up connection.', exc_info=True)
 
 
@@ -128,7 +128,7 @@ class login_required(object):
             conn.SERVICE_OPTS.setOmeroShare(share_id)
             conn.getShare(share_id)
             return conn
-        except:
+        except Exception:
             logger.error('Error activating share.', exc_info=True)
             return None
 
@@ -146,7 +146,7 @@ class login_required(object):
                     return self.get_share_connection(request, conn, share_id)
                 logger.debug('Share is unavailable.')
                 return None
-        except:
+        except Exception:
             logger.error('Error retrieving share connection.', exc_info=True)
             return None
 
@@ -252,14 +252,14 @@ class login_required(object):
             request.session['can_create'] = conn.canCreate()
         try:
             request.session['server_settings']
-        except:
+        except Exception:
             request.session.modified = True
             request.session['server_settings'] = {}
             try:
                 request.session['server_settings'] = \
                     propertiesToDict(conn.getClientSettings(),
                                      prefix="omero.client.")
-            except:
+            except Exception:
                 logger.error(traceback.format_exc())
             # make extra call for omero.mail, not a part of omero.client
             request.session['server_settings']['email'] = \
@@ -364,7 +364,7 @@ class login_required(object):
             else:
                 try:
                     server_id = request['server']
-                except:
+                except Exception:
                     logger.debug('No Server ID available.')
                     return None
 
@@ -491,7 +491,7 @@ class login_required(object):
                     if doConnectionCleanup:
                         if conn is not None and conn.c is not None:
                             conn.close(hard=False)
-                except:
+                except Exception:
                     logger.warn('Failed to clean up connection', exc_info=True)
             return retval
         return update_wrapper(wrapped, f)

@@ -346,7 +346,7 @@ def forgotten_password(request, **kwargs):
                     try:
                         error = exp.err.parameters[
                             exp.err.parameters.keys()[0]]
-                    except:
+                    except Exception:
                         error = exp
     else:
         form = ForgottonPasswordForm()
@@ -361,7 +361,7 @@ def index(request, **kwargs):
     conn = None
     try:
         conn = kwargs["conn"]
-    except:
+    except Exception:
         logger.error(traceback.format_exc())
 
     if conn.isAdmin():
@@ -474,7 +474,7 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
             prepare_experimenter(conn, eid)
         try:
             defaultGroupId = defaultGroup.id
-        except:
+        except Exception:
             defaultGroupId = None
 
         initial = {
@@ -914,7 +914,7 @@ def my_account(request, action=None, conn=None, **kwargs):
         prepare_experimenter(conn)
     try:
         defaultGroupId = defaultGroup.id
-    except:
+    except Exception:
         defaultGroupId = None
 
     ownedGroups = ownedGroupsInitial(conn)

@@ -188,7 +188,7 @@ def imageMarshal(image, key=None, request=None):
     try:
         server_settings = request.session.get('server_settings', {}) \
                                          .get('viewer', {})
-    except:
+    except Exception:
         server_settings = {}
     init_zoom = server_settings.get('initial_zoom_level', 0)
     if init_zoom < 0:
@@ -201,7 +201,7 @@ def imageMarshal(image, key=None, request=None):
             try:
                 size = method('MICROMETER')
                 return size.getValue() if size else None
-            except:
+            except Exception:
                 logger.debug(
                     'Unable to convert physical pixel size to microns',
                     exc_info=True

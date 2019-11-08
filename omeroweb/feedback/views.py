@@ -53,7 +53,7 @@ def get_user_agent(request):
     user_agent = ""
     try:
         user_agent = request.META['HTTP_USER_AGENT']
-    except:
+    except Exception:
         pass
     return user_agent
 
@@ -84,7 +84,7 @@ def send_feedback(request):
             try:
                 try:
                     fileObj.write(request.POST['error'])
-                except:
+                except Exception:
                     logger.error('handler500: Error could not be saved.')
                     logger.error(traceback.format_exc())
             finally:
@@ -116,7 +116,7 @@ def send_comment(request):
                 sf = SendFeedback(settings.FEEDBACK_URL)
                 sf.send_feedback(comment=comment, email=email,
                                  user_agent=get_user_agent(request))
-            except:
+            except Exception:
                 logger.error('handler500: Feedback could not be sent')
                 logger.error(traceback.format_exc())
                 error = ("Feedback could not be sent."
@@ -160,12 +160,12 @@ def handler500(request):
         try:
             request_repr = '\n{}'.format(
                 force_text(error_filter.get_request_repr(request)))
-        except:
+        except Exception:
             request_repr = error_filter.get_request_repr(request)
-    except:
+    except Exception:
         try:
             request_repr = repr(request)
-        except:
+        except Exception:
             request_repr = "Request unavailable"
 
     error500 = "%s\n%s" % (as_string, request_repr)

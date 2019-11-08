@@ -181,7 +181,7 @@ while True:
             raise exctype(value)
         else:
             event.wait(1)  # Wait a total of 10 seconds
-    except:
+    except Exception:
         # logger.error("Exception while loading configuration...",
         # exc_info=True)
         exctype, value = sys.exc_info()[:2]

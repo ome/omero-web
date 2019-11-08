@@ -102,7 +102,7 @@ class Server(ServerBase):
         r = None
         try:
             pk = int(pk)
-        except:
+        except Exception:
             pass
         else:
             if pk in cls._registry:
@@ -175,7 +175,7 @@ class Connector(object):
                              % username)
                 self.prepare_gateway(connection)
                 return connection
-        except:
+        except Exception:
             logger.debug('Cannot create a new connection.', exc_info=True)
         connection.close()
         return None
@@ -189,7 +189,7 @@ class Connector(object):
                 return connection
             else:
                 logger.warn('Cannot create a guest connection.')
-        except:
+        except Exception:
             logger.error('Cannot create a guest connection.', exc_info=True)
         connection.close()
         return None
@@ -203,7 +203,7 @@ class Connector(object):
                 connection.setUserId(self.user_id)
                 self.prepare_gateway(connection)
                 return connection
-        except:
+        except Exception:
             logger.debug('Cannot create a new connection.', exc_info=True)
         connection.close()
         return None
@@ -216,7 +216,7 @@ class Connector(object):
             try:
                 connection.getServerVersion()
                 return True
-            except:
+            except Exception:
                 logger.error('Cannot request server version.', exc_info=True)
             return False
         finally:
@@ -240,7 +240,7 @@ class Connector(object):
                 logger.info("Client version: '%s'; Server version: '%s'"
                             % (client_version, server_version))
                 return self.is_compatible(server_version, client_version)
-            except:
+            except Exception:
                 logger.error('Cannot compare server to client version.',
                              exc_info=True)
             return False

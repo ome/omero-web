@@ -77,7 +77,7 @@ class login_required(omeroweb.decorators.login_required):
         if self.login_redirect is not None:
             try:
                 url = reverse(self.login_redirect)
-            except:
+            except Exception:
                 pass
         return super(
             login_required, self).on_not_logged_in(request, url, error)

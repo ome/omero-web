@@ -423,7 +423,7 @@ class WebGatewayCache (object):
             try:
                 logger.debug('removing cache lock file on __del__')
                 os.remove(self._lastlock)
-            except:
+            except Exception:
                 pass
             self._lastlock = None
 
@@ -444,7 +444,7 @@ class WebGatewayCache (object):
                 return True
             try:
                 os.remove(self._lastlock)
-            except:
+            except Exception:
                 pass
             self._lastlock = None
         try:
@@ -856,14 +856,14 @@ class AutoLockFile ():
         """ tries to delete the lock file """
         try:
             os.remove(self._lock)
-        except:
+        except Exception:
             pass
 
     def close(self):
         """ tries to delete the lock file and close the file """
         try:
             os.remove(self._lock)
-        except:
+        except Exception:
             pass
         # FIXME: AutoLockFile previously extended file object
         # super(AutoLockFile, self).close()

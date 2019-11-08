@@ -225,7 +225,7 @@ class WebclientLoginView(LoginView):
         if url is None or len(url) == 0:
             try:
                 url = parse_url(settings.LOGIN_REDIRECT)
-            except:
+            except Exception:
                 url = reverse("webindex")
         return HttpResponseRedirect(url)
 
@@ -344,7 +344,7 @@ def logout(request, conn=None, **kwargs):
         try:
             try:
                 conn.close()
-            except:
+            except Exception:
                 logger.error('Exception during logout.', exc_info=True)
         finally:
             request.session.flush()
@@ -436,7 +436,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             user_id = initially_open_owner
     try:
         user_id = long(user_id)
-    except:
+    except Exception:
         user_id = None
     # check if user_id is in a currnt group
     if user_id is not None:
@@ -665,7 +665,7 @@ def api_container_list(request, conn=None, **kwargs):
         try:
             orph_t = request \
                 .session['server_settings']['ui']['tree']['orphans']
-        except:
+        except Exception:
             orph_t = {'enabled': True}
         if (conn.isAdmin() or
                 conn.isLeader(gid=request.session.get('active_group')) or
@@ -978,7 +978,7 @@ def _api_links_POST(conn, json_data, **kwargs):
             # We try to save all at once, for speed.
             conn.saveArray(linksToSave)
             response['success'] = True
-        except:
+        except Exception:
             logger.info("api_link: Exception on saveArray with %s links"
                         % len(linksToSave))
             # If this fails, e.g. ValidationException because link
@@ -986,7 +986,7 @@ def _api_links_POST(conn, json_data, **kwargs):
             for l in linksToSave:
                 try:
                     conn.saveObject(l)
-                except:
+                except Exception:
                     pass
             response['success'] = True
 
@@ -1803,7 +1803,7 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
 
         try:
             image = manager.well.getWellSample().image()
-        except:
+        except Exception:
             image = manager.image
 
         if share_id is None:    # 9853
@@ -2365,7 +2365,7 @@ def marshal_tagging_form_data(request, conn=None, **kwargs):
     try:
         offset = int(request.GET.get('offset'))
         limit = int(request.GET.get('limit', 1000))
-    except:
+    except Exception:
         offset = limit = None
 
     jsonmode = request.GET.get('jsonmode')
@@ -3238,7 +3238,7 @@ def activities(request, conn=None, **kwargs):
                             in_progress += 1
                     finally:
                         prx.close(close_handle)
-                except:
+                except Exception:
                     logger.info(
                         "Activities chgrp handle not found: %s" % cbString)
                     continue
@@ -3295,7 +3295,7 @@ def activities(request, conn=None, **kwargs):
                             in_progress += 1
                     finally:
                         callback.close(close_handle)
-                except:
+                except Exception:
                     logger.error(traceback.format_exc())
                     logger.info("Activities send_email handle not found: %s"
                                 % cbString)
@@ -3413,7 +3413,7 @@ def activities(request, conn=None, **kwargs):
                                             v.file.mimetype.val]
                                         obj_data['fileId'] = v.file.id.val
                                     obj_data['name'] = v.file.name.val
-                                    # except:
+                                    # except Exception:
                                     #    pass
                                 if v.isLoaded() and hasattr(v, "name"):
                                     # E.g Image, OriginalFile etc
@@ -3687,7 +3687,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
                 wellIdx = 0
                 try:
                     wellIdx = int(request.GET.get("Index", 0))
-                except:
+                except Exception:
                     pass
                 wells = conn.getObjects("Well", wellIds)
                 imgIds = [str(w.getImage(wellIdx).getId()) for w in wells]
@@ -4302,7 +4302,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                     try:
                         # RStringI() will encode any unicode
                         obj = listClass(v.strip())
-                    except:
+                    except Exception:
                         logger.debug("Invalid entry for '%s' : %s" % (key, v))
                         continue
                     if isinstance(obj, omero.model.IObject):
@@ -4318,7 +4318,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                     continue
                 try:
                     inputMap[key] = pclass(value)
-                except:
+                except Exception:
                     logger.debug("Invalid entry for '%s' : %s" % (key, value))
                     continue
 
@@ -4341,7 +4341,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
         # Try/except in case inputs are not serializable, e.g. unicode
         logger.debug("Running script %s with "
                      "params %s" % (scriptName, inputMap))
-    except:
+    except Exception:
         pass
     rsp = run_script(request, conn, sId, inputMap, scriptName)
     return JsonResponse(rsp)

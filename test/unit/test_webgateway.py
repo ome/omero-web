@@ -183,7 +183,7 @@ class TestWebGatewayCacheTempFile(object):
 
         try:
             fpath, rpath, fobj = self.tmpfile.new(fname, key='specialchars')
-        except:
+        except Exception:
             raise
             pytest.fail('WebGatewayTempFile.new not handling special'
                         ' characters properly')
@@ -213,7 +213,7 @@ class TestWebGatewayCacheTempFile(object):
                 "5" + fname + '.tif.somethingverylong', key='longname')
             fobj.close()
             assert fpath[-5:] == 'aaaaa'
-        except:
+        except Exception:
             pytest.fail('WebGatewayTempFile.new not handling long file names'
                         ' properly')
 

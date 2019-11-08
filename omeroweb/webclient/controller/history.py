@@ -129,19 +129,19 @@ class BaseCalendar(BaseController):
                     if item.get('type') == 'ome.model.core.Image':
                         try:
                             t_items['image'].index(item.get('id'))
-                        except:
+                        except Exception:
                             imgCounter += 1
                             t_items['image'].append(item.get('id'))
                     elif item.get('type') == 'ome.model.containers.Dataset':
                         try:
                             t_items['dataset'].index(item.get('id'))
-                        except:
+                        except Exception:
                             dsCounter += 1
                             t_items['dataset'].append(item.get('id'))
                     elif item.get('type') == 'ome.model.containers.Project':
                         try:
                             t_items['project'].index(item.get('id'))
-                        except:
+                        except Exception:
                             prCounter += 1
                             t_items['project'].append(item.get('id'))
                 self.cal_days.append({
