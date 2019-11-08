@@ -179,7 +179,7 @@ class TestWebGatewayCacheTempFile(object):
         things up.
         Also check for filename size limits.
         """
-        fname = '1/2_3!"\'#$%&()=@€£‰¶÷[]≠§±+*~^\,.;:'
+        fname = r'1/2_3!"\'#$%&()=@€£‰¶÷[]≠§±+*~^\,.;:'
 
         try:
             fpath, rpath, fobj = self.tmpfile.new(fname, key='specialchars')

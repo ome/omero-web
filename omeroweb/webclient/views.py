@@ -267,9 +267,9 @@ class WebclientLoginView(LoginView):
 
         context['show_download_links'] = settings.SHOW_CLIENT_DOWNLOADS
         if settings.SHOW_CLIENT_DOWNLOADS:
-            ver = re.match(('(?P<major>\d+)\.'
-                            '(?P<minor>\d+)\.'
-                            '(?P<patch>(dev|a|b|rc)\d+).*'),
+            ver = re.match((r'(?P<major>\d+)\.'
+                            r'(?P<minor>\d+)\.'
+                            r'(?P<patch>(dev|a|b|rc)\d+).*'),
                            omero_version)
             client_download_tag_re = '^v%s\\.%s\\.[^-]+$' % (
                 ver.group('major'), ver.group('minor'))
@@ -1457,7 +1457,7 @@ def load_searching(request, form=None, conn=None, **kwargs):
 
         # if the query is only numbers (separated by commas or spaces)
         # we search for objects by ID
-        isIds = re.compile('^[\d ,]+$')
+        isIds = re.compile(r'^[\d ,]+$')
         if isIds.search(query_search) is not None:
             conn.SERVICE_OPTS.setOmeroGroup(-1)
             idSet = set()

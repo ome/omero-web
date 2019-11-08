@@ -74,8 +74,8 @@ class Show(object):
 
     # Regular expression for matching Well names
     WELL_REGEX = re.compile(
-        '^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|'
-        '(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$'
+        r'^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|'
+        r'(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$'
     )
 
     def __init__(self, conn, request, menu):
