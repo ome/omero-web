@@ -2474,7 +2474,7 @@ class ImageWrapper (OmeroWebObjectWrapper,
             if size is not None:
                 return size.getSymbol()
         if size is None:
-                size = 0
+            size = 0
         else:
             size = size.getValue()
         return lengthunit(size)

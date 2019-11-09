@@ -236,13 +236,17 @@ def drivespace_json(request, query=None, groupId=None, userId=None, conn=None,
     def getBytes(ctx, eid=None):
         bytesInGroup = 0
 
-        pixelsQuery = "select sum(cast( p.sizeX as double ) * p.sizeY * p.sizeZ * p.sizeT * p.sizeC * pt.bitSize / 8) " \
-            "from Pixels p join p.pixelsType as pt join p.image i left outer join i.fileset f " \
-            "join p.details.owner as owner " \
-            "where f is null"
+        pixelsQuery = (
+            "select sum(cast( p.sizeX as double ) * p.sizeY * p.sizeZ *"
+            " p.sizeT * p.sizeC * pt.bitSize / 8) "
+            "from Pixels p join p.pixelsType as pt join p.image i "
+            "left outer join i.fileset f "
+            "join p.details.owner as owner "
+            "where f is null")
 
-        filesQuery = "select sum(origFile.size) from OriginalFile as origFile " \
-            "join origFile.details.owner as owner"
+        filesQuery = (
+            "select sum(origFile.size) from OriginalFile as origFile "
+            "join origFile.details.owner as owner")
 
         if eid is not None:
             params.add('eid', omero.rtypes.rlong(eid))

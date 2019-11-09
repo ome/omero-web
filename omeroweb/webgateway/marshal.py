@@ -51,8 +51,8 @@ def eventContextMarshal(event_context):
               'groupName', 'isAdmin', 'eventId', 'eventType',
               'memberOfGroups', 'leaderOfGroups',
               'adminPrivileges']:
-            if (hasattr(event_context, a)):
-                ctx[a] = unwrap(getattr(event_context, a))
+        if (hasattr(event_context, a)):
+            ctx[a] = unwrap(getattr(event_context, a))
 
     perms = event_context.groupPermissions
     encoder = get_encoder(perms.__class__)
@@ -181,9 +181,10 @@ def imageMarshal(image, key=None, request=None):
         if zoomLevelScaling is not None:
             rv['zoomLevelScaling'] = zoomLevelScaling
 
-    nominalMagnification = image.getObjectiveSettings() is not None \
-        and image.getObjectiveSettings().getObjective().getNominalMagnification() \
-        or None
+    nominalMagnification = (
+        image.getObjectiveSettings() is not None and
+        image.getObjectiveSettings().getObjective().getNominalMagnification()
+        or None)
 
     try:
         server_settings = request.session.get('server_settings', {}) \
