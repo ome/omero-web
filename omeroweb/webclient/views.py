@@ -539,7 +539,7 @@ def api_group_list(request, conn=None, **kwargs):
         page = get_long_or_default(request, 'page', 1)
         limit = get_long_or_default(request, 'limit', settings.PAGE)
         member_id = get_long_or_default(request, 'member', -1)
-    except ValueError as e:
+    except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
 
     try:
@@ -2895,7 +2895,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                         dMap['did'] = ids[0]
                     request.session['callback'][str(handle)] = dMap
             request.session.modified = True
-        except Exception as x:
+        except Exception:
             logger.error(
                 'Failed to delete: %r' % {'did': ids, 'dtype': key},
                 exc_info=True)
@@ -3364,7 +3364,7 @@ def activities(request, conn=None, **kwargs):
                 try:
                     proc = omero.grid.ScriptProcessPrx.checkedCast(
                         conn.c.ic.stringToProxy(cbString))
-                except IceException as e:
+                except IceException:
                     update_callback(request, cbString, status="failed",
                                     Message="No process found for job",
                                     error=1)
@@ -3378,7 +3378,7 @@ def activities(request, conn=None, **kwargs):
                         results = proc.getResults(0, conn.SERVICE_OPTS)
                         update_callback(request, cbString, status="finished")
                         new_results.append(cbString)
-                    except Exception as x:
+                    except Exception:
                         update_callback(request, cbString, status="finished",
                                         Message="Failed to get results")
                         logger.info(
@@ -4332,7 +4332,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 inputMap['Data_Type'].val, unwrap(inputMap['IDs'])[0])
             newGid = firstObj.getDetails().group.id.val
             conn.SERVICE_OPTS.setOmeroGroup(newGid)
-        except Exception as x:
+        except Exception:
             logger.debug(traceback.format_exc())
             # if inputMap values not as expected or firstObj is None
             conn.SERVICE_OPTS.setOmeroGroup(gid)
