@@ -99,9 +99,9 @@ class SessionStore(SessionBase):
                     session_data = self.decode(file_data)
                 except (EOFError, SuspiciousOperation) as e:
                     if isinstance(e, SuspiciousOperation):
-                        l = logging.getLogger(
+                        log = logging.getLogger(
                             'django.security.%s' % e.__class__.__name__)
-                        l.warning(force_text(e))
+                        log.warning(force_text(e))
                     self.create()
 
                 # Remove expired sessions.

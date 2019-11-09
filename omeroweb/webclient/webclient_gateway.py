@@ -2139,9 +2139,9 @@ class OmeroWebObjectWrapper (object):
     annotation_counter = None
 
     def countParents(self):
-        l = self.listParents()
-        if l is not None:
-            return len(l)
+        lp = self.listParents()
+        if lp is not None:
+            return len(lp)
 
     def countAnnotations(self):
         """
@@ -2190,10 +2190,10 @@ class OmeroWebObjectWrapper (object):
         """
 
         try:
-            l = len(self.name)
-            if l < 30:
+            length = len(self.name)
+            if length < 30:
                 return self.name
-            elif l >= 30:
+            elif length >= 30:
                 splited = []
                 for v in range(0, len(self.name), 30):
                     splited.append(self.name[v:v+30]+"\n")

@@ -889,32 +889,32 @@ def create_link(parent_type, parent_id, child_type, child_id):
         project = ProjectI(long(parent_id), False)
         if child_type == 'dataset':
             dataset = DatasetI(long(child_id), False)
-            l = ProjectDatasetLinkI()
-            l.setParent(project)
-            l.setChild(dataset)
-            return l
+            link = ProjectDatasetLinkI()
+            link.setParent(project)
+            link.setChild(dataset)
+            return link
     elif parent_type == 'dataset':
         dataset = DatasetI(long(parent_id), False)
         if child_type == 'image':
             image = ImageI(long(child_id), False)
-            l = DatasetImageLinkI()
-            l.setParent(dataset)
-            l.setChild(image)
-            return l
+            link = DatasetImageLinkI()
+            link.setParent(dataset)
+            link.setChild(image)
+            return link
     elif parent_type == 'screen':
         screen = ScreenI(long(parent_id), False)
         if child_type == 'plate':
             plate = PlateI(long(child_id), False)
-            l = ScreenPlateLinkI()
-            l.setParent(screen)
-            l.setChild(plate)
-            return l
+            link = ScreenPlateLinkI()
+            link.setParent(screen)
+            link.setChild(plate)
+            return link
     elif parent_type == 'tagset':
         if child_type == 'tag':
-            l = AnnotationAnnotationLinkI()
-            l.setParent(TagAnnotationI(long(parent_id), False))
-            l.setChild(TagAnnotationI(long(child_id), False))
-            return l
+            link = AnnotationAnnotationLinkI()
+            link.setParent(TagAnnotationI(long(parent_id), False))
+            link.setChild(TagAnnotationI(long(child_id), False))
+            return link
     return None
 
 
@@ -4286,11 +4286,11 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
                 # try to determine 'type' of values in our list
                 listClass = omero.rtypes.RStringI
-                l = prototype.val     # list
+                pval = prototype.val     # list
                 # check if a value type has been set (first item of prototype
                 # list)
-                if len(l) > 0:
-                    listClass = l[0].__class__
+                if len(pval) > 0:
+                    listClass = pval[0].__class__
                     if listClass == int(1).__class__:
                         listClass = omero.rtypes.rint
                     if listClass == long(1).__class__:
