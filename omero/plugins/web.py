@@ -276,12 +276,13 @@ class WebControl(DiagnosticsControl):
             "OMEROWEBROOT": self._get_python_dir() / "omeroweb",
             "STATIC_ROOT": settings.STATIC_ROOT,
             "STATIC_URL": settings.STATIC_URL.rstrip("/"),
-            "NOW": str(datetime.now())}
+            "NOW": str(datetime.now()),
+            "omeroweb_application_server": server,
+        }
 
-        if server in ("nginx", "nginx-development"):
-            d["HTTPPORT"] = port
-            d["MAX_BODY_SIZE"] = args.max_body_size
-            d["SERVERNAME"] = servername
+        d["HTTPPORT"] = port
+        d["MAX_BODY_SIZE"] = args.max_body_size
+        d["SERVERNAME"] = servername
 
         # FORCE_SCRIPT_NAME always has a starting /, and will not have a
         # trailing / unless there is no prefix (/)
