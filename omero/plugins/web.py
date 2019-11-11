@@ -11,6 +11,7 @@
 import traceback
 from future.utils import bytes_to_native_str
 from datetime import datetime
+from jinja2 import Template
 from omero.cli import DiagnosticsControl
 from omero.cli import CLI
 import platform
@@ -304,10 +305,10 @@ class WebControl(DiagnosticsControl):
                          "Web template configuration requires"
                          "wsgi or wsgi-tcp.")
 
-        template_file = "%s.conf.template" % server
+        template_file = "nginx.conf.j2"
         c = bytes_to_native_str(
             resource_string('omeroweb', 'templates/' + template_file))
-        self.ctx.out(c % d)
+        self.ctx.out(Template(c).render(d))
 
     def syncmedia(self, args):
         self.collectstatic()
