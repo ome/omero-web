@@ -33,6 +33,7 @@ import json
 import re
 import sys
 import warnings
+from past.builtins import unicode
 
 from io import StringIO
 from time import time

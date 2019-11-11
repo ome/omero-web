@@ -25,6 +25,7 @@
 
 import datetime
 import time
+from past.builtins import long
 
 from omero.rtypes import rtime
 

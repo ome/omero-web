@@ -20,6 +20,7 @@ import warnings
 from functools import wraps
 import omero
 import omero.clients
+from past.builtins import unicode
 
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseServerError, JsonResponse

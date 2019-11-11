@@ -23,6 +23,7 @@
 # Version: 1.0
 #
 
+from past.builtins import long
 import time
 import omero
 import logging
