@@ -29,11 +29,11 @@ import warnings
 from django.test import Client
 from django.test.client import MULTIPART_CONTENT
 from django.core.urlresolvers import reverse
-from urllib.parse import urlencode
 
 from omero.testlib import ITest
 
-standard_library.install_aliases()
+standard_library.install_aliases() # noqa
+from urllib.parse import urlencode
 
 
 class IWebTest(ITest):
