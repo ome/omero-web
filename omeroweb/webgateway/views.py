@@ -55,6 +55,7 @@ except ImportError:
     long = int
 
 from io import StringIO
+from io import BytesIO
 import tempfile
 
 from omero import ApiUsageException
@@ -1024,22 +1025,26 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     if 'download' in kwargs and kwargs['download']:
         if format == 'png':
             # convert jpeg data to png...
-            i = Image.open(StringIO(jpeg_data))
-            output = StringIO()
+            i = Image.open(BytesIO(jpeg_data))
+            output = BytesIO()
             i.save(output, 'png')
             jpeg_data = output.getvalue()
             output.close()
             rsp = HttpResponse(jpeg_data, content_type='image/png')
         elif format == 'tif':
             # convert jpeg data to TIFF
-            i = Image.open(StringIO(jpeg_data))
-            output = StringIO()
+            i = Image.open(BytesIO(jpeg_data))
+            output = BytesIO()
             i.save(output, 'tiff')
             jpeg_data = output.getvalue()
             output.close()
             rsp = HttpResponse(jpeg_data, content_type='image/tiff')
-        fileName = img.getName().decode('utf8').replace(" ", "_")
-        fileName = fileName.replace(",", ".")
+        fileName = img.getName()
+        try:
+            fileName = fileName.decode('utf8')
+        except AttributeError:
+            pass    # python 3
+        fileName = fileName.replace(",", ".").replace(" ", "_")
         rsp['Content-Type'] = 'application/force-download'
         rsp['Content-Length'] = len(jpeg_data)
         rsp['Content-Disposition'] = (
