@@ -1088,12 +1088,12 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
         if obj is None:
             raise Http404
         imgs.extend(list(obj.listChildren()))
-        selection = filter(None,
-                           request.GET.get('selection', '').split(','))
-        if len(selection):
+        selection = list(filter(None, request.GET.get('selection', '').split(',')))
+        print(selection)
+        if len(selection) > 0:
             logger.debug(selection)
             logger.debug(imgs)
-            imgs = filter(lambda x: str(x.getId()) in selection, imgs)
+            imgs = [x for x in imgs if str(x.getId()) in selection]
             logger.debug(imgs)
             if len(imgs) == 0:
                 raise Http404
@@ -1114,7 +1114,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
             raise Http404
         imgs.append(obj)
 
-    imgs = filter(lambda x: not x.requiresPixelsPyramid(), imgs)
+    imgs = [x for x in imgs if not x.requiresPixelsPyramid()]
 
     if request.GET.get('dryrun', False):
         rv = json.dumps(len(imgs))
@@ -1163,7 +1163,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                                         'webgateway/tfiles/' + rpath)
     else:
         try:
-            img_ids = '+'.join((str(x.getId()) for x in imgs))
+            img_ids = '+'.join((str(x.getId()) for x in imgs)).encode('utf-8')
             key = ('_'.join((str(x.getId()) for x in imgs[0].getAncestry())) +
                    '_' + md5(img_ids).hexdigest() + '_ome_tiff_zip')
             fpath, rpath, fobj = webgateway_tempfile.new(name + '.zip',
@@ -1173,7 +1173,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                                             'webgateway/tfiles/' + rpath)
             logger.debug(fpath)
             if fobj is None:
-                fobj = StringIO()
+                fobj = BytesIO()
             zobj = zipfile.ZipFile(fobj, 'w', zipfile.ZIP_STORED)
             for obj in imgs:
                 tiff_data = webgateway_cache.getOmeTiffImage(request,
