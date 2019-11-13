@@ -3750,7 +3750,7 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             raise Http404("No %ss found with IDs %s" % (dtype, ids))
         else:
             # Now we can specify group context - All should be same group
-            gid = validObjs.values()[0].getDetails().group.id.val
+            gid = list(validObjs.values())[0].getDetails().group.id.val
             conn.SERVICE_OPTS.setOmeroGroup(gid)
         return filteredIds, validObjs
 
