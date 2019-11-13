@@ -1090,7 +1090,6 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
         imgs.extend(list(obj.listChildren()))
         selection = list(filter(None, request.GET.get(
             'selection', '').split(',')))
-        print(selection)
         if len(selection) > 0:
             logger.debug(selection)
             logger.debug(imgs)
