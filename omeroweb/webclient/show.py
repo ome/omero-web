@@ -74,8 +74,8 @@ class Show(object):
 
     # Regular expression for matching Well names
     WELL_REGEX = re.compile(
-        '^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|'
-        '(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$'
+        r'^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|'
+        r'(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$'
     )
 
     def __init__(self, conn, request, menu):
@@ -348,7 +348,7 @@ class Show(object):
             # Set context to 'cross-group'
             self.conn.SERVICE_OPTS.setOmeroGroup('-1')
             first_selected = self._load_first_selected(first_obj, attributes)
-        except:
+        except Exception:
             pass
         if first_obj not in self.TOP_LEVEL_PREFIXES:
             # Need to see if first item has parents

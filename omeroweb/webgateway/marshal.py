@@ -25,10 +25,10 @@ import logging
 import traceback
 from future.utils import isbytes, bytes_to_native_str
 
-logger = logging.getLogger(__name__)
-
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
+
+logger = logging.getLogger(__name__)
 
 # OMERO.insight point list regular expression
 INSIGHT_POINT_LIST_RE = re.compile(r'points\[([^\]]+)\]')
@@ -51,8 +51,8 @@ def eventContextMarshal(event_context):
               'groupName', 'isAdmin', 'eventId', 'eventType',
               'memberOfGroups', 'leaderOfGroups',
               'adminPrivileges']:
-            if (hasattr(event_context, a)):
-                ctx[a] = unwrap(getattr(event_context, a))
+        if (hasattr(event_context, a)):
+            ctx[a] = unwrap(getattr(event_context, a))
 
     perms = event_context.groupPermissions
     encoder = get_encoder(perms.__class__)
@@ -181,14 +181,15 @@ def imageMarshal(image, key=None, request=None):
         if zoomLevelScaling is not None:
             rv['zoomLevelScaling'] = zoomLevelScaling
 
-    nominalMagnification = image.getObjectiveSettings() is not None \
-        and image.getObjectiveSettings().getObjective().getNominalMagnification() \
-        or None
+    nominalMagnification = (
+        image.getObjectiveSettings() is not None and
+        image.getObjectiveSettings().getObjective().getNominalMagnification()
+        or None)
 
     try:
         server_settings = request.session.get('server_settings', {}) \
                                          .get('viewer', {})
-    except:
+    except Exception:
         server_settings = {}
     init_zoom = server_settings.get('initial_zoom_level', 0)
     if init_zoom < 0:
@@ -201,7 +202,7 @@ def imageMarshal(image, key=None, request=None):
             try:
                 size = method('MICROMETER')
                 return size.getValue() if size else None
-            except:
+            except Exception:
                 logger.debug(
                     'Unable to convert physical pixel size to microns',
                     exc_info=True

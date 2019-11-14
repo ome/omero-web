@@ -66,7 +66,7 @@ LOGDIR = os.path.join(OMERO_HOME, 'var', 'log').replace('\\', '/')
 if not os.path.isdir(LOGDIR):
     try:
         os.makedirs(LOGDIR)
-    except Exception as x:
+    except Exception:
         exctype, value = sys.exc_info()[:2]
         raise exctype(value)
 
@@ -181,7 +181,7 @@ while True:
             raise exctype(value)
         else:
             event.wait(1)  # Wait a total of 10 seconds
-    except:
+    except Exception:
         # logger.error("Exception while loading configuration...",
         # exc_info=True)
         exctype, value = sys.exc_info()[:2]
@@ -1111,13 +1111,13 @@ except NameError:
                                    os.O_WRONLY | os.O_CREAT,
                                    0o600), 'w') as secret_file:
                 secret_file.write(secret_key)
-        except IOError as e:
+        except IOError:
             raise IOError("Please create a %s file with random characters"
                           " to generate your secret key!" % secret_path)
     try:
         with open(secret_path, 'r') as secret_file:
             SECRET_KEY = secret_file.read().strip()
-    except IOError as e:
+    except IOError:
         raise IOError("Could not find secret key in %s!" % secret_path)
 
 # USE_I18N: A boolean that specifies whether Django's internationalization

@@ -69,23 +69,23 @@ class SendFeedback(object):
                 }
             try:
                 p['python_classpath'] = sys.path
-            except:
+            except Exception:
                 pass
             try:
                 p['python_version'] = platform.python_version()
-            except:
+            except Exception:
                 pass
             try:
                 p['os_name'] = platform.platform()
-            except:
+            except Exception:
                 pass
             try:
                 p['os_arch'] = platform.machine()
-            except:
+            except Exception:
                 pass
             try:
                 p['os_version'] = platform.release()
-            except:
+            except Exception:
                 pass
             data = urllib.urlencode(p)
             headers = {

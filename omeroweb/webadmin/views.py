@@ -49,6 +49,9 @@ from .forms import ForgottonPasswordForm, ExperimenterForm, GroupForm
 from .forms import GroupOwnerForm, MyAccountForm, ChangePassword
 from .forms import UploadPhotoForm, EmailForm
 
+import omero
+from omero.model import PermissionsI
+
 from omeroweb.httprsp import HttpJPEGResponse
 from omeroweb.webclient.decorators import login_required, render_response
 from omeroweb.connector import Connector
@@ -91,9 +94,6 @@ class render_response_admin(omeroweb.webclient.decorators.render_response):
 
 ##############################################################################
 # utils
-
-import omero
-from omero.model import PermissionsI
 
 
 def prepare_experimenter(conn, eid=None):
@@ -236,13 +236,17 @@ def drivespace_json(request, query=None, groupId=None, userId=None, conn=None,
     def getBytes(ctx, eid=None):
         bytesInGroup = 0
 
-        pixelsQuery = "select sum(cast( p.sizeX as double ) * p.sizeY * p.sizeZ * p.sizeT * p.sizeC * pt.bitSize / 8) " \
-            "from Pixels p join p.pixelsType as pt join p.image i left outer join i.fileset f " \
-            "join p.details.owner as owner " \
-            "where f is null"
+        pixelsQuery = (
+            "select sum(cast( p.sizeX as double ) * p.sizeY * p.sizeZ *"
+            " p.sizeT * p.sizeC * pt.bitSize / 8) "
+            "from Pixels p join p.pixelsType as pt join p.image i "
+            "left outer join i.fileset f "
+            "join p.details.owner as owner "
+            "where f is null")
 
-        filesQuery = "select sum(origFile.size) from OriginalFile as origFile " \
-            "join origFile.details.owner as owner"
+        filesQuery = (
+            "select sum(origFile.size) from OriginalFile as origFile "
+            "join origFile.details.owner as owner")
 
         if eid is not None:
             params.add('eid', omero.rtypes.rlong(eid))
@@ -346,7 +350,7 @@ def forgotten_password(request, **kwargs):
                     try:
                         error = exp.err.parameters[
                             exp.err.parameters.keys()[0]]
-                    except:
+                    except Exception:
                         error = exp
     else:
         form = ForgottonPasswordForm()
@@ -361,7 +365,7 @@ def index(request, **kwargs):
     conn = None
     try:
         conn = kwargs["conn"]
-    except:
+    except Exception:
         logger.error(traceback.format_exc())
 
     if conn.isAdmin():
@@ -474,7 +478,7 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
             prepare_experimenter(conn, eid)
         try:
             defaultGroupId = defaultGroup.id
-        except:
+        except Exception:
             defaultGroupId = None
 
         initial = {
@@ -914,7 +918,7 @@ def my_account(request, action=None, conn=None, **kwargs):
         prepare_experimenter(conn)
     try:
         defaultGroupId = defaultGroup.id
-    except:
+    except Exception:
         defaultGroupId = None
 
     ownedGroups = ownedGroupsInitial(conn)

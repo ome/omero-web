@@ -77,7 +77,7 @@ class login_required(omeroweb.decorators.login_required):
         if self.login_redirect is not None:
             try:
                 url = reverse(self.login_redirect)
-            except:
+            except Exception:
                 pass
         return super(
             login_required, self).on_not_logged_in(request, url, error)
@@ -171,23 +171,23 @@ class render_response(omeroweb.decorators.render_response):
         for tl in top_links:
             if len(tl) < 2:
                 continue
-            l = {}
-            l["label"] = tl[0]
+            link = {}
+            link["label"] = tl[0]
             link_id = tl[1]
             try:
                 # test if complex dictionary view with args and query_string
-                l["link"] = reverse_with_params(**link_id)
+                link["link"] = reverse_with_params(**link_id)
             except TypeError:
                 # assume is only view name
                 try:
-                    l["link"] = reverse(link_id)
+                    link["link"] = reverse(link_id)
                 except NoReverseMatch:
                     # assume we've been passed a url
-                    l["link"] = link_id
+                    link["link"] = link_id
             # simply add optional attrs dict
             if len(tl) > 2:
-                l['attrs'] = tl[2]
-            links.append(l)
+                link['attrs'] = tl[2]
+            links.append(link)
         context['ome']['top_links'] = links
 
         if settings.TOP_LOGO:

@@ -161,8 +161,8 @@ class AnnotationQuerySetIterator(object):
                 textValue = obj.textValue
 
             if isinstance(textValue, str):
-                l = len(textValue)
-                if l > 55:
+                length = len(textValue)
+                if length > 55:
                     textValue = "%s..." % textValue[:55]
             oid = obj.id
             yield (oid, smart_text(textValue))
@@ -231,7 +231,7 @@ class AnnotationModelMultipleChoiceField(AnnotationModelChoiceField):
         for val in value:
             try:
                 int(val)
-            except:
+            except Exception:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False
@@ -330,7 +330,7 @@ class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
         for val in value:
             try:
                 int(val)
-            except:
+            except Exception:
                 raise ValidationError(self.error_messages['invalid_choice'])
             else:
                 res = False

@@ -1,7 +1,7 @@
 try:
     from omero_version import omero_version
     from omero_version import build_year as omero_buildyear
-except ImportError as ie:
+except ImportError:
     # Especially common during setup.py
     omero_version = "unknown"
     omero_buildyear = "unknown"

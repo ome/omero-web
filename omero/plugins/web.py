@@ -72,7 +72,7 @@ def config_required(func):
             #     self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
             try:
                 import django  # NOQA
-            except:
+            except Exception:
                 self.ctx.die(681, "ERROR: Django not installed!")
             if django.VERSION < (1, 11) or django.VERSION >= (2, 0):
                 self.ctx.err("ERROR: Django version %s is not "
@@ -237,7 +237,7 @@ class WebControl(DiagnosticsControl):
                 global_value = getattr(settings, global_name, "(unset)")
                 CONFIG_TABLE += CONFIG_TABLE_FMT % (
                     key, using_default, global_value)
-        except:
+        except Exception:
             CONFIG_TABLE = (
                 "INVALID OR LOCKED CONFIGURATION!"
                 " Cannot display default values")
@@ -291,7 +291,7 @@ class WebControl(DiagnosticsControl):
             d["FORCE_SCRIPT_NAME"] = settings.FORCE_SCRIPT_NAME.rstrip("/")
             prefix = re.sub(r'\W+', '', d["FORCE_SCRIPT_NAME"])
             d["PREFIX_NAME"] = "_%s" % prefix
-        except:
+        except Exception:
             d["FORCE_SCRIPT_NAME"] = "/"
             d["PREFIX_NAME"] = ""
 
@@ -362,7 +362,7 @@ class WebControl(DiagnosticsControl):
             os.environ['DJANGO_SETTINGS_MODULE'] = 'omeroweb.settings'
             self.set_environ()
             self.ctx.call(cargs, cwd=location)
-        except:
+        except Exception:
             print(traceback.print_exc())
 
     @config_required
@@ -416,21 +416,21 @@ class WebControl(DiagnosticsControl):
         d_args = {}
         try:
             d_args['wsgi_args'] = settings.WSGI_ARGS
-        except:
+        except Exception:
             d_args['wsgi_args'] = args.wsgi_args or ""
         if args.wsgi_args:
             self.ctx.out(" `--wsgi-args` is deprecated and overwritten"
                          " by `omero.web.wsgi_args`. ", newline=False)
         try:
             d_args['workers'] = settings.WSGI_WORKERS
-        except:
+        except Exception:
             d_args['workers'] = args.workers
         if args.workers:
             self.ctx.out(" `--workers` is deprecated and overwritten"
                          " by `omero.web.wsgi_workers`. ", newline=False)
         try:
             d_args['worker_conn'] = settings.WSGI_WORKER_CONNECTIONS
-        except:
+        except Exception:
             d_args['worker_conn'] = args.worker_connections
         if args.worker_connections:
             self.ctx.out(" `--worker-connections` is deprecated and"
@@ -512,7 +512,7 @@ class WebControl(DiagnosticsControl):
                              "config.")
             try:
                 os.environ['SCRIPT_NAME'] = settings.FORCE_SCRIPT_NAME
-            except:
+            except Exception:
                 pass
 
             # wrap all deprecated args
@@ -633,12 +633,12 @@ class WebControl(DiagnosticsControl):
         except Exception as e:
             try:
                 self.ctx.out("OMERO.web error: %s" % e.message[1].message)
-            except:
+            except Exception:
                 self.ctx.out("OMERO.web not installed!")
         try:
             import django
             self.ctx.out("Django version: %s" % django.get_version())
-        except:
+        except Exception:
             self.ctx.err("Django not installed!")
 
         if not args.no_logs:
@@ -654,6 +654,7 @@ class WebControl(DiagnosticsControl):
                 log_file = "OMEROweb.log"
                 self._item("Log file ", log_file)
                 self._exists(log_dir / log_file)
+
 
 try:
     register("web", WebControl, HELP)

@@ -143,7 +143,7 @@ class TestWeb(object):
 
     def normalise_generated(self, s):
         serverdir = self.cli.dir
-        s = re.sub('\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}',
+        s = re.sub(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}',
                    '0000-00-00 00:00:00.000000', s)
         s = s.replace(serverdir, '/home/omero/OMERO.server')
         s = s.replace(os.path.dirname(Ice.__file__), '/home/omero/ice/python')
@@ -470,9 +470,9 @@ class TestWeb(object):
             out = []
             with open(fn) as f:
                 for line in f:
-                    if re.match('##\s*\w', line):
+                    if re.match(r'##\s*\w', line):
                         out.append(line[2:].strip())
-                    elif re.match('[^#]\s*\w', line):
+                    elif re.match(r'[^#]\s*\w', line):
                         out.append(line.strip())
             return out
 

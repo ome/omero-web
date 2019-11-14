@@ -225,7 +225,7 @@ class WebclientLoginView(LoginView):
         if url is None or len(url) == 0:
             try:
                 url = parse_url(settings.LOGIN_REDIRECT)
-            except:
+            except Exception:
                 url = reverse("webindex")
         return HttpResponseRedirect(url)
 
@@ -267,9 +267,9 @@ class WebclientLoginView(LoginView):
 
         context['show_download_links'] = settings.SHOW_CLIENT_DOWNLOADS
         if settings.SHOW_CLIENT_DOWNLOADS:
-            ver = re.match(('(?P<major>\d+)\.'
-                            '(?P<minor>\d+)\.'
-                            '(?P<patch>(dev|a|b|rc)\d+).*'),
+            ver = re.match((r'(?P<major>\d+)\.'
+                            r'(?P<minor>\d+)\.'
+                            r'(?P<patch>(dev|a|b|rc)\d+).*'),
                            omero_version)
             client_download_tag_re = '^v%s\\.%s\\.[^-]+$' % (
                 ver.group('major'), ver.group('minor'))
@@ -344,7 +344,7 @@ def logout(request, conn=None, **kwargs):
         try:
             try:
                 conn.close()
-            except:
+            except Exception:
                 logger.error('Exception during logout.', exc_info=True)
         finally:
             request.session.flush()
@@ -436,7 +436,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             user_id = initially_open_owner
     try:
         user_id = long(user_id)
-    except:
+    except Exception:
         user_id = None
     # check if user_id is in a currnt group
     if user_id is not None:
@@ -539,7 +539,7 @@ def api_group_list(request, conn=None, **kwargs):
         page = get_long_or_default(request, 'page', 1)
         limit = get_long_or_default(request, 'limit', settings.PAGE)
         member_id = get_long_or_default(request, 'member', -1)
-    except ValueError as e:
+    except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
 
     try:
@@ -665,7 +665,7 @@ def api_container_list(request, conn=None, **kwargs):
         try:
             orph_t = request \
                 .session['server_settings']['ui']['tree']['orphans']
-        except:
+        except Exception:
             orph_t = {'enabled': True}
         if (conn.isAdmin() or
                 conn.isLeader(gid=request.session.get('active_group')) or
@@ -889,32 +889,32 @@ def create_link(parent_type, parent_id, child_type, child_id):
         project = ProjectI(long(parent_id), False)
         if child_type == 'dataset':
             dataset = DatasetI(long(child_id), False)
-            l = ProjectDatasetLinkI()
-            l.setParent(project)
-            l.setChild(dataset)
-            return l
+            link = ProjectDatasetLinkI()
+            link.setParent(project)
+            link.setChild(dataset)
+            return link
     elif parent_type == 'dataset':
         dataset = DatasetI(long(parent_id), False)
         if child_type == 'image':
             image = ImageI(long(child_id), False)
-            l = DatasetImageLinkI()
-            l.setParent(dataset)
-            l.setChild(image)
-            return l
+            link = DatasetImageLinkI()
+            link.setParent(dataset)
+            link.setChild(image)
+            return link
     elif parent_type == 'screen':
         screen = ScreenI(long(parent_id), False)
         if child_type == 'plate':
             plate = PlateI(long(child_id), False)
-            l = ScreenPlateLinkI()
-            l.setParent(screen)
-            l.setChild(plate)
-            return l
+            link = ScreenPlateLinkI()
+            link.setParent(screen)
+            link.setChild(plate)
+            return link
     elif parent_type == 'tagset':
         if child_type == 'tag':
-            l = AnnotationAnnotationLinkI()
-            l.setParent(TagAnnotationI(long(parent_id), False))
-            l.setChild(TagAnnotationI(long(child_id), False))
-            return l
+            link = AnnotationAnnotationLinkI()
+            link.setParent(TagAnnotationI(long(parent_id), False))
+            link.setChild(TagAnnotationI(long(child_id), False))
+            return link
     return None
 
 
@@ -978,7 +978,7 @@ def _api_links_POST(conn, json_data, **kwargs):
             # We try to save all at once, for speed.
             conn.saveArray(linksToSave)
             response['success'] = True
-        except:
+        except Exception:
             logger.info("api_link: Exception on saveArray with %s links"
                         % len(linksToSave))
             # If this fails, e.g. ValidationException because link
@@ -986,7 +986,7 @@ def _api_links_POST(conn, json_data, **kwargs):
             for l in linksToSave:
                 try:
                     conn.saveObject(l)
-                except:
+                except Exception:
                     pass
             response['success'] = True
 
@@ -1457,7 +1457,7 @@ def load_searching(request, form=None, conn=None, **kwargs):
 
         # if the query is only numbers (separated by commas or spaces)
         # we search for objects by ID
-        isIds = re.compile('^[\d ,]+$')
+        isIds = re.compile(r'^[\d ,]+$')
         if isIds.search(query_search) is not None:
             conn.SERVICE_OPTS.setOmeroGroup(-1)
             idSet = set()
@@ -1803,7 +1803,7 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
 
         try:
             image = manager.well.getWellSample().image()
-        except:
+        except Exception:
             image = manager.image
 
         if share_id is None:    # 9853
@@ -2365,7 +2365,7 @@ def marshal_tagging_form_data(request, conn=None, **kwargs):
     try:
         offset = int(request.GET.get('offset'))
         limit = int(request.GET.get('limit', 1000))
-    except:
+    except Exception:
         offset = limit = None
 
     jsonmode = request.GET.get('jsonmode')
@@ -2895,7 +2895,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                         dMap['did'] = ids[0]
                     request.session['callback'][str(handle)] = dMap
             request.session.modified = True
-        except Exception as x:
+        except Exception:
             logger.error(
                 'Failed to delete: %r' % {'did': ids, 'dtype': key},
                 exc_info=True)
@@ -3238,7 +3238,7 @@ def activities(request, conn=None, **kwargs):
                             in_progress += 1
                     finally:
                         prx.close(close_handle)
-                except:
+                except Exception:
                     logger.info(
                         "Activities chgrp handle not found: %s" % cbString)
                     continue
@@ -3295,7 +3295,7 @@ def activities(request, conn=None, **kwargs):
                             in_progress += 1
                     finally:
                         callback.close(close_handle)
-                except:
+                except Exception:
                     logger.error(traceback.format_exc())
                     logger.info("Activities send_email handle not found: %s"
                                 % cbString)
@@ -3364,7 +3364,7 @@ def activities(request, conn=None, **kwargs):
                 try:
                     proc = omero.grid.ScriptProcessPrx.checkedCast(
                         conn.c.ic.stringToProxy(cbString))
-                except IceException as e:
+                except IceException:
                     update_callback(request, cbString, status="failed",
                                     Message="No process found for job",
                                     error=1)
@@ -3378,7 +3378,7 @@ def activities(request, conn=None, **kwargs):
                         results = proc.getResults(0, conn.SERVICE_OPTS)
                         update_callback(request, cbString, status="finished")
                         new_results.append(cbString)
-                    except Exception as x:
+                    except Exception:
                         update_callback(request, cbString, status="finished",
                                         Message="Failed to get results")
                         logger.info(
@@ -3413,7 +3413,7 @@ def activities(request, conn=None, **kwargs):
                                             v.file.mimetype.val]
                                         obj_data['fileId'] = v.file.id.val
                                     obj_data['name'] = v.file.name.val
-                                    # except:
+                                    # except Exception:
                                     #    pass
                                 if v.isLoaded() and hasattr(v, "name"):
                                     # E.g Image, OriginalFile etc
@@ -3687,7 +3687,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
                 wellIdx = 0
                 try:
                     wellIdx = int(request.GET.get("Index", 0))
-                except:
+                except Exception:
                     pass
                 wells = conn.getObjects("Well", wellIds)
                 imgIds = [str(w.getImage(wellIdx).getId()) for w in wells]
@@ -4286,11 +4286,11 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
                 # try to determine 'type' of values in our list
                 listClass = omero.rtypes.RStringI
-                l = prototype.val     # list
+                pval = prototype.val     # list
                 # check if a value type has been set (first item of prototype
                 # list)
-                if len(l) > 0:
-                    listClass = l[0].__class__
+                if len(pval) > 0:
+                    listClass = pval[0].__class__
                     if listClass == int(1).__class__:
                         listClass = omero.rtypes.rint
                     if listClass == long(1).__class__:
@@ -4302,7 +4302,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                     try:
                         # RStringI() will encode any unicode
                         obj = listClass(v.strip())
-                    except:
+                    except Exception:
                         logger.debug("Invalid entry for '%s' : %s" % (key, v))
                         continue
                     if isinstance(obj, omero.model.IObject):
@@ -4318,7 +4318,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                     continue
                 try:
                     inputMap[key] = pclass(value)
-                except:
+                except Exception:
                     logger.debug("Invalid entry for '%s' : %s" % (key, value))
                     continue
 
@@ -4332,7 +4332,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 inputMap['Data_Type'].val, unwrap(inputMap['IDs'])[0])
             newGid = firstObj.getDetails().group.id.val
             conn.SERVICE_OPTS.setOmeroGroup(newGid)
-        except Exception as x:
+        except Exception:
             logger.debug(traceback.format_exc())
             # if inputMap values not as expected or firstObj is None
             conn.SERVICE_OPTS.setOmeroGroup(gid)
@@ -4341,7 +4341,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
         # Try/except in case inputs are not serializable, e.g. unicode
         logger.debug("Running script %s with "
                      "params %s" % (scriptName, inputMap))
-    except:
+    except Exception:
         pass
     rsp = run_script(request, conn, sId, inputMap, scriptName)
     return JsonResponse(rsp)

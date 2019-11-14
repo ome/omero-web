@@ -146,11 +146,11 @@ def shortening(value, arg):
     if not isinstance(value, basestring):
         value = str(value)
     try:
-        l = len(value)
-        if l < length:
+        length = len(value)
+        if length < length:
             return value
-        elif l >= length:
-            return value[:front]+"..."+value[l-end:]
+        elif length >= length:
+            return value[:front]+"..."+value[length-end:]
     except Exception:
         logger.error(traceback.format_exc())
         return value

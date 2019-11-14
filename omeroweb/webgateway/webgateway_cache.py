@@ -23,7 +23,6 @@ import datetime
 from past.builtins import basestring
 from builtins import str
 
-logger = logging.getLogger(__name__)
 
 import struct
 import time
@@ -31,6 +30,9 @@ import os
 import re
 import shutil
 import stat
+
+logger = logging.getLogger(__name__)
+
 size_of_double = len(struct.pack('d', 0))
 # string_type = type('')
 
@@ -357,6 +359,7 @@ class FileCache(CacheBase):
         return count
     _num_entries = property(_get_num_entries)
 
+
 FN_REGEX = re.compile('[#$,|]')
 
 
@@ -423,7 +426,7 @@ class WebGatewayCache (object):
             try:
                 logger.debug('removing cache lock file on __del__')
                 os.remove(self._lastlock)
-            except:
+            except Exception:
                 pass
             self._lastlock = None
 
@@ -444,7 +447,7 @@ class WebGatewayCache (object):
                 return True
             try:
                 os.remove(self._lastlock)
-            except:
+            except Exception:
                 pass
             self._lastlock = None
         try:
@@ -837,6 +840,7 @@ class WebGatewayCache (object):
         self._cache_clear(self._json_cache, k)
         return True
 
+
 webgateway_cache = WebGatewayCache(FileCache)
 
 
@@ -856,14 +860,14 @@ class AutoLockFile ():
         """ tries to delete the lock file """
         try:
             os.remove(self._lock)
-        except:
+        except Exception:
             pass
 
     def close(self):
         """ tries to delete the lock file and close the file """
         try:
             os.remove(self._lock)
-        except:
+        except Exception:
             pass
         # FIXME: AutoLockFile previously extended file object
         # super(AutoLockFile, self).close()
@@ -1006,5 +1010,6 @@ class WebGatewayTempFile (object):
         if os.path.exists(fn):
             return fn, rn, True
         return fn, rn, AutoLockFile(fn, 'wb')
+
 
 webgateway_tempfile = WebGatewayTempFile()

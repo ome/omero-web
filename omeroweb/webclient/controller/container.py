@@ -234,7 +234,7 @@ class BaseContainer(BaseController):
         try:
             limit = request.session['server_settings'][
                 'download_as']['max_size']
-        except:
+        except Exception:
             limit = 144000000
         if self.image:
             sizex = self.image.getSizeX()
@@ -439,7 +439,7 @@ class BaseContainer(BaseController):
             return False
         try:
             group = self.conn.getObject("ExperimenterGroup", int(gid))
-        except:
+        except Exception:
             return False
         if group is None:
             return False
@@ -461,7 +461,7 @@ class BaseContainer(BaseController):
             file_anns = list(file_ann_gen)
             try:
                 file_anns.sort(key=lambda x: x.getFile().getName().lower())
-            except:
+            except Exception:
                 pass
             return file_anns
 
@@ -562,7 +562,7 @@ class BaseContainer(BaseController):
         ann = None
         try:
             ann = self.conn.findTag(tag, desc)
-        except:
+        except Exception:
             pass
         if ann is None:
             ann = omero.model.TagAnnotationI()
@@ -574,7 +574,7 @@ class BaseContainer(BaseController):
                 try:
                     tag_group = self.conn.getObject(
                         'TagAnnotation', tag_group_id)
-                except:
+                except Exception:
                     pass
                 if tag_group is not None:
                     link = omero.model.AnnotationAnnotationLinkI()
@@ -607,7 +607,7 @@ class BaseContainer(BaseController):
                 for l in new_links:
                     try:
                         self.conn.saveObject(l)
-                    except:
+                    except Exception:
                         pass
         return ann.getId()
 
@@ -699,7 +699,7 @@ class BaseContainer(BaseController):
                     saved_links.append(
                         self.conn.getUpdateService().saveAndReturnObject(
                             l, self.conn.SERVICE_OPTS))
-                except:
+                except Exception:
                     failed += 1
 
         return tids

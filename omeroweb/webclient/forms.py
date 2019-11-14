@@ -82,7 +82,7 @@ class ShareForm(NonASCIIForm):
                 queryset=kwargs['initial']['experimenters'],
                 initial=kwargs['initial']['shareMembers'],
                 widget=forms.SelectMultiple(attrs={'size': 28}))
-        except:
+        except Exception:
             self.fields['members'] = ExperimenterModelMultipleChoiceField(
                 queryset=kwargs['initial']['experimenters'],
                 widget=forms.SelectMultiple(attrs={'size': 28}))
@@ -110,7 +110,7 @@ class ShareForm(NonASCIIForm):
             try:
                 date = datetime.datetime.strptime(
                     ("%s-%s-%s" % (d[0], d[1], d[2])), "%Y-%m-%d")
-            except:
+            except Exception:
                 raise forms.ValidationError(
                     'Date is in the wrong format. YY-MM-DD')
             if time.mktime(date.timetuple()) <= time.time():
@@ -129,7 +129,7 @@ class BasketShareForm(ShareForm):
                 queryset=kwargs['initial']['images'],
                 initial=kwargs['initial']['selected'],
                 widget=forms.SelectMultiple(attrs={'size': 10}))
-        except:
+        except Exception:
             self.fields['image'] = GroupModelMultipleChoiceField(
                 queryset=kwargs['initial']['images'],
                 widget=forms.SelectMultiple(attrs={'size': 10}))
@@ -181,7 +181,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['images'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['image'] = ObjectModelMultipleChoiceField(
                     queryset=images,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -196,7 +196,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['datasets'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['dataset'] = ObjectModelMultipleChoiceField(
                     queryset=datasets,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -211,7 +211,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['projects'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['project'] = ObjectModelMultipleChoiceField(
                     queryset=projects,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -226,7 +226,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['screens'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['screen'] = ObjectModelMultipleChoiceField(
                     queryset=screens,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -241,7 +241,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['plates'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['plate'] = ObjectModelMultipleChoiceField(
                     queryset=plates,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -256,7 +256,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['acquisitions'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['acquisition'] = ObjectModelMultipleChoiceField(
                     queryset=acquisitions,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -271,7 +271,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['wells'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['well'] = ObjectModelMultipleChoiceField(
                     queryset=wells,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -286,7 +286,7 @@ class BaseAnnotationForm(NonASCIIForm):
                     initial=kwargs['initial']['selected']['shares'],
                     widget=forms.SelectMultiple(attrs={'size': 10}),
                     required=False)
-            except:
+            except Exception:
                 self.fields['share'] = ObjectModelMultipleChoiceField(
                     queryset=shares,
                     widget=forms.SelectMultiple(attrs={'size': 10}),
@@ -320,6 +320,7 @@ class NewTagsAnnotationForm(forms.Form):
     description = forms.CharField(required=False, widget=forms.HiddenInput)
     tagset = forms.IntegerField(
         min_value=1, required=False, widget=forms.HiddenInput)
+
 
 NewTagsAnnotationFormSet = formset_factory(NewTagsAnnotationForm, extra=0)
 
@@ -358,7 +359,7 @@ class ActiveGroupForm(forms.Form):
                         '?url=' + kwargs['initial']['url'] +
                         '&active_group=\''
                         '+this.options[this.selectedIndex].value')}))
-        except:
+        except Exception:
             self.fields['active_group'] = GroupModelChoiceField(
                 queryset=kwargs['initial']['mygroups'],
                 initial=kwargs['initial']['activeGroup'],
@@ -431,7 +432,7 @@ class MetadataChannelForm(forms.Form):
                         'onchange': save_metadata(logicalCh.id, 'name')}),
                     required=False)
             set_widget_attrs(self.fields['name'])
-        except:
+        except Exception:
             self.fields['name'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -460,7 +461,7 @@ class MetadataChannelForm(forms.Form):
                     label="Excitation",
                     required=False)
             set_widget_attrs(self.fields['excitationWave'])
-        except:
+        except Exception:
             self.fields['excitationWave'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -490,7 +491,7 @@ class MetadataChannelForm(forms.Form):
                     label="Emission",
                     required=False)
             set_widget_attrs(self.fields['emissionWave'])
-        except:
+        except Exception:
             self.fields['emissionWave'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -519,7 +520,7 @@ class MetadataChannelForm(forms.Form):
                     label="ND filter (%)",
                     required=False)
             set_widget_attrs(self.fields['ndFilter'], set_class=False)
-        except:
+        except Exception:
             self.fields['ndFilter'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -549,7 +550,7 @@ class MetadataChannelForm(forms.Form):
                     label="Pin hole size",
                     required=False)
             set_widget_attrs(self.fields['pinHoleSize'], set_class=False)
-        except:
+        except Exception:
             self.fields['pinHoleSize'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -576,7 +577,7 @@ class MetadataChannelForm(forms.Form):
                         'onchange': save_metadata(logicalCh.id, 'name')}),
                     required=False)
             set_widget_attrs(self.fields['fluor'], set_class=False)
-        except:
+        except Exception:
             self.fields['fluor'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -604,7 +605,7 @@ class MetadataChannelForm(forms.Form):
                             logicalCh.id, 'illumination', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['illumination'], set_class=False)
-        except:
+        except Exception:
             self.fields['illumination'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -634,7 +635,7 @@ class MetadataChannelForm(forms.Form):
                     label="Contrast method",
                     required=False)
             set_widget_attrs(self.fields['contrastMethod'])
-        except:
+        except Exception:
             self.fields['contrastMethod'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -663,7 +664,7 @@ class MetadataChannelForm(forms.Form):
                             logicalCh.id, 'mode', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['mode'])
-        except:
+        except Exception:
             self.fields['mode'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -691,7 +692,7 @@ class MetadataChannelForm(forms.Form):
                     label="Pockel cell",
                     required=False)
             set_widget_attrs(self.fields['pockelCellSetting'])
-        except:
+        except Exception:
             self.fields['pockelCellSetting'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -733,7 +734,7 @@ class MetadataDichroicForm(forms.Form):
                             'manufacturer')}),
                     required=False)
             set_widget_attrs(self.fields['manufacturer'])
-        except:
+        except Exception:
             self.fields['manufacturer'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -761,7 +762,7 @@ class MetadataDichroicForm(forms.Form):
                             kwargs['initial']['dichroic'].id, 'model')}),
                     required=False)
             set_widget_attrs(self.fields['model'])
-        except:
+        except Exception:
             self.fields['model'] = forms.CharField(
                 max_length=10, widget=forms.TextInput(attrs={'size': 25}),
                 initial="N/A", required=False)
@@ -791,7 +792,7 @@ class MetadataDichroicForm(forms.Form):
                     label="Serial number",
                     required=False)
             set_widget_attrs(self.fields['serialNumber'])
-        except:
+        except Exception:
             self.fields['serialNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -824,7 +825,7 @@ class MetadataDichroicForm(forms.Form):
                     label="Lot number",
                     required=False)
             set_widget_attrs(self.fields['lotNumber'])
-        except:
+        except Exception:
             self.fields['lotNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -862,7 +863,7 @@ class MetadataMicroscopeForm(forms.Form):
                             kwargs['initial']['microscope'].id, 'model')}),
                     required=False)
             set_widget_attrs(self.fields['model'])
-        except:
+        except Exception:
             self.fields['model'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -892,7 +893,7 @@ class MetadataMicroscopeForm(forms.Form):
                             'manufacturer')}),
                     required=False)
             set_widget_attrs(self.fields['manufacturer'])
-        except:
+        except Exception:
             self.fields['manufacturer'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -924,7 +925,7 @@ class MetadataMicroscopeForm(forms.Form):
                     label="Serial number",
                     required=False)
             set_widget_attrs(self.fields['serialNumber'])
-        except:
+        except Exception:
             self.fields['serialNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -957,7 +958,7 @@ class MetadataMicroscopeForm(forms.Form):
                     label="Serial number",
                     required=False)
             set_widget_attrs(self.fields['lotNumber'])
-        except:
+        except Exception:
             self.fields['lotNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -990,7 +991,7 @@ class MetadataMicroscopeForm(forms.Form):
                             options=True)}),
                     required=False)
             set_widget_attrs(self.fields['type'])
-        except:
+        except Exception:
             self.fields['type'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1027,7 +1028,7 @@ class MetadataObjectiveForm(forms.Form):
                             kwargs['initial']['objective'].id, 'model')}),
                     required=False)
             set_widget_attrs(self.fields['model'])
-        except:
+        except Exception:
             self.fields['model'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1057,7 +1058,7 @@ class MetadataObjectiveForm(forms.Form):
                             'manufacturer')}),
                     required=False)
             set_widget_attrs(self.fields['manufacturer'])
-        except:
+        except Exception:
             self.fields['manufacturer'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1089,7 +1090,7 @@ class MetadataObjectiveForm(forms.Form):
                     label="Serial number",
                     required=False)
             set_widget_attrs(self.fields['serialNumber'])
-        except:
+        except Exception:
             self.fields['serialNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1123,7 +1124,7 @@ class MetadataObjectiveForm(forms.Form):
                     label="Lot number",
                     required=False)
             set_widget_attrs(self.fields['lotNumber'])
-        except:
+        except Exception:
             self.fields['lotNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1158,7 +1159,7 @@ class MetadataObjectiveForm(forms.Form):
                     label="Nominal magnification",
                     required=False)
             set_widget_attrs(self.fields['nominalMagnification'])
-        except:
+        except Exception:
             self.fields['nominalMagnification'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1193,7 +1194,7 @@ class MetadataObjectiveForm(forms.Form):
                     label="Calibrated magnification",
                     required=False)
             set_widget_attrs(self.fields['calibratedMagnification'])
-        except:
+        except Exception:
             self.fields['calibratedMagnification'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1223,7 +1224,7 @@ class MetadataObjectiveForm(forms.Form):
                             kwargs['initial']['objective'].id, 'lensNA')}),
                     required=False)
             set_widget_attrs(self.fields['lensNA'])
-        except:
+        except Exception:
             self.fields['lensNA'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1253,7 +1254,7 @@ class MetadataObjectiveForm(forms.Form):
                             'immersion', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['immersion'])
-        except:
+        except Exception:
             self.fields['immersion'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1285,7 +1286,7 @@ class MetadataObjectiveForm(forms.Form):
                     required=False)
             set_widget_attrs(self.fields['correction'])
 
-        except:
+        except Exception:
             self.fields['correction'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1319,7 +1320,7 @@ class MetadataObjectiveForm(forms.Form):
                     label="Working distance",
                     required=False)
             set_widget_attrs(self.fields['workingDistance'])
-        except:
+        except Exception:
             self.fields['workingDistance'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1347,7 +1348,7 @@ class MetadataObjectiveForm(forms.Form):
                             options=True)}),
                     required=False)
             set_widget_attrs(self.fields['iris'])
-        except:
+        except Exception:
             self.fields['iris'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1400,7 +1401,7 @@ class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
                         label="Correction collar",
                         required=False)
             set_widget_attrs(self.fields['correctionCollar'])
-        except:
+        except Exception:
             self.fields['correctionCollar'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1432,7 +1433,7 @@ class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
                             'medium', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['medium'])
-        except:
+        except Exception:
             self.fields['medium'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1466,7 +1467,7 @@ class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
                     label="Refractive index",
                     required=False)
             set_widget_attrs(self.fields['refractiveIndex'])
-        except:
+        except Exception:
             self.fields['refractiveIndex'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1509,7 +1510,7 @@ class MetadataFilterForm(forms.Form):
                             kwargs['initial']['filter'].id, 'manufacturer')}),
                     required=False)
             set_widget_attrs(self.fields['manufacturer'])
-        except:
+        except Exception:
             self.fields['manufacturer'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1537,7 +1538,7 @@ class MetadataFilterForm(forms.Form):
                             kwargs['initial']['filter'].id, 'model')}),
                     required=False)
             set_widget_attrs(self.fields['model'])
-        except:
+        except Exception:
             self.fields['model'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1566,7 +1567,7 @@ class MetadataFilterForm(forms.Form):
                             kwargs['initial']['filter'].id, 'serialNumber')}),
                     label="Serial number", required=False)
             set_widget_attrs(self.fields['serialNumber'])
-        except:
+        except Exception:
             self.fields['serialNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1596,7 +1597,7 @@ class MetadataFilterForm(forms.Form):
                     label="Lot number",
                     required=False)
             set_widget_attrs(self.fields['lotNumber'])
-        except:
+        except Exception:
             self.fields['lotNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1627,7 +1628,7 @@ class MetadataFilterForm(forms.Form):
                     label="Filter wheel",
                     required=False)
             set_widget_attrs(self.fields['filterWheel'])
-        except:
+        except Exception:
             self.fields['filterWheel'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1658,7 +1659,7 @@ class MetadataFilterForm(forms.Form):
                             options=True)}),
                     required=False)
             set_widget_attrs(self.fields['type'])
-        except:
+        except Exception:
             self.fields['type'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1690,7 +1691,7 @@ class MetadataFilterForm(forms.Form):
                     label="Cut in",
                     required=False)
             set_widget_attrs(self.fields['cutIn'])
-        except:
+        except Exception:
             self.fields['cutIn'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1721,7 +1722,7 @@ class MetadataFilterForm(forms.Form):
                     label="Cut out",
                     required=False)
             set_widget_attrs(self.fields['cutOut'])
-        except:
+        except Exception:
             self.fields['cutOut'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1755,7 +1756,7 @@ class MetadataFilterForm(forms.Form):
                     label="Cut in tolerance",
                     required=False)
             set_widget_attrs(self.fields['cutInTolerance'])
-        except:
+        except Exception:
             self.fields['cutInTolerance'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1787,7 +1788,7 @@ class MetadataFilterForm(forms.Form):
                     label="Cut out tolerance",
                     required=False)
             set_widget_attrs(self.fields['cutOutTolerance'])
-        except:
+        except Exception:
             self.fields['cutOutTolerance'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1821,7 +1822,7 @@ class MetadataFilterForm(forms.Form):
                             'transmittance')}),
                     required=False)
             set_widget_attrs(self.fields['transmittance'])
-        except:
+        except Exception:
             self.fields['transmittance'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1863,7 +1864,7 @@ class MetadataDetectorForm(forms.Form):
                             detector.id, 'manufacturer')}),
                     required=False)
             set_widget_attrs(self.fields['manufacturer'])
-        except:
+        except Exception:
             self.fields['manufacturer'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1889,7 +1890,7 @@ class MetadataDetectorForm(forms.Form):
                         'onchange': save_metadata(detector.id, 'model')}),
                     required=False)
             set_widget_attrs(self.fields['model'])
-        except:
+        except Exception:
             self.fields['model'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1917,7 +1918,7 @@ class MetadataDetectorForm(forms.Form):
                             detector.id, 'serialNumber')}),
                     required=False)
             set_widget_attrs(self.fields['serialNumber'])
-        except:
+        except Exception:
             self.fields['serialNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1944,7 +1945,7 @@ class MetadataDetectorForm(forms.Form):
                         'onchange': save_metadata(detector.id, 'lotNumber')}),
                     required=False)
             set_widget_attrs(self.fields['lotNumber'])
-        except:
+        except Exception:
             self.fields['lotNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -1972,7 +1973,7 @@ class MetadataDetectorForm(forms.Form):
                             detector.id, 'type', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['type'])
-        except:
+        except Exception:
             self.fields['type'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2006,7 +2007,7 @@ class MetadataDetectorForm(forms.Form):
                         'onchange': save_metadata(detSet.id, 'gain')}),
                     required=False)
             set_widget_attrs(self.fields['gain'])
-        except:
+        except Exception:
             self.fields['gain'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2042,7 +2043,7 @@ class MetadataDetectorForm(forms.Form):
                         'onchange': save_metadata(detSet.id, 'voltage')}),
                     required=False)
             set_widget_attrs(self.fields['voltage'])
-        except:
+        except Exception:
             self.fields['voltage'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2081,7 +2082,7 @@ class MetadataDetectorForm(forms.Form):
                     label="Offset",
                     required=False)
             set_widget_attrs(self.fields['offsetValue'])
-        except:
+        except Exception:
             self.fields['offsetValue'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2110,7 +2111,7 @@ class MetadataDetectorForm(forms.Form):
                             detector.id, 'voltage')}),
                     required=False)
             set_widget_attrs(self.fields['zoom'])
-        except:
+        except Exception:
             self.fields['zoom'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2140,7 +2141,7 @@ class MetadataDetectorForm(forms.Form):
                     label="Amplification gain",
                     required=False)
             set_widget_attrs(self.fields['amplificationGain'])
-        except:
+        except Exception:
             self.fields['amplificationGain'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2170,7 +2171,7 @@ class MetadataDetectorForm(forms.Form):
                     label="Read out rate",
                     required=False)
             set_widget_attrs(self.fields['readOutRate'])
-        except:
+        except Exception:
             self.fields['readOutRate'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2199,7 +2200,7 @@ class MetadataDetectorForm(forms.Form):
                             detSet.id, 'type', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['binning'])
-        except:
+        except Exception:
             self.fields['binning'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2249,7 +2250,7 @@ class MetadataLightSourceForm(forms.Form):
                         'onchange': save_metadata(lightSource.id, 'model')}),
                     required=False)
             set_widget_attrs(self.fields['manufacturer'])
-        except:
+        except Exception:
             self.fields['manufacturer'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2275,7 +2276,7 @@ class MetadataLightSourceForm(forms.Form):
                         'onchange': save_metadata(lightSource.id, 'model')}),
                     required=False)
             set_widget_attrs(self.fields['model'])
-        except:
+        except Exception:
             self.fields['model'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2305,7 +2306,7 @@ class MetadataLightSourceForm(forms.Form):
                     label="Serial number",
                     required=False)
             set_widget_attrs(self.fields['serialNumber'])
-        except:
+        except Exception:
             self.fields['serialNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2336,7 +2337,7 @@ class MetadataLightSourceForm(forms.Form):
                     label="Lot number",
                     required=False)
             set_widget_attrs(self.fields['lotNumber'])
-        except:
+        except Exception:
             self.fields['lotNumber'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2364,7 +2365,7 @@ class MetadataLightSourceForm(forms.Form):
                         'onchange': save_metadata(lightSource.id, 'power')}),
                     required=False)
             set_widget_attrs(self.fields['power'])
-        except:
+        except Exception:
             self.fields['power'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2394,7 +2395,7 @@ class MetadataLightSourceForm(forms.Form):
                     label="Type",
                     required=False)
             set_widget_attrs(self.fields['lstype'])
-        except:
+        except Exception:
             self.fields['lstype'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2415,7 +2416,7 @@ class MetadataLightSourceForm(forms.Form):
                 widget=forms.TextInput(attrs={'size': 25}),
                 initial=pumpValue,
                 required=False)
-        except:
+        except Exception:
             # Not a Laser - don't show Pump
             self.fields['pump'] = forms.CharField(
                 max_length=10,
@@ -2446,7 +2447,7 @@ class MetadataLightSourceForm(forms.Form):
                     label="Medium",
                     required=False)
             set_widget_attrs(self.fields['lmedium'])
-        except:
+        except Exception:
             self.fields['lmedium'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2489,7 +2490,7 @@ class MetadataLightSourceForm(forms.Form):
                             lightSource.id, 'wavelength')}),
                     required=False)
             set_widget_attrs(self.fields['wavelength'])
-        except:
+        except Exception:
             self.fields['wavelength'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2519,7 +2520,7 @@ class MetadataLightSourceForm(forms.Form):
                     label="Frequency Multiplication",
                     required=False)
             set_widget_attrs(self.fields['frequencyMultiplication'])
-        except:
+        except Exception:
             self.fields['frequencyMultiplication'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2546,7 +2547,7 @@ class MetadataLightSourceForm(forms.Form):
                             lightSource.id, 'tuneable', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['tuneable'])
-        except:
+        except Exception:
             self.fields['tuneable'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2574,7 +2575,7 @@ class MetadataLightSourceForm(forms.Form):
                             lightSource.id, 'pulse', options=True)}),
                     required=False)
             set_widget_attrs(self.fields['pulse'])
-        except:
+        except Exception:
             self.fields['pulse'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2605,7 +2606,7 @@ class MetadataLightSourceForm(forms.Form):
                     label="Repetition rate",
                     required=False)
             set_widget_attrs(self.fields['repetitionRate'])
-        except:
+        except Exception:
             self.fields['repetitionRate'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2634,7 +2635,7 @@ class MetadataLightSourceForm(forms.Form):
                     label="Pockel Cell",
                     required=False)
             set_widget_attrs(self.fields['pockelCell'])
-        except:
+        except Exception:
             self.fields['pockelCell'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2701,7 +2702,7 @@ class MetadataEnvironmentForm(forms.Form):
                             kwargs['initial']['image'].id, 'temperature')}),
                     required=False)
             set_widget_attrs(self.fields['temperature'])
-        except:
+        except Exception:
             self.fields['temperature'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2732,7 +2733,7 @@ class MetadataEnvironmentForm(forms.Form):
                     label="Air Pressure",
                     required=False)
             set_widget_attrs(self.fields['airPressure'])
-        except:
+        except Exception:
             self.fields['airPressure'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2761,7 +2762,7 @@ class MetadataEnvironmentForm(forms.Form):
                             kwargs['initial']['image'].id, 'humidity')}),
                     required=False)
             set_widget_attrs(self.fields['humidity'])
-        except:
+        except Exception:
             self.fields['humidity'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2791,7 +2792,7 @@ class MetadataEnvironmentForm(forms.Form):
                     label="CO2 (%)",
                     required=False)
             set_widget_attrs(self.fields['co2percent'])
-        except:
+        except Exception:
             self.fields['co2percent'] = forms.CharField(
                 max_length=10,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2834,7 +2835,7 @@ class MetadataStageLabelForm(forms.Form):
                     label="Position X",
                     required=False)
             set_widget_attrs(self.fields['positionx'])
-        except:
+        except Exception:
             self.fields['positionx'] = forms.CharField(
                 max_length=100,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2866,7 +2867,7 @@ class MetadataStageLabelForm(forms.Form):
                     label="Position Y",
                     required=False)
             set_widget_attrs(self.fields['positiony'])
-        except:
+        except Exception:
             self.fields['positiony'] = forms.CharField(
                 max_length=100,
                 widget=forms.TextInput(attrs={'size': 25}),
@@ -2898,7 +2899,7 @@ class MetadataStageLabelForm(forms.Form):
                     label="Position Z",
                     required=False)
             set_widget_attrs(self.fields['positionz'])
-        except:
+        except Exception:
             self.fields['positionz'] = forms.CharField(
                 max_length=100,
                 widget=forms.TextInput(attrs={'size': 25}),
