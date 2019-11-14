@@ -577,7 +577,7 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
                         dGroup = g
                         break
 
-                listOfOtherGroups = set()
+                listOfOtherGroups = list()
                 # rest of groups
                 for g in groups:
                     for og in otherGroups:
@@ -585,7 +585,7 @@ def manage_experimenter(request, action, eid=None, conn=None, **kwargs):
                         if int(og) == int(dGroup.id):
                             pass
                         elif int(og) == g.id:
-                            listOfOtherGroups.add(g)
+                            listOfOtherGroups.append(g)
 
                 # Update 'AdminPrivilege' config roles for user
                 privileges = conn.get_privileges_from_form(form)
