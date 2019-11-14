@@ -270,7 +270,7 @@ class TestWebGatewayCache(object):
                     'abcdefgh'), 'Key %d not properly cached' % i
         assert self.wcache.getThumb(self.request, 'test', uid, 5) is None, (
             'Entries limit failed')
-        time.sleep(2)
+        time.sleep(3)
         assert self.wcache.getThumb(self.request, 'test', uid, 0) is None, (
             'Time limit failed')
 
