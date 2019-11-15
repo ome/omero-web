@@ -2426,12 +2426,14 @@ def download_as(request, iid=None, conn=None, **kwargs):
             if not zipName.endswith('.zip'):
                 zipName = "%s.zip" % zipName
 
+            # get file size before it is consumed by FileWrapper
+            file_size = os.path.getsize(temp.name)
             # return the zip or single file
             imageFile_data = FileWrapper(temp)
             rsp = HttpResponse(imageFile_data)
-            rsp['Content-Length'] = temp.tell()
+            rsp['Content-Length'] = file_size
             rsp['Content-Disposition'] = 'attachment; filename=%s' % zipName
-            temp.seek(0)
+            # temp.seek(0)      # ValueError: I/O operation on closed file
         except Exception:
             temp.close()
             stack = traceback.format_exc()
