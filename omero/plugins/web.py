@@ -20,7 +20,11 @@ import re
 from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
-from path import path
+try:
+    from omero_ext.path import path
+except ImportError:
+    # Python 2
+    from path import path
 from pkg_resources import resource_string
 
 from omero.install.windows_warning import windows_warning, WINDOWS_WARNING
