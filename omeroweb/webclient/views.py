@@ -4266,7 +4266,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 k = str(request.POST[keyName])
                 v = request.POST[valueName]
                 if len(k) > 0 and len(v) > 0:
-                    paramMap[str(k)] = v.encode('utf8')
+                    paramMap[str(k)] = v
                 row += 1
                 keyName = "%s_key%d" % (key, row)
                 valueName = "%s_value%d" % (key, row)
@@ -4324,7 +4324,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
     # If we have objects specified via 'IDs' and 'DataType', try to pick
     # correct group
-    if 'IDs' in inputMap.keys() and 'Data_Type' in inputMap.keys():
+    if 'IDs' in inputMap and 'Data_Type' in inputMap:
         gid = conn.SERVICE_OPTS.getOmeroGroup()
         conn.SERVICE_OPTS.setOmeroGroup('-1')
         try:
@@ -4396,7 +4396,8 @@ def run_script(request, conn, sId, inputMap, scriptName='Script'):
         request.session.modified = True
     except Exception as x:
         jobId = str(time())      # E.g. 1312803670.6076391
-        if x.message and x.message.startswith("No processor available"):
+        if hasattr(x, 'message') and x.message and \
+                x.message.startswith("No processor available"):
             # omero.ResourceError
             logger.info(traceback.format_exc())
             error = "No Processor Available"
