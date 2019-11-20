@@ -23,6 +23,8 @@
 # Version: 1.0
 #
 
+import logging
+import importlib
 from django.conf import settings
 from django.apps import AppConfig
 from django.conf.urls import url, include
@@ -34,6 +36,8 @@ from django.utils.functional import lazy
 from django.views.generic import RedirectView
 from django.views.decorators.cache import never_cache
 from omeroweb.webclient import views as webclient_views
+
+logger = logging.getLogger(__name__)
 
 # error handler
 handler404 = "omeroweb.feedback.views.handler404"
@@ -79,13 +83,16 @@ for app in settings.ADDITIONAL_APPS:
         urlmodule = 'omeroweb.%s.urls' % app
     else:
         urlmodule = '%s.urls' % app
-    try:
+
+    # Try to import module.urls.py if it exists (not for corsheaders etc)
+    urls_found = importlib.util.find_spec(urlmodule)
+    if urls_found is not None:
+        # We don't try/except here since import failure means app won't run
         __import__(urlmodule)
-    except ImportError:
-        pass
-    else:
         regex = '^(?i)%s/' % label
         urlpatterns.append(url(regex, include(urlmodule)))
+    else:
+        logger.debug('Module not found: %s' % urlmodule)
 
 urlpatterns += [
     url(r'^favicon\.ico$',
