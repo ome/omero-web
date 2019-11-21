@@ -15,6 +15,8 @@
 ## API Changes
 
 - OMERO.web now uses Django 1.11, upgraded from Django 1.9.
+- omeroweb.http renamed to omeroweb.httprsp to avoid import name
+  clashes with Django http.
 
 # 5.6.dev2 (October 2019)
 
