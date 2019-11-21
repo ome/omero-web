@@ -4396,8 +4396,10 @@ def run_script(request, conn, sId, inputMap, scriptName='Script'):
         request.session.modified = True
     except Exception as x:
         jobId = str(time())      # E.g. 1312803670.6076391
-        if hasattr(x, 'message') and x.message and \
-                x.message.startswith("No processor available"):
+        # handle python 2 or 3 errors
+        message = x.message if hasattr(x, 'message') else (
+            x.args[0] if x.args else '')
+        if message and message.startswith("No processor available"):
             # omero.ResourceError
             logger.info(traceback.format_exc())
             error = "No Processor Available"
