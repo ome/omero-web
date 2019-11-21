@@ -7,5 +7,5 @@ except ImportError:
     omero_buildyear = "unknown"
 
 
-omeroweb_version = "5.6.dev5"
+omeroweb_version = "5.6.dev6"
 omeroweb_buildyear = "2019"
