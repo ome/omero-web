@@ -52,8 +52,7 @@ For a development installation we recommend creating a virtualenv with the follo
 
 This will install OMERO.web into your virtualenv as an editable package, so any edits to source files should be reflected in your installation.
 
-Note you should not install multiple omero modules in editable mode.
-For example do not ``pip install -e`` omero-py and omero-web in the same virtualenv.
+Note some omero-web tests may not run when this module and/or omero-py are installed in editable mode.
 
 Running tests
 -------------
