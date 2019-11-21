@@ -444,8 +444,15 @@ class TestWeb(object):
         cgiport = '12345'
         app_server = server_type[-1]
         del server_type[-1]
+        nginx_server_extra = [
+            'listen 443 ssl;',
+            'ssl_certificate /dummy/fullchain.pem;',
+            'ssl_certificate_key /dummy/private.key;',
+        ]
         self.mock_django_setting('STATIC_ROOT', static_root, monkeypatch)
         self.mock_django_setting('APPLICATION_SERVER', app_server, monkeypatch)
+        self.mock_django_setting(
+            'NGINX_SERVER_EXTRA_CONFIG', nginx_server_extra, monkeypatch)
         self.add_prefix(prefix, monkeypatch)
         self.add_hostport(cgihost, cgiport, monkeypatch)
 
