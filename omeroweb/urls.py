@@ -93,7 +93,8 @@ for app in settings.ADDITIONAL_APPS:
             urlpatterns.append(url(regex, include(urlmodule)))
         except ImportError:
             print("""Failed to import %s
-Please check if the app is  installed and the versions of the app and OMERO.web are compatible
+Please check if the app is installed and the versions of the app and
+OMERO.web are compatible
             """ % urlmodule)
             raise
     else:
