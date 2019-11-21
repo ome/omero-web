@@ -87,10 +87,15 @@ for app in settings.ADDITIONAL_APPS:
     # Try to import module.urls.py if it exists (not for corsheaders etc)
     urls_found = pkgutil.find_loader(urlmodule)
     if urls_found is not None:
-        # We don't try/except here since import failure means app won't run
-        __import__(urlmodule)
-        regex = '^(?i)%s/' % label
-        urlpatterns.append(url(regex, include(urlmodule)))
+        try:
+            __import__(urlmodule)
+            regex = '^(?i)%s/' % label
+            urlpatterns.append(url(regex, include(urlmodule)))
+        except ImportError:
+            print("""Failed to import %s
+Please check if the app is  installed and the versions of the app and OMERO.web are compatible
+            """ % urlmodule)
+            raise
     else:
         logger.debug('Module not found: %s' % urlmodule)
 
