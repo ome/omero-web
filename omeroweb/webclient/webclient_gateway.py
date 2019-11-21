@@ -49,8 +49,6 @@ from omero.fs import TRANSFERS
 
 from omero.gateway import KNOWN_WRAPPERS
 
-from omero.plugins.admin import AdminControl
-
 from django.utils.encoding import smart_str
 from django.conf import settings
 
@@ -249,14 +247,11 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         Local config settings override client settings sent by the server
         """
         configmap = super(OmeroWebGateway, self).getClientSettings()
-        localcfg = AdminControl().open_config()
-        try:
-            for key in localcfg.keys():
-                if key.startswith('omero.client.'):
-                    configmap[key] = localcfg[key]
-            return configmap
-        finally:
-            localcfg.close()
+        localcfg = settings.CONFIG_XML
+        for key in localcfg.keys():
+            if key.startswith('omero.client.'):
+                configmap[key] = localcfg[key]
+        return configmap
 
     def getEmailSettings(self):
         """
