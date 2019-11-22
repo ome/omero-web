@@ -857,6 +857,13 @@ CUSTOM_SETTINGS_MAPPINGS = {
          ("Additional Django settings as list of key-value tuples. "
           "Use this to set or override Django settings that aren't managed by "
           "OMERO.web. E.g. ``[\"CUSTOM_KEY\", \"CUSTOM_VALUE\"]``")],
+    "omero.web.nginx_server_extra_config":
+        ["NGINX_SERVER_EXTRA_CONFIG",
+         "[]",
+         json.loads,
+         ("Extra configuration lines to add to the Nginx server block. "
+          "Lines will be joined with \\n. "
+          "Remember to terminate lines with; when necessary.")],
 }
 
 DEPRECATED_SETTINGS_MAPPINGS = {

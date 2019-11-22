@@ -276,7 +276,10 @@ class WebControl(DiagnosticsControl):
             "OMEROWEBROOT": self._get_python_dir() / "omeroweb",
             "STATIC_ROOT": settings.STATIC_ROOT,
             "STATIC_URL": settings.STATIC_URL.rstrip("/"),
-            "NOW": str(datetime.now())}
+            "NOW": str(datetime.now()),
+            "NGINX_SERVER_EXTRA_CONFIG": '\n'.join(
+                settings.NGINX_SERVER_EXTRA_CONFIG),
+        }
 
         if server in ("nginx", "nginx-development"):
             d["HTTPPORT"] = port
