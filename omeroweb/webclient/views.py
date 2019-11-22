@@ -3750,7 +3750,7 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             raise Http404("No %ss found with IDs %s" % (dtype, ids))
         else:
             # Now we can specify group context - All should be same group
-            gid = validObjs.values()[0].getDetails().group.id.val
+            gid = list(validObjs.values())[0].getDetails().group.id.val
             conn.SERVICE_OPTS.setOmeroGroup(gid)
         return filteredIds, validObjs
 
@@ -4266,7 +4266,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 k = str(request.POST[keyName])
                 v = request.POST[valueName]
                 if len(k) > 0 and len(v) > 0:
-                    paramMap[str(k)] = v.encode('utf8')
+                    paramMap[str(k)] = v
                 row += 1
                 keyName = "%s_key%d" % (key, row)
                 valueName = "%s_value%d" % (key, row)
@@ -4324,7 +4324,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
     # If we have objects specified via 'IDs' and 'DataType', try to pick
     # correct group
-    if 'IDs' in inputMap.keys() and 'Data_Type' in inputMap.keys():
+    if 'IDs' in inputMap and 'Data_Type' in inputMap:
         gid = conn.SERVICE_OPTS.getOmeroGroup()
         conn.SERVICE_OPTS.setOmeroGroup('-1')
         try:
@@ -4396,7 +4396,10 @@ def run_script(request, conn, sId, inputMap, scriptName='Script'):
         request.session.modified = True
     except Exception as x:
         jobId = str(time())      # E.g. 1312803670.6076391
-        if x.message and x.message.startswith("No processor available"):
+        # handle python 2 or 3 errors
+        message = x.message if hasattr(x, 'message') else (
+            x.args[0] if x.args else '')
+        if message and message.startswith("No processor available"):
             # omero.ResourceError
             logger.info(traceback.format_exc())
             error = "No Processor Available"
