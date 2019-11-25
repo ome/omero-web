@@ -23,6 +23,8 @@
 # Version: 1.0
 #
 
+import logging
+import pkgutil
 from django.conf import settings
 from django.apps import AppConfig
 from django.conf.urls import url, include
@@ -34,6 +36,8 @@ from django.utils.functional import lazy
 from django.views.generic import RedirectView
 from django.views.decorators.cache import never_cache
 from omeroweb.webclient import views as webclient_views
+
+logger = logging.getLogger(__name__)
 
 # error handler
 handler404 = "omeroweb.feedback.views.handler404"
@@ -79,13 +83,22 @@ for app in settings.ADDITIONAL_APPS:
         urlmodule = 'omeroweb.%s.urls' % app
     else:
         urlmodule = '%s.urls' % app
-    try:
-        __import__(urlmodule)
-    except ImportError:
-        pass
+
+    # Try to import module.urls.py if it exists (not for corsheaders etc)
+    urls_found = pkgutil.find_loader(urlmodule)
+    if urls_found is not None:
+        try:
+            __import__(urlmodule)
+            regex = '^(?i)%s/' % label
+            urlpatterns.append(url(regex, include(urlmodule)))
+        except ImportError:
+            print("""Failed to import %s
+Please check if the app is installed and the versions of the app and
+OMERO.web are compatible
+            """ % urlmodule)
+            raise
     else:
-        regex = '^(?i)%s/' % label
-        urlpatterns.append(url(regex, include(urlmodule)))
+        logger.debug('Module not found: %s' % urlmodule)
 
 urlpatterns += [
     url(r'^favicon\.ico$',
