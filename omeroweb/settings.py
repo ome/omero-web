@@ -43,6 +43,7 @@ from builtins import str as text
 from omero_ext import portalocker
 from omero.util.concurrency import get_event
 from omeroweb.utils import sort_properties_to_tuple
+from omero.util import get_omero_userdir
 from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,12 @@ elif 'OMERODIR' in os.environ:
 else:
     OMERO_HOME = os.path.join(os.path.dirname(__file__), '..', '..', '..')
     OMERO_HOME = os.path.normpath(OMERO_HOME)
+
+CONFIG_XML = os.path.join(OMERO_HOME, 'etc', 'grid', 'config.xml')
+# If config can't be found, use same default location as omero-py
+if not os.path.exists(CONFIG_XML):
+    OMERO_HOME = get_omero_userdir()
+    CONFIG_XML = os.path.join(OMERO_HOME, 'etc', 'grid', 'config.xml')
 
 # Logging
 LOGDIR = os.path.join(OMERO_HOME, 'var', 'log').replace('\\', '/')
@@ -160,7 +167,6 @@ LOGGING = {
 }
 
 
-CONFIG_XML = os.path.join(OMERO_HOME, 'etc', 'grid', 'config.xml')
 count = 10
 event = get_event("websettings")
 
