@@ -1,3 +1,14 @@
+# 5.6.dev6 (November 2019)
+
+- Fix `omero_ext.path` import (#77)
+- Add `omero.web.nginx_server_extra_config` property (#80)
+- Use cached config.xml in `omero.webgateway.getClientSettings` (#83)
+- Fix dialogs for thumbnail figure and split-view figure scripts (#73)
+
+## API changes
+
+- OMERO.web now fails to start when `<app>.urls` fails to import (#79)
+
 # 5.6.dev5 (November 2019)
 
 - Moving to production bug fixes
