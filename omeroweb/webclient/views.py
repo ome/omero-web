@@ -3499,7 +3499,8 @@ def activities_update(request, action, **kwargs):
                 rv['removed'] = False
             return JsonResponse(rv)
         else:
-            for key, data in request.session['callback'].items():
+            jobs = list(request.session['callback'].items())
+            for key, data in jobs:
                 if data['status'] != "in progress":
                     del request.session['callback'][key]
     return HttpResponse("OK")
