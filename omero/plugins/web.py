@@ -281,9 +281,13 @@ class WebControl(DiagnosticsControl):
             "STATIC_ROOT": settings.STATIC_ROOT,
             "STATIC_URL": settings.STATIC_URL.rstrip("/"),
             "NOW": str(datetime.now()),
-            "NGINX_SERVER_EXTRA_CONFIG": '\n'.join(
-                settings.NGINX_SERVER_EXTRA_CONFIG),
+            "NGINX_SERVER_EXTRA_CONFIG": "",
         }
+        if settings.NGINX_SERVER_EXTRA_CONFIG:
+            d["NGINX_SERVER_EXTRA_CONFIG"] = '\n'.join(
+                ['# <<<<< omero.web.nginx_server_extra_config'] +
+                settings.NGINX_SERVER_EXTRA_CONFIG +
+                ['# omero.web.nginx_server_extra_config >>>>>'])
 
         if server in ("nginx", "nginx-development"):
             d["HTTPPORT"] = port
