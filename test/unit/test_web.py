@@ -31,6 +31,9 @@ except ImportError:
 import getpass
 import Ice
 import omero.cli
+from omero.plugins.prefs import (
+    PrefsControl
+)
 from omero.plugins.web import (
     APACHE_MOD_WSGI_ERR,
     WebControl
@@ -501,3 +504,15 @@ class TestWeb(object):
             '-proxy_pass http://omeroweb;',
             '+proxy_pass http://127.0.0.1:4080;'
         ]
+
+
+class TestParse(object):
+
+    def setup_method(self, method):
+        self.cli = omero.cli.CLI()
+        self.cli.register("config", PrefsControl, "TEST")
+        self.args = ["config"]
+
+    def test_parse(self):
+        self.args += ["parse", "--rst"]
+        self.cli.invoke(self.args, strict=True)
