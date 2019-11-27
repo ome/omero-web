@@ -755,7 +755,7 @@ def render_shape_mask(request, shapeId, conn=None, **kwargs):
         if x > width - 1:
             x = 0
             y += 1
-    rv = StringIO()
+    rv = BytesIO()
     # return a png (supports transparency)
     img.save(rv, 'png', quality=int(100))
     png = rv.getvalue()
