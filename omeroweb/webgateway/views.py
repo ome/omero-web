@@ -590,7 +590,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
         draw = ImageDraw.Draw(dummy)
         draw.text((10, 30), "Shape too large to \ngenerate thumbnail",
                   fill=(255, 0, 0))
-        rv = StringIO()
+        rv = BytesIO()
         dummy.save(rv, 'jpeg', quality=90)
         return HttpResponse(rv.getvalue(), content_type='image/jpeg')
 
@@ -623,14 +623,14 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
     jpeg_data = image.renderJpegRegion(theZ, theT, newX, newY, newW, newH,
                                        level=None,
                                        compression=compress_quality)
-    img = Image.open(StringIO(jpeg_data))
+    img = Image.open(BytesIO(jpeg_data))
 
     # add back on the xs we were forced to trim
     if left_xs != 0 or right_xs != 0 or top_xs != 0 or bottom_xs != 0:
         jpg_w, jpg_h = img.size
         xs_w = jpg_w + right_xs + left_xs
         xs_h = jpg_h + bottom_xs + top_xs
-        xs_image = Image.new('RGBA', (xs_w, xs_h), bg_color)
+        xs_image = Image.new('RGB', (xs_w, xs_h), bg_color)
         xs_image.paste(img, (left_xs, top_xs))
         img = xs_image
 
@@ -697,7 +697,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
                 y2 = start_y + 1
             draw.line((x2, y2, start_x, start_y), fill=lineColour, width=2)
 
-    rv = StringIO()
+    rv = BytesIO()
     compression = 0.9
     img.save(rv, 'jpeg', quality=int(compression*100))
     jpeg = rv.getvalue()
@@ -755,7 +755,7 @@ def render_shape_mask(request, shapeId, conn=None, **kwargs):
         if x > width - 1:
             x = 0
             y += 1
-    rv = StringIO()
+    rv = BytesIO()
     # return a png (supports transparency)
     img.save(rv, 'png', quality=int(100))
     png = rv.getvalue()
