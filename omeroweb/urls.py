@@ -104,9 +104,9 @@ urlpatterns += [
     url(r'^favicon\.ico$',
         lambda request: redirect('%swebgateway/img/ome.ico'
                                  % settings.STATIC_URL)),
-    url(r'^(?i)webgateway/', include('omeroweb.webgateway.urls')),
+    url(r'^webgateway/', include('omeroweb.webgateway.urls')),
     url(r'^(?i)webadmin/', include('omeroweb.webadmin.urls')),
-    url(r'^(?i)webclient/', include('omeroweb.webclient.urls')),
+    url(r'^webclient/', include('omeroweb.webclient.urls')),
 
     url(r'^(?i)url/', include('omeroweb.webredirect.urls')),
     url(r'^(?i)feedback/', include('omeroweb.feedback.urls')),
