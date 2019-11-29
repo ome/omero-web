@@ -39,7 +39,7 @@ urlpatterns = [
     url(r'^$', views.load_template, {'menu': 'userdata'}, name="webindex"),
 
     # render main template
-    url(r'^(?P<menu>(userdata|public|history|search|help|usertags))/$',
+    url(r'^(?P<menu>((?i)userdata|public|history|search|help|usertags))/$',
         views.load_template,
         name="load_template"),
     url(r'^userdata/$',
@@ -72,7 +72,7 @@ urlpatterns = [
 
     # loading data
     url(r'^load_plate/(?:(?P<o1_type>'
-        r'(plate|acquisition))/)'
+        r'((?i)plate|acquisition))/)'
         r'?(?:(?P<o1_id>[0-9]+)/)?$',
         views.load_plate,
         name="load_plate"),
@@ -83,7 +83,7 @@ urlpatterns = [
         views.load_chgrp_groups,
         name="load_chgrp_groups"),  # Query E.g. ?Image=1,2&Dataset=3
     url(r'^load_chgrp_target/(?P<group_id>[0-9]+)/'
-        r'(?P<target_type>(project|dataset|screen))/$',
+        r'(?P<target_type>((?i)project|dataset|screen))/$',
         views.load_chgrp_target,
         name="load_chgrp_target"),
 
@@ -94,7 +94,7 @@ urlpatterns = [
         views.load_history, name="load_history"),
 
     # load search
-    url(r'^load_searching/(?:(?P<form>(form))/)?$', views.load_searching,
+    url(r'^load_searching/(?:(?P<form>((?i)form))/)?$', views.load_searching,
         name="load_searching"),
 
     # metadata
@@ -106,7 +106,7 @@ urlpatterns = [
         r'(?P<c_id>[0-9]+)/(?:(?P<share_id>[0-9]+)/)?$',
         views.load_metadata_acquisition,
         name="load_metadata_acquisition"),
-    url(r'^metadata_preview/(?P<c_type>(image|well))/'
+    url(r'^metadata_preview/(?P<c_type>((?i)image|well))/'
         r'(?P<c_id>[0-9]+)/(?:(?P<share_id>[0-9]+)/)?$',
         views.load_metadata_preview,
         name="load_metadata_preview"),
@@ -189,7 +189,7 @@ urlpatterns = [
 
     # Fileset query (for delete or chgrp dialogs) obj-types and ids in REQUEST
     # data
-    url(r'^fileset_check/(?P<action>((delete|chgrp))/$',
+    url(r'^fileset_check/(?P<action>((?i)delete|chgrp))/$',
         views.fileset_check,
         name="fileset_check"),
 
@@ -253,7 +253,7 @@ urlpatterns = [
         {'download': True},
         name="download_original_file"),  # for stderr, stdout etc
     url(r'^figure_script/(?P<scriptName>'
-        r'(SplitView|Thumbnail|MakeMovie))/$',
+        r'((?i)SplitView|Thumbnail|MakeMovie))/$',
         views.figure_script,
         name='figure_script'),  # shows a form for running a script
 
