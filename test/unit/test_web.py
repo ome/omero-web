@@ -23,6 +23,7 @@ import pytest
 from difflib import unified_diff
 import re
 import os
+import sys
 try:
     from omero_ext.path import path
 except ImportError:
@@ -513,6 +514,7 @@ class TestParse(object):
         self.cli.register("config", PrefsControl, "TEST")
         self.args = ["config"]
 
+    @pytest.mark.xfail(sys.version_info < (3, 0), reason="py2 unicode issue")
     def test_parse(self):
         self.args += ["parse", "--rst"]
         self.cli.invoke(self.args, strict=True)
