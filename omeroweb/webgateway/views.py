@@ -2432,11 +2432,12 @@ def download_as(request, iid=None, conn=None, **kwargs):
                 zipName = "%s.zip" % zipName
 
             # return the zip or single file
-            imageFile_data = FileWrapper(temp)
-            rsp = HttpResponse(imageFile_data)
+            rsp = ConnCleaningHttpResponse(FileWrapper(temp))
+            rsp.conn = conn
             rsp['Content-Length'] = temp.tell()
             rsp['Content-Disposition'] = 'attachment; filename=%s' % zipName
             temp.seek(0)
+
         except Exception:
             temp.close()
             stack = traceback.format_exc()

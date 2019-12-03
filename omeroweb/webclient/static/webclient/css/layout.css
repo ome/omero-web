@@ -1032,7 +1032,7 @@
         position: absolute;
         top: -5px;
         right: 15px;
-        z-index: 100;
+        z-index: 10;
     }
     .editableKeyValueTable tr.placeholder td {
         font-style: italic;
