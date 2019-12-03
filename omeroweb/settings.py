@@ -1036,7 +1036,7 @@ def process_custom_settings(
         except ValueError as e:
             raise ValueError(
                 "Invalid %s (%s = %r). %s. %s" %
-                (global_name, key, global_value, e.message, description))
+                (global_name, key, global_value, e.args[0], description))
         except ImportError as e:
             raise ImportError(
                 "ImportError: %s. %s (%s = %r).\n%s" %
