@@ -1,3 +1,12 @@
+# 5.6.dev7 (December 2019)
+
+- Better exception handling of custom settings (#94)
+- Add support for extra NGINX server configuration (#90)
+- Fix ROI maks and thumbnails (#92)
+- Fix script result failures (#87)
+- Fix download of multiple images in a zip (#76)
+- Fix race condition while closing tables (#25)
+
 # 5.6.dev6 (November 2019)
 
 - Fix `omero_ext.path` import (#77)
