@@ -53,8 +53,9 @@ logger = logging.getLogger(__name__)
 # A boolean that turns on/off debug mode.
 # handler404 and handler500 works only when False
 if 'OMERO_HOME' in os.environ:
-    OMERO_HOME = os.environ.get('OMERO_HOME')
-elif 'OMERODIR' in os.environ:
+    logger.warn("OMERO_HOME usage is deprecated in OMERO.web")
+
+if 'OMERODIR' in os.environ:
     OMERO_HOME = os.environ.get('OMERODIR')
 else:
     OMERO_HOME = os.path.join(os.path.dirname(__file__), '..', '..', '..')
