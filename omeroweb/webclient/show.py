@@ -74,8 +74,8 @@ class Show(object):
 
     # Regular expression for matching Well names
     WELL_REGEX = re.compile(
-        '^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|'
-        '(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$'
+        r'^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|'
+        r'(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$'
     )
 
     def __init__(self, conn, request, menu):
@@ -217,7 +217,7 @@ class Show(object):
                 if key is None:
                     key = 'id'
                 if key == 'id':
-                    value = long(value)
+                    value = int(value)
                 parent_attributes = {key: value}
                 parent, = self.conn.getObjects(
                     object_type, attributes=parent_attributes
@@ -343,12 +343,12 @@ class Show(object):
             key = m.group('key')
             value = m.group('value')
             if key == 'id':
-                value = long(value)
+                value = int(value)
             attributes = {key: value}
             # Set context to 'cross-group'
             self.conn.SERVICE_OPTS.setOmeroGroup('-1')
             first_selected = self._load_first_selected(first_obj, attributes)
-        except:
+        except Exception:
             pass
         if first_obj not in self.TOP_LEVEL_PREFIXES:
             # Need to see if first item has parents
@@ -584,7 +584,7 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     # Need to know which page image is on
                     iids = get_image_ids(conn, datasetId)
                     index = iids.index(imageId)
-                    page = (index / page_size) + 1  # 1-based index
+                    page = (index // page_size) + 1  # 1-based index
                     ds['childIndex'] = index
                     ds['childPage'] = page
                 path.append(ds)
@@ -611,7 +611,7 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     if len(iids) > page_size:
                         try:
                             index = iids.index(imageId)
-                            page = (index / page_size) + 1  # 1-based index
+                            page = (index // page_size) + 1  # 1-based index
                             orph['childCount'] = len(iids)
                             orph['childIndex'] = index
                             orph['childPage'] = page

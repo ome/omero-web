@@ -253,7 +253,7 @@ urlpatterns = [
         {'download': True},
         name="download_original_file"),  # for stderr, stdout etc
     url(r'^figure_script/(?P<scriptName>'
-        r'((?i)SplitView|RoiSplit|Thumbnail|MakeMovie))/$',
+        r'((?i)SplitView|Thumbnail|MakeMovie))/$',
         views.figure_script,
         name='figure_script'),  # shows a form for running a script
 

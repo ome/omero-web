@@ -23,11 +23,12 @@ import time
 import re
 import logging
 import traceback
-
-logger = logging.getLogger(__name__)
+from future.utils import isbytes, bytes_to_native_str
 
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
+
+logger = logging.getLogger(__name__)
 
 # OMERO.insight point list regular expression
 INSIGHT_POINT_LIST_RE = re.compile(r'points\[([^\]]+)\]')
@@ -50,8 +51,8 @@ def eventContextMarshal(event_context):
               'groupName', 'isAdmin', 'eventId', 'eventType',
               'memberOfGroups', 'leaderOfGroups',
               'adminPrivileges']:
-            if (hasattr(event_context, a)):
-                ctx[a] = unwrap(getattr(event_context, a))
+        if (hasattr(event_context, a)):
+            ctx[a] = unwrap(getattr(event_context, a))
 
     perms = event_context.groupPermissions
     encoder = get_encoder(perms.__class__)
@@ -115,7 +116,7 @@ def imageMarshal(image, key=None, request=None):
             if len(well_smpls) == 1:
                 if well_smpls[0].well is not None:
                     well = well_smpls[0].well
-    except omero.SecurityViolation, e:
+    except omero.SecurityViolation as e:
         # We're in a share so the Image's parent Dataset cannot be loaded
         # or some other permissions related issue has tripped us up.
         logger.warn('Security violation while retrieving Dataset when '
@@ -153,7 +154,7 @@ def imageMarshal(image, key=None, request=None):
             logger.debug(
                 "Failed to prepare Rendering Engine for imageMarshal")
             return rv
-    except omero.ConcurrencyException, ce:
+    except omero.ConcurrencyException as ce:
         backOff = ce.backOff
         rv = {
             'ConcurrencyException': {
@@ -161,7 +162,7 @@ def imageMarshal(image, key=None, request=None):
             }
         }
         return rv
-    except Exception, ex:   # Handle everything else.
+    except Exception as ex:   # Handle everything else.
         rv['Exception'] = ex.message
         logger.error(traceback.format_exc())
         return rv       # Return what we have already, in case it's useful
@@ -180,14 +181,15 @@ def imageMarshal(image, key=None, request=None):
         if zoomLevelScaling is not None:
             rv['zoomLevelScaling'] = zoomLevelScaling
 
-    nominalMagnification = image.getObjectiveSettings() is not None \
-        and image.getObjectiveSettings().getObjective().getNominalMagnification() \
-        or None
+    nominalMagnification = (
+        image.getObjectiveSettings() is not None and
+        image.getObjectiveSettings().getObjective().getNominalMagnification()
+        or None)
 
     try:
         server_settings = request.session.get('server_settings', {}) \
                                          .get('viewer', {})
-    except:
+    except Exception:
         server_settings = {}
     init_zoom = server_settings.get('initial_zoom_level', 0)
     if init_zoom < 0:
@@ -200,7 +202,7 @@ def imageMarshal(image, key=None, request=None):
             try:
                 size = method('MICROMETER')
                 return size.getValue() if size else None
-            except:
+            except Exception:
                 logger.debug(
                     'Unable to convert physical pixel size to microns',
                     exc_info=True
@@ -224,8 +226,7 @@ def imageMarshal(image, key=None, request=None):
             rv.update({'nominalMagnification': nominalMagnification})
         try:
             rv['pixel_range'] = image.getPixelRange()
-            rv['channels'] = map(lambda x: channelMarshal(x),
-                                 image.getChannels())
+            rv['channels'] = [channelMarshal(x) for x in image.getChannels()]
             rv['split_channel'] = image.splitChannelDims()
             rv['rdefs'] = {'model': (image.isGreyscaleRenderingModel() and
                                      'greyscale' or 'color'),
@@ -274,6 +275,12 @@ def shapeMarshal(shape):
         if func(v):
             rv[k] = v
 
+    def decode(shape_field):
+        value = shape_field.getValue()
+        if value and isbytes(value):
+            value = bytes_to_native_str(value)
+        return value
+
     rv['id'] = shape.getId().getValue()
     set_if('theT', shape.getTheT())
     set_if('theZ', shape.getTheZ())
@@ -299,7 +306,8 @@ def shapeMarshal(shape):
         rv['radiusY'] = shape.getRadiusY().getValue()
     elif shape_type == omero.model.PolylineI:
         rv['type'] = 'PolyLine'
-        rv['points'] = stringToSvg(shape.getPoints().getValue())
+        points = decode(shape.getPoints())
+        rv['points'] = stringToSvg(points)
     elif shape_type == omero.model.LineI:
         rv['type'] = 'Line'
         rv['x1'] = shape.getX1().getValue()
@@ -313,7 +321,8 @@ def shapeMarshal(shape):
     elif shape_type == omero.model.PolygonI:
         rv['type'] = 'Polygon'
         # z = closed line
-        rv['points'] = stringToSvg(shape.getPoints().getValue()) + " z"
+        points = decode(shape.getPoints())
+        rv['points'] = stringToSvg(points) + " z"
     elif shape_type == omero.model.LabelI:
         rv['type'] = 'Label'
         rv['x'] = shape.getX().getValue()
@@ -350,9 +359,10 @@ def shapeMarshal(shape):
         # FIXME: units ignored for stroke width
         set_if('strokeWidth', shape.getStrokeWidth().getValue())
     if hasattr(shape, 'getMarkerStart') and shape.getMarkerStart() is not None:
-        rv['markerStart'] = shape.getMarkerStart().getValue()
+        # Handle string for python2 and bytes python3. TODO: lower level fix
+        rv['markerStart'] = decode(shape.getMarkerStart())
     if hasattr(shape, 'getMarkerEnd') and shape.getMarkerEnd() is not None:
-        rv['markerEnd'] = shape.getMarkerEnd().getValue()
+        rv['markerEnd'] = decode(shape.getMarkerEnd())
     return rv
 
 
@@ -383,9 +393,9 @@ def rgb_int2css(rgbint):
     """
     alpha = rgbint % 256
     alpha = float(alpha) / 255
-    b = rgbint / 256 % 256
-    g = rgbint / 256 / 256 % 256
-    r = rgbint / 256 / 256 / 256 % 256
+    b = rgbint // 256 % 256
+    g = rgbint // 256 // 256 % 256
+    r = rgbint // 256 // 256 // 256 % 256
     return "#%02x%02x%02x" % (r, g, b), alpha
 
 
@@ -396,9 +406,9 @@ def rgb_int2rgba(rgbint):
     """
     alpha = rgbint % 256
     alpha = float(alpha) / 255
-    b = rgbint / 256 % 256
-    g = rgbint / 256 / 256 % 256
-    r = rgbint / 256 / 256 / 256 % 256
+    b = rgbint // 256 % 256
+    g = rgbint // 256 // 256 % 256
+    r = rgbint // 256 // 256 // 256 % 256
     return (r, g, b, alpha)
 
 
@@ -474,9 +484,9 @@ def chgrpMarshal(conn, rsp):
                     else:
                         others += 1
         # sort tags & comments
-        tags = tags.values()
+        tags = list(tags.values())
         tags.sort(key=lambda x: x['name'])
-        files = files.values()
+        files = list(files.values())
         files.sort(key=lambda x: x['name'])
         rv['unlinkedDetails'] = {'Tags': tags,
                                  'Files': files,
@@ -516,7 +526,7 @@ def chgrpMarshal(conn, rsp):
                                                      'name': name}
         # sort objects
         for otype, objs in objects.items():
-            objs = objs.values()
+            objs = list(objs.values())
             objs.sort(key=lambda x: x['name'])
             # E.g. 'Dataset' objects in 'Datasets'
             rv['unlinkedDetails'][otype] = objs

@@ -27,6 +27,7 @@ import calendar
 import datetime
 import time
 
+from past.builtins import long
 from django.conf import settings
 
 from omeroweb.webclient.controller import BaseController
@@ -113,8 +114,8 @@ class BaseCalendar(BaseController):
         items = self.calendar_items(self.month, self.monthrange)
 
         for week, day in [(week, day) for week
-                          in xrange(0, len(self.cal_weeks))
-                          for day in xrange(0, 7)]:
+                          in range(0, len(self.cal_weeks))
+                          for day in range(0, 7)]:
             imgCounter = dict()
             dsCounter = dict()
             prCounter = dict()
@@ -128,19 +129,19 @@ class BaseCalendar(BaseController):
                     if item.get('type') == 'ome.model.core.Image':
                         try:
                             t_items['image'].index(item.get('id'))
-                        except:
+                        except Exception:
                             imgCounter += 1
                             t_items['image'].append(item.get('id'))
                     elif item.get('type') == 'ome.model.containers.Dataset':
                         try:
                             t_items['dataset'].index(item.get('id'))
-                        except:
+                        except Exception:
                             dsCounter += 1
                             t_items['dataset'].append(item.get('id'))
                     elif item.get('type') == 'ome.model.containers.Project':
                         try:
                             t_items['project'].index(item.get('id'))
-                        except:
+                        except Exception:
                             prCounter += 1
                             t_items['project'].append(item.get('id'))
                 self.cal_days.append({
@@ -169,7 +170,7 @@ class BaseCalendar(BaseController):
         all_logs = self.conn.getEventsByPeriod(start, end, self.eid)
 
         items = dict()
-        for d in xrange(1, monthrange+1):
+        for d in range(1, monthrange+1):
             items[d] = list()
         for i in all_logs:
             for d in items:

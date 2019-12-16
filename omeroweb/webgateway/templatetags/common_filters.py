@@ -31,6 +31,8 @@ import logging
 import json
 import random
 
+from past.builtins import basestring
+
 from django import template
 
 register = template.Library()
@@ -144,11 +146,11 @@ def shortening(value, arg):
     if not isinstance(value, basestring):
         value = str(value)
     try:
-        l = len(value)
-        if l < length:
+        length = len(value)
+        if length < length:
             return value
-        elif l >= length:
-            return value[:front]+"..."+value[l-end:]
+        elif length >= length:
+            return value[:front]+"..."+value[length-end:]
     except Exception:
         logger.error(traceback.format_exc())
         return value
@@ -243,17 +245,17 @@ def timeformat(value):
     all values are in seconds
     """
     from decimal import Decimal, InvalidOperation
-    from django.utils.encoding import force_unicode
+    from django.utils.encoding import force_text
 
     if value is None:
         return ''
     try:
-        value = Decimal(force_unicode(value))
+        value = Decimal(force_text(value))
     except UnicodeEncodeError:
         return u''
     except InvalidOperation:
         try:
-            value = Decimal(force_unicode(float(value)))
+            value = Decimal(force_text(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
             return u'%s s' % str(value)
     # Formatting shows integer values for all, so we round() for accuracy

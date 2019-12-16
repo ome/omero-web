@@ -33,8 +33,9 @@ import json
 import re
 import sys
 import warnings
+from past.builtins import unicode
 
-from StringIO import StringIO
+from io import StringIO
 from time import time
 
 from omeroweb.version import omeroweb_buildyear as build_year
@@ -42,7 +43,7 @@ from omeroweb.version import omeroweb_version as omero_version
 
 import omero
 import omero.scripts
-from omero.rtypes import wrap, unwrap
+from omero.rtypes import wrap, unwrap, rlong, rlist
 
 from omero.gateway.utils import toBoolean
 
@@ -51,29 +52,30 @@ from django.template import loader as template_loader
 from django.http import Http404, HttpResponse, HttpResponseRedirect, \
     JsonResponse
 from django.http import HttpResponseServerError, HttpResponseBadRequest
-from django.template import RequestContext as Context
 from django.utils.http import urlencode
 from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
+from django.shortcuts import render
 
-from webclient_utils import _formatReport, _purgeCallback
-from forms import GlobalSearchForm, ContainerForm
-from forms import ShareForm, BasketShareForm
-from forms import ContainerNameForm, ContainerDescriptionForm
-from forms import CommentAnnotationForm, TagsAnnotationForm
-from forms import MetadataFilterForm, MetadataDetectorForm
-from forms import MetadataChannelForm, MetadataEnvironmentForm
-from forms import MetadataObjectiveForm, MetadataObjectiveSettingsForm
-from forms import MetadataStageLabelForm, MetadataLightSourceForm
-from forms import MetadataDichroicForm, MetadataMicroscopeForm
-from forms import FilesAnnotationForm, WellIndexForm, NewTagsAnnotationFormSet
 
-from controller.container import BaseContainer
-from controller.history import BaseCalendar
-from controller.search import BaseSearch
-from controller.share import BaseShare
+from omeroweb.webclient.webclient_utils import _formatReport, _purgeCallback
+from .forms import GlobalSearchForm, ContainerForm
+from .forms import ShareForm, BasketShareForm
+from .forms import ContainerNameForm, ContainerDescriptionForm
+from .forms import CommentAnnotationForm, TagsAnnotationForm
+from .forms import MetadataFilterForm, MetadataDetectorForm
+from .forms import MetadataChannelForm, MetadataEnvironmentForm
+from .forms import MetadataObjectiveForm, MetadataObjectiveSettingsForm
+from .forms import MetadataStageLabelForm, MetadataLightSourceForm
+from .forms import MetadataDichroicForm, MetadataMicroscopeForm
+from .forms import FilesAnnotationForm, WellIndexForm, NewTagsAnnotationFormSet
+
+from .controller.container import BaseContainer
+from .controller.history import BaseCalendar
+from .controller.search import BaseSearch
+from .controller.share import BaseShare
 
 from omeroweb.webadmin.forms import LoginForm
 
@@ -95,10 +97,14 @@ from omero.model import ProjectI, DatasetI, ImageI, \
     ProjectDatasetLinkI, DatasetImageLinkI, \
     ScreenPlateLinkI, AnnotationAnnotationLinkI, TagAnnotationI
 from omero import ApiUsageException, ServerError, CmdError
-from omero.rtypes import rlong, rlist
 from omeroweb.webgateway.views import LoginView
 
-import tree
+from . import tree
+
+try:
+    import long
+except ImportError:
+    long = int
 
 logger = logging.getLogger(__name__)
 
@@ -219,7 +225,7 @@ class WebclientLoginView(LoginView):
         if url is None or len(url) == 0:
             try:
                 url = parse_url(settings.LOGIN_REDIRECT)
-            except:
+            except Exception:
                 url = reverse("webindex")
         return HttpResponseRedirect(url)
 
@@ -261,9 +267,9 @@ class WebclientLoginView(LoginView):
 
         context['show_download_links'] = settings.SHOW_CLIENT_DOWNLOADS
         if settings.SHOW_CLIENT_DOWNLOADS:
-            ver = re.match(('(?P<major>\d+)\.'
-                            '(?P<minor>\d+)\.'
-                            '(?P<patch>(dev|a|b|rc)\d+).*'),
+            ver = re.match((r'(?P<major>\d+)\.'
+                            r'(?P<minor>\d+)\.'
+                            r'(?P<patch>(dev|a|b|rc)\d+).*'),
                            omero_version)
             client_download_tag_re = '^v%s\\.%s\\.[^-]+$' % (
                 ver.group('major'), ver.group('minor'))
@@ -271,10 +277,7 @@ class WebclientLoginView(LoginView):
             context['client_download_repo'] = (
                 settings.CLIENT_DOWNLOAD_GITHUB_REPO)
 
-        t = template_loader.get_template(self.template)
-        c = Context(request, context)
-        rsp = t.render(c)
-        return HttpResponse(rsp)
+        return render(request, self.template, context)
 
 
 @login_required(ignore_login_fail=True)
@@ -341,7 +344,7 @@ def logout(request, conn=None, **kwargs):
         try:
             try:
                 conn.close()
-            except:
+            except Exception:
                 logger.error('Exception during logout.', exc_info=True)
         finally:
             request.session.flush()
@@ -350,10 +353,8 @@ def logout(request, conn=None, **kwargs):
         context = {
             'url': reverse('weblogout'),
             'submit': "Do you want to log out?"}
-        t = template_loader.get_template(
-            'webgateway/base/includes/post_form.html')
-        c = Context(request, context)
-        return HttpResponse(t.render(c))
+        template = 'webgateway/base/includes/post_form.html'
+        return render(request, template, context)
 
 
 ###########################################################################
@@ -385,7 +386,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     # in order to set up our initial state correctly.
     try:
         first_sel = show.first_selected
-    except IncorrectMenuError, e:
+    except IncorrectMenuError as e:
         return HttpResponseRedirect(e.uri)
     # We get the owner of the top level object, E.g. Project
     # Actual api_paths_to_object() is retrieved by jsTree once loaded
@@ -435,7 +436,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             user_id = initially_open_owner
     try:
         user_id = long(user_id)
-    except:
+    except Exception:
         user_id = None
     # check if user_id is in a currnt group
     if user_id is not None:
@@ -466,7 +467,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             g.loadLeadersAndMembers()
             for c in g.leaders + g.colleagues:
                 myColleagues[c.id] = c
-        myColleagues = myColleagues.values()
+        myColleagues = list(myColleagues.values())
         myColleagues.sort(key=lambda x: x.getLastName().lower())
 
     context = {
@@ -538,7 +539,7 @@ def api_group_list(request, conn=None, **kwargs):
         page = get_long_or_default(request, 'page', 1)
         limit = get_long_or_default(request, 'limit', settings.PAGE)
         member_id = get_long_or_default(request, 'member', -1)
-    except ValueError as e:
+    except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
 
     try:
@@ -664,7 +665,7 @@ def api_container_list(request, conn=None, **kwargs):
         try:
             orph_t = request \
                 .session['server_settings']['ui']['tree']['orphans']
-        except:
+        except Exception:
             orph_t = {'enabled': True}
         if (conn.isAdmin() or
                 conn.isLeader(gid=request.session.get('active_group')) or
@@ -888,32 +889,32 @@ def create_link(parent_type, parent_id, child_type, child_id):
         project = ProjectI(long(parent_id), False)
         if child_type == 'dataset':
             dataset = DatasetI(long(child_id), False)
-            l = ProjectDatasetLinkI()
-            l.setParent(project)
-            l.setChild(dataset)
-            return l
+            link = ProjectDatasetLinkI()
+            link.setParent(project)
+            link.setChild(dataset)
+            return link
     elif parent_type == 'dataset':
         dataset = DatasetI(long(parent_id), False)
         if child_type == 'image':
             image = ImageI(long(child_id), False)
-            l = DatasetImageLinkI()
-            l.setParent(dataset)
-            l.setChild(image)
-            return l
+            link = DatasetImageLinkI()
+            link.setParent(dataset)
+            link.setChild(image)
+            return link
     elif parent_type == 'screen':
         screen = ScreenI(long(parent_id), False)
         if child_type == 'plate':
             plate = PlateI(long(child_id), False)
-            l = ScreenPlateLinkI()
-            l.setParent(screen)
-            l.setChild(plate)
-            return l
+            link = ScreenPlateLinkI()
+            link.setParent(screen)
+            link.setChild(plate)
+            return link
     elif parent_type == 'tagset':
         if child_type == 'tag':
-            l = AnnotationAnnotationLinkI()
-            l.setParent(TagAnnotationI(long(parent_id), False))
-            l.setChild(TagAnnotationI(long(child_id), False))
-            return l
+            link = AnnotationAnnotationLinkI()
+            link.setParent(TagAnnotationI(long(parent_id), False))
+            link.setChild(TagAnnotationI(long(child_id), False))
+            return link
     return None
 
 
@@ -977,7 +978,7 @@ def _api_links_POST(conn, json_data, **kwargs):
             # We try to save all at once, for speed.
             conn.saveArray(linksToSave)
             response['success'] = True
-        except:
+        except Exception:
             logger.info("api_link: Exception on saveArray with %s links"
                         % len(linksToSave))
             # If this fails, e.g. ValidationException because link
@@ -985,7 +986,7 @@ def _api_links_POST(conn, json_data, **kwargs):
             for l in linksToSave:
                 try:
                     conn.saveObject(l)
-                except:
+                except Exception:
                     pass
             response['success'] = True
 
@@ -1268,12 +1269,12 @@ def load_plate(request, o1_type=None, o1_id=None, conn=None, **kwargs):
     # 'acquisition': 301L}
     kw = dict()
     if o1_type is not None:
-        if o1_id is not None and o1_id > 0:
+        if o1_id is not None and int(o1_id) > 0:
             kw[str(o1_type)] = long(o1_id)
 
     try:
         manager = BaseContainer(conn, **kw)
-    except AttributeError, x:
+    except AttributeError as x:
         return handlerInternalError(request, x)
 
     # prepare forms
@@ -1456,7 +1457,7 @@ def load_searching(request, form=None, conn=None, **kwargs):
 
         # if the query is only numbers (separated by commas or spaces)
         # we search for objects by ID
-        isIds = re.compile('^[\d ,]+$')
+        isIds = re.compile(r'^[\d ,]+$')
         if isIds.search(query_search) is not None:
             conn.SERVICE_OPTS.setOmeroGroup(-1)
             idSet = set()
@@ -1558,7 +1559,7 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None,
         try:
             manager = BaseContainer(
                 conn, **{str(c_type): long(c_id), 'index': index})
-        except AttributeError, x:
+        except AttributeError as x:
             return handlerInternalError(request, x)
         if share_id is not None:
             template = "webclient/annotations/annotations_share.html"
@@ -1675,7 +1676,7 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
             template = "webclient/annotations/metadata_acquisition.html"
             manager = BaseContainer(
                 conn, **{str(c_type): long(c_id)})
-    except AttributeError, x:
+    except AttributeError as x:
         return handlerInternalError(request, x)
 
     form_environment = None
@@ -1802,7 +1803,7 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
 
         try:
             image = manager.well.getWellSample().image()
-        except:
+        except Exception:
             image = manager.image
 
         if share_id is None:    # 9853
@@ -2135,11 +2136,11 @@ def annotate_file(request, conn=None, **kwargs):
                 # TODO: this should be handled by the BaseContainer
                 o_type = 'tag'
             kw = {}
-            if o_type is not None and o_id > 0:
-                kw[str(o_type)] = long(o_id)
+            if o_type is not None and int(o_id) > 0:
+                kw[str(o_type)] = int(o_id)
             try:
                 manager = BaseContainer(conn, **kw)
-            except AttributeError, x:
+            except AttributeError as x:
                 return handlerInternalError(request, x)
 
     if manager is not None:
@@ -2364,7 +2365,7 @@ def marshal_tagging_form_data(request, conn=None, **kwargs):
     try:
         offset = int(request.GET.get('offset'))
         limit = int(request.GET.get('limit', 1000))
-    except:
+    except Exception:
         offset = limit = None
 
     jsonmode = request.GET.get('jsonmode')
@@ -2492,7 +2493,7 @@ def annotate_tags(request, conn=None, **kwargs):
             selected_tag_ids = [stag[0] for stag in selected_tags if stag[5]]
             # Remove duplicates from tag IDs
             selected_tag_ids = list(set(selected_tag_ids))
-            post_tags = form_tags.cleaned_data['tags']
+            post_tags = list(form_tags.cleaned_data['tags'])
             tags = [tag for tag in post_tags
                     if tag not in selected_tag_ids]
             removed = [tag for tag in selected_tag_ids
@@ -2600,11 +2601,12 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
     if o_type in ("dataset", "project", "image", "screen", "plate",
                   "acquisition", "well", "comment", "file", "tag", "tagset"):
         kw = {}
-        if o_type is not None and o_id > 0:
-            kw[str(o_type)] = long(o_id)
+        if o_type is not None and int(o_id) > 0:
+            o_id = int(o_id)
+            kw[str(o_type)] = o_id
         try:
             manager = BaseContainer(conn, **kw)
-        except AttributeError, x:
+        except AttributeError as x:
             return handlerInternalError(request, x)
     elif o_type in ("share", "sharecomment", "chat"):
         manager = BaseShare(conn, o_id)
@@ -2651,7 +2653,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
             return JsonResponse(rdict)
         else:
             d = dict()
-            for e in form.errors.iteritems():
+            for e in form.errors.items():
                 d.update({e[0]: unicode(e[1])})
             rdict = {'bad': 'true', 'errs': d}
             return JsonResponse(rdict)
@@ -2770,7 +2772,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                 return JsonResponse(rdict)
             else:
                 d = dict()
-                for e in form.errors.iteritems():
+                for e in form.errors.items():
                     d.update({e[0]: unicode(e[1])})
                 rdict = {'bad': 'true', 'errs': d}
                 return JsonResponse(rdict)
@@ -2802,7 +2804,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                 return JsonResponse(rdict)
             else:
                 d = dict()
-                for e in form.errors.iteritems():
+                for e in form.errors.items():
                     d.update({e[0]: unicode(e[1])})
                 rdict = {'bad': 'true', 'errs': d}
                 return JsonResponse(rdict)
@@ -2815,7 +2817,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
         parents = request.POST['parent']
         try:
             manager.remove(parents.split('|'))
-        except Exception, x:
+        except Exception as x:
             logger.error(traceback.format_exc())
             rdict = {'bad': 'true', 'errs': str(x)}
             return JsonResponse(rdict)
@@ -2826,7 +2828,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
         image_id = request.POST.get('source')
         try:
             manager.removeImage(image_id)
-        except Exception, x:
+        except Exception as x:
             logger.error(traceback.format_exc())
             rdict = {'bad': 'true', 'errs': str(x)}
             return JsonResponse(rdict)
@@ -2848,7 +2850,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                 'dreport': _formatReport(handle),
                 'start_time': datetime.datetime.now()}
             request.session.modified = True
-        except Exception, x:
+        except Exception as x:
             logger.error(
                 'Failed to delete: %r' % {'did': o_id, 'dtype': o_type},
                 exc_info=True)
@@ -2873,7 +2875,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
             "Delete many: child? %s anns? %s object_ids %s"
             % (child, anns, object_ids))
         try:
-            for key, ids in object_ids.iteritems():
+            for key, ids in object_ids.items():
                 if ids is not None and len(ids) > 0:
                     handle = manager.deleteObjects(key, ids, child, anns)
                     if key == "PlateAcquisition":
@@ -2893,7 +2895,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
                         dMap['did'] = ids[0]
                     request.session['callback'][str(handle)] = dMap
             request.session.modified = True
-        except Exception, x:
+        except Exception:
             logger.error(
                 'Failed to delete: %r' % {'did': ids, 'dtype': key},
                 exc_info=True)
@@ -3152,7 +3154,7 @@ def getObjectUrl(conn, obj):
 # Activities window & Progressbar
 def update_callback(request, cbString, **kwargs):
     """Update a callback handle with  key/value pairs"""
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
         request.session['callback'][cbString][key] = value
 
 
@@ -3236,7 +3238,7 @@ def activities(request, conn=None, **kwargs):
                             in_progress += 1
                     finally:
                         prx.close(close_handle)
-                except:
+                except Exception:
                     logger.info(
                         "Activities chgrp handle not found: %s" % cbString)
                     continue
@@ -3293,7 +3295,7 @@ def activities(request, conn=None, **kwargs):
                             in_progress += 1
                     finally:
                         callback.close(close_handle)
-                except:
+                except Exception:
                     logger.error(traceback.format_exc())
                     logger.info("Activities send_email handle not found: %s"
                                 % cbString)
@@ -3342,7 +3344,7 @@ def activities(request, conn=None, **kwargs):
                         error=0,
                         status="finished",
                         dreport=None)
-                except Exception, x:
+                except Exception as x:
                     logger.error(traceback.format_exc())
                     logger.error("Status job '%s'error:" % cbString)
                     update_callback(
@@ -3362,7 +3364,7 @@ def activities(request, conn=None, **kwargs):
                 try:
                     proc = omero.grid.ScriptProcessPrx.checkedCast(
                         conn.c.ic.stringToProxy(cbString))
-                except IceException as e:
+                except IceException:
                     update_callback(request, cbString, status="failed",
                                     Message="No process found for job",
                                     error=1)
@@ -3376,7 +3378,7 @@ def activities(request, conn=None, **kwargs):
                         results = proc.getResults(0, conn.SERVICE_OPTS)
                         update_callback(request, cbString, status="finished")
                         new_results.append(cbString)
-                    except Exception, x:
+                    except Exception:
                         update_callback(request, cbString, status="finished",
                                         Message="Failed to get results")
                         logger.info(
@@ -3411,7 +3413,7 @@ def activities(request, conn=None, **kwargs):
                                             v.file.mimetype.val]
                                         obj_data['fileId'] = v.file.id.val
                                     obj_data['name'] = v.file.name.val
-                                    # except:
+                                    # except Exception:
                                     #    pass
                                 if v.isLoaded() and hasattr(v, "name"):
                                     # E.g Image, OriginalFile etc
@@ -3497,7 +3499,8 @@ def activities_update(request, action, **kwargs):
                 rv['removed'] = False
             return JsonResponse(rv)
         else:
-            for key, data in request.session['callback'].items():
+            jobs = list(request.session['callback'].items())
+            for key, data in jobs:
                 if data['status'] != "in progress":
                     del request.session['callback'][key]
     return HttpResponse("OK")
@@ -3598,7 +3601,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
 
     try:
         params = scriptService.getParams(long(scriptId))
-    except Exception, ex:
+    except Exception as ex:
         if ex.message.lower().startswith("no processor available"):
             return {'template': 'webclient/scripts/no_processor.html',
                     'scriptId': scriptId}
@@ -3685,7 +3688,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
                 wellIdx = 0
                 try:
                     wellIdx = int(request.GET.get("Index", 0))
-                except:
+                except Exception:
                     pass
                 wells = conn.getObjects("Well", wellIds)
                 imgIds = [str(w.getImage(wellIdx).getId()) for w in wells]
@@ -3748,7 +3751,7 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             raise Http404("No %ss found with IDs %s" % (dtype, ids))
         else:
             # Now we can specify group context - All should be same group
-            gid = validObjs.values()[0].getDetails().group.id.val
+            gid = list(validObjs.values())[0].getDetails().group.id.val
             conn.SERVICE_OPTS.setOmeroGroup(gid)
         return filteredIds, validObjs
 
@@ -4229,7 +4232,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
     try:
         params = scriptService.getParams(sId)
-    except Exception, x:
+    except Exception as x:
         if x.message and x.message.startswith("No processor available"):
             # Delegate to run_script() for handling 'No processor available'
             rsp = run_script(
@@ -4264,7 +4267,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 k = str(request.POST[keyName])
                 v = request.POST[valueName]
                 if len(k) > 0 and len(v) > 0:
-                    paramMap[str(k)] = v.encode('utf8')
+                    paramMap[str(k)] = v
                 row += 1
                 keyName = "%s_key%d" % (key, row)
                 valueName = "%s_value%d" % (key, row)
@@ -4284,11 +4287,11 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
                 # try to determine 'type' of values in our list
                 listClass = omero.rtypes.RStringI
-                l = prototype.val     # list
+                pval = prototype.val     # list
                 # check if a value type has been set (first item of prototype
                 # list)
-                if len(l) > 0:
-                    listClass = l[0].__class__
+                if len(pval) > 0:
+                    listClass = pval[0].__class__
                     if listClass == int(1).__class__:
                         listClass = omero.rtypes.rint
                     if listClass == long(1).__class__:
@@ -4300,7 +4303,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                     try:
                         # RStringI() will encode any unicode
                         obj = listClass(v.strip())
-                    except:
+                    except Exception:
                         logger.debug("Invalid entry for '%s' : %s" % (key, v))
                         continue
                     if isinstance(obj, omero.model.IObject):
@@ -4316,13 +4319,13 @@ def script_run(request, scriptId, conn=None, **kwargs):
                     continue
                 try:
                     inputMap[key] = pclass(value)
-                except:
+                except Exception:
                     logger.debug("Invalid entry for '%s' : %s" % (key, value))
                     continue
 
     # If we have objects specified via 'IDs' and 'DataType', try to pick
     # correct group
-    if 'IDs' in inputMap.keys() and 'Data_Type' in inputMap.keys():
+    if 'IDs' in inputMap and 'Data_Type' in inputMap:
         gid = conn.SERVICE_OPTS.getOmeroGroup()
         conn.SERVICE_OPTS.setOmeroGroup('-1')
         try:
@@ -4330,7 +4333,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 inputMap['Data_Type'].val, unwrap(inputMap['IDs'])[0])
             newGid = firstObj.getDetails().group.id.val
             conn.SERVICE_OPTS.setOmeroGroup(newGid)
-        except Exception, x:
+        except Exception:
             logger.debug(traceback.format_exc())
             # if inputMap values not as expected or firstObj is None
             conn.SERVICE_OPTS.setOmeroGroup(gid)
@@ -4339,7 +4342,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
         # Try/except in case inputs are not serializable, e.g. unicode
         logger.debug("Running script %s with "
                      "params %s" % (scriptName, inputMap))
-    except:
+    except Exception:
         pass
     rsp = run_script(request, conn, sId, inputMap, scriptName)
     return JsonResponse(rsp)
@@ -4364,7 +4367,8 @@ def ome_tiff_script(request, imageId, conn=None, **kwargs):
         gid = image.getDetails().group.id.val
         conn.SERVICE_OPTS.setOmeroGroup(gid)
     imageIds = [long(imageId)]
-    inputMap = {'Data_Type': wrap('Image'), 'IDs': wrap(imageIds)}
+    inputMap = {'Data_Type': wrap('Image'),
+                'IDs': rlist([rlong(id) for id in imageIds])}
     inputMap['Format'] = wrap('OME-TIFF')
     rsp = run_script(
         request, conn, sId, inputMap, scriptName='Create OME-TIFF')
@@ -4391,9 +4395,12 @@ def run_script(request, conn, sId, inputMap, scriptName='Script'):
             'start_time': datetime.datetime.now(),
             'status': status}
         request.session.modified = True
-    except Exception, x:
+    except Exception as x:
         jobId = str(time())      # E.g. 1312803670.6076391
-        if x.message and x.message.startswith("No processor available"):
+        # handle python 2 or 3 errors
+        message = x.message if hasattr(x, 'message') else (
+            x.args[0] if x.args else '')
+        if message and message.startswith("No processor available"):
             # omero.ResourceError
             logger.info(traceback.format_exc())
             error = "No Processor Available"

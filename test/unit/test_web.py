@@ -23,10 +23,18 @@ import pytest
 from difflib import unified_diff
 import re
 import os
-from path import path
+import sys
+try:
+    from omero_ext.path import path
+except ImportError:
+    # Python 2
+    from path import path
 import getpass
 import Ice
 import omero.cli
+from omero.plugins.prefs import (
+    PrefsControl
+)
 from omero.plugins.web import (
     APACHE_MOD_WSGI_ERR,
     WebControl
@@ -143,7 +151,7 @@ class TestWeb(object):
 
     def normalise_generated(self, s):
         serverdir = self.cli.dir
-        s = re.sub('\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}',
+        s = re.sub(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}',
                    '0000-00-00 00:00:00.000000', s)
         s = s.replace(serverdir, '/home/omero/OMERO.server')
         s = s.replace(os.path.dirname(Ice.__file__), '/home/omero/ice/python')
@@ -444,8 +452,15 @@ class TestWeb(object):
         cgiport = '12345'
         app_server = server_type[-1]
         del server_type[-1]
+        nginx_server_extra = [
+            'listen 443 ssl;',
+            'ssl_certificate /dummy/fullchain.pem;',
+            'ssl_certificate_key /dummy/private.key;',
+        ]
         self.mock_django_setting('STATIC_ROOT', static_root, monkeypatch)
         self.mock_django_setting('APPLICATION_SERVER', app_server, monkeypatch)
+        self.mock_django_setting(
+            'NGINX_SERVER_EXTRA_CONFIG', nginx_server_extra, monkeypatch)
         self.add_prefix(prefix, monkeypatch)
         self.add_hostport(cgihost, cgiport, monkeypatch)
 
@@ -470,9 +485,9 @@ class TestWeb(object):
             out = []
             with open(fn) as f:
                 for line in f:
-                    if re.match('##\s*\w', line):
+                    if re.match(r'##\s*\w', line):
                         out.append(line[2:].strip())
-                    elif re.match('[^#]\s*\w', line):
+                    elif re.match(r'[^#]\s*\w', line):
                         out.append(line.strip())
             return out
 
@@ -490,3 +505,16 @@ class TestWeb(object):
             '-proxy_pass http://omeroweb;',
             '+proxy_pass http://127.0.0.1:4080;'
         ]
+
+
+class TestParse(object):
+
+    def setup_method(self, method):
+        self.cli = omero.cli.CLI()
+        self.cli.register("config", PrefsControl, "TEST")
+        self.args = ["config"]
+
+    @pytest.mark.xfail(sys.version_info < (3, 0), reason="py2 unicode issue")
+    def test_parse(self):
+        self.args += ["parse", "--rst"]
+        self.cli.invoke(self.args, strict=True)

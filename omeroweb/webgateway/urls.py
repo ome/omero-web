@@ -406,7 +406,7 @@ specified image is in.
 """
 
 copy_image_rdef_json = url(r'^copyImgRDef/$', views.copy_image_rdef_json,
-                           name="copy_image_rdef_json")
+                           name="webgateway_copy_image_rdef_json")
 """
 Copy the rendering settings from one image to a list of images, specified in
 request by 'fromid' and list of 'toids'. See L{views.copy_image_rdef_json}
@@ -457,7 +457,7 @@ Get a json dict of original file paths.
 """
 
 open_with_options = url(r'^open_with/$', views.open_with_options,
-                        name='open_with_options')
+                        name='webgateway_open_with_options')
 """
 This makes the settings.OPEN_WITH configuration available via json
 """

@@ -36,7 +36,8 @@ class TestHelperObjects(object):
         assert isinstance(omero_type('rstring'), omero.RString)
         assert isinstance(omero_type(u'rstring'), omero.RString)
         assert isinstance(omero_type(1), omero.RInt)
-        assert isinstance(omero_type(1L), omero.RLong)
+        # FIXME: python3
+        # assert isinstance(omero_type(1), omero.RLong)
         assert isinstance(omero_type(False), omero.RBool)
         assert isinstance(omero_type(True), omero.RBool)
         assert not isinstance(omero_type((1, 2, 'a')), omero.RType)
@@ -178,11 +179,11 @@ class TestWebGatewayCacheTempFile(object):
         things up.
         Also check for filename size limits.
         """
-        fname = '1/2_3!"\'#$%&()=@€£‰¶÷[]≠§±+*~^\,.;:'
+        fname = r'1/2_3!"\'#$%&()=@€£‰¶÷[]≠§±+*~^\,.;:'
 
         try:
             fpath, rpath, fobj = self.tmpfile.new(fname, key='specialchars')
-        except:
+        except Exception:
             raise
             pytest.fail('WebGatewayTempFile.new not handling special'
                         ' characters properly')
@@ -212,7 +213,7 @@ class TestWebGatewayCacheTempFile(object):
                 "5" + fname + '.tif.somethingverylong', key='longname')
             fobj.close()
             assert fpath[-5:] == 'aaaaa'
-        except:
+        except Exception:
             pytest.fail('WebGatewayTempFile.new not handling long file names'
                         ' properly')
 
@@ -269,7 +270,7 @@ class TestWebGatewayCache(object):
                     'abcdefgh'), 'Key %d not properly cached' % i
         assert self.wcache.getThumb(self.request, 'test', uid, 5) is None, (
             'Entries limit failed')
-        time.sleep(2)
+        time.sleep(3)
         assert self.wcache.getThumb(self.request, 'test', uid, 0) is None, (
             'Time limit failed')
 

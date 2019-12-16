@@ -9,6 +9,7 @@
 """
 
 import traceback
+from future.utils import bytes_to_native_str
 from datetime import datetime
 from omero.cli import DiagnosticsControl
 from omero.cli import CLI
@@ -16,9 +17,14 @@ import platform
 import sys
 import os
 import re
+from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
-from path import path
+try:
+    from omero_ext.path import path
+except ImportError:
+    # Python 2
+    from path import path
 from pkg_resources import resource_string
 
 from omero.install.windows_warning import windows_warning, WINDOWS_WARNING
@@ -66,19 +72,19 @@ def config_required(func):
     def import_django_settings(func):
         @windows_warning
         def wrapper(self, *args, **kwargs):
-            if not py27_only():
-                self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
+            # if not py27_only():
+            #     self.ctx.die(681, "ERROR: %s" % PYTHON_WARNING)
             try:
                 import django  # NOQA
-            except:
+            except Exception:
                 self.ctx.die(681, "ERROR: Django not installed!")
-            if django.VERSION < (1, 6) or django.VERSION >= (1, 9):
+            if django.VERSION < (1, 11) or django.VERSION >= (2, 0):
                 self.ctx.err("ERROR: Django version %s is not "
                              "supported!" % django.get_version())
             try:
                 import omeroweb.settings as settings
                 kwargs['settings'] = settings
-            except Exception, e:
+            except Exception as e:
                 self.ctx.die(682, e)
             return func(self, *args, **kwargs)
         return wrapper
@@ -235,7 +241,7 @@ class WebControl(DiagnosticsControl):
                 global_value = getattr(settings, global_name, "(unset)")
                 CONFIG_TABLE += CONFIG_TABLE_FMT % (
                     key, using_default, global_value)
-        except:
+        except Exception:
             CONFIG_TABLE = (
                 "INVALID OR LOCKED CONFIGURATION!"
                 " Cannot display default values")
@@ -274,7 +280,14 @@ class WebControl(DiagnosticsControl):
             "OMEROWEBROOT": self._get_python_dir() / "omeroweb",
             "STATIC_ROOT": settings.STATIC_ROOT,
             "STATIC_URL": settings.STATIC_URL.rstrip("/"),
-            "NOW": str(datetime.now())}
+            "NOW": str(datetime.now()),
+            "NGINX_SERVER_EXTRA_CONFIG": "",
+        }
+        if settings.NGINX_SERVER_EXTRA_CONFIG:
+            d["NGINX_SERVER_EXTRA_CONFIG"] = '\n'.join(
+                ['# <<<<< omero.web.nginx_server_extra_config'] +
+                settings.NGINX_SERVER_EXTRA_CONFIG +
+                ['# omero.web.nginx_server_extra_config >>>>>'])
 
         if server in ("nginx", "nginx-development"):
             d["HTTPPORT"] = port
@@ -289,7 +302,7 @@ class WebControl(DiagnosticsControl):
             d["FORCE_SCRIPT_NAME"] = settings.FORCE_SCRIPT_NAME.rstrip("/")
             prefix = re.sub(r'\W+', '', d["FORCE_SCRIPT_NAME"])
             d["PREFIX_NAME"] = "_%s" % prefix
-        except:
+        except Exception:
             d["FORCE_SCRIPT_NAME"] = "/"
             d["PREFIX_NAME"] = ""
 
@@ -302,7 +315,8 @@ class WebControl(DiagnosticsControl):
                          "wsgi or wsgi-tcp.")
 
         template_file = "%s.conf.template" % server
-        c = resource_string('omeroweb', 'templates/' + template_file)
+        c = bytes_to_native_str(
+            resource_string('omeroweb', 'templates/' + template_file))
         self.ctx.out(c % d)
 
     def syncmedia(self, args):
@@ -330,7 +344,7 @@ class WebControl(DiagnosticsControl):
                     self.ctx.die(121, "Failed to enable '%s'.\n" % app)
                 else:
                     self.ctx.out("App '%s' was enabled\n" % app)
-            args = [sys.executable, "manage.py", "syncdb", "--noinput"]
+            args = [sys.executable, "manage.py", "migrate", "--noinput"]
             rv = self.ctx.call(args, cwd=location)
             self.syncmedia(None)
 
@@ -359,8 +373,8 @@ class WebControl(DiagnosticsControl):
             os.environ['DJANGO_SETTINGS_MODULE'] = 'omeroweb.settings'
             self.set_environ()
             self.ctx.call(cargs, cwd=location)
-        except:
-            print traceback.print_exc()
+        except Exception:
+            print(traceback.print_exc())
 
     @config_required
     def collectstatic(self, settings):
@@ -413,21 +427,21 @@ class WebControl(DiagnosticsControl):
         d_args = {}
         try:
             d_args['wsgi_args'] = settings.WSGI_ARGS
-        except:
+        except Exception:
             d_args['wsgi_args'] = args.wsgi_args or ""
         if args.wsgi_args:
             self.ctx.out(" `--wsgi-args` is deprecated and overwritten"
                          " by `omero.web.wsgi_args`. ", newline=False)
         try:
             d_args['workers'] = settings.WSGI_WORKERS
-        except:
+        except Exception:
             d_args['workers'] = args.workers
         if args.workers:
             self.ctx.out(" `--workers` is deprecated and overwritten"
                          " by `omero.web.wsgi_workers`. ", newline=False)
         try:
             d_args['worker_conn'] = settings.WSGI_WORKER_CONNECTIONS
-        except:
+        except Exception:
             d_args['worker_conn'] = args.worker_connections
         if args.worker_connections:
             self.ctx.out(" `--worker-connections` is deprecated and"
@@ -509,7 +523,7 @@ class WebControl(DiagnosticsControl):
                              "config.")
             try:
                 os.environ['SCRIPT_NAME'] = settings.FORCE_SCRIPT_NAME
-            except:
+            except Exception:
                 pass
 
             # wrap all deprecated args
@@ -627,15 +641,15 @@ class WebControl(DiagnosticsControl):
         self._diagnostics_banner("web")
         try:
             self.status(args)
-        except Exception, e:
+        except Exception as e:
             try:
                 self.ctx.out("OMERO.web error: %s" % e.message[1].message)
-            except:
+            except Exception:
                 self.ctx.out("OMERO.web not installed!")
         try:
             import django
             self.ctx.out("Django version: %s" % django.get_version())
-        except:
+        except Exception:
             self.ctx.err("Django not installed!")
 
         if not args.no_logs:
@@ -651,6 +665,7 @@ class WebControl(DiagnosticsControl):
                 log_file = "OMEROweb.log"
                 self._item("Log file ", log_file)
                 self._exists(log_dir / log_file)
+
 
 try:
     register("web", WebControl, HELP)

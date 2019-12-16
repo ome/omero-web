@@ -234,7 +234,7 @@ class BaseContainer(BaseController):
         try:
             limit = request.session['server_settings'][
                 'download_as']['max_size']
-        except:
+        except Exception:
             limit = 144000000
         if self.image:
             sizex = self.image.getSizeX()
@@ -307,8 +307,9 @@ class BaseContainer(BaseController):
         # Split View Figure is enabled if we have at least one image with
         # SizeC > 1
         if image:
-            splitView['enabled'] = (image.getSizeC() > 1) and \
-                'Split_View_Figure.py' in availableScripts
+            splitView['enabled'] = (
+                image.getSizeC() and image.getSizeC() > 1
+                and 'Split_View_Figure.py' in availableScripts)
         elif objDict is not None:
             if 'image' in objDict:
                 for i in objDict['image']:
@@ -335,7 +336,8 @@ class BaseContainer(BaseController):
             'name': 'Make Movie',
             'enabled': False,
             'tooltip': "Create a movie of the image"}
-        if (image and (image.getSizeT() > 1 or image.getSizeZ() > 1)):
+        if (image and image.getSizeT() and image.getSizeZ() and
+                (image.getSizeT() > 1 or image.getSizeZ() > 1)):
             makeMovie['enabled'] = 'Make_Movie.py' in availableScripts
 
         figureScripts.append(splitView)
@@ -436,8 +438,8 @@ class BaseContainer(BaseController):
         if gid is None:
             return False
         try:
-            group = self.conn.getObject("ExperimenterGroup", long(gid))
-        except:
+            group = self.conn.getObject("ExperimenterGroup", int(gid))
+        except Exception:
             return False
         if group is None:
             return False
@@ -459,7 +461,7 @@ class BaseContainer(BaseController):
             file_anns = list(file_ann_gen)
             try:
                 file_anns.sort(key=lambda x: x.getFile().getName().lower())
-            except:
+            except Exception:
                 pass
             return file_anns
 
@@ -560,19 +562,19 @@ class BaseContainer(BaseController):
         ann = None
         try:
             ann = self.conn.findTag(tag, desc)
-        except:
+        except Exception:
             pass
         if ann is None:
             ann = omero.model.TagAnnotationI()
-            ann.textValue = rstring(tag.encode('utf8'))
-            ann.setDescription(rstring(desc.encode('utf8')))
+            ann.textValue = rstring(tag)
+            ann.setDescription(rstring(desc))
             ann = self.conn.saveAndReturnObject(ann)
             if tag_group_id:  # Put new tag in given tag set
                 tag_group = None
                 try:
                     tag_group = self.conn.getObject(
                         'TagAnnotation', tag_group_id)
-                except:
+                except Exception:
                     pass
                 if tag_group is not None:
                     link = omero.model.AnnotationAnnotationLinkI()
@@ -605,7 +607,7 @@ class BaseContainer(BaseController):
                 for l in new_links:
                     try:
                         self.conn.saveObject(l)
-                    except:
+                    except Exception:
                         pass
         return ann.getId()
 
@@ -697,7 +699,7 @@ class BaseContainer(BaseController):
                     saved_links.append(
                         self.conn.getUpdateService().saveAndReturnObject(
                             l, self.conn.SERVICE_OPTS))
-                except:
+                except Exception:
                     failed += 1
 
         return tids
@@ -781,7 +783,7 @@ class BaseContainer(BaseController):
         for p in parents:
             parent = p.split('-')
             dtype = str(parent[0])
-            parentId = long(parent[1])
+            parentId = int(parent[1])
             if dtype == "acquisition":
                 dtype = "PlateAcquisition"
             if self.tag:

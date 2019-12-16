@@ -356,6 +356,7 @@
                     {% endif %}
 
                     var showBulkAnnTooltip = function(data) {
+                        if (!data || !data.id) return;
                         var bulkAnnTooltip = "<span class='tooltip_html' style='display:none'>" +
                             "Data from tables file:<br />" +
                             "<b>File ID:</b> " + data.id + "<br />" +
@@ -391,10 +392,24 @@
                             loadBulkAnnotations(screenQuery, query, showBulkAnnTooltip);
                             loadBulkAnnotations(plateQuery, query, showBulkAnnTooltip);
                             {% if manager.image %}
-                                loadBulkAnnotations(projectQuery, query, showBulkAnnTooltip);
-                                loadBulkAnnotations(datasetQuery, query, showBulkAnnTooltip);
-                                loadBulkAnnotations(projectQuery, query2, showBulkAnnTooltip);
-                                loadBulkAnnotations(datasetQuery, query2, showBulkAnnTooltip);
+                                // Try query1 and query2 in *series* (not at the same time on same OMERO.table)
+                                // to avoid the table.close() causing errors if in parallel
+                                loadBulkAnnotations(projectQuery, query, function(data) {
+                                    if (data && data.id) {
+                                        showBulkAnnTooltip(data);
+                                    } else {
+                                        // If query1 didn't work, try query2 on the same OMERO.table
+                                        loadBulkAnnotations(projectQuery, query2, showBulkAnnTooltip);
+                                    }
+                                });
+                                loadBulkAnnotations(datasetQuery, query, function(data) {
+                                    if (data && data.id) {
+                                        showBulkAnnTooltip(data);
+                                    } else {
+                                        // If query1 didn't work, try query2 on the same OMERO.table
+                                        loadBulkAnnotations(datasetQuery, query2, showBulkAnnTooltip);
+                                    }
+                                });
                             {% endif %}
                         }
                     });
@@ -408,10 +423,22 @@
                             loadBulkAnnotations(screenQuery, query, showBulkAnnTooltip);
                             loadBulkAnnotations(plateQuery, query, showBulkAnnTooltip);
                             {% if manager.image %}
-                                loadBulkAnnotations(projectQuery, query, showBulkAnnTooltip);
-                                loadBulkAnnotations(datasetQuery, query, showBulkAnnTooltip);
-                                loadBulkAnnotations(projectQuery, query2, showBulkAnnTooltip);
-                                loadBulkAnnotations(datasetQuery, query2, showBulkAnnTooltip);
+                                loadBulkAnnotations(projectQuery, query, function(data) {
+                                    if (data && data.id) {
+                                        showBulkAnnTooltip(data);
+                                    } else {
+                                        // If query1 didn't work, try query2 on the same OMERO.table
+                                        loadBulkAnnotations(projectQuery, query2, showBulkAnnTooltip);
+                                    }
+                                });
+                                loadBulkAnnotations(datasetQuery, query, function(data) {
+                                    if (data && data.id) {
+                                        showBulkAnnTooltip(data);
+                                    } else {
+                                        // If query1 didn't work, try query2 on the same OMERO.table
+                                        loadBulkAnnotations(datasetQuery, query2, showBulkAnnTooltip);
+                                    }
+                                });
                             {% endif %}
                         }
                     }
