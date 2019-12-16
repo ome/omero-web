@@ -1105,6 +1105,23 @@ button::-moz-focus-inner {
 		margin: 2px 2px 2px 7px;
 	}
 
+	/* Filter by Map Annotation - auto-complete */
+	ul.ui-autocomplete{
+		background: #ffffff;
+		border:solid 1px #D4D6D8;
+		max-height: 400px;
+		overflow-y: scroll;
+	}
+
+	.ui-menu-item a.ui-state-focus{
+		background: #D4D6D8;
+	}
+
+	.ui-menu-item a{
+		background:#ffffff;
+		font-size: 10px;
+		width: 135px;
+	}
 
 
 

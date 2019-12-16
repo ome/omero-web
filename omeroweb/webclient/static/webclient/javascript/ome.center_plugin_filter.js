@@ -44,8 +44,29 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
             let min = this.usedKeyValues[this.currentFilterKey].min;
             let max = this.usedKeyValues[this.currentFilterKey].max;
             placeholder = min + '-' + max;
+        } else {
+            var autocompVals = [];
+            for (var values of Object.values(this.currentKeyValues)) {
+                for(var v=0; v<values.length; v++) {
+                    if (autocompVals.indexOf(values[v]) === -1){
+                        autocompVals.push(values[v]);
+                    }
+                }
+            }
+            autocompVals.sort();
+            var self = this;
+            $(".filter_map_value", $filter).autocomplete({
+                source: autocompVals,
+                select: function( event, ui ) {
+                    self.filterText = ui.item.value;
+                    if (callback) {
+                        callback();
+                    }
+                }
+            });
         }
         $('.filter_map_value', $filter).attr('placeholder', placeholder)
+            .attr('title', placeholder)
             .val('');   // clear filter
         this.filterText = "";
         if (callback) {
