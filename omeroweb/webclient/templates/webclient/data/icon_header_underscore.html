@@ -1,5 +1,5 @@
 
-<div class="toolbar">
+<div id="center_toolbar" class="toolbar">
     <div id="layout_chooser">
         <button id="icon_layout" title="View as Thumbnails" class="<% if (layout === 'icon') print('checked') %>" /><button id="table_layout" title="View as List" class="<% if (layout === 'table') print('checked') %>" />
     </div>
@@ -10,6 +10,7 @@
             <option value="unrated">Unrated</option>
             <option value="name">Name</option>
             <option value="tag">Tag</option>
+            <option value="map">Key-Values</option>
             <option disabled>──────────</option>
             <option value="removeAll">Remove all filters</option>
         </select>
