@@ -53,15 +53,16 @@ logger = logging.getLogger(__name__)
 # A boolean that turns on/off debug mode.
 # handler404 and handler500 works only when False
 if 'OMERO_HOME' in os.environ:
-    OMERO_HOME = os.environ.get('OMERO_HOME')
-elif 'OMERODIR' in os.environ:
-    OMERO_HOME = os.environ.get('OMERODIR')
+    logger.warn("OMERO_HOME usage is ignored in OMERO.web")
+
+if 'OMERODIR' in os.environ:
+    OMERODIR = os.environ.get('OMERODIR')
 else:
-    OMERO_HOME = os.path.join(os.path.dirname(__file__), '..', '..', '..')
-    OMERO_HOME = os.path.normpath(OMERO_HOME)
+    OMERODIR = os.path.join(os.path.dirname(__file__), '..', '..', '..')
+    OMERODIR = os.path.normpath(OMERODIR)
 
 # Logging
-LOGDIR = os.path.join(OMERO_HOME, 'var', 'log').replace('\\', '/')
+LOGDIR = os.path.join(OMERODIR, 'var', 'log').replace('\\', '/')
 
 if not os.path.isdir(LOGDIR):
     try:
@@ -160,7 +161,7 @@ LOGGING = {
 }
 
 
-CONFIG_XML = os.path.join(OMERO_HOME, 'etc', 'grid', 'config.xml')
+CONFIG_XML = os.path.join(OMERODIR, 'etc', 'grid', 'config.xml')
 count = 10
 event = get_event("websettings")
 
@@ -416,7 +417,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
           " must end in a slash if set to a non-empty value.")],
     "omero.web.static_root":
         ["STATIC_ROOT",
-         os.path.join(OMERO_HOME, 'var', 'static'),
+         os.path.join(OMERODIR, 'var', 'static'),
          os.path.normpath,
          ("The absolute path to the directory where collectstatic will"
           " collect static files for deployment. If the staticfiles contrib"
@@ -1103,7 +1104,7 @@ LANGUAGE_CODE = 'en-gb'
 try:
     SECRET_KEY
 except NameError:
-    secret_path = os.path.join(OMERO_HOME, 'var',
+    secret_path = os.path.join(OMERODIR, 'var',
                                'django_secret_key').replace('\\', '/')
     if not os.path.isfile(secret_path):
         try:
