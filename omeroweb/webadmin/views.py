@@ -55,6 +55,7 @@ from omero.model import PermissionsI
 from omeroweb.httprsp import HttpJPEGResponse
 from omeroweb.webclient.decorators import login_required, render_response
 from omeroweb.connector import Connector
+from omero import ApiUsageException
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +104,12 @@ def prepare_experimenter(conn, eid=None):
     defaultGroup = experimenter.getDefaultGroup()
     otherGroups = list(experimenter.getOtherGroups())
     hasAvatar = conn.hasExperimenterPhoto()
-    isLdapUser = experimenter.isLdapUser()
+    try:
+        isLdapUser = experimenter.isLdapUser()
+    except ApiUsageException as x:
+        # e.g. "Cannot find unique user DistinguishedName: found=0"
+        logger.info(traceback.format_exc())
+        isLdapUser = x.message
     return experimenter, defaultGroup, otherGroups, isLdapUser, hasAvatar
 
 
