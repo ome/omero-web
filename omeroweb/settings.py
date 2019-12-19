@@ -55,11 +55,9 @@ logger = logging.getLogger(__name__)
 if 'OMERO_HOME' in os.environ:
     logger.warn("OMERO_HOME usage is ignored in OMERO.web")
 
-if 'OMERODIR' in os.environ:
-    OMERODIR = os.environ.get('OMERODIR')
-else:
-    OMERODIR = os.path.join(os.path.dirname(__file__), '..', '..', '..')
-    OMERODIR = os.path.normpath(OMERODIR)
+OMERODIR = os.environ.get('OMERODIR')
+if not OMERODIR:
+    raise Exception('ERROR: OMERODIR not set')
 
 # Logging
 LOGDIR = os.path.join(OMERODIR, 'var', 'log').replace('\\', '/')

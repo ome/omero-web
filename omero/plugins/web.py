@@ -81,6 +81,8 @@ def config_required(func):
             if django.VERSION < (1, 11) or django.VERSION >= (2, 0):
                 self.ctx.err("ERROR: Django version %s is not "
                              "supported!" % django.get_version())
+            if not os.environ.get('OMERODIR'):
+                self.ctx.die(101, "ERROR: OMERODIR not set")
             try:
                 import omeroweb.settings as settings
                 kwargs['settings'] = settings
