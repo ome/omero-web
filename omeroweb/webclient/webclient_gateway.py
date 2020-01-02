@@ -86,7 +86,7 @@ def defaultThumbnail(size=(120, 120)):
         size = (size[0], size[0])
     img = Image.open(settings.DEFAULT_IMG)
     img.thumbnail(size, Image.ANTIALIAS)
-    f = StringIO()
+    f = BytesIO()
     img.save(f, "PNG")
     f.seek(0)
     return f.read()
