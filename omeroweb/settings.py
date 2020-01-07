@@ -390,7 +390,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
          ('Warning: Only system administrators should use this feature. '
           'List of Django middleware classes in the form '
           '[{"class": "class.name", "index": FLOAT}]. '
-          'See https://docs.djangoproject.com/en/1.8/topics/http/middleware/. '
+          'See https://docs.djangoproject.com/en/1.11/topics/http/middleware/. '
           'Classes will be ordered by increasing index')],
     "omero.web.prefix":
         ["FORCE_SCRIPT_NAME",
