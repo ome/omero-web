@@ -390,7 +390,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
          ('Warning: Only system administrators should use this feature. '
           'List of Django middleware classes in the form '
           '[{"class": "class.name", "index": FLOAT}]. '
-          'See https://docs.djangoproject.com/en/1.11/topics/http/middleware/.'
+          'See :djangodoc:`Django middleware <topics/http/middleware/>`.'
           ' Classes will be ordered by increasing index')],
     "omero.web.prefix":
         ["FORCE_SCRIPT_NAME",
@@ -726,7 +726,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
          json.loads,
          ("Redirect to the given location after logging in. It only supports "
           "arguments for :djangodoc:`Django reverse function"
-          " <ref/urlresolvers/#django.core.urlresolvers.reverse>`. "
+          " <ref/urlresolvers/#reverse>`. "
           "For example: ``'{\"redirect\": [\"webindex\"], \"viewname\":"
           " \"load_template\", \"args\":[\"userdata\"], \"query_string\":"
           " {\"experimenter\": -1}}'``")],
