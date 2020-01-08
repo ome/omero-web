@@ -1,3 +1,10 @@
+
+# 5.6.0 (January 2020)
+
+- Use BytesIO for default Thumbnail (#104)
+- omero-web requires OMERODIR (#100)
+- Ignore OMERO_HOME in settings.py (#98)
+
 # 5.6.dev7 (December 2019)
 
 - Better exception handling of custom settings (#94)
