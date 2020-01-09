@@ -59,5 +59,5 @@ setup(name="omero-web",
           'Pillow',
       ],
       include_package_data=True,
-      tests_require=['pytest<3'],
+      tests_require=['pytest'],
       )
