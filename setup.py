@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-   Copyright 2008-2019 The Open Microscopy Environment, Glencoe Software, Inc.
+   Copyright 2008-2020 The Open Microscopy Environment, Glencoe Software, Inc.
    All rights reserved.
 
    Use is subject to license terms supplied in LICENSE.txt
@@ -51,12 +51,12 @@ setup(name="omero-web",
       python_requires='>=3',
       install_requires=[
           # requires Ice (use wheel for faster installs)
-          'omero-py>=5.6.dev10',
+          'omero-py',
           # minimum requirements for `omero web start`
           'Django>=1.11,<2.0',
           'django-pipeline==1.6.14',
           'gunicorn>=19.3',
-          'omero-marshal>=0.7.dev1',
+          'omero-marshal>=0.7.0',
           'Pillow',
       ],
       include_package_data=True,
