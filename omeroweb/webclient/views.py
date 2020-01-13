@@ -269,7 +269,7 @@ class WebclientLoginView(LoginView):
         if settings.SHOW_CLIENT_DOWNLOADS:
             ver = re.match((r'(?P<major>\d+)\.'
                             r'(?P<minor>\d+)\.'
-                            r'(?P<patch>\d+\.)?'
+                            r'(?P<patch>\d+\.?)?'
                             r'(?P<dev>(dev|a|b|rc)\d+)?.*'),
                            omero_version)
             client_download_tag_re = '^v%s\\.%s\\.[^-]+$' % (
