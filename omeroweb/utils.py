@@ -22,8 +22,8 @@
 import logging
 
 from django.utils.http import urlencode
-from django.core.urlresolvers import reverse
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import reverse
+from django.urls import NoReverseMatch
 from past.builtins import basestring
 
 

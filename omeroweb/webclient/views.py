@@ -53,7 +53,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, \
     JsonResponse
 from django.http import HttpResponseServerError, HttpResponseBadRequest
 from django.utils.http import urlencode
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST

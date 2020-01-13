@@ -22,7 +22,7 @@
 from django.views.generic import View
 from django.middleware import csrf
 from django.utils.decorators import method_decorator
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from . import api_settings
 
 import traceback
