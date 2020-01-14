@@ -33,7 +33,7 @@ urlpatterns = [
     path('feedback/', views.send_feedback, name="fsend"),
     path('comment/', views.send_comment, name="csend"),
     path('thanks/', TemplateView.as_view(template_name='thanks.html'),
-        name="fthanks"),
+         name="fthanks"),
     path('disabled/', TemplateView.as_view(template_name='disabled.html'),
-        name="feedback_disabled"),
+         name="feedback_disabled"),
 ]
