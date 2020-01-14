@@ -29,40 +29,40 @@ from django.conf.urls import url
 from omeroweb.webclient import views
 from omeroweb.webgateway import views as webgateway
 from omeroweb.webclient.webclient_gateway import defaultThumbnail
-from django.urls import get_callable
+from django.urls import get_callable, path, re_path
 
 viewer_view = get_callable(settings.VIEWER_VIEW)
 
 urlpatterns = [
 
     # Home page is the main 'Data' page
-    url(r'^$', views.load_template, {'menu': 'userdata'}, name="webindex"),
+    path('', views.load_template, {'menu': 'userdata'}, name="webindex"),
 
     # render main template
     url(r'^(?P<menu>((?i)userdata|public|history|search|help|usertags))/$',
         views.load_template,
         name="load_template"),
-    url(r'^userdata/$',
+    path('userdata/',
         views.load_template, {'menu': 'userdata'},
         name="userdata"),
-    url(r'^history/$',
+    path('history/',
         views.load_template, {'menu': 'history'},
         name="history"),
 
-    url(r'^login/$', views.WebclientLoginView.as_view(), name="weblogin"),
-    url(r'^logout/$', views.logout, name="weblogout"),
-    url(r'^active_group/$',
+    path('login/', views.WebclientLoginView.as_view(), name="weblogin"),
+    path('logout/', views.logout, name="weblogout"),
+    path('active_group/',
         views.change_active_group,
         name="change_active_group"),
 
     # The content of group/users drop-down menu
-    url(r'^group_user_content/$',
+    path('group_user_content/',
         views.group_user_content,
         name="group_user_content"),
 
     # update, display activities, E.g. delete queues, scripts etc.
-    url(r'^activities/', views.activities, name="activities"),
-    url(r'^activities_json/',
+    path('activities/', views.activities, name="activities"),
+    path('activities_json/',
         views.activities,
         {'template': 'json'},
         name="activities_json"),
@@ -79,7 +79,7 @@ urlpatterns = [
 
     # chgrp. Load potential target groups, then load target P/D within chosen
     # group
-    url(r'^load_chgrp_groups/$',
+    path('load_chgrp_groups/',
         views.load_chgrp_groups,
         name="load_chgrp_groups"),  # Query E.g. ?Image=1,2&Dataset=3
     url(r'^load_chgrp_target/(?P<group_id>[0-9]+)/'
@@ -133,7 +133,7 @@ urlpatterns = [
         webgateway.render_thumbnail,
         {'_defcb': defaultThumbnail},
         name="render_thumbnail_resize"),
-    url(r'^edit_channel_names/(?P<imageId>[0-9]+)/$',
+    path('edit_channel_names/<int:imageId>/',
         views.edit_channel_names,
         name="edit_channel_names"),
 
@@ -173,7 +173,7 @@ urlpatterns = [
         r'(?P<iid>[^/]+)/(?P<z>[^/]+)/(?P<t>[^/]+)/$',
         webgateway.render_split_channel,
         name="web_render_split_channel"),
-    url(r'^saveImgRDef/(?P<iid>[^/]+)/$',
+    path('saveImgRDef/<int:iid>/',
         webgateway.save_image_rdef_json,
         name="web_save_image_rdef_json"),
     url(r'^(?:(?P<share_id>[0-9]+)/)?getImgRDef/$',
@@ -195,60 +195,60 @@ urlpatterns = [
 
     # chgrp dry run - 'group_id', obj-types and ids in POST data.
     # E.g. Dataset=1,2,3 & Fileset=4. Multiple datatypes in one chgrp.
-    url(r'^chgrpDryRun/$', views.chgrpDryRun, name="chgrpDryRun"),
+    path('chgrpDryRun/', views.chgrpDryRun, name="chgrpDryRun"),
 
     # Popup for downloading original archived files for images
-    url(r'^download_placeholder/$', views.download_placeholder,
+    path('download_placeholder/', views.download_placeholder,
         name="download_placeholder"),
 
     # chgrp - 'group_id', obj-types and ids in POST data
-    url(r'^chgrp/$', views.chgrp, name="chgrp"),
+    path('chgrp/', views.chgrp, name="chgrp"),
 
     # annotations
     url(r'^action/(?P<action>[a-zA-Z]+)/(?:(?P<o_type>[a-zA-Z]+)/)'
         r'?(?:(?P<o_id>[0-9]+)/)?$',
         views.manage_action_containers,
         name="manage_action_containers"),
-    url(r'^batch_annotate/$', views.batch_annotate, name="batch_annotate"),
-    url(r'^annotate_tags/$', views.annotate_tags, name="annotate_tags"),
-    url(r'^marshal_tagging_form_data/$', views.marshal_tagging_form_data,
+    path('batch_annotate/', views.batch_annotate, name="batch_annotate"),
+    path('annotate_tags/', views.annotate_tags, name="annotate_tags"),
+    path('marshal_tagging_form_data/', views.marshal_tagging_form_data,
         name="marshal_tagging_form_data"),
-    url(r'^annotate_rating/$',
+    path('annotate_rating/',
         views.annotate_rating,
         name="annotate_rating"),
-    url(r'^annotate_comment/$',
+    path('annotate_comment/',
         views.annotate_comment,
         name="annotate_comment"),
-    url(r'^annotate_file/$', views.annotate_file, name="annotate_file"),
-    url(r'^annotate_map/$', views.annotate_map, name="annotate_map"),
-    url(r'^annotation/(?P<annId>[0-9]+)/$',
+    path('annotate_file/', views.annotate_file, name="annotate_file"),
+    path('annotate_map/', views.annotate_map, name="annotate_map"),
+    path('annotation/<int:annId>/',
         views.download_annotation,
         name="download_annotation"),
     url(r'^load_original_metadata/(?P<imageId>[0-9]+)/'
         r'(?:(?P<share_id>[0-9]+)/)?$',
         views.load_original_metadata,
         name="load_original_metadata"),
-    url(r'^download_orig_metadata/(?P<imageId>[0-9]+)/$',
+    path('download_orig_metadata/<int:imageId>/',
         views.download_orig_metadata,
         name="download_orig_metadata"),
 
-    url(r'^avatar/(?P<oid>[0-9]+)/$', views.avatar, name="avatar"),
+    path('avatar/<int:oid>/', views.avatar, name="avatar"),
 
 
     # scripting service urls
-    url(r'^list_scripts/$',
+    path('list_scripts/',
         views.list_scripts,
         name="list_scripts"),  # returns html list of scripts - click to run
-    url(r'^script_ui/(?P<scriptId>[0-9]+)/$',
+    path('script_ui/<int:scriptId>/',
         views.script_ui,
         name='script_ui'),  # shows a form for running a script
-    url(r'^script_run/(?P<scriptId>[0-9]+)/$',
+    path('script_run/<int:scriptId>/',
         views.script_run,
         name='script_run'),  # runs the script - parameters in POST
-    url(r'^get_original_file/(?:(?P<fileId>[0-9]+)/)?$',
+    path('get_original_file/<int:fileId>/',
         views.get_original_file,
         name="get_original_file"),  # for stderr, stdout etc
-    url(r'^download_original_file/(?:(?P<fileId>[0-9]+)/)?$',
+    path('download_original_file/<int:fileId>/',
         views.get_original_file,
         {'download': True},
         name="download_original_file"),  # for stderr, stdout etc
@@ -259,67 +259,57 @@ urlpatterns = [
 
     # ome_tiff_script: generate OME-TIFF and attach to image (use script
     # service). Must be POST
-    url(r'^ome_tiff_script/(?P<imageId>[0-9]+)/$',
+    path('ome_tiff_script/<int:imageId>/',
         views.ome_tiff_script,
         name='ome_tiff_script'),
-    url(r'^ome_tiff_info/(?P<imageId>[0-9]+)/$',
+    path('ome_tiff_info/<int:imageId>/',
         views.ome_tiff_info,
         name='ome_tiff_info'),
 
     # ping OMERO server to keep session alive
-    url(r'^keepalive_ping/$', views.keepalive_ping, name="keepalive_ping"),
+    path('keepalive_ping/', views.keepalive_ping, name="keepalive_ping"),
 
     # Load data, but with JSON.
     # url(r'^api/$', None, name='api'),
-    url(r'^api/groups/$', views.api_group_list,
+    path('api/groups/', views.api_group_list,
         name='api_groups'),
 
-    url(r'^api/experimenters/$', views.api_experimenter_list,
+    path('api/experimenters/', views.api_experimenter_list,
         name='api_experimenters'),
-    url(r'^api/experimenters/(?P<experimenter_id>-?\d+)/$',
+    path('api/experimenters/<int:experimenter_id>/',
         views.api_experimenter_detail, name='api_experimenter'),
 
     # Generic container list. This is necessary as an experimenter may have
     # datasets/etc which do not belong to any project
-    url(r'^api/containers/$', views.api_container_list, name='api_containers'),
+    path('api/containers/', views.api_container_list, name='api_containers'),
 
-    # url(r'^api/projects/$', views.api_project_list, name='api_projects'),
-    # url(r'^api/projects/(?P<pk>[0-9]+)/$', views.api_project_detail),
+    path('api/datasets/', views.api_dataset_list, name='api_datasets'),
 
-    url(r'^api/datasets/$', views.api_dataset_list, name='api_datasets'),
-    # url(r'^api/datasets/(?P<pk>[0-9]+)/$', views.api_dataset_detail),
-
-    url(r'^api/images/$', views.api_image_list, name='api_images'),
+    path('api/images/', views.api_image_list, name='api_images'),
 
     # special case: share_id not allowed in query string since we
     # just want to allow share connection for this url ONLY.
-    url(r'^api/share_images/(?P<share_id>[0-9]+)/$', views.api_image_list,
+    path('api/share_images/<int:share_id>/', views.api_image_list,
         name='api_share_images'),
 
-    url(r'^api/plates/$', views.api_plate_list, name='api_plates'),
-    # url(r'^api/plates/(?P<pk>[0-9]+)/$', views.api_plate_detail),
+    path('api/plates/', views.api_plate_list, name='api_plates'),
 
-    url(r'^api/plate_acquisitions/$', views.api_plate_acquisition_list,
+    path('api/plate_acquisitions/', views.api_plate_acquisition_list,
         name='api_plate_acquisitions'),
-    # url(r'^api/plate_acquisitions/(?P<pk>[0-9]+)/$',
-    #     views.api_plate_acquisitions_detail),
 
     # POST to create link, DELETE to remove.
     # links in request.body json, e.g. {"dataset":{"10":{"image":[1,2,3]}}}
-    url(r'^api/links/$', views.api_links, name='api_links'),
-
-    # url(r'^api/tags/$', views.api_tag_list, name='api_tags'),
-    # url(r'^api/tags/(?P<pk>[0-9]+)/$', views.api_tag_detail),
+    path('api/links/', views.api_links, name='api_links'),
 
     # Retrieve paths to an object
-    url(r'^api/paths_to_object/$', views.api_paths_to_object,
+    path('api/paths_to_object/', views.api_paths_to_object,
         name='api_paths_to_object'),
 
-    url(r'^api/tags/$', views.api_tags_and_tagged_list,
+    path('api/tags/', views.api_tags_and_tagged_list,
         name='api_tags_and_tagged'),
 
-    url(r'^api/annotations/$', views.api_annotations,
+    path('api/annotations/', views.api_annotations,
         name='api_annotations'),
 
-    url(r'^api/shares/$', views.api_share_list, name='api_shares'),
+    path('api/shares/', views.api_share_list, name='api_shares'),
 ]
