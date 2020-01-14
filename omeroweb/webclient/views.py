@@ -103,11 +103,6 @@ from omeroweb.webgateway.views import LoginView
 
 from . import tree
 
-try:
-    import long
-except ImportError:
-    long = int
-
 logger = logging.getLogger(__name__)
 
 logger.info("INIT '%s'" % os.getpid())
@@ -124,7 +119,7 @@ def get_long_or_default(request, name, default):
     val = None
     val_raw = request.GET.get(name, default)
     if val_raw is not None:
-        val = long(val_raw)
+        val = int(val_raw)
     return val
 
 
@@ -438,7 +433,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             # if we're not already showing 'All Members'...
             user_id = initially_open_owner
     try:
-        user_id = long(user_id)
+        user_id = int(user_id)
     except Exception:
         user_id = None
     # check if user_id is in a currnt group
@@ -482,8 +477,8 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context['groups'] = groups
     context['myColleagues'] = myColleagues
     context['active_group'] = conn.getObject(
-        "ExperimenterGroup", long(active_group))
-    context['active_user'] = conn.getObject("Experimenter", long(user_id))
+        "ExperimenterGroup", int(active_group))
+    context['active_user'] = conn.getObject("Experimenter", int(user_id))
     context['initially_select'] = show.initially_select
     context['initially_open'] = show.initially_open
     context['isLeader'] = conn.isLeader()
@@ -567,7 +562,7 @@ def api_group_list(request, conn=None, **kwargs):
 def api_experimenter_detail(request, experimenter_id, conn=None, **kwargs):
     # Validate parameter
     try:
-        experimenter_id = long(experimenter_id)
+        experimenter_id = int(experimenter_id)
     except ValueError:
         return HttpResponseBadRequest('Invalid experimenter id')
 
@@ -740,7 +735,7 @@ def api_image_list(request, conn=None, **kwargs):
     # a share connection in @login_required.
     # We don't support ?share_id in query string since this would allow a
     # share connection to be created for ALL urls, instead of just this one.
-    share_id = 'share_id' in kwargs and long(kwargs['share_id']) or None
+    share_id = 'share_id' in kwargs and int(kwargs['share_id']) or None
 
     try:
         # Get the images
@@ -881,25 +876,25 @@ def create_link(parent_type, parent_id, child_type, child_id):
             # dataset/plate is an orphan
             return 'orphan'
     if parent_type == 'project':
-        project = ProjectI(long(parent_id), False)
+        project = ProjectI(int(parent_id), False)
         if child_type == 'dataset':
-            dataset = DatasetI(long(child_id), False)
+            dataset = DatasetI(int(child_id), False)
             link = ProjectDatasetLinkI()
             link.setParent(project)
             link.setChild(dataset)
             return link
     elif parent_type == 'dataset':
-        dataset = DatasetI(long(parent_id), False)
+        dataset = DatasetI(int(parent_id), False)
         if child_type == 'image':
-            image = ImageI(long(child_id), False)
+            image = ImageI(int(child_id), False)
             link = DatasetImageLinkI()
             link.setParent(dataset)
             link.setChild(image)
             return link
     elif parent_type == 'screen':
-        screen = ScreenI(long(parent_id), False)
+        screen = ScreenI(int(parent_id), False)
         if child_type == 'plate':
-            plate = PlateI(long(child_id), False)
+            plate = PlateI(int(child_id), False)
             link = ScreenPlateLinkI()
             link.setParent(screen)
             link.setChild(plate)
@@ -907,8 +902,8 @@ def create_link(parent_type, parent_id, child_type, child_id):
     elif parent_type == 'tagset':
         if child_type == 'tag':
             link = AnnotationAnnotationLinkI()
-            link.setParent(TagAnnotationI(long(parent_id), False))
-            link.setChild(TagAnnotationI(long(child_id), False))
+            link.setParent(TagAnnotationI(int(parent_id), False))
+            link.setChild(TagAnnotationI(int(child_id), False))
             return link
     return None
 
@@ -1306,7 +1301,7 @@ def load_plate(request, o1_type=None, o1_id=None, conn=None, **kwargs):
     kw = dict()
     if o1_type is not None:
         if o1_id is not None and int(o1_id) > 0:
-            kw[str(o1_type)] = long(o1_id)
+            kw[str(o1_type)] = int(o1_id)
 
     try:
         manager = BaseContainer(conn, **kw)
@@ -1502,7 +1497,7 @@ def load_searching(request, form=None, conn=None, **kwargs):
                 if len(queryId) == 0:
                     continue
                 try:
-                    searchById = long(queryId)
+                    searchById = int(queryId)
                     if searchById in idSet:
                         continue
                     idSet.add(searchById)
@@ -1595,7 +1590,7 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None,
     else:
         try:
             manager = BaseContainer(
-                conn, **{str(c_type): long(c_id), 'index': index})
+                conn, **{str(c_type): int(c_id), 'index': index})
         except AttributeError as x:
             return handlerInternalError(request, x)
         if share_id is not None:
@@ -1632,7 +1627,7 @@ def load_metadata_preview(request, c_type, c_id, conn=None, share_id=None,
     # the index of a field within a well
     index = getIntOrDefault(request, 'index', 0)
 
-    manager = BaseContainer(conn, **{str(c_type): long(c_id)})
+    manager = BaseContainer(conn, **{str(c_type): int(c_id)})
     if share_id:
         context['share'] = BaseShare(conn, share_id)
     if c_type == "well":
@@ -1688,7 +1683,7 @@ def load_metadata_hierarchy(request, c_type, c_id, conn=None, **kwargs):
     static tree.
     Used by an AJAX call from the metadata_general panel.
     """
-    manager = BaseContainer(conn, **{str(c_type): long(c_id)})
+    manager = BaseContainer(conn, **{str(c_type): int(c_id)})
 
     context = {'manager': manager}
     context['template'] = "webclient/annotations/metadata_hierarchy.html"
@@ -1712,7 +1707,7 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
         else:
             template = "webclient/annotations/metadata_acquisition.html"
             manager = BaseContainer(
-                conn, **{str(c_type): long(c_id)})
+                conn, **{str(c_type): int(c_id)})
     except AttributeError as x:
         return handlerInternalError(request, x)
 
@@ -2602,7 +2597,7 @@ def edit_channel_names(request, imageId, conn=None, **kwargs):
         parentId = request.POST.get('parentId', None)
         if parentId is not None:
             ptype = parentId.split("-")[0].title()
-            pid = long(parentId.split("-")[1])
+            pid = int(parentId.split("-")[1])
             counts = conn.setChannelNames(
                 ptype, [pid], nameDict, channelCount=sizeC)
     else:
@@ -3743,7 +3738,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
     scriptService = conn.getScriptService()
 
     try:
-        params = scriptService.getParams(long(scriptId))
+        params = scriptService.getParams(int(scriptId))
     except Exception as ex:
         if ex.message.lower().startswith("no processor available"):
             return {'template': 'webclient/scripts/no_processor.html',
@@ -3754,7 +3749,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
 
     paramData = {}
 
-    paramData["id"] = long(scriptId)
+    paramData["id"] = int(scriptId)
     paramData["name"] = params.name.replace("_", " ")
     paramData["description"] = params.description
     paramData["authors"] = ", ".join([a for a in params.authors])
@@ -3791,7 +3786,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
                 i["default"] = ",".join([str(d) for d in i["default"]])
         elif isinstance(pt, bool):
             i["boolean"] = True
-        elif isinstance(pt, int) or isinstance(pt, long):
+        elif isinstance(pt, int) or isinstance(pt, int):
             # will stop the user entering anything other than numbers.
             i["number"] = "number"
         elif isinstance(pt, float):
@@ -3826,7 +3821,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
         if (len(IDsParam["default"]) == 0 and
                 request.GET.get("Well", None) is not None):
             if "Image" in Data_TypeParam["options"]:
-                wellIds = [long(j) for j in request.GET.get(
+                wellIds = [int(j) for j in request.GET.get(
                            "Well", None).split(",")]
                 wellIdx = 0
                 try:
@@ -3875,7 +3870,7 @@ def figure_script(request, scriptName, conn=None, **kwargs):
     wellIds = request.GET.get('Well', None)
 
     if wellIds is not None:
-        wellIds = [long(i) for i in wellIds.split(",")]
+        wellIds = [int(i) for i in wellIds.split(",")]
         wells = conn.getObjects("Well", wellIds)
         wellIdx = getIntOrDefault(request, 'Index', 0)
         imageIds = [str(w.getImage(wellIdx).getId()) for w in wells]
@@ -4266,7 +4261,7 @@ def chgrp(request, conn=None, **kwargs):
     group_id = getIntOrDefault(request, 'group_id', None)
     if group_id is None:
         return JsonResponse({'Error': "chgrp: No group_id specified"})
-    group_id = long(group_id)
+    group_id = int(group_id)
 
     def getObjectOwnerId(r):
         for t in ["Dataset", "Image", "Plate"]:
@@ -4337,15 +4332,15 @@ def chgrp(request, conn=None, **kwargs):
     plate_ids = request.POST.get('Plate', [])
 
     if project_ids:
-        project_ids = [long(x) for x in project_ids.split(',')]
+        project_ids = [int(x) for x in project_ids.split(',')]
     if dataset_ids:
-        dataset_ids = [long(x) for x in dataset_ids.split(',')]
+        dataset_ids = [int(x) for x in dataset_ids.split(',')]
     if image_ids:
-        image_ids = [long(x) for x in image_ids.split(',')]
+        image_ids = [int(x) for x in image_ids.split(',')]
     if screen_ids:
-        screen_ids = [long(x) for x in screen_ids.split(',')]
+        screen_ids = [int(x) for x in screen_ids.split(',')]
     if plate_ids:
-        plate_ids = [long(x) for x in plate_ids.split(',')]
+        plate_ids = [int(x) for x in plate_ids.split(',')]
 
     # TODO Change this user_id to be an experimenter_id in the request as it
     # is possible that a user is chgrping data from another user so it is
@@ -4371,7 +4366,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
     inputMap = {}
 
-    sId = long(scriptId)
+    sId = int(scriptId)
 
     try:
         params = scriptService.getParams(sId)
@@ -4449,7 +4444,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
                     listClass = pval[0].__class__
                     if listClass == int(1).__class__:
                         listClass = omero.rtypes.rint
-                    if listClass == long(1).__class__:
+                    if listClass == int(1).__class__:
                         listClass = omero.rtypes.rlong
 
                 # construct our list, using appropriate 'type'
@@ -4558,7 +4553,7 @@ def ome_tiff_script(request, imageId, conn=None, **kwargs):
     if image is not None:
         gid = image.getDetails().group.id.val
         conn.SERVICE_OPTS.setOmeroGroup(gid)
-    imageIds = [long(imageId)]
+    imageIds = [int(imageId)]
     inputMap = {'Data_Type': wrap('Image'),
                 'IDs': rlist([rlong(id) for id in imageIds])}
     inputMap['Format'] = wrap('OME-TIFF')
