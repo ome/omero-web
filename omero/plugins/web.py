@@ -78,7 +78,7 @@ def config_required(func):
                 import django  # NOQA
             except Exception:
                 self.ctx.die(681, "ERROR: Django not installed!")
-            if django.VERSION < (2, 0) or django.VERSION >= (2, 3):
+            if django.VERSION < (2, 2) or django.VERSION >= (3, 0):
                 self.ctx.err("ERROR: Django version %s is not "
                              "supported!" % django.get_version())
             if not os.environ.get('OMERODIR'):
