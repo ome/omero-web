@@ -29,7 +29,7 @@ from django.conf.urls import url
 from omeroweb.webclient import views
 from omeroweb.webgateway import views as webgateway
 from omeroweb.webclient.webclient_gateway import defaultThumbnail
-from django.urls import get_callable, path, re_path
+from django.urls import get_callable, path
 
 viewer_view = get_callable(settings.VIEWER_VIEW)
 
@@ -42,27 +42,32 @@ urlpatterns = [
     url(r'^(?P<menu>((?i)userdata|public|history|search|help|usertags))/$',
         views.load_template,
         name="load_template"),
-    path('userdata/',
+    path(
+        'userdata/',
         views.load_template, {'menu': 'userdata'},
         name="userdata"),
-    path('history/',
+    path(
+        'history/',
         views.load_template, {'menu': 'history'},
         name="history"),
 
     path('login/', views.WebclientLoginView.as_view(), name="weblogin"),
     path('logout/', views.logout, name="weblogout"),
-    path('active_group/',
+    path(
+        'active_group/',
         views.change_active_group,
         name="change_active_group"),
 
     # The content of group/users drop-down menu
-    path('group_user_content/',
+    path(
+        'group_user_content/',
         views.group_user_content,
         name="group_user_content"),
 
     # update, display activities, E.g. delete queues, scripts etc.
     path('activities/', views.activities, name="activities"),
-    path('activities_json/',
+    path(
+        'activities_json/',
         views.activities,
         {'template': 'json'},
         name="activities_json"),
@@ -79,7 +84,8 @@ urlpatterns = [
 
     # chgrp. Load potential target groups, then load target P/D within chosen
     # group
-    path('load_chgrp_groups/',
+    path(
+        'load_chgrp_groups/',
         views.load_chgrp_groups,
         name="load_chgrp_groups"),  # Query E.g. ?Image=1,2&Dataset=3
     url(r'^load_chgrp_target/(?P<group_id>[0-9]+)/'
@@ -133,7 +139,8 @@ urlpatterns = [
         webgateway.render_thumbnail,
         {'_defcb': defaultThumbnail},
         name="render_thumbnail_resize"),
-    path('edit_channel_names/<int:imageId>/',
+    path(
+        'edit_channel_names/<int:imageId>/',
         views.edit_channel_names,
         name="edit_channel_names"),
 
@@ -173,7 +180,8 @@ urlpatterns = [
         r'(?P<iid>[^/]+)/(?P<z>[^/]+)/(?P<t>[^/]+)/$',
         webgateway.render_split_channel,
         name="web_render_split_channel"),
-    path('saveImgRDef/<int:iid>/',
+    path(
+        'saveImgRDef/<int:iid>/',
         webgateway.save_image_rdef_json,
         name="web_save_image_rdef_json"),
     url(r'^(?:(?P<share_id>[0-9]+)/)?getImgRDef/$',
@@ -198,7 +206,8 @@ urlpatterns = [
     path('chgrpDryRun/', views.chgrpDryRun, name="chgrpDryRun"),
 
     # Popup for downloading original archived files for images
-    path('download_placeholder/', views.download_placeholder,
+    path(
+        'download_placeholder/', views.download_placeholder,
         name="download_placeholder"),
 
     # chgrp - 'group_id', obj-types and ids in POST data
@@ -212,23 +221,27 @@ urlpatterns = [
     path('batch_annotate/', views.batch_annotate, name="batch_annotate"),
     path('annotate_tags/', views.annotate_tags, name="annotate_tags"),
     path('marshal_tagging_form_data/', views.marshal_tagging_form_data,
-        name="marshal_tagging_form_data"),
-    path('annotate_rating/',
+         name="marshal_tagging_form_data"),
+    path(
+        'annotate_rating/',
         views.annotate_rating,
         name="annotate_rating"),
-    path('annotate_comment/',
+    path(
+        'annotate_comment/',
         views.annotate_comment,
         name="annotate_comment"),
     path('annotate_file/', views.annotate_file, name="annotate_file"),
     path('annotate_map/', views.annotate_map, name="annotate_map"),
-    path('annotation/<int:annId>/',
+    path(
+        'annotation/<int:annId>/',
         views.download_annotation,
         name="download_annotation"),
     url(r'^load_original_metadata/(?P<imageId>[0-9]+)/'
         r'(?:(?P<share_id>[0-9]+)/)?$',
         views.load_original_metadata,
         name="load_original_metadata"),
-    path('download_orig_metadata/<int:imageId>/',
+    path(
+        'download_orig_metadata/<int:imageId>/',
         views.download_orig_metadata,
         name="download_orig_metadata"),
 
@@ -236,19 +249,24 @@ urlpatterns = [
 
 
     # scripting service urls
-    path('list_scripts/',
+    path(
+        'list_scripts/',
         views.list_scripts,
         name="list_scripts"),  # returns html list of scripts - click to run
-    path('script_ui/<int:scriptId>/',
+    path(
+        'script_ui/<int:scriptId>/',
         views.script_ui,
         name='script_ui'),  # shows a form for running a script
-    path('script_run/<int:scriptId>/',
+    path(
+        'script_run/<int:scriptId>/',
         views.script_run,
         name='script_run'),  # runs the script - parameters in POST
-    path('get_original_file/<int:fileId>/',
+    path(
+        'get_original_file/<int:fileId>/',
         views.get_original_file,
         name="get_original_file"),  # for stderr, stdout etc
-    path('download_original_file/<int:fileId>/',
+    path(
+        'download_original_file/<int:fileId>/',
         views.get_original_file,
         {'download': True},
         name="download_original_file"),  # for stderr, stdout etc
@@ -259,10 +277,12 @@ urlpatterns = [
 
     # ome_tiff_script: generate OME-TIFF and attach to image (use script
     # service). Must be POST
-    path('ome_tiff_script/<int:imageId>/',
+    path(
+        'ome_tiff_script/<int:imageId>/',
         views.ome_tiff_script,
         name='ome_tiff_script'),
-    path('ome_tiff_info/<int:imageId>/',
+    path(
+        'ome_tiff_info/<int:imageId>/',
         views.ome_tiff_info,
         name='ome_tiff_info'),
 
@@ -271,12 +291,15 @@ urlpatterns = [
 
     # Load data, but with JSON.
     # url(r'^api/$', None, name='api'),
-    path('api/groups/', views.api_group_list,
+    path(
+        'api/groups/', views.api_group_list,
         name='api_groups'),
 
-    path('api/experimenters/', views.api_experimenter_list,
+    path(
+        'api/experimenters/', views.api_experimenter_list,
         name='api_experimenters'),
-    path('api/experimenters/<int:experimenter_id>/',
+    path(
+        'api/experimenters/<int:experimenter_id>/',
         views.api_experimenter_detail, name='api_experimenter'),
 
     # Generic container list. This is necessary as an experimenter may have
@@ -289,12 +312,14 @@ urlpatterns = [
 
     # special case: share_id not allowed in query string since we
     # just want to allow share connection for this url ONLY.
-    path('api/share_images/<int:share_id>/', views.api_image_list,
+    path(
+        'api/share_images/<int:share_id>/', views.api_image_list,
         name='api_share_images'),
 
     path('api/plates/', views.api_plate_list, name='api_plates'),
 
-    path('api/plate_acquisitions/', views.api_plate_acquisition_list,
+    path(
+        'api/plate_acquisitions/', views.api_plate_acquisition_list,
         name='api_plate_acquisitions'),
 
     # POST to create link, DELETE to remove.
@@ -302,13 +327,16 @@ urlpatterns = [
     path('api/links/', views.api_links, name='api_links'),
 
     # Retrieve paths to an object
-    path('api/paths_to_object/', views.api_paths_to_object,
+    path(
+        'api/paths_to_object/', views.api_paths_to_object,
         name='api_paths_to_object'),
 
-    path('api/tags/', views.api_tags_and_tagged_list,
+    path(
+        'api/tags/', views.api_tags_and_tagged_list,
         name='api_tags_and_tagged'),
 
-    path('api/annotations/', views.api_annotations,
+    path(
+        'api/annotations/', views.api_annotations,
         name='api_annotations'),
 
     path('api/shares/', views.api_share_list, name='api_shares'),

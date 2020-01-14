@@ -23,16 +23,16 @@ Returns a main prefix
 """
 
 annotations = path('annotations/(<slug:objtype>/<int:objid>/',
-                  views.annotations,
-                  name="webgateway_annotations")
+                   views.annotations,
+                   name="webgateway_annotations")
 """
 Retrieve annotations for object specified by object type and identifier,
 optionally traversing object model graph.
 """
 
 table_query = path('table/<int:fileid>/query/',
-                  views.table_query,
-                  name="webgateway_table_query")
+                   views.table_query,
+                   name="webgateway_table_query")
 """
 Query a table specified by fileid
 """
@@ -150,7 +150,7 @@ L{views.render_shape_thumbnail}. Uses current rendering settings.
 """
 
 render_shape_mask = path('render_shape_mask/<int:shapeId>/',
-                        views.render_shape_mask)
+                         views.render_shape_mask)
 """
 Returns a mask for the specified shape
 """
@@ -194,7 +194,7 @@ Params in render_movie/<iid>/<axis>/<pos> are:
 # json methods...
 
 listProjects_json = path('proj/list/', views.listProjects_json,
-                        name="webgateway_listProjects_json")
+                         name="webgateway_listProjects_json")
 """
 json method: returning list of all projects available to current user. See
 L{views.listProjects_json} .
@@ -202,8 +202,8 @@ List of E.g. {"description": "", "id": 651, "name": "spim"}
 """
 
 projectDetail_json = path('proj/<int:pid>/detail/',
-                         views.projectDetail_json,
-                         name="webgateway_projectDetail_json")
+                          views.projectDetail_json,
+                          name="webgateway_projectDetail_json")
 """
 json method: returns details of specified Project. See
 L{views.projectDetail_json}. Returns E.g
@@ -213,8 +213,8 @@ L{views.projectDetail_json}. Returns E.g
 """
 
 listDatasets_json = path('proj/<int:pid>/children/',
-                        views.listDatasets_json,
-                        name="webgateway_listDatasets_json")
+                         views.listDatasets_json,
+                         name="webgateway_listDatasets_json")
 """
 json method: returns list of Datasets belonging to specified Project. See
 L{views.listDatasets_json}. Returns E.g
@@ -225,8 +225,8 @@ list of {"child_count": 4, "description": "", "type": "Dataset", "id": 901,
 """
 
 datasetDetail_json = path('dataset/<int:did>/detail/',
-                         views.datasetDetail_json,
-                         name="webgateway_datasetDetail_json")
+                          views.datasetDetail_json,
+                          name="webgateway_datasetDetail_json")
 """
 json method: returns details of specified Dataset. See
 L{views.datasetDetail_json}. Returns E.g
@@ -313,8 +313,8 @@ Returns E.g
 """
 
 wellData_json = path('wellData/<int:wid>/',
-                    views.wellData_json,
-                    name='webgateway_wellData_json')
+                     views.wellData_json,
+                     name='webgateway_wellData_json')
 """
 json method: returns details of specified Well. See L{views.wellData_json}.
     - webgateway/wellData/<wid>/ params are:
@@ -322,15 +322,15 @@ json method: returns details of specified Well. See L{views.wellData_json}.
 """
 
 webgateway_search_json = path('search/', views.search_json,
-                             name="webgateway_search_json")
+                              name="webgateway_search_json")
 """
 json method: returns search results. All parameters in request. See
 L{views.search_json}
 """
 
 get_rois_json = path('get_rois_json/<int:imageId>/',
-                    views.get_rois_json,
-                    name='webgateway_get_rois_json')
+                     views.get_rois_json,
+                     name='webgateway_get_rois_json')
 """
 gets all the ROIs for an Image as json. Image-ID is request: imageId=123
 [{'id':123, 'shapes':[{'type':'Rectangle', 'theZ':5, 'theT':0, 'x':250,
@@ -356,8 +356,8 @@ channel of an image. A single plane is specified by ?theT=1&theZ=2.
 """
 
 full_viewer = path('img_detail/<int:iid>/',
-                  views.full_viewer,
-                  name="webgateway_full_viewer")
+                   views.full_viewer,
+                   name="webgateway_full_viewer")
 """
 Returns html page displaying full image viewer and image details, rendering
 settings etc.
@@ -367,8 +367,8 @@ See L{views.full_viewer}.
 """
 
 save_image_rdef_json = path('saveImgRDef/<int:iid>/',
-                           views.save_image_rdef_json,
-                           name="webgateway_save_image_rdef_json")
+                            views.save_image_rdef_json,
+                            name="webgateway_save_image_rdef_json")
 """
 Saves rendering definition (from request parameters) on the image. See
 L{views.save_image_rdef_json}.
@@ -379,15 +379,15 @@ Returns 'true' if worked OK.
 """
 
 get_image_rdef_json = path('getImgRDef/',
-                          views.get_image_rdef_json,
-                          name="webgateway_get_image_rdef_json")
+                           views.get_image_rdef_json,
+                           name="webgateway_get_image_rdef_json")
 """
 Gets rendering definition from the 'session' if saved.
 Returns json dict of 'c', 'm', 'z', 't'.
 """
 
 listLuts_json = path('luts/', views.listLuts_json,
-                    name="webgateway_listLuts_json")
+                     name="webgateway_listLuts_json")
 """
 json method: returning list of all lookup tables available
 for rendering engine.
@@ -395,8 +395,8 @@ E.g. list of {path: "/luts/", size: 800, id: 37, name: "cool.lut"},
 """
 
 list_compatible_imgs_json = path('compatImgRDef/<int:iid>/',
-                                views.list_compatible_imgs_json,
-                                name="webgateway_list_compatible_imgs_json")
+                                 views.list_compatible_imgs_json,
+                                 name="webgateway_list_compatible_imgs_json")
 """
 json method: returns list of IDs for images that have channels compatible with
 the specified image, such that rendering settings can be copied from the image
@@ -407,14 +407,14 @@ specified image is in.
 """
 
 copy_image_rdef_json = path('copyImgRDef/', views.copy_image_rdef_json,
-                           name="webgateway_copy_image_rdef_json")
+                            name="webgateway_copy_image_rdef_json")
 """
 Copy the rendering settings from one image to a list of images, specified in
 request by 'fromid' and list of 'toids'. See L{views.copy_image_rdef_json}
 """
 
 reset_rdef_json = path('resetRDef/', views.reset_rdef_json,
-                      name="reset_rdef_json")
+                       name="reset_rdef_json")
 """
 Reset the images within specified objects to their rendering settings at
 import time"
@@ -422,16 +422,15 @@ Objects defined in request by E.g. totype=dataset&toids=1&toids=2
 """
 
 reset_owners_rdef_json = path('applyOwnersRDef/',
-                             views.reset_rdef_json,
-                             {'toOwners': True},
-                             name="reset_owners_rdef_json")
+                              views.reset_rdef_json,
+                              {'toOwners': True},
+                              name="reset_owners_rdef_json")
 """
 Apply the owner's rendering settings to the specified objects.
 Objects defined in request by E.g. totype=dataset&toids=1&toids=2
 """
 
-webgateway_su = path('su/<user>/', views.su,
-                    name="webgateway_su")
+webgateway_su = path('su/<user>/', views.su, name="webgateway_su")
 """
 Admin method to switch to the specified user, identified by username: <user>
 Returns 'true' if switch went OK.
@@ -449,8 +448,8 @@ are assembled into a zip file on the fly, and this is downloaded.
 """
 
 original_file_paths = path('original_file_paths/<int:iid>/',
-                          views.original_file_paths,
-                          name="original_file_paths")
+                           views.original_file_paths,
+                           name="original_file_paths")
 """
 Get a json dict of original file paths.
 'repo' is a list of path/name strings for original files in managed repo
@@ -458,15 +457,15 @@ Get a json dict of original file paths.
 """
 
 open_with_options = path('open_with/', views.open_with_options,
-                        name='webgateway_open_with_options')
+                         name='webgateway_open_with_options')
 """
 This makes the settings.OPEN_WITH configuration available via json
 """
 
 
 get_image_rdefs_json = path('get_image_rdefs_json/<int:img_id>/',
-                           views.get_image_rdefs_json,
-                           name="webgateway_get_image_rdefs_json")
+                            views.get_image_rdefs_json,
+                            name="webgateway_get_image_rdefs_json")
 """
 This url will retrieve all rendering definitions for a given image (id)
 """
