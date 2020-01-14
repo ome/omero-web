@@ -53,16 +53,16 @@ def redirect_urlpatterns():
     if settings.INDEX_TEMPLATE is None:
         return [
             path('', never_cache(
-                RedirectView.as_view(url=reverse_lazy('webindex'),
-                                     permanent=True)),
-                name="index")
+                 RedirectView.as_view(url=reverse_lazy('webindex'),
+                                      permanent=True)),
+                 name="index")
         ]
     else:
         return [
             path('', never_cache(
-                RedirectView.as_view(url=reverse_lazy('webindex_custom'),
-                                     permanent=True)),
-                name="index"),
+                 RedirectView.as_view(url=reverse_lazy('webindex_custom'),
+                                      permanent=True)),
+                 name="index"),
         ]
 
 
@@ -102,8 +102,8 @@ OMERO.web are compatible
 
 urlpatterns += [
     path('favicon.ico',
-        lambda request: redirect('%swebgateway/img/ome.ico'
-                                 % settings.STATIC_URL)),
+         lambda request: redirect('%swebgateway/img/ome.ico'
+                                  % settings.STATIC_URL)),
     path('webgateway/', include('omeroweb.webgateway.urls')),
     path('webadmin/', include('omeroweb.webadmin.urls')),
     path('webclient/', include('omeroweb.webclient.urls')),
@@ -114,7 +114,7 @@ urlpatterns += [
     path('api/', include('omeroweb.api.urls')),
 
     path('index', webclient_views.custom_index,
-        name="webindex_custom"),
+         name="webindex_custom"),
 ]
 
 urlpatterns += redirect_urlpatterns()
