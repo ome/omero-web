@@ -49,11 +49,6 @@ try:
 except Exception:
     from md5 import md5
 
-try:
-    import long
-except ImportError:
-    long = int
-
 from io import StringIO
 from io import BytesIO
 import tempfile
@@ -417,7 +412,7 @@ def render_roi_thumbnail(request, roiId, w=None, h=None, conn=None, **kwargs):
 
     # need to find the z indices of the first shape in T
     roiResult = conn.getRoiService().findByRoi(
-        long(roiId), None, conn.SERVICE_OPTS)
+        int(roiId), None, conn.SERVICE_OPTS)
     if roiResult is None or roiResult.rois is None:
         raise Http404
     zz = set()
@@ -875,8 +870,8 @@ def _get_prepared_image(request, iid, server_id=None, conn=None,
     img.setInvertedAxis(bool(r.get('ia', "0") == "1"))
     compress_quality = r.get('q', None)
     if saveDefs:
-        'z' in r and img.setDefaultZ(long(r['z'])-1)
-        't' in r and img.setDefaultT(long(r['t'])-1)
+        'z' in r and img.setDefaultZ(int(r['z'])-1)
+        't' in r and img.setDefaultT(int(r['t'])-1)
         img.saveDefaults()
     return (img, compress_quality)
 
@@ -1523,7 +1518,7 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
     """
     """
     try:
-        field = long(field or 0)
+        field = int(field or 0)
     except ValueError:
         field = 0
     prefix = kwargs.get('thumbprefix', 'webgateway_render_thumbnail')
@@ -2001,7 +1996,7 @@ def list_compatible_imgs_json(request, iid, conn=None, **kwargs):
         img_ew.sort()
 
         def compat(i):
-            if long(i.getId()) == long(iid):
+            if int(i.getId()) == int(iid):
                 return False
             pp = i.getPrimaryPixels()
             if (pp is None or
@@ -2169,9 +2164,9 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         else:
             image.setColorRenderingModel()
         if 'z' in rdef:
-            image._re.setDefaultZ(long(rdef['z'])-1)
+            image._re.setDefaultZ(int(rdef['z'])-1)
         if 't' in rdef:
-            image._re.setDefaultT(long(rdef['t'])-1)
+            image._re.setDefaultT(int(rdef['t'])-1)
         image.saveDefaults()
 
     # Use rdef from above or previously saved one...
@@ -2193,8 +2188,8 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
 
         # If we have both, apply settings...
         try:
-            fromid = long(fromid)
-            toids = [long(x) for x in toids]
+            fromid = int(fromid)
+            toids = [int(x) for x in toids]
         except TypeError:
             fromid = None
         except ValueError:
@@ -2607,9 +2602,9 @@ def get_rois_json(request, imageId, conn=None, **kwargs):
     """
     rois = []
     roiService = conn.getRoiService()
-    # rois = webfigure_utils.getRoiShapes(roiService, long(imageId))  # gets a
+    # rois = webfigure_utils.getRoiShapes(roiService, int(imageId))  # gets a
     # whole json list of ROIs
-    result = roiService.findByImage(long(imageId), None, conn.SERVICE_OPTS)
+    result = roiService.findByImage(int(imageId), None, conn.SERVICE_OPTS)
 
     for r in result.rois:
         roi = {}
