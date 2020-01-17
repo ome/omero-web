@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (C) 2011-2014 University of Dundee & Open Microscopy Environment.
+# Copyright (C) 2011-2020 University of Dundee & Open Microscopy Environment.
 # All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 import re
 import logging
 
-from django.utils.encoding import force_text
+from django.utils.encoding import force_text, smart_text
 from future.utils import with_metaclass
 
 from omero import client_wrapper
@@ -96,6 +96,17 @@ class Server(ServerBase):
 
     def __unicode__(self):
         return str(self.id)
+
+    @classmethod
+    def get_choices(cls):
+        choices = []
+        for obj in cls._registry.values():
+            if obj.server is None:
+                name = "%s:%s" % (obj.host, obj.port)
+            else:
+                name = "%s:%s" % (obj.server, obj.port)
+            choices.append((smart_text(obj.id), smart_text(name)))
+        return choices
 
     @classmethod
     def get(cls, pk):

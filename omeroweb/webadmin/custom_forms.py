@@ -3,7 +3,7 @@
 #
 #
 #
-# Copyright (c) 2008 University of Dundee.
+# Copyright (c) 2008-2020 University of Dundee.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@ import re
 
 from django import forms
 from django.forms.fields import ChoiceField, EMPTY_VALUES
-from django.forms.widgets import SelectMultiple, MultipleHiddenInput
+from django.forms.widgets import SelectMultiple, MultipleHiddenInput, Select
 from django.forms import ModelChoiceField, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
@@ -54,59 +54,6 @@ class OmeNameField(forms.CharField):
         # TODO: PATTERN !!!!!!!
         omeName_pattern = re.compile(r"(?:^|\s)[a-zA-Z0-9_.]")
         return omeName_pattern.match(omeName) is not None
-
-# Group queryset iterator for group form
-
-
-class ServerQuerySetIterator(object):
-    def __init__(self, queryset, empty_label):
-        self.queryset = queryset
-        self.empty_label = empty_label
-
-    def __iter__(self):
-        if self.empty_label is not None:
-            yield (u"", self.empty_label)
-        for obj in self.queryset:
-            if obj.server is None:
-                name = "%s:%s" % (obj.host, obj.port)
-            else:
-                name = "%s:%s" % (obj.server, obj.port)
-            yield (smart_text(obj.id), smart_text(name))
-
-
-class ServerModelChoiceField(ModelChoiceField):
-
-    def _get_choices(self):
-        # If self._choices is set, then somebody must have manually set
-        # the property self.choices. In this case, just return self._choices.
-        if hasattr(self, '_choices'):
-            return self._choices
-        # Otherwise, execute the QuerySet in self.queryset to determine the
-        # choices dynamically. Return a fresh QuerySetIterator that has not
-        # been consumed. Note that we're instantiating a new QuerySetIterator
-        # *each* time _get_choices() is called (and, thus, each time
-        # self.choices is accessed) so that we can ensure the QuerySet has not
-        # been consumed.
-        return ServerQuerySetIterator(self.queryset, self.empty_label)
-
-    def _set_choices(self, value):
-        # This method is copied from ChoiceField._set_choices(). It's necessary
-        # because property() doesn't allow a subclass to overwrite only
-        # _get_choices without implementing _set_choices.
-        self._choices = self.widget.choices = list(value)
-
-    choices = property(_get_choices, _set_choices)
-
-    def to_python(self, value):
-        if value in EMPTY_VALUES:
-            return None
-        res = False
-        for q in self.queryset:
-            if long(value) == q.id:
-                res = True
-        if not res:
-            raise ValidationError(self.error_messages['invalid_choice'])
-        return value
 
 
 # Group queryset iterator for group form
