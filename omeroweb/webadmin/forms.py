@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008-2018 University of Dundee.
+# Copyright (c) 2008-2020 University of Dundee.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,12 +30,13 @@ except Exception:
 
 from django import forms
 from django.forms.widgets import Textarea
+from django.forms import ChoiceField
 
 from omeroweb.connector import Server
 
 from omeroweb.custom_forms import NonASCIIForm
 
-from .custom_forms import ServerModelChoiceField, GroupModelChoiceField
+from .custom_forms import GroupModelChoiceField
 from .custom_forms import GroupModelMultipleChoiceField, OmeNameField
 from .custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
 
@@ -49,8 +50,7 @@ class LoginForm(NonASCIIForm):
 
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
-        self.fields['server'] = ServerModelChoiceField(
-            Server, empty_label=None)
+        self.fields['server'] = ChoiceField(choices=Server.get_choices())
 
         self.fields.keyOrder = ['server', 'username', 'password']
 
@@ -71,8 +71,7 @@ class ForgottonPasswordForm(NonASCIIForm):
 
     def __init__(self, *args, **kwargs):
         super(ForgottonPasswordForm, self).__init__(*args, **kwargs)
-        self.fields['server'] = ServerModelChoiceField(Server,
-                                                       empty_label=None)
+        self.fields['server'] = ChoiceField(Server.get_choices())
         f = forms.CharField(max_length=50,
                             widget=forms.TextInput(
                                 attrs={'size': 28, 'autocomplete': 'off'}))
