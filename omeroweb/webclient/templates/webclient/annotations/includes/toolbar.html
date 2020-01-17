@@ -161,7 +161,7 @@
                     href="{% url 'archived_files' image.id %}"
                   {% else %}
                     href="#"
-                    onClick="return OME.openPopup('{% url 'download_placeholder' %}?ids=image-{{ image.id }}&fileCount={{ fileCount }}&name={{ image.name }}');"
+                    onClick="return OME.openPopup('{% url 'download_placeholder' %}?ids=image-{{ image.id }}&name={{ image.name }}');"
                   {% endifequal %}
                 title="Download {{ filesetInfo.count }} original imported file{{ filesetInfo.count|pluralize:'s'}} ({{ filesetInfo.size|filesizeformat }})"
                 >
