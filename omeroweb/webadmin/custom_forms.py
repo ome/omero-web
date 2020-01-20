@@ -28,7 +28,7 @@ import re
 
 from django import forms
 from django.forms.fields import ChoiceField, EMPTY_VALUES
-from django.forms.widgets import SelectMultiple, MultipleHiddenInput, Select
+from django.forms.widgets import SelectMultiple, MultipleHiddenInput
 from django.forms import ModelChoiceField, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
