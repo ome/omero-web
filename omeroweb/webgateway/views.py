@@ -2738,29 +2738,31 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
     #          retrieves annotations from Plate that contains Well 1
     objtype = objtype.split('.')
 
+    params = omero.sys.ParametersI()
+    params.addId(objid)
+    params.addString('ns', NSBULKANNOTATIONS)
+    params.addString('mt', "OMERO.tables")
+
     query = "select obj0 from %s obj0\n" % objtype[0]
     for i, t in enumerate(objtype[1:]):
         query += "join fetch obj%d.%s obj%d\n" % (i, t, i+1)
     query += """
         left outer join fetch obj0.annotationLinks links
-        left outer join fetch links.child
+        left outer join fetch links.child as f
         left outer join fetch links.parent
+        left outer join fetch f.file
         join fetch links.details.owner
         join fetch links.details.creationEvent
-        where obj%d.id=:id""" % (len(objtype) - 1)
+        where obj%d.id=:id and
+        (f.ns=:ns or f.file.mimetype=:mt)""" % (len(objtype) - 1)
 
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
 
     try:
-        objs = q.findAllByQuery(query, omero.sys.ParametersI().addId(objid),
-                                ctx)
+        objs = q.findAllByQuery(query, params, ctx)
     except omero.QueryException:
         return dict(error='%s cannot be queried' % objtype,
-                    query=query)
-
-    if len(objs) == 0:
-        return dict(error='%s with id %s not found' % (objtype, objid),
                     query=query)
 
     data = []
@@ -2768,8 +2770,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
     links = [l for obj in objs for l in obj.copyAnnotationLinks()]
     for link in links:
         annotation = link.child
-        if (not isinstance(annotation, omero.model.FileAnnotation) or
-                unwrap(annotation.getNs()) != NSBULKANNOTATIONS):
+        if not isinstance(annotation, omero.model.FileAnnotation):
             continue
         owner = annotation.details.owner
         ownerName = "%s %s" % (unwrap(owner.firstName), unwrap(owner.lastName))
@@ -2789,7 +2790,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 annotations = login_required()(jsonp(_bulk_file_annotations))
 
 
-def _table_query(request, fileid, conn=None, **kwargs):
+def _table_query(request, fileid, conn=None, query=None, **kwargs):
     """
     Query a table specified by fileid
     Returns a dictionary with query result if successful, error information
@@ -2808,7 +2809,8 @@ def _table_query(request, fileid, conn=None, **kwargs):
                         'columns' (an array of column names) and 'rows'
                         (an array of rows, each an array of values)
     """
-    query = request.GET.get('query')
+    if query is None:
+        query = request.GET.get('query')
     if not query:
         return dict(
             error='Must specify query parameter, use * to retrieve all')
@@ -2825,24 +2827,43 @@ def _table_query(request, fileid, conn=None, **kwargs):
         cols = t.getHeaders()
         rows = t.getNumberOfRows()
 
+        offset = kwargs.get('offset', 0)
+        limit = kwargs.get('limit', None)
+
+        range_start = offset
+        range_size = kwargs.get('limit', rows)
+        range_end = min(rows, range_start + range_size)
+
         if query == '*':
-            hits = range(rows)
+            hits = range(range_start, range_end)
+            totalCount = rows
         else:
             match = re.match(r'^(\w+)-(\d+)', query)
             if match:
                 query = '(%s==%s)' % (match.group(1), match.group(2))
             try:
                 hits = t.getWhereList(query, None, 0, rows, 1)
+                totalCount = len(hits)
+                # paginate the hits
+                hits = hits[range_start: range_end]
             except Exception:
                 return dict(error='Error executing query: %s' % query)
 
-        return dict(data=dict(
-            columns=[col.name for col in cols],
-            rows=[[col.values[0] for col in t.read(range(len(cols)), hit,
-                                                   hit+1).columns]
-                  for hit in hits],
-            )
-        )
+        return {
+            'data': {
+                'column_types': [col.__class__.__name__ for col in cols],
+                'columns': [col.name for col in cols],
+                'rows': [[col.values[0] for col in t.read(
+                         range(len(cols)), hit, hit+1).columns]
+                         for hit in hits]
+            },
+            'meta': {
+                'rowCount': rows,
+                'totalCount': totalCount,
+                'limit': limit,
+                'offset': offset,
+            }
+        }
     finally:
         t.close()
 

@@ -2942,6 +2942,97 @@ def get_original_file(request, fileId, download=False, conn=None, **kwargs):
     return rsp
 
 
+@login_required()
+@render_response()
+def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
+    """
+    Download OMERO.table as CSV or show as HTML table
+    @param file_id:     OriginalFile ID
+    @param mtype:       None for html table or 'csv' or 'json'
+    @param conn:        BlitzGateway connection
+    """
+
+    query = request.GET.get('query', '*')
+    offset = get_long_or_default(request, 'offset', 0)
+    limit = get_long_or_default(request, 'limit', settings.PAGE)
+
+    # Check if file exists since _table_query() doesn't check
+    file_id = long(file_id)
+    orig_file = conn.getObject('OriginalFile', file_id)
+    if orig_file is None:
+        raise Http404("OriginalFile %s not found" % file_id)
+
+    context = webgateway_views._table_query(request, file_id, conn=conn,
+                                            query=query, offset=offset,
+                                            limit=limit)
+
+    if context.get('error') or not context.get('data'):
+        return JsonResponse(context)
+
+    context['data']['name'] = orig_file.name
+    context['data']['path'] = orig_file.path
+    context['data']['id'] = file_id
+    context['meta']['query'] = query
+
+    # if we're on an exact page:
+    if offset == 0 or float(offset)/limit == offset/limit:
+        context['meta']['page'] = (offset/limit) + 1 if offset > 0 else 1
+
+    # pagination links
+    url = reverse('omero_table', args=[file_id])
+    context['meta']['url'] = url
+    url += '?limit=%s' % limit
+    if query != '*':
+        url += '&query=%s' % query
+    if (offset + limit) < context['meta']['totalCount']:
+        context['meta']['next'] = url + '&offset=%s' % (offset + limit)
+    if offset > 0:
+        context['meta']['prev'] = url + '&offset=%s' % (max(0, offset - limit))
+
+    # by default, return context as JSON data
+    # OR, return as csv or html
+    if mtype == 'csv':
+        table_data = context.get('data')
+        csv_rows = [",".join(table_data.get('columns'))]
+        for row in table_data.get('rows'):
+            csv_rows.append(",".join([str(r).replace(',', '.') for r in row]))
+        csv_data = '\n'.join(csv_rows)
+        rsp = HttpResponse(csv_data, content_type='text/csv')
+        rsp['Content-Type'] = 'application/force-download'
+        rsp['Content-Length'] = len(csv_data)
+        downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
+        downloadName = downloadName + ".csv"
+        rsp['Content-Disposition'] = 'attachment; filename=%s' % downloadName
+        return rsp
+    elif mtype is None:
+        context['template'] = 'webclient/annotations/omero_table.html'
+        col_types = context['data']['column_types']
+        if 'ImageColumn' in col_types:
+            context['image_column_index'] = col_types.index('ImageColumn')
+        if 'WellColumn' in col_types:
+            context['well_column_index'] = col_types.index('WellColumn')
+        # provide example queries - pick first DoubleColumn...
+        for idx, c_type in enumerate(col_types):
+            if c_type in ('DoubleColumn', 'LongColumn'):
+                col_name = context['data']['columns'][idx]
+                # find first few non-empty cells...
+                vals = []
+                for row in context['data']['rows']:
+                    if row[idx]:
+                        vals.append(row[idx])
+                    if len(vals) > 3:
+                        break
+                if ' ' in col_name or len(vals) < 2:
+                    # Don't support queries on columns with spaces
+                    continue
+                context['example_column'] = col_name
+                context['example_min_value'] = min(vals)
+                context['example_max_value'] = max(vals)
+                break
+
+    return context
+
+
 @login_required(doConnectionCleanup=False)
 def download_annotation(request, annId, conn=None, **kwargs):
     """ Returns the file annotation as an http response for download """
