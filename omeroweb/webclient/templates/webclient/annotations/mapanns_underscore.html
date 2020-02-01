@@ -31,6 +31,11 @@
                       <% print (ann.permissions.canEdit && clientMapAnn ? 'editing' : 'viewing') %>
                       <b><%= ann.parentNames.length %></b> identical Key-Value annotations:
                     <% } %>
+                    <% if (!ann.parentNames) { %>
+                        <!-- If single object show e.g. Image ID: (slice ImageI -> Image) -->
+                        <b><%= ann.link.parent.class.slice(0, ann.link.parent.class.length-1) %>
+                            ID:</b> <%= ann.link.parent.id %><br />
+                    <% } %>
                     <b>Annotation ID<% if (ann.parentNames) { %>s<% } %>:</b> <%= ann.id %><br />
                     <% if (ann.parentNames) { %>
                         <b>Linked to:</b><br>
