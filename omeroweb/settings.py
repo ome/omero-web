@@ -748,7 +748,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
          json.loads,
          ("Add additional Django applications. For example, see"
           " :doc:`/developers/Web/CreateApp`")],
-    "omero.web.apps.root_application":
+    "omero.web.root_application":
         ["OMEROWEB_ROOT_APPLICATION",
          '',
          str,
