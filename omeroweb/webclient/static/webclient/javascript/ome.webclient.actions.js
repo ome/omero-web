@@ -520,6 +520,29 @@ OME.truncateNames = (function(){
     return truncateNames;
 }());
 
+OME.checkForMultipleParents = function(objList, callback) {
+    // objList is list of ['image=1'] etc.
+    var url = WEBCLIENT.URLS.api_parent_links + '?' + objList.join('&');
+
+    $.getJSON(url, function(data){
+        // look for any child that has > 1 parent:
+        var multiple = false;
+        var links = {};
+        data.data.forEach(function(link){
+            var childId = link.child.type + link.child.id;
+            var parentId = link.parent.type + link.parent.id;
+            // do we already have a parent link for that child?
+            if (links[childId]) {
+                multiple = true;
+            }
+            links[childId] = parentId;
+        });
+        if (callback) {
+            callback(multiple);
+        }
+    });
+}
+
 // Handle deletion of selected objects in jsTree in containers.html
 OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     var datatree = $.jstree.reference($('#dataTree'));
@@ -586,6 +609,17 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
         datatree.disable_node(node);
     });
 
+    // Hide warning, show it if e.g Image is in multiple groups
+    // https://forum.image.sc/t/caution-with-copy-links-in-omero/33680
+    $("#deleteCopyWarning").hide();
+    $("#delete-dialog-form").css('height', '92px');
+    OME.checkForMultipleParents(ajax_data, function(multiple){
+        if (multiple) {
+            $("#deleteCopyWarning").show();
+            $("#delete-dialog-form").css('height', '192px');
+        }
+    })
+
     if (notOwned) {
         $("#deleteOthersWarning").show();
     } else {
@@ -593,11 +627,17 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     }
 
     var type_strings = [];
+    var parent_types = {image:'dataset', dataset:'project', plate:'screen'};
+    var parent_strings = [];
     for (var key in dtypes) {
+        if (parent_types[key]) {
+            parent_strings.push(parent_types[key].capitalize());
+        }
         type_strings.push(key.replace("acquisition", "Run").capitalize() + (dtypes[key]>1 && "s" || ""));
     }
     var type_str = type_strings.join(" & ");    // For delete dialog: E.g. 'Project & Datasets'
-    $("#delete_type").text(type_str);
+    $(".delete_type").text(type_str);
+    $(".delete_parent_type").text(parent_strings.join(" or "));
     if (!askDeleteContents) $("#delete_contents_form").hide();  // don't ask about deleting contents
 
     // callback when delete dialog is closed

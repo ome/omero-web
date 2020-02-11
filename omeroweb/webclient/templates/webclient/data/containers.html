@@ -895,7 +895,16 @@
     <p id="deleteOthersWarning" class='error' style="font-size: 120%; font-weight: bold">
         Warning: Some objects you selected are owned by other users.
     </p>
-    <p>Are you sure you want to delete the selected <span id="delete_type">Images</span>?</p>
+    <p id="deleteCopyWarning" class='error' style="font-size: 120%; font-weight: bold">
+        Warning: One or more <span class="delete_type">Images</span> are linked in multiple
+        <span class="delete_parent_type">Dataset</span>s.
+        This will DELETE them from ALL of those
+        <span class="delete_parent_type">Dataset</span>s.
+        If you only wish to remove <span class="delete_type">Images</span> from one
+        <span class="delete_parent_type">Dataset</span>, use the
+        "Cut Link" action.
+    </p>
+    <p>Are you sure you want to delete the selected <span class="delete_type">Images</span>?</p>
     <p>If yes:</p>
     <form>
     <fieldset style="border: 0px solid white">
