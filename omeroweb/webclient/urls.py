@@ -318,6 +318,10 @@ urlpatterns = [
     url(r'^api/paths_to_object/$', views.api_paths_to_object,
         name='api_paths_to_object'),
 
+    # Get parents of 1 or more objects. ?image=1,2&dataset=3
+    url(r'^api/parent_links/$', views.api_parent_links,
+        name='api_parent_links'),
+
     url(r'^api/tags/$', views.api_tags_and_tagged_list,
         name='api_tags_and_tagged'),
 
