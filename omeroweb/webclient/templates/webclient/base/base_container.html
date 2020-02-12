@@ -167,6 +167,7 @@
         WEBCLIENT.USER = {'id': {{ ome.user.id }}, 'fullName': "{{ ome.user.getFullName }}"};
         WEBCLIENT.active_user = {'id': {{ ome.user_id }}, 'fullName': "{{ active_user.getFullName }}"};
         WEBCLIENT.eventContext = {{ ome.eventContext|json_dumps|safe }};
+        WEBCLIENT.isAdmin = {% if ome.user.isAdmin %}true{% else %}false{% endif %};
         WEBCLIENT.CAN_CREATE = {{ ome.can_create|json_dumps|safe }};
 
         WEBCLIENT.URLS = {};
@@ -185,6 +186,7 @@
         WEBCLIENT.URLS.copy_image_rdef_json = "{% url 'copy_image_rdef_json' %}";
         WEBCLIENT.URLS.reset_owners_rdef_json = "{% url 'reset_owners_rdef_json' %}";
         WEBCLIENT.URLS.reset_rdef_json = "{% url 'reset_rdef_json' %}";
+        WEBCLIENT.URLS.script_upload = "{% url 'script_upload' %}";
         // jsTree code in ome.tree.js and center panel code in center_plugin.thumbs.js.html uses initially_select
         // instead of browser URL since URL may be /webclient/?path=plate.name-barcode|well.name-A1
 

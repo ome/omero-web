@@ -277,6 +277,11 @@ OME.openScriptWindow = function(event, width, height) {
     var script_url = $(event.target).attr('href');
     if (script_url == "#") return false;
 
+    if (script_url.indexOf('script_upload') > -1) {
+        OME.openCenteredWindow(script_url, width, 300);
+        return;
+    }
+
     // selected is list of {'id':'image-123'} etc.
     var selected = $("body").data("selected_objects.ome"),
         sel_types = {};

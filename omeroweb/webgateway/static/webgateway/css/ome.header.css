@@ -663,6 +663,11 @@ li.menu_back a {
 	background:url(../img/dropdown_left_arrow_hover.png) 0% center no-repeat !important;
 }
 
+.menulist .upload_script {
+	background: url(../img/upload_grey.png) 8px center no-repeat;
+    padding-left: 30px;
+}
+
 #runningStatus {
 	 position:absolute; 
 	 bottom:1px; 

@@ -1000,7 +1000,13 @@ OME.showScriptList = function(event) {
                 return html;
             };
 
-            var html = "<ul class='menulist'>" + build_ul(data) + "</ul>";
+            var html = build_ul(data);
+
+            // For Admins, add a 'Upload Script' option.
+            if (WEBCLIENT.isAdmin) {
+                html += "<li><a class='upload_script' href='" + WEBCLIENT.URLS.script_upload + "'>Upload Script</a></li>";
+            }
+            html = "<ul class='menulist'>" + html + "</ul>";
 
             // In case multiple requests are sent at once, don't duplicate menu
             if ($("#scriptList li").length === 0) {

@@ -95,6 +95,7 @@ from omeroweb.webgateway.util import getIntOrDefault
 from omero.model import ProjectI, DatasetI, ImageI, \
     ScreenI, PlateI, \
     ProjectDatasetLinkI, DatasetImageLinkI, \
+    OriginalFileI, \
     ScreenPlateLinkI, AnnotationAnnotationLinkI, TagAnnotationI
 from omero import ApiUsageException, ServerError, CmdError
 from omeroweb.webgateway.views import LoginView
@@ -4438,6 +4439,39 @@ def script_run(request, scriptId, conn=None, **kwargs):
         pass
     rsp = run_script(request, conn, sId, inputMap, scriptName)
     return JsonResponse(rsp)
+
+
+@login_required(isAdmin=True)
+@render_response()
+def script_upload(request, conn=None, **kwargs):
+    """Script upload UI"""
+
+    if request.method != "POST":
+        return {'template': 'webclient/scripts/upload_script.html'}
+
+    # Get script path, name and text
+    script_path = request.POST.get("script_path")
+    script_file = request.FILES['script_file']
+    script_file.seek(0)
+    script_text = script_file.read().decode('utf-8')
+
+    if not script_path.endswith('/'):
+        script_path = script_path + '/'
+    script_path = script_path + script_file.name
+
+    # If script exists, replace. Otherwise upload
+    scriptService = conn.getScriptService()
+    script_id = scriptService.getScriptID(script_path)
+
+    if script_id > 0:
+        orig_file = OriginalFileI(script_id, False)
+        scriptService.editScript(orig_file, script_text)
+        message = "Script Replaced"
+    else:
+        script_id = scriptService.uploadOfficialScript(script_path, script_text)
+        message = "Script Uploaded"
+
+    return {'Message': message, 'script_id': script_id}
 
 
 @require_POST
