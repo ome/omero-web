@@ -4473,7 +4473,8 @@ def script_upload(request, conn=None, **kwargs):
         scriptService.editScript(orig_file, script_text)
         message = "Script Replaced: %s" % script_file.name
     else:
-        script_id = scriptService.uploadOfficialScript(script_path, script_text)
+        script_id = scriptService.uploadOfficialScript(script_path,
+                                                       script_text)
         message = "Script Uploaded: %s" % script_file.name
 
     return {'Message': message, 'script_id': script_id}
