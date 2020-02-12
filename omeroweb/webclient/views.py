@@ -3628,7 +3628,12 @@ def image_viewer(request, iid, share_id=None, **kwargs):
 @login_required()
 @render_response()
 def list_scripts(request, conn=None, **kwargs):
-    """ List the available scripts - Just officical scripts for now """
+    """
+    List the available scripts - Just officical scripts for now
+
+    If all scripts are under a single top-level directory, this is
+    removed by default. To prevent this, use ?full_path=true
+    """
     scriptService = conn.getScriptService()
     scripts = scriptService.getScripts()
 
@@ -3678,7 +3683,7 @@ def list_scripts(request, conn=None, **kwargs):
     scriptList = ul_to_list(scriptMenu)
 
     # If we have a single top-level directory, we can skip it
-    if len(scriptList) == 1:
+    if not request.GET.get('full_path') and len(scriptList) == 1:
         scriptList = scriptList[0]['ul']
 
     return scriptList

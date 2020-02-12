@@ -143,7 +143,7 @@
             })
 
             // Load existing scripts...
-            $.getJSON("{% url 'list_scripts' %}", function(data){
+            $.getJSON("{% url 'list_scripts' %}?full_path=true", function(data){
                 var script_folders = [];
                 
                 var get_folders = function(baseDir, script_data) {
