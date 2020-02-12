@@ -128,7 +128,10 @@
             $("#script_folders").on('change', function(event){
                 $("#scriptFolder").val(event.target.value);
                 $(this).val('');
+                checkForReplace();
+            });
 
+            $("#scriptFolder").on('keyup', function(event){
                 checkForReplace();
             });
 
