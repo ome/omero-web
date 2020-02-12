@@ -4466,10 +4466,10 @@ def script_upload(request, conn=None, **kwargs):
     if script_id > 0:
         orig_file = OriginalFileI(script_id, False)
         scriptService.editScript(orig_file, script_text)
-        message = "Script Replaced"
+        message = "Script Replaced: %s" % script_file.name
     else:
         script_id = scriptService.uploadOfficialScript(script_path, script_text)
-        message = "Script Uploaded"
+        message = "Script Uploaded: %s" % script_file.name
 
     return {'Message': message, 'script_id': script_id}
 

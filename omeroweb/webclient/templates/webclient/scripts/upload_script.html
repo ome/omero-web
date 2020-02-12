@@ -68,6 +68,7 @@
     {% include "webgateway/base/includes/jquery-ui.html" %}
     <script type="text/javascript" src="{% static "webclient/javascript/jquery.form-3.51.js" %}"></script>
     <link rel="stylesheet" href="{% static "webclient/css/layout.css"|add:url_suffix %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "webclient/css/dusty.css"|add:url_suffix %}" type="text/css" media="screen"/>
     <script type="text/javascript">
 
         $(document).ready(function() {
@@ -76,12 +77,17 @@
             $('#submit').attr('disabled', 'disabled')
 
             $('#script_form').ajaxForm({
-                // beforeSubmit: function() {
-                //     $("#submit").prop("disabled", true);
-                // },
+                beforeSubmit: function() {
+                    $("#submit").prop("disabled", true)
+                                .prop("value", "uploading...");
+                },
                 success: function(data) {
                     window.opener.$("#scriptList").empty();
-                    // self.close();
+                    OME.confirm_dialog(
+                        data.Message, function(){
+                            self.close();
+                        }, "Upload Script",
+                        ["OK"], null, 200);
                 }
             });
             // Show any error
