@@ -566,19 +566,6 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
 
     var disabledNodes = [];
 
-    function traverse(state) {
-        // Check if this state is one that we are looking for
-        var n = datatree.get_node(state);
-        disabledNodes.push(n);
-
-        if (n.children) {
-            $.each(n.children, function(index, child) {
-                 traverse(child);
-            });
-        }
-        datatree.disable_node(n);
-
-    }
     var notOwned = false;
     $.each(selected, function(index, node) {
         // What types are being deleted and how many (for pluralization)
@@ -601,11 +588,6 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
         // Disable the nodes marked for deletion
         // Record them so they can easily be removed/re-enabled later
         disabledNodes.push(node);
-        if (node.children) {
-            $.each(node.children, function(index, child) {
-                 traverse(child);
-            });
-        }
         datatree.disable_node(node);
     });
 
