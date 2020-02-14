@@ -4337,9 +4337,21 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
     logger.debug("Script: run with request.POST: %s" % request.POST)
 
+    # upload new file
+    fileupload = ('file_annotation' in request.FILES and
+                  request.FILES['file_annotation'] or None)
+    fileAnnId = None
+    if fileupload is not None and fileupload != "":
+        manager = BaseContainer(conn)
+        fileAnnId = manager.createFileAnnotations(fileupload, [])
+
     for key, param in params.inputs.items():
         prototype = param.prototype
         pclass = prototype.__class__
+
+        if key == "File_Annotation" and fileAnnId is not None:
+            inputMap[key] = pclass(str(fileAnnId))
+            continue
 
         # handle bool separately, since unchecked checkbox will not be in
         # request.POST
