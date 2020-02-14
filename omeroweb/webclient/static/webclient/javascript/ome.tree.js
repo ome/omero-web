@@ -1055,6 +1055,11 @@ $(function() {
                                     });
                                     url = v.getUrl(selJson, v.url);
                                 }
+                                if (typeof url === 'function') {
+                                    // if url is callable, call and return
+                                    url();
+                                    return;
+                                }
                                 // ...otherwise we use default handling...
                                 window.open(url, '_blank');
                             },
