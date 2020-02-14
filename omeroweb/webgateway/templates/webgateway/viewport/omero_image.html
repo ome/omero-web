@@ -1111,8 +1111,22 @@
         $("#rdef-fullrange-btn").attr("disabled", "disabled").addClass("button-disabled");
       }
 
-      // disable 'Max Intensity' projection for single-Z images
-      var disable_intmax = (viewport.loadedImg.rdefs.invertAxis || viewport.getSizes().z < 2);
+      var sizes = viewport.getSizes();
+      // Currently relies on `pixel_range` coming from the server being based
+      // on pixel type byte width
+      var bytes_per_pixel = Math.ceil(
+        Math.log2(viewport.loadedImg.pixel_range[1]) / 8.0);
+      var active_channel_count = viewport.loadedImg.channels
+        .filter(function(x) { return x.active }).length;
+      var stack_size = sizes.width * sizes.height * sizes.z
+                       * active_channel_count * bytes_per_pixel;
+
+      // disable 'Max Intensity' projection for single-Z images or if total
+      // amount of data to be projected is > 256MiB
+      var disable_intmax = (
+        viewport.loadedImg.rdefs.invertAxis || sizes.z < 2
+        || stack_size > 256 * 1024 * 1024
+      );
       $('[name="wblitz-proj"][value=intmax]').prop('disabled', disable_intmax);
     });
 
