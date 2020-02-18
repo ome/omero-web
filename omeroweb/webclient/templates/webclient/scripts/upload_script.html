@@ -56,6 +56,10 @@
             border-radius: 2px;
             padding: 5px;
         }
+        #spinner {
+            display: none;
+            margin: -2px 0;
+        }
 
     </style>
 {% endblock %}
@@ -78,11 +82,17 @@
 
             $('#script_form').ajaxForm({
                 beforeSubmit: function() {
-                    $("#submit").prop("disabled", true)
-                                .prop("value", "uploading...");
+                    $("#submit").prop("value", "Uploading...");
+                    $("form imput").prop("disabled", true);
+                    $("form label").css("opacity", 0.5);
+                    $("#spinner").show();
                 },
                 success: function(data) {
+                    // Force reload of scripts on webclient page
                     window.opener.$("#scriptList").empty();
+                    $("#spinner").hide();
+                    $("#submit").prop("value", "Done");
+                    // Close this window on 'OK'
                     OME.confirm_dialog(
                         data.Message, function(){
                             self.close();
@@ -206,6 +216,7 @@
             <div style="float:right">
                 <a href="#" tabIndex="3" onClick="self.close()">Cancel</a>
                 <input id="submit" tabIndex="2" type="submit" value="Upload Script" />
+                <img id="spinner" src ="{% static "webgateway/img/spinner.gif" %}"/>
             </div>
         </div>
     </form>
