@@ -1046,6 +1046,41 @@ def _api_links_DELETE(conn, json_data):
 
 
 @login_required()
+def api_parent_links(request, conn=None, **kwargs):
+    """
+    Get a list of links as
+    {'data': [{id: 12, child:{type:'image', id:1},
+               parent:{type:'dataset', id:2}] }
+
+    Supports ?image=1,2 and ?image=1&image=2
+    """
+    parent_types = {'image': 'dataset',
+                    'dataset': 'project',
+                    'plate': 'screen'}
+    parents = []
+    for child_type, parent_type in parent_types.items():
+        ids = request.GET.getlist(child_type)
+        if len(ids) == 0:
+            continue
+        # support for ?image=1,2
+        child_ids = []
+        for id in ids:
+            for i in id.split(","):
+                child_ids.append(i)
+
+        link_type, result = get_object_links(conn, parent_type, None,
+                                             child_type, child_ids)
+        for link in result:
+            parents.append({
+                'id': link.id.val,
+                'parent': {'type': parent_type, 'id': link.parent.id.val},
+                'child': {'type': child_type, 'id': link.child.id.val}
+            })
+
+    return JsonResponse({'data': parents})
+
+
+@login_required()
 def api_paths_to_object(request, conn=None, **kwargs):
     """
     This finds the paths to objects in the hierarchy. It returns only
