@@ -664,7 +664,11 @@ li.menu_back a {
 }
 
 .menulist .upload_script {
-	background: url(../img/upload_grey.png) 8px center no-repeat;
+	background: url(../img/upload.png) 8px center no-repeat;
+    padding-left: 30px;
+}
+.menulist .delete_script {
+	background: url(../img/delete.png) 8px center no-repeat;
     padding-left: 30px;
 }
 

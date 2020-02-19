@@ -977,7 +977,6 @@ OME.showScriptList = function(event) {
     // $('#scriptList').css('visibility', 'visible');
     $('#scriptList').show();
     if ($("#scriptList li").length === 0){  // if none loaded yet...
-        var $scriptLink = $(this);
         var $scriptSpinner = $("#scriptSpinner").show();
         var script_list_url = $(this).attr('href');
         $.get(script_list_url, function(data) {
@@ -1002,9 +1001,10 @@ OME.showScriptList = function(event) {
 
             var html = build_ul(data);
 
-            // For Admins, add a 'Upload Script' option.
+            // For Admins, add 'Upload/Delete Script' options.
             if (WEBCLIENT.isAdmin) {
                 html += "<li><a class='upload_script' href='" + WEBCLIENT.URLS.script_upload + "'>Upload Script</a></li>";
+                html += "<li><a class='delete_script' href='" + WEBCLIENT.URLS.script_delete + "'>Delete Script</a></li>";
             }
             html = "<ul class='menulist'>" + html + "</ul>";
 

@@ -4480,6 +4480,32 @@ def script_upload(request, conn=None, **kwargs):
     return {'Message': message, 'script_id': script_id}
 
 
+@login_required(isAdmin=True)
+@render_response()
+def script_delete(request, conn=None, **kwargs):
+    """Script delete UI"""
+
+    if request.method != "POST":
+        return {'template': 'webclient/scripts/delete_script.html'}
+
+    # Get script path, name and text
+    script_paths = request.POST.getlist("script_path")
+    scriptService = conn.getScriptService()
+
+    deleted_ids = []
+    for script_path in script_paths:
+        script_id = scriptService.getScriptID(script_path)
+        if script_id > 0:
+            scriptService.deleteScript(script_id)
+            deleted_ids.append(script_id)
+
+    message = 'Deleted %s script' % len(deleted_ids)
+    if len(deleted_ids) != 1:
+        message += 's'
+    return {'Message': message,
+            'deleted': [deleted_ids]}
+
+
 @require_POST
 @login_required()
 def ome_tiff_script(request, imageId, conn=None, **kwargs):

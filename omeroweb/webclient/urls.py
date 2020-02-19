@@ -249,6 +249,7 @@ urlpatterns = [
         views.script_run,
         name='script_run'),  # runs the script - parameters in POST
     url(r'^script_upload/$', views.script_upload, name='script_upload'),
+    url(r'^script_delete/$', views.script_delete, name='script_delete'),
     url(r'^get_original_file/(?:(?P<fileId>[0-9]+)/)?$',
         views.get_original_file,
         name="get_original_file"),  # for stderr, stdout etc

@@ -281,6 +281,10 @@ OME.openScriptWindow = function(event, width, height) {
         OME.openCenteredWindow(script_url, width, 300);
         return;
     }
+    if (script_url.indexOf('script_delete') > -1) {
+        OME.openCenteredWindow(script_url, width, 500);
+        return;
+    }
 
     // selected is list of {'id':'image-123'} etc.
     var selected = $("body").data("selected_objects.ome"),
