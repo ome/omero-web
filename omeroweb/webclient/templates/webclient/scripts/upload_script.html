@@ -83,9 +83,13 @@
             $('#script_form').ajaxForm({
                 beforeSubmit: function() {
                     $("#submit").prop("value", "Uploading...");
-                    $("form imput").prop("disabled", true);
                     $("form label").css("opacity", 0.5);
                     $("#spinner").show();
+                    setTimeout(function(){
+                        // Don't disable before submit or data not included
+                        $("form input").prop("disabled", true);
+                        $("form select").prop("disabled", true);
+                    }, 100);
                 },
                 success: function(data) {
                     // Force reload of scripts on webclient page
