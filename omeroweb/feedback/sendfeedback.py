@@ -27,7 +27,7 @@ import sys
 import platform
 import traceback
 import logging
-import urllib
+from urllib.parse import urlencode
 try:
     # python2
     from urllib2 import urlopen, Request, HTTPError, URLError
@@ -87,7 +87,8 @@ class SendFeedback(object):
                 p['os_version'] = platform.release()
             except Exception:
                 pass
-            data = urllib.urlencode(p)
+            data = urlencode(p)
+            data = data.encode()
             headers = {
                 "Content-type": "application/x-www-form-urlencoded",
                 "Accept": "text/plain",
@@ -116,4 +117,4 @@ class SendFeedback(object):
                     response.close()
         except Exception as x:
             logger.error(traceback.format_exc())
-            raise Exception("Feedback server error: %s" % x.message)
+            raise Exception("Feedback server error: %s" % x)
