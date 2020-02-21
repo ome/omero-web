@@ -2229,6 +2229,8 @@ def annotate_rating(request, conn=None, **kwargs):
     """
     Handle adding Rating to one or more objects
     """
+    if request.method != 'POST':
+        raise Http404("Only POST supported")
     rating = getIntOrDefault(request, 'rating', 0)
     oids = getObjects(request, conn)
 
