@@ -4468,14 +4468,18 @@ def script_upload(request, conn=None, **kwargs):
     scriptService = conn.getScriptService()
     script_id = scriptService.getScriptID(script_path)
 
-    if script_id > 0:
-        orig_file = OriginalFileI(script_id, False)
-        scriptService.editScript(orig_file, script_text)
-        message = "Script Replaced: %s" % script_file.name
-    else:
-        script_id = scriptService.uploadOfficialScript(script_path,
-                                                       script_text)
-        message = "Script Uploaded: %s" % script_file.name
+    try:
+        if script_id > 0:
+            orig_file = OriginalFileI(script_id, False)
+            scriptService.editScript(orig_file, script_text)
+            message = "Script Replaced: %s" % script_file.name
+        else:
+            script_id = scriptService.uploadOfficialScript(script_path,
+                                                        script_text)
+            message = "Script Uploaded: %s" % script_file.name
+    except omero.ValidationException as ex:
+        message = str(ex)
+
 
     return {'Message': message, 'script_id': script_id}
 

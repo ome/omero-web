@@ -98,7 +98,7 @@
                     $("#submit").prop("value", "Done");
                     // Close this window on 'OK'
                     OME.confirm_dialog(
-                        data.Message, function(){
+                        data.Message.replace('\n', '<br/>'), function(){
                             self.close();
                         }, "Upload Script",
                         ["OK"], null, 200);
