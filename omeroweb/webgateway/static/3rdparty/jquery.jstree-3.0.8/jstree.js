@@ -7045,6 +7045,8 @@
 
 
 (function ($) {
+	// NB: document.registerElement is deprecated - see https://github.com/vakata/jstree/issues/2094
+	// But seems this is not used by OMERO.web currently - see https://github.com/ome/omero-web/pull/119
 	if(document.registerElement && Object && Object.create) {
 		var proto = Object.create(HTMLElement.prototype);
 		proto.createdCallback = function () {
