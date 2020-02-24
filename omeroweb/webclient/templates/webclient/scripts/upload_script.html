@@ -121,6 +121,11 @@
                     return;
                 }
                 $('#targetInfo').show();
+                if (!chosen_file.endsWith(".py")) {
+                    $("#targetMessage").html("File: " + chosen_file + " not valid.<br/>File must be Python script (.py)");
+                    return;
+                }
+
                 $('#submit').removeAttr('disabled');
 
                 var folder = $("#scriptFolder").val();
