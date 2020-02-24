@@ -4493,15 +4493,21 @@ def script_delete(request, conn=None, **kwargs):
     scriptService = conn.getScriptService()
 
     deleted_ids = []
+    errors = []
     for script_path in script_paths:
         script_id = scriptService.getScriptID(script_path)
         if script_id > 0:
-            scriptService.deleteScript(script_id)
-            deleted_ids.append(script_id)
+            try:
+                scriptService.deleteScript(script_id)
+                deleted_ids.append(script_id)
+            except ServerError as ex:
+                errors.append(str(ex))
 
     message = 'Deleted %s script' % len(deleted_ids)
     if len(deleted_ids) != 1:
         message += 's'
+    if len(errors) > 0:
+        message += "".join(errors)
     return {'Message': message,
             'deleted': [deleted_ids]}
 
