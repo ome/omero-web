@@ -563,15 +563,15 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
     # we want to render a region larger than the bounding box
     x, y, w, h = bBox
     # make the aspect ratio (w/h) = 3/2
-    requiredWidth = max(w, h*3/2)
-    requiredHeight = requiredWidth*2/3
+    requiredWidth = max(w, h*3//2)
+    requiredHeight = requiredWidth*2//3
     # make the rendered region 1.5 times larger than the bounding box
     newW = int(requiredWidth * 1.5)
     newH = int(requiredHeight * 1.5)
     # Don't want the region to be smaller than the thumbnail dimensions
     if newW < MAX_WIDTH:
         newW = MAX_WIDTH
-        newH = newW*2/3
+        newH = newW*2//3
     # Don't want the region to be bigger than a 'Big Image'!
 
     def getConfigValue(key):
@@ -586,7 +586,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
     if (max_plane_width is None or max_plane_height is None or
             (newW > int(max_plane_width)) or (newH > int(max_plane_height))):
         # generate dummy image to return
-        dummy = Image.new('RGB', (MAX_WIDTH, MAX_WIDTH*2/3), bg_color)
+        dummy = Image.new('RGB', (MAX_WIDTH, MAX_WIDTH*2//3), bg_color)
         draw = ImageDraw.Draw(dummy)
         draw.text((10, 30), "Shape too large to \ngenerate thumbnail",
                   fill=(255, 0, 0))
@@ -594,8 +594,8 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
         dummy.save(rv, 'jpeg', quality=90)
         return HttpResponse(rv.getvalue(), content_type='image/jpeg')
 
-    xOffset = (newW - w)/2
-    yOffset = (newH - h)/2
+    xOffset = (newW - w)//2
+    yOffset = (newH - h)//2
     newX = int(x - xOffset)
     newY = int(y - yOffset)
 
@@ -636,7 +636,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
 
     # we have our full-sized region. Need to resize to thumbnail.
     current_w, current_h = img.size
-    factor = float(MAX_WIDTH) / current_w
+    factor = float(MAX_WIDTH) // current_w
     resizeH = int(current_h * factor)
     img = img.resize((MAX_WIDTH, resizeH))
 
@@ -666,8 +666,8 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
         draw.ellipse((rectX-1, rectY-1, rectW+1, rectH+1), outline=lineColour)
     elif shape['type'] == 'Point':
         point_radius = 2
-        rectX = (MAX_WIDTH/2) - point_radius
-        rectY = int(resizeH/2) - point_radius
+        rectX = (MAX_WIDTH//2) - point_radius
+        rectY = int(resizeH//2) - point_radius
         rectW = rectX + (point_radius * 2)
         rectH = rectY + (point_radius * 2)
         draw.ellipse((rectX, rectY, rectW, rectH), outline=lineColour)
