@@ -1025,7 +1025,7 @@ OME.showScriptList = function(event) {
             var html = build_ul(data);
 
             // For Admins, add a 'Upload Script' option.
-            if (WEBCLIENT.isAdmin) {
+            if (WEBCLIENT.current_admin_privileges.indexOf("WriteScriptRepo") > -1) {
                 html += "<li><a class='upload_script' href='" + WEBCLIENT.URLS.script_upload + "'>Upload Script</a></li>";
             }
             html = "<ul class='menulist'>" + html + "</ul>";

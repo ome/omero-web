@@ -490,6 +490,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context['page_size'] = settings.PAGE
     context['template'] = template
     context['thumbnails_batch'] = settings.THUMBNAILS_BATCH
+    context['current_admin_privileges'] = conn.getCurrentAdminPrivileges()
 
     return context
 
