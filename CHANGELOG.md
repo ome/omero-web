@@ -13,6 +13,7 @@
 - Confine projections to no more than 256MiB of raw data ([#115](https://github.com/ome/omero-web/pull/115))
 - Fix color picker hex input box ([#114](https://github.com/ome/omero-web/pull/114))
 - Fix and expand "open with" plugin support ([#113](https://github.com/ome/omero-web/pull/113))
+- Table download ([#3](https://github.com/ome/omero-web/pull/3))
 
 5.6.1 (January 2020)
 --------------------
