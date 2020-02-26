@@ -169,6 +169,7 @@
         WEBCLIENT.eventContext = {{ ome.eventContext|json_dumps|safe }};
         WEBCLIENT.isAdmin = {% if ome.user.isAdmin %}true{% else %}false{% endif %};
         WEBCLIENT.CAN_CREATE = {{ ome.can_create|json_dumps|safe }};
+        WEBCLIENT.current_admin_privileges = {{ current_admin_privileges|json_dumps|safe }};
 
         WEBCLIENT.URLS = {};
         WEBCLIENT.URLS.webindex = "{% url 'webindex' %}";
