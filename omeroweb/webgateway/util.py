@@ -196,3 +196,45 @@ def zip_archived_files(images, temp, zipName, buf=2621440):
         shutil.rmtree(temp_zip_dir, ignore_errors=True)
 
     return zipName
+
+
+def xy_list_to_bbox(xyList):
+    """
+    Returns a bounding box (x,y,w,h) that will contain the shape
+    represented by the XY points list
+    """
+    xList, yList = [], []
+    for xy in xyList:
+        x, y = xy
+        xList.append(x)
+        yList.append(y)
+    return (min(xList), min(yList), max(xList)-min(xList),
+            max(yList)-min(yList))
+
+
+def points_string_to_XY_list(string):
+    """
+    Method for converting the string returned from
+    omero.model.ShapeI.getPoints() into list of (x,y) points.
+    E.g: "points[309,427, 366,503, 190,491] points1[309,427, 366,503,
+    190,491] points2[309,427, 366,503, 190,491]"
+    or the new format: "309,427 366,503 190,491"
+    OR with extra ,  : "309,427, 366,503, 190,491"
+    """
+    pointLists = string.strip().split("points")
+    if len(pointLists) < 2:
+        if len(pointLists) == 1 and pointLists[0]:
+            xys = pointLists[0].split(" ")
+            xyList = [tuple(map(float, xy.strip(',').split(',')))
+                      for xy in xys if len(xy) > 0]
+            return xyList
+
+        msg = "Unrecognised ROI shape 'points' string: %s" % string
+        raise ValueError(msg)
+
+    firstList = pointLists[1]
+    xyList = []
+    for xy in firstList.strip(" []").split(", "):
+        x, y = xy.split(",")
+        xyList.append((float(x.strip()), float(y.strip())))
+    return xyList

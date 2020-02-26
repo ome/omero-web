@@ -33,7 +33,7 @@ from django.conf import settings
 from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
-from omero.util.ROI_utils import pointsStringToXYlist, xyListToBbox
+from .util import points_string_to_XY_list, xy_list_to_bbox
 from .plategrid import PlateGrid
 from omeroweb.version import omeroweb_buildyear as build_year
 from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
@@ -531,8 +531,8 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
                 2*shape['radiusX'], 2*shape['radiusY'])
     elif type(s) == omero.model.PolylineI:
         shape['type'] = 'PolyLine'
-        shape['xyList'] = pointsStringToXYlist(s.getPoints().getValue())
-        bBox = xyListToBbox(shape['xyList'])
+        shape['xyList'] = points_string_to_XY_list(s.getPoints().getValue())
+        bBox = xy_list_to_bbox(shape['xyList'])
     elif type(s) == omero.model.LineI:
         shape['type'] = 'Line'
         shape['x1'] = int(s.getX1().getValue())
@@ -550,8 +550,8 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
         bBox = (shape['x']-50, shape['y']-50, 100, 100)
     elif type(s) == omero.model.PolygonI:
         shape['type'] = 'Polygon'
-        shape['xyList'] = pointsStringToXYlist(s.getPoints().getValue())
-        bBox = xyListToBbox(shape['xyList'])
+        shape['xyList'] = points_string_to_XY_list(s.getPoints().getValue())
+        bBox = xy_list_to_bbox(shape['xyList'])
     elif type(s) == omero.model.LabelI:
         shape['type'] = 'Label'
         shape['x'] = s.getX().getValue()
