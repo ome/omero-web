@@ -27,7 +27,14 @@ class CustomHeadersMiddleware(object):
 
     Headers will only be set if not already present in the response.
     """
-    def process_response(self, request, response):
+
+    # https://docs.djangoproject.com/en/1.11/topics/http/middleware/
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
         for header in settings.HTTP_RESPONSE_HEADERS:
             k, v = header
             if not response.has_header(k):

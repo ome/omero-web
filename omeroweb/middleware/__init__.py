@@ -1,4 +1,4 @@
-from customheaders import CustomHeadersMiddleware
+from .customheaders import CustomHeadersMiddleware
 
 __all__ = [
     'CustomHeadersMiddleware',
