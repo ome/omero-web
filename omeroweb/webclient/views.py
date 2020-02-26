@@ -95,6 +95,7 @@ from omeroweb.webgateway.util import getIntOrDefault
 from omero.model import ProjectI, DatasetI, ImageI, \
     ScreenI, PlateI, \
     ProjectDatasetLinkI, DatasetImageLinkI, \
+    OriginalFileI, \
     ScreenPlateLinkI, AnnotationAnnotationLinkI, TagAnnotationI
 from omero import ApiUsageException, ServerError, CmdError
 from omeroweb.webgateway.views import LoginView
@@ -3664,7 +3665,12 @@ def image_viewer(request, iid, share_id=None, **kwargs):
 @login_required()
 @render_response()
 def list_scripts(request, conn=None, **kwargs):
-    """ List the available scripts - Just officical scripts for now """
+    """
+    List the available scripts - Just officical scripts for now
+
+    If all scripts are under a single top-level directory, this is
+    removed by default. To prevent this, use ?full_path=true
+    """
     scriptService = conn.getScriptService()
     scripts = scriptService.getScripts()
 
@@ -3714,7 +3720,7 @@ def list_scripts(request, conn=None, **kwargs):
     scriptList = ul_to_list(scriptMenu)
 
     # If we have a single top-level directory, we can skip it
-    if len(scriptList) == 1:
+    if not request.GET.get('full_path') and len(scriptList) == 1:
         scriptList = scriptList[0]['ul']
 
     return scriptList
@@ -4487,6 +4493,43 @@ def script_run(request, scriptId, conn=None, **kwargs):
         pass
     rsp = run_script(request, conn, sId, inputMap, scriptName)
     return JsonResponse(rsp)
+
+
+@login_required(isAdmin=True)
+@render_response()
+def script_upload(request, conn=None, **kwargs):
+    """Script upload UI"""
+
+    if request.method != "POST":
+        return {'template': 'webclient/scripts/upload_script.html'}
+
+    # Get script path, name and text
+    script_path = request.POST.get("script_path")
+    script_file = request.FILES['script_file']
+    script_file.seek(0)
+    script_text = script_file.read().decode('utf-8')
+
+    if not script_path.endswith('/'):
+        script_path = script_path + '/'
+    script_path = script_path + script_file.name
+
+    # If script exists, replace. Otherwise upload
+    scriptService = conn.getScriptService()
+    script_id = scriptService.getScriptID(script_path)
+
+    try:
+        if script_id > 0:
+            orig_file = OriginalFileI(script_id, False)
+            scriptService.editScript(orig_file, script_text)
+            message = "Script Replaced: %s" % script_file.name
+        else:
+            script_id = scriptService.uploadOfficialScript(script_path,
+                                                           script_text)
+            message = "Script Uploaded: %s" % script_file.name
+    except omero.ValidationException as ex:
+        message = str(ex)
+
+    return {'Message': message, 'script_id': script_id}
 
 
 @require_POST
