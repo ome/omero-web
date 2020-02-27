@@ -1,5 +1,27 @@
+5.6.2 (February 2020)
+---------------------
 
-# 5.6.0 (January 2020)
+- Fix shape_thumbnail using integer division ([#137](https://github.com/ome/omero-web/pull/137))
+- Use chosen plugin for script UI values ([#135](https://github.com/ome/omero-web/pull/135))
+- Rating post only ([#132](https://github.com/ome/omero-web/pull/132))
+- Fix feedback url encode ([#131](https://github.com/ome/omero-web/pull/131))
+- Script GUI file upload ([#128](https://github.com/ome/omero-web/pull/128))
+- Script upload ([#126](https://github.com/ome/omero-web/pull/126))
+- Fix webadmin search firefox ([#125](https://github.com/ome/omero-web/pull/125))
+- Delete check parent links ([#124](https://github.com/ome/omero-web/pull/124))
+- Map ann parent ID ([#119](https://github.com/ome/omero-web/pull/119))
+- Confine projections to no more than 256MiB of raw data ([#115](https://github.com/ome/omero-web/pull/115))
+- Fix color picker hex input box ([#114](https://github.com/ome/omero-web/pull/114))
+- Fix and expand "open with" plugin support ([#113](https://github.com/ome/omero-web/pull/113))
+- Table download ([#3](https://github.com/ome/omero-web/pull/3))
+
+5.6.1 (January 2020)
+--------------------
+
+- Quick fix of the show downloads regex ([#109](https://github.com/ome/omero-web/pull/109))
+
+5.6.0 (January 2020)
+--------------------
 
 - Remove support for Python 2 ([#103](https://github.com/ome/omero-web/pull/103))
 - Remove requirement files ([#107](https://github.com/ome/omero-web/pull/107))
@@ -30,7 +52,8 @@
   `{% url 'webgateway_render_image' image_id theZ theT %}`.
 
 
-# 5.5.dev2 (August 2019)
+5.5.dev2 (August 2019)
+----------------------
 
 - Improve README
 - Add omeroweb.version
