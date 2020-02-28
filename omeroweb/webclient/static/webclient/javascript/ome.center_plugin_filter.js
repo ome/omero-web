@@ -166,12 +166,19 @@ MapAnnFilter.prototype.loadAnnotations = function(callback) {
                 if (!prev[key]) {
                     prev[key] = {values: {}, type: 'number', min: Infinity, max: -Infinity};
                 }
-                if (isNaN(parseFloat(val))) {
-                    prev[key].type = 'string';
-                } else {
-                    val = parseFloat(val);
-                    prev[key].min = Math.min(val, prev[key].min);
-                    prev[key].max = Math.max(val, prev[key].max);
+                // if type is NOT string, check if val is a number...
+                if (prev[key].type !== 'string') {
+                    // If not, make sure ALL are strings
+                    if (isNaN(parseFloat(val))) {
+                        prev[key].type = 'string';
+                        for (i in prev[key].values) {
+                            prev[key].values[i] = prev[key].values[i].map(function(v){return v + ""});
+                        }
+                    } else {
+                        val = parseFloat(val);
+                        prev[key].min = Math.min(val, prev[key].min);
+                        prev[key].max = Math.max(val, prev[key].max);
+                    }
                 }
                 if (!prev[key].values[iid]) {
                     prev[key].values[iid] = [val];
