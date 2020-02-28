@@ -166,7 +166,7 @@ MapAnnFilter.prototype.loadAnnotations = function(callback) {
                 if (!prev[key]) {
                     prev[key] = {values: {}, type: 'number', min: Infinity, max: -Infinity};
                 }
-                if (isNaN(val)) {
+                if (isNaN(parseFloat(val))) {
                     prev[key].type = 'string';
                 } else {
                     val = parseFloat(val);
