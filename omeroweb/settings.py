@@ -748,6 +748,15 @@ CUSTOM_SETTINGS_MAPPINGS = {
          json.loads,
          ("Add additional Django applications. For example, see"
           " :doc:`/developers/Web/CreateApp`")],
+    "omero.web.root_application":
+        ["OMEROWEB_ROOT_APPLICATION",
+         '',
+         str,
+         ("Override the root application label that handles ``/``. "
+          "**Warning** you must ensure the application's URLs do not conflict "
+          "with other applications. "
+          "omero-gallery is an example of an application that can be used for "
+          "this (set to ``gallery``)")],
     "omero.web.databases":
         ["DATABASES", '{}', json.loads, None],
     "omero.web.page_size":

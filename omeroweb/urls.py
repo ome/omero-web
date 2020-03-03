@@ -89,7 +89,11 @@ for app in settings.ADDITIONAL_APPS:
     if urls_found is not None:
         try:
             __import__(urlmodule)
-            regex = '^(?i)%s/' % label
+            # https://stackoverflow.com/questions/7580220/django-urls-how-to-map-root-to-app
+            if label == settings.OMEROWEB_ROOT_APPLICATION:
+                regex = r'^'
+            else:
+                regex = '^(?i)%s/' % label
             urlpatterns.append(url(regex, include(urlmodule)))
         except ImportError:
             print("""Failed to import %s
