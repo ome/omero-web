@@ -1380,6 +1380,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         @rtype                  List of L{ExperimenterWrapper}
         """
 
+        # Make sure we've loaded experimenters
+        group = self.getObject("ExperimenterGroup", group.id,
+                               opts={'load_experimenters': True})
+
         experimenters = list(self.getObjects("Experimenter"))
 
         new_membersIds = [nm.id for nm in new_members]
@@ -1387,11 +1391,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         old_members = group.getMembers()
         old_membersIds = [om.id for om in old_members]
 
-        old_available = list()
+        old_availableIds = []
         for e in experimenters:
             if e.id not in old_membersIds:
-                old_available.append(e)
-        old_availableIds = [oa.id for oa in old_available]
+                old_availableIds.append(e.id)
 
         new_available = list()
         for e in experimenters:
@@ -2366,6 +2369,8 @@ class ExperimenterGroupWrapper(OmeroWebObjectWrapper,
                 yield ExperimenterWrapper(self._conn, gem.child)
 
     def getOwnersNames(self):
+        warnings.warn("getOwnersNames() deprecated in 5.6.3",
+                      DeprecationWarning)
         owners = list()
         for e in self.getOwners():
             owners.append(e.getFullName())
