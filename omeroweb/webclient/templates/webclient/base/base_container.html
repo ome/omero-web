@@ -170,6 +170,7 @@
         WEBCLIENT.isAdmin = {% if ome.user.isAdmin %}true{% else %}false{% endif %};
         WEBCLIENT.CAN_CREATE = {{ ome.can_create|json_dumps|safe }};
         WEBCLIENT.current_admin_privileges = {{ current_admin_privileges|json_dumps|safe }};
+        WEBCLIENT.leader_of_groups = {{ leader_of_groups|json_dumps|safe }};
 
         WEBCLIENT.URLS = {};
         WEBCLIENT.URLS.webindex = "{% url 'webindex' %}";

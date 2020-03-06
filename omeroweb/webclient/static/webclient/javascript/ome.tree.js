@@ -958,6 +958,15 @@ $(function() {
                         OME.handleChgrp(WEBCLIENT.URLS.webindex, WEBCLIENT.URLS.static_webclient);
                     }
                 };
+
+                config["chown"] = {
+                    "label" : "Change Owner...",
+                    "_disabled": true,
+                    "icon"  : WEBCLIENT.URLS.static_webclient + 'image/icon_basic_user_16.png',
+                    "action": function() {
+                        OME.handleChown(WEBCLIENT.URLS.webindex, WEBCLIENT.URLS.static_webclient);
+                    }
+                };
                 
                 config["share"] = {
                     "label" : "Create share",
@@ -1148,6 +1157,12 @@ $(function() {
                     if (["acquisition", "tag", "tagset"].indexOf(node.type) === -1) {
                         config["chgrp"]["_disabled"] = false;
                     }
+                }
+
+                // Can chown if Admin (with 'Chown' privilege) or Group owner
+                if (WEBCLIENT.current_admin_privileges.indexOf("Chown") > -1 || 
+                    WEBCLIENT.leader_of_groups.indexOf(WEBCLIENT.active_group_id) > -1) {
+                        config["chown"]["_disabled"] = false;
                 }
 
                 if (canLink) {

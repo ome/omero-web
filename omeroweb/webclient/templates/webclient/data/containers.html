@@ -48,6 +48,7 @@
     <script type="text/javascript" src="{% static "webclient/javascript/jquery.jstree.truncatetext_plugin.js"|add:url_suffix %}"></script>
 
     <script type="text/javascript" src="{% static 'webclient/javascript/ome.chgrp.js'|add:url_suffix %}"></script>
+    <script type="text/javascript" src="{% static 'webclient/javascript/ome.chown.js'|add:url_suffix %}"></script>
 
     <!-- Main jsTree code is here -->
     <script src="{% static 'webclient/javascript/ome.tree.js'|add:url_suffix %}"></script>
@@ -934,7 +935,9 @@
 <!-- hidden form for chgrp -->
 <form id="chgrp-form" title="Move to Group" action="{% url 'chgrp' %}" style="display:none" method="POST">{% csrf_token %}
 </form>
-
+<!-- hidden form for chown -->
+<form id="chown-form" title="Change Owner" action="{% url 'chown' %}" style="display:none" method="POST">{% csrf_token %}
+</form>
 
 {% endblock %}
 

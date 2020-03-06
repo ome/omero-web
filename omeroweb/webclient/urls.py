@@ -203,6 +203,8 @@ urlpatterns = [
 
     # chgrp - 'group_id', obj-types and ids in POST data
     url(r'^chgrp/$', views.chgrp, name="chgrp"),
+    # chown - 'owner_id', obj-types and ids in POST data
+    url(r'^chown/$', views.chown, name="chown"),
 
     # annotations
     url(r'^action/(?P<action>[a-zA-Z]+)/(?:(?P<o_type>[a-zA-Z]+)/)'

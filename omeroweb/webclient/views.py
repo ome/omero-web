@@ -491,6 +491,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context['template'] = template
     context['thumbnails_batch'] = settings.THUMBNAILS_BATCH
     context['current_admin_privileges'] = conn.getCurrentAdminPrivileges()
+    context['leader_of_groups'] = conn.getEventContext().leaderOfGroups
 
     return context
 
@@ -4353,6 +4354,53 @@ def chgrp(request, conn=None, **kwargs):
 
     # return HttpResponse("OK")
     return JsonResponse({'update': update})
+
+
+@login_required()
+def chown(request, conn=None, **kwargs):
+    """
+    Moves data to a new owner, using the chown queue.
+    Handles submission of chown form: all data in POST.
+    Adds the callback handle to the request.session['callback']['jobId']
+    """
+    if not request.method == 'POST':
+        return JsonResponse({'Error': "Need to POST to chown"},
+                            status=405)
+    # Get the target owner_id
+    owner_id = getIntOrDefault(request, 'owner_id', None)
+    if owner_id is None:
+        return JsonResponse({'Error': "chown: No owner_id specified"})
+    owner_id = long(owner_id)
+    exp = conn.getObject("Experimenter", owner_id)
+    if exp is None:
+        return JsonResponse({'Error': "chown: Experimenter not found" % 
+                             owner_id})
+
+    # Context must be set to owner of data, E.g. to create links.
+    conn.SERVICE_OPTS.setOmeroUser(owner_id)
+
+    dtypes = ["Project", "Dataset", "Image", "Screen", "Plate"]
+    for dtype in dtypes:
+        # Get all requested objects of this type
+        oids = request.POST.get(dtype, None)
+        if oids is not None:
+            obj_ids = [int(oid) for oid in oids.split(",")]
+            logger.debug(
+                "chown to owner:%s %s-%s" % (owner_id, dtype, obj_ids))
+            handle = conn.chgrpObjects(dtype, obj_ids, owner_id)
+            jobId = str(handle)
+            request.session['callback'][jobId] = {
+                'job_type': "chown",
+                'owner': exp.getFullName(),
+                'to_owner_id': owner_id,
+                'dtype': dtype,
+                'obj_ids': obj_ids,
+                'job_name': "Change owner",
+                'start_time': datetime.datetime.now(),
+                'status': 'in progress'}
+            request.session.modified = True
+
+    return JsonResponse({'jobId': jobId})
 
 
 @login_required(setGroupContext=True)
