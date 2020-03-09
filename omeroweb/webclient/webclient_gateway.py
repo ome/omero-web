@@ -1412,23 +1412,23 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             if e.id in rm_exps:
                 # removing user from their default group #9193
                 # if e.getDefaultGroup().id != group.id:
-                to_remove.append(e._obj)
+                to_remove.append(e)
             if e.id in add_exps:
-                to_add.append(e._obj)
+                to_add.append(e)
 
         admin_serv = self.getAdminService()
         userGid = admin_serv.getSecurityRoles().userGroupId
         failures = []
         for e in to_add:
-            admin_serv.addGroups(e, [group._obj])
+            admin_serv.addGroups(e._obj, [group._obj])
         for e in to_remove:
             # Experimenter needs to stay in at least 1 non-user group
-            gs = [l.parent.id.val for l in e.copyGroupExperimenterMap()
+            gs = [l.parent.id for l in e.copyGroupExperimenterMap()
                   if l.parent.id.val != userGid]
             if len(gs) == 1:
-                failures.append(ExperimenterWrapper(self, e))
+                failures.append(ExperimenterWrapper(self, e._obj))
                 continue
-            admin_serv.removeGroups(e, [group._obj])
+            admin_serv.removeGroups(e._obj, [group._obj])
         return failures
 
     def setOwnersOfGroup(self, group, owners):
