@@ -319,14 +319,14 @@ api_group_experimenters = url(
     r'^v(?P<api_version>%s)/m/experimentergroups/(?P<group_id>[0-9]+)'
     '/experimenters/$' % versions,
     views.ExperimentersView.as_view(),
-    name='api_group_experimenters')
+    name='api_experimentergroup_experimenters')
 """
 GET Experimenters in a Group, using omero-marshal to generate json
 """
 
 api_groups = url(r'^v(?P<api_version>%s)/m/experimentergroups/$' % versions,
                  views.ExperimenterGroupsView.as_view(),
-                 name='api_groups')
+                 name='api_experimentergroups')
 """
 GET ExperimenterGroups, using omero-marshal to generate json
 """
@@ -334,7 +334,7 @@ GET ExperimenterGroups, using omero-marshal to generate json
 api_group = url(r'^v(?P<api_version>%s)/m/experimentergroups/'
                 '(?P<object_id>[0-9]+)/$' % versions,
                 views.ExperimenterGroupView.as_view(),
-                name='api_group')
+                name='api_experimentergroup')
 """
 GET ExperimenterGroup, using omero-marshal to generate json
 """
@@ -343,7 +343,7 @@ api_experimenter_groups = url(
     r'^v(?P<api_version>%s)/m/experimenters/(?P<experimenter_id>[0-9]+)'
     '/experimentergroups/$' % versions,
     views.ExperimenterGroupsView.as_view(),
-    name='api_experimenter_groups')
+    name='api_experimenter_experimentergroups')
 """
 GET Groups that an Experimenter is in, using omero-marshal to generate json
 """

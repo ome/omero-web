@@ -79,7 +79,7 @@ def api_base(request, api_version=None, **kwargs):
     """Base url of the webgateway json api for a specified version."""
     v = api_version
     rv = {'url:experimenters': build_url(request, 'api_experimenters', v),
-          'url:experimentergroups': build_url(request, 'api_groups', v),
+          'url:experimentergroups': build_url(request, 'api_experimentergroups', v),
           'url:projects': build_url(request, 'api_projects', v),
           'url:datasets': build_url(request, 'api_datasets', v),
           'url:images': build_url(request, 'api_images', v),
@@ -390,7 +390,7 @@ class ExperimenterView(ObjectView):
 
     # Urls to add to marshalled object. See ProjectsView for more details
     urls = {
-        'url:experimentergroups': {'name': 'api_experimenter_groups',
+        'url:experimentergroups': {'name': 'api_experimenter_experimentergroups',
                                    'kwargs': {'experimenter_id': 'OBJECT_ID'}},
     }
 
@@ -403,7 +403,7 @@ class ExperimenterGroupView(ObjectView):
 
     # Urls to add to marshalled object. See ProjectsView for more details
     urls = {
-        'url:experimenters': {'name': 'api_group_experimenters',
+        'url:experimenters': {'name': 'api_experimentergroup_experimenters',
                               'kwargs': {'group_id': 'OBJECT_ID'}},
     }
 
@@ -434,7 +434,7 @@ class ObjectsView(ApiView):
     def get(self, request, conn=None, **kwargs):
         """GET a list of Projects, filtering by various request parameters."""
         opts = self.get_opts(request, **kwargs)
-        group = getIntOrDefault(request, 'group', -1)
+        group = getIntOrDefault(request, 'experimentergroup', -1)
         normalize = request.GET.get('normalize', False) == 'true'
         # Get the data
         marshalled = query_objects(conn, self.OMERO_TYPE, group,
@@ -743,7 +743,7 @@ class ExperimentersView(ObjectsView):
     urls = {
         'url:experimenter': {'name': 'api_experimenter',
                              'kwargs': {'object_id': 'OBJECT_ID'}},
-        'url:experimentergroups': {'name': 'api_experimenter_groups',
+        'url:experimentergroups': {'name': 'api_experimenter_experimentergroups',
                                    'kwargs': {'experimenter_id': 'OBJECT_ID'}},
     }
 
@@ -768,15 +768,15 @@ class ExperimentersView(ObjectsView):
 
 
 class ExperimenterGroupsView(ObjectsView):
-    """Handles GET for /groups/ to list ExperimenterGroups."""
+    """Handles GET for /experimentergroups/ to list ExperimenterGroups."""
 
     OMERO_TYPE = 'ExperimenterGroup'
 
     # Urls to add to marshalled object. See ProjectsView for more details
     urls = {
-        'url:experimentergroup': {'name': 'api_group',
+        'url:experimentergroup': {'name': 'api_experimentergroup',
                                   'kwargs': {'object_id': 'OBJECT_ID'}},
-        'url:experimenters': {'name': 'api_group_experimenters',
+        'url:experimenters': {'name': 'api_experimentergroup_experimenters',
                               'kwargs': {'group_id': 'OBJECT_ID'}},
     }
 
