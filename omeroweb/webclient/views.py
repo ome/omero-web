@@ -4370,16 +4370,14 @@ def chown(request, conn=None, **kwargs):
     owner_id = getIntOrDefault(request, 'owner_id', None)
     if owner_id is None:
         return JsonResponse({'Error': "chown: No owner_id specified"})
-    owner_id = long(owner_id)
+    owner_id = int(owner_id)
     exp = conn.getObject("Experimenter", owner_id)
     if exp is None:
         return JsonResponse({'Error': "chown: Experimenter not found" % 
                              owner_id})
 
-    # Context must be set to owner of data, E.g. to create links.
-    conn.SERVICE_OPTS.setOmeroUser(owner_id)
-
     dtypes = ["Project", "Dataset", "Image", "Screen", "Plate"]
+    jobIds = []
     for dtype in dtypes:
         # Get all requested objects of this type
         oids = request.POST.get(dtype, None)
@@ -4387,8 +4385,9 @@ def chown(request, conn=None, **kwargs):
             obj_ids = [int(oid) for oid in oids.split(",")]
             logger.debug(
                 "chown to owner:%s %s-%s" % (owner_id, dtype, obj_ids))
-            handle = conn.chgrpObjects(dtype, obj_ids, owner_id)
+            handle = conn.chownObjects(dtype, obj_ids, owner_id, wait=True)
             jobId = str(handle)
+            jobIds.append(jobId)
             request.session['callback'][jobId] = {
                 'job_type': "chown",
                 'owner': exp.getFullName(),
@@ -4400,7 +4399,7 @@ def chown(request, conn=None, **kwargs):
                 'status': 'in progress'}
             request.session.modified = True
 
-    return JsonResponse({'jobId': jobId})
+    return JsonResponse({'jobIds': jobIds})
 
 
 @login_required(setGroupContext=True)
