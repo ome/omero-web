@@ -43,17 +43,21 @@
             $("<input name='"+ dtype +"' value='"+ dids +"'/>")
                 .appendTo($chownform).hide();
         }
+        var datatree = $.jstree.reference('#dataTree');
+        var dataOwners = datatree.get_selected(true).map(function(s){return s.data.obj.ownerId});
 
         // Need to find users we can move selected objects to.
-        // Object owner must be member of target group.
+        // Object owner must be member of current group.
         var gid = WEBCLIENT.active_group_id;
         var url = WEBCLIENT.URLS.api_base + "m/experimentergroups/" + gid + "/experimenters/";
         $.getJSON(url, function(data) {
-            // Other group members (ignore current user)
-            var userId = WEBCLIENT.USER.id;
-            var exps = data.data.filter(function(exp){
-                return exp['@id'] != userId;
-            });
+            // Other group members (ignore current owner if just 1)
+            var exps = data.data;
+            if (dataOwners.length === 1) {
+                exps = exps.filter(function(exp){
+                    return exp['@id'] != dataOwners[0];
+                });
+            }
             // List the target users...
             var html = exps.map(function(exp) {
                 return "<label><input name='owner_id' type='radio' value='" + exp['@id'] + "'/>" + exp.FirstName + " " + exp.LastName + "</label><br/>";
