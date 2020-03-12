@@ -94,84 +94,22 @@
     $chownform.ajaxForm({
         beforeSubmit: function(data, $form){
             // Don't submit if we haven't populated the form with users etc.
-            console.log('beforeSubmit', data);
             if (data.length === 0) {
                 OME.alert_dialog("Please choose target user.");
                 return false;
             }
         },
         success: function(data) {
-            // var inst = $.jstree.reference('#dataTree');
-            // var remove = data.update.remove;
-            // var childless = data.update.childless;
-
-            // var removalClosure = [];
-            // var unremovedParentClosure;
-            // var removeType = function(type, ids) {
-            //     $.each(ids, function(index, id) {
-            //         var removeLocated = inst.locate_node(type + '-' + id);
-            //         if (removeLocated) {
-            //             $.each(removeLocated, function(index, val) {
-            //                 if (unremovedParentClosure !== undefined &&
-            //                     val.id === unremovedParentClosure.id) {
-            //                     // The new selection is also to be deleted, so select its parent
-            //                     unremovedParentClosure = inst.get_node(inst.get_parent(val));
-            //                 }
-            //                 else if (inst.is_selected(val)) {
-            //                     // This node was selected, mark its parent to be selected instead
-            //                     unremovedParentClosure = inst.get_node(inst.get_parent(val));
-            //                 }
-            //             // Accumulate nodes for deletion so the new selection can occur before delete
-            //             removalClosure.push(val);
-            //             });
-            //         }
-            //     });
-            // };
-
-            // // Find and remove
-            // // This is done in a specific order so that the correct node can be selected
-            // var typeOrder = ['image', 'acquisition', 'dataset', 'plate', 'project', 'screen'];
-            // $.each(typeOrder, function(index, type) {
-            //     if (remove.hasOwnProperty(type)) {
-            //         removeType(type, remove[type]);
-            //     }
-            // });
-
-            // // Select the closest parent that was not part of the chown
-            // inst.deselect_all(true);
-            // inst.select_node(unremovedParentClosure);
-
-            // // Update the central panel in case chown removes an icon
-            // $.each(removalClosure, function(index, node) {
-            //     inst.delete_node(node);
-            //     var e = {'type': 'delete_node'};
-            //     var data = {'node': node,
-            //                 'old_parent': inst.get_parent(node)};
-            //     update_thumbnails_panel(e, data);
-            // });
-
-            // function markChildless(ids, dtype) {
-            //     $.each(ids, function(index, id) {
-            //         var childlessLocated = inst.locate_node(property + '-' + id);
-            //         // If some nodes were found, make them childless
-            //         if (childlessLocated) {
-            //             $.each(childlessLocated, function(index, node) {
-            //                 node.state.loaded = true;
-            //                 inst.redraw_node(node);
-            //             });
-
-            //         }
-            //     });
-            // }
-
-            // // Find and mark childless
-            // for (var property in childless) {
-            //     if (childless.hasOwnProperty(property)) {
-            //         markChildless(childless[property], property);
-            //     }
-
-            // }
-
+            // If we're viewing 'All Members' we don't need to change anything in the tree
+            if (WEBCLIENT.active_user.id != -1) {
+                // Otherwise, we need to remove selected nodes
+                var inst = $.jstree.reference('#dataTree');
+                inst.get_selected(true).forEach(function(node){
+                    console.log('delete', node);
+                    inst.delete_node(node);
+                });
+            }
+            $chownform.dialog( "close" );
             OME.showActivities();
         }
     });
