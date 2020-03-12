@@ -3336,8 +3336,8 @@ def activities(request, conn=None, **kwargs):
 
         request.session.modified = True
 
-        # update chgrp
-        if job_type == 'chgrp':
+        # update chgrp / chown
+        if job_type in ('chgrp', 'chown'):
             if status not in ("failed", "finished"):
                 rsp = None
                 try:
@@ -3355,8 +3355,8 @@ def activities(request, conn=None, **kwargs):
                                 rsp_params = ", ".join(
                                     ["%s: %s" % (k, v) for k, v in
                                      rsp.parameters.items()])
-                                logger.error("chgrp failed with: %s"
-                                             % rsp_params)
+                                logger.error("%s failed with: %s"
+                                             % (job_type, rsp_params))
                                 update_callback(
                                     request, cbString,
                                     status="failed",
@@ -3372,7 +3372,8 @@ def activities(request, conn=None, **kwargs):
                         prx.close(close_handle)
                 except Exception:
                     logger.info(
-                        "Activities chgrp handle not found: %s" % cbString)
+                        "Activities %s handle not found: %s"
+                        % (job_type, cbString))
                     continue
         elif job_type == 'send_email':
             if status not in ("failed", "finished"):
@@ -4385,7 +4386,7 @@ def chown(request, conn=None, **kwargs):
             obj_ids = [int(oid) for oid in oids.split(",")]
             logger.debug(
                 "chown to owner:%s %s-%s" % (owner_id, dtype, obj_ids))
-            handle = conn.chownObjects(dtype, obj_ids, owner_id, wait=True)
+            handle = conn.chownObjects(dtype, obj_ids, owner_id)
             jobId = str(handle)
             jobIds.append(jobId)
             request.session['callback'][jobId] = {
