@@ -755,8 +755,8 @@ class ExperimentersView(ObjectsView):
     def get_opts(self, request, **kwargs):
         """Add extra parameters to the opts dict."""
         opts = super(ExperimentersView, self).get_opts(request, **kwargs)
-        # Default 'load_groups' is True for 5.3.x, but we don't need groups
-        opts['load_groups'] = False
+        # Default 'load_experimentergroups' is True, but we don't need groups
+        opts['load_experimentergroups'] = False
         # order_by lastName, firstName
         opts['order_by'] = 'lower(obj.lastName), lower(obj.firstName)'
 
@@ -788,7 +788,7 @@ class ExperimenterGroupsView(ObjectsView):
     def get_opts(self, request, **kwargs):
         """Add extra parameters to the opts dict."""
         opts = super(ExperimenterGroupsView, self).get_opts(request, **kwargs)
-        # Default 'load_experimenters' = True for 5.3.x, but we don't want them
+        # Default 'load_experimenters' = True, but we don't want them
         opts['load_experimenters'] = False
         # order_by group name
         opts['order_by'] = 'lower(obj.name)'

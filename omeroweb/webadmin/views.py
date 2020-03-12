@@ -101,7 +101,7 @@ def prepare_experimenter(conn, eid=None):
     if eid is None:
         eid = conn.getEventContext().userId
     experimenter = conn.getObject("Experimenter", eid,
-                                  opts={'load_groups': True})
+                                  opts={'load_experimentergroups': True})
     defaultGroup = experimenter.getDefaultGroup()
     otherGroups = list(experimenter.getOtherGroups())
     hasAvatar = conn.hasExperimenterPhoto()
@@ -393,7 +393,7 @@ def experimenters(request, conn=None, **kwargs):
     template = "webadmin/experimenters.html"
 
     experimenterList = list(conn.getObjects("Experimenter",
-                                            opts={'load_groups': True}))
+                                            opts={'load_experimentergroups': True}))
     can_modify_user = 'ModifyUser' in conn.getCurrentAdminPrivileges()
 
     context = {'experimenterList': experimenterList,
