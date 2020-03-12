@@ -1,3 +1,8 @@
+5.6.3 (March 2020)
+------------------
+
+- `omero.web.root_application`: allow "/" to be overridden ([#123](https://github.com/ome/omero-web/pull/123))
+
 5.6.2 (February 2020)
 ---------------------
 
