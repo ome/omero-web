@@ -4374,7 +4374,7 @@ def chown(request, conn=None, **kwargs):
     owner_id = int(owner_id)
     exp = conn.getObject("Experimenter", owner_id)
     if exp is None:
-        return JsonResponse({'Error': "chown: Experimenter not found" % 
+        return JsonResponse({'Error': "chown: Experimenter not found" %
                              owner_id})
 
     dtypes = ["Project", "Dataset", "Image", "Screen", "Plate"]
