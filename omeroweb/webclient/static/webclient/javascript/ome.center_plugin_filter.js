@@ -129,6 +129,7 @@ MapAnnFilter.prototype.isImageVisible = function(iid) {
     } else if (this.keyisNumber) {
         let cutoff = parseFloat(text);
         this.currentKeyValues[iid].forEach(function(v){
+            v = parseFloat(v);
             // compare: more, less, moreequal, lessequal, equal
             if (v == cutoff && this.moreLess.indexOf('equal') > -1) {
                 visible = true;
@@ -171,13 +172,10 @@ MapAnnFilter.prototype.loadAnnotations = function(callback) {
                     // If not, make sure ALL are strings
                     if (isNaN(parseFloat(val))) {
                         prev[key].type = 'string';
-                        for (i in prev[key].values) {
-                            prev[key].values[i] = prev[key].values[i].map(function(v){return v + ""});
-                        }
                     } else {
-                        val = parseFloat(val);
-                        prev[key].min = Math.min(val, prev[key].min);
-                        prev[key].max = Math.max(val, prev[key].max);
+                        var num = parseFloat(val);
+                        prev[key].min = Math.min(num, prev[key].min);
+                        prev[key].max = Math.max(num, prev[key].max);
                     }
                 }
                 if (!prev[key].values[iid]) {
