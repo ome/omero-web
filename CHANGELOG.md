@@ -2,6 +2,7 @@
 ------------------
 
 - `omero.web.root_application`: allow "/" to be overridden ([#123](https://github.com/ome/omero-web/pull/123))
+- Close sessions where user is anonymous but `is_valid_public_url` is false ([#151](https://github.com/ome/omero-web/pull/151))
 
 5.6.2 (February 2020)
 ---------------------
