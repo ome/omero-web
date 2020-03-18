@@ -50,7 +50,7 @@ from omero.gateway.utils import toBoolean
 from django.conf import settings
 from django.template import loader as template_loader
 from django.http import Http404, HttpResponse, HttpResponseRedirect, \
-    JsonResponse
+    JsonResponse, HttpResponseForbidden
 from django.http import HttpResponseServerError, HttpResponseBadRequest
 from django.utils.http import urlencode
 from django.core.urlresolvers import reverse
@@ -629,6 +629,9 @@ def api_container_list(request, conn=None, **kwargs):
     # parents), screens and plates (without parents). This is fine for
     # the first page, but the second page may not be what is expected.
 
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
+
     r = dict()
     try:
         # Get the projects
@@ -704,6 +707,9 @@ def api_dataset_list(request, conn=None, **kwargs):
     except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
 
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
+
     try:
         # Get the datasets
         datasets = tree.marshal_datasets(conn=conn,
@@ -747,6 +753,9 @@ def api_image_list(request, conn=None, **kwargs):
     except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
 
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
+
     # Share ID is in kwargs from api/share_images/<id>/ which will create
     # a share connection in @login_required.
     # We don't support ?share_id in query string since this would allow a
@@ -786,6 +795,9 @@ def api_plate_list(request, conn=None, **kwargs):
         screen_id = get_long_or_default(request, 'id', None)
     except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
+
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
 
     try:
         # Get the plates
