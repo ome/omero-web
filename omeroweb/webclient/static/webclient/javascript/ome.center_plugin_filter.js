@@ -51,6 +51,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
             let min = this.usedKeyValues[this.currentFilterKey].min;
             let max = this.usedKeyValues[this.currentFilterKey].max;
             placeholder = min + '-' + max;
+            $(".filter_map_value", $filter).autocomplete({disabled: true})
         } else {
             var autocompVals = [];
             for (var values of Object.values(this.currentKeyValues)) {
@@ -63,6 +64,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
             autocompVals.sort();
             var self = this;
             $(".filter_map_value", $filter).autocomplete({
+                disabled: false,
                 source: autocompVals,
                 select: function( event, ui ) {
                     self.filterText = ui.item.value;
