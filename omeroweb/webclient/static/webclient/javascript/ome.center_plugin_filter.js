@@ -84,7 +84,17 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
     }.bind(this));
 
     $(".filter_map_value", $filter).on('input', function(event){
-        this.filterText = $(event.target).val();
+        var val = $(event.target).val();
+        if (this.keyisNumber) {
+            // remove non-number characters
+            val = val.replace(/[a-zA-Z]/g, '');
+            $(event.target).val(val);
+            if (isNaN(val)) {
+                val = '';
+            }
+        }
+        this.filterText = val;
+
         if (callback) {
             callback();
         }
