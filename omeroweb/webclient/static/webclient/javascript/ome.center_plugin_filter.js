@@ -86,8 +86,8 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
     $(".filter_map_value", $filter).on('input', function(event){
         var val = $(event.target).val();
         if (this.keyisNumber) {
-            // remove non-number characters
-            val = val.replace(/[a-zA-Z]/g, '');
+            // remove non-number characters. Allow . or - or 0-9
+            val = val.split("").filter(function(c){c = c.charCodeAt(); return c == 45 || c == 46 || (c > 47 && c < 58)}).join('');
             $(event.target).val(val);
             if (isNaN(val)) {
                 val = '';
