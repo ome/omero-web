@@ -392,8 +392,8 @@ def logout(request, **kwargs):
 def experimenters(request, conn=None, **kwargs):
     template = "webadmin/experimenters.html"
 
-    experimenterList = list(conn.getObjects("Experimenter",
-                                            opts={'load_experimentergroups': True}))
+    experimenterList = list(conn.getObjects(
+        "Experimenter", opts={'load_experimentergroups': True}))
     can_modify_user = 'ModifyUser' in conn.getCurrentAdminPrivileges()
 
     context = {'experimenterList': experimenterList,
