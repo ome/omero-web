@@ -17,7 +17,8 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
             '<option value="equal">=</option>' +
         '</select>' +
         '<input class="filter_map_value" style="float:left; margin:2px; position:relative" />' +
-        '<span title="Remove filter" class="removefilter" style="float:left">X</span>' +
+        '<span class="filter_map_units" style="float:left; margin: 5px; font-size: 12px"></span>' +
+        '<span title="Remove filter" class="removefilter" style="float:left; margin-left:5px">X</span>' +
     '</div>');
 
     $element.append($filter);
@@ -33,11 +34,17 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
         } else {
             this.currentKeyValues = this.usedKeyValues[this.currentFilterKey].values;
             this.keyisNumber = this.usedKeyValues[this.currentFilterKey].type === 'number';
+            this.keyUnits = this.usedKeyValues[this.currentFilterKey].units;
         }
         if (this.keyisNumber) {
             $(".map_more_less", $filter).show();
         } else {
             $(".map_more_less", $filter).hide();
+        }
+        if (!this.keyUnits) {
+            $(".filter_map_units", $filter).text("");
+        } else {
+            $(".filter_map_units", $filter).text(this.keyUnits.escapeHTML());
         }
         var placeholder = 'filter text';
         if (this.keyisNumber) {
@@ -165,15 +172,35 @@ MapAnnFilter.prototype.loadAnnotations = function(callback) {
                 if (val.length == 0) continue;
 
                 if (!prev[key]) {
-                    prev[key] = {values: {}, type: 'number', min: Infinity, max: -Infinity};
+                    prev[key] = {
+                        values: {},
+                        type: 'number',
+                        units: undefined,   // just a suffix e.g 'mM' for 10mM
+                        min: Infinity,
+                        max: -Infinity,
+                    };
                 }
                 // if type is NOT string, check if val is a number...
                 if (prev[key].type !== 'string') {
-                    // If not, make sure ALL are strings
-                    if (isNaN(parseFloat(val))) {
+                    // If 'units' are defined, value must be number+units
+                    var num = undefined;
+                    if (prev[key].units != undefined) {
+                        let digits = val.replace(prev[key].units, '');
+                        if (isNaN(digits) || isNaN(parseFloat(val))) {
+                            prev[key].type = 'string';
+                            prev[key].units = undefined
+                        } else {
+                            num = parseFloat(val);
+                        }
+                    } else if (isNaN(parseFloat(val))) {
                         prev[key].type = 'string';
                     } else {
-                        var num = parseFloat(val);
+                        // it is a number - need to set units
+                        num = parseFloat(val);
+                        prev[key].units = val.replace(num, '').trim();   // '10 mM' -> 'mM'
+                    }
+                    // update min/max
+                    if (num != undefined) {
                         prev[key].min = Math.min(num, prev[key].min);
                         prev[key].max = Math.max(num, prev[key].max);
                     }
