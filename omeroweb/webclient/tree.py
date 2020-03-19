@@ -26,7 +26,6 @@ from past.utils import old_div
 
 from omero.rtypes import rlong, unwrap, wrap
 from django.conf import settings
-from django.http import Http404
 from datetime import datetime
 from copy import deepcopy
 from omero.gateway import _letterGridLabel
@@ -166,9 +165,6 @@ def _marshal_experimenter(conn, row):
     experimenter['omeName'] = unwrap_to_str(ome_name)
     experimenter['firstName'] = unwrap_to_str(first_name)
     experimenter['lastName'] = unwrap_to_str(last_name)
-    # Email is not mandatory
-    if email:
-        experimenter['email'] = unwrap_to_str(email)
     return experimenter
 
 
@@ -254,18 +250,31 @@ def marshal_experimenter(conn, experimenter_id):
 
     params.add('id', rlong(experimenter_id))
     qs = conn.getQueryService()
+
+    join_clause = ''
+    where_clause = ''
+    if not conn.isAdmin():
+        group_ids = conn.getEventContext().memberOfGroups
+        user_gid = conn.getAdminService().getSecurityRoles().userGroupId
+        if user_gid in group_ids:
+            group_ids.remove(user_gid)
+        params.addIds(group_ids)
+        join_clause = "join experimenter.groupExperimenterMap gem"
+        where_clause = "and gem.parent.id in :ids"
     q = """
-        select experimenter.id,
+        select distinct experimenter.id,
                experimenter.omeName,
                experimenter.firstName,
                experimenter.lastName,
                experimenter.email
         from Experimenter experimenter
+        %s
         where experimenter.id = :id
-        """
+        %s
+        """ % (join_clause, where_clause)
     rows = qs.projection(q, params, service_opts)
     if len(rows) != 1:
-        raise Http404("No Experimenter found with ID %s" % experimenter_id)
+        return None
     return _marshal_experimenter(conn, rows[0][0:5])
 
 

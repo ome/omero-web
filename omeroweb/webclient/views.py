@@ -562,31 +562,6 @@ def api_group_list(request, conn=None, **kwargs):
 
 
 @login_required()
-def api_experimenter_list(request, conn=None, **kwargs):
-    # Get parameters
-    try:
-        page = get_long_or_default(request, 'page', 1)
-        limit = get_long_or_default(request, 'limit', settings.PAGE)
-        group_id = get_long_or_default(request, 'group', -1)
-    except ValueError:
-        return HttpResponseBadRequest('Invalid parameter value')
-
-    try:
-        # Get the experimenters
-        experimenters = tree.marshal_experimenters(conn=conn,
-                                                   group_id=group_id,
-                                                   page=page,
-                                                   limit=limit)
-        return JsonResponse({'experimenters': experimenters})
-    except ApiUsageException as e:
-        return HttpResponseBadRequest(e.serverStackTrace)
-    except ServerError as e:
-        return HttpResponseServerError(e.serverStackTrace)
-    except IceException as e:
-        return HttpResponseServerError(e.message)
-
-
-@login_required()
 def api_experimenter_detail(request, experimenter_id, conn=None, **kwargs):
     # Validate parameter
     try:
@@ -602,6 +577,9 @@ def api_experimenter_detail(request, experimenter_id, conn=None, **kwargs):
             # Get the experimenter
             experimenter = tree.marshal_experimenter(
                 conn=conn, experimenter_id=experimenter_id)
+            if experimenter is None:
+                raise Http404("No Experimenter found with ID %s"
+                              % experimenter_id)
         return JsonResponse({'experimenter': experimenter})
 
     except ApiUsageException as e:
