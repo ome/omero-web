@@ -443,7 +443,7 @@ def render_roi_thumbnail(request, roiId, w=None, h=None, conn=None, **kwargs):
         default_z = image.getDefaultZ()
         # find shapes on default Z/T plane
         def_shapes = [s for s in shapes if unwrap(s.getTheT()) is None
-                  or unwrap(s.getTheT()) == default_t]
+                      or unwrap(s.getTheT()) == default_t]
         if len(def_shapes) == 1:
             shape = def_shapes[0]
         else:
