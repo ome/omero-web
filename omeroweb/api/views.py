@@ -437,7 +437,7 @@ class ObjectsView(ApiView):
     def get(self, request, conn=None, **kwargs):
         """GET a list of Projects, filtering by various request parameters."""
         opts = self.get_opts(request, **kwargs)
-        group = getIntOrDefault(request, 'experimentergroup', -1)
+        group = getIntOrDefault(request, 'group', -1)
         normalize = request.GET.get('normalize', False) == 'true'
         # Get the data
         marshalled = query_objects(conn, self.OMERO_TYPE, group,
