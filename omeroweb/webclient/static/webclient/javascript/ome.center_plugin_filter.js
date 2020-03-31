@@ -6,7 +6,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
     this.moreLess = "more";
     this.filterObjects = filterObjects;
 
-    var $filter = $('<div class="imagefilter filtersearch">' +
+    var $filter = $('<div class="imagefilter filtersearch" style="width:100%">' +
         '<select class="choose_map_key">' +
         '</select>' +
         '<select class="map_more_less" style="width: 40px; display:none">' +
