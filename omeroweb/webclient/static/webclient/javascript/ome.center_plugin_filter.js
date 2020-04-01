@@ -160,7 +160,7 @@ MapAnnFilter.prototype.isImageVisible = function(iid) {
         }.bind(this));
     } else {
         this.currentKeyValues[iid].forEach(function(v){
-            if (v.toLowerCase().indexOf(text.toLowerCase()) > -1) {
+            if (v.indexOf(text) > -1) {
                 visible = true;
             }
         });
