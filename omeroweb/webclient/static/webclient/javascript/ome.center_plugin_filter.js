@@ -194,20 +194,24 @@ MapAnnFilter.prototype.loadAnnotations = function(callback) {
                 }
                 // if type is NOT string, check if val is a number...
                 if (prev[key].type !== 'string') {
-                    // If 'units' are defined, value must be number+units
+                    // If 'units' are a string (not empty), value must be number+units
                     var num = undefined;
-                    if (prev[key].units != undefined) {
+                    if (prev[key].units) {
+                        // We remove units and strictly check it's a number...
                         let digits = val.replace(prev[key].units, '');
                         if (isNaN(digits) || isNaN(parseFloat(val))) {
+                            // If not - we treat data as a string
                             prev[key].type = 'string';
                             prev[key].units = undefined
                         } else {
                             num = parseFloat(val);
                         }
+                    // We haven't defined units yet... Check if NaN
                     } else if (isNaN(parseFloat(val))) {
+                        // Can't cast to a number - bail!
                         prev[key].type = 'string';
                     } else {
-                        // it is a number - need to set units
+                        // it IS a number - and we don't have any units yet...
                         num = parseFloat(val);
                         prev[key].units = val.replace(num, '').trim();   // '10 mM' -> 'mM'
                     }
