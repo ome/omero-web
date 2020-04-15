@@ -2716,6 +2716,8 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
 
     elif action == 'edit':
         # form for editing Shares only
+        if o_id is None:
+            raise Http404("No share ID")
         if o_type == "share" and int(o_id) > 0:
             template = "webclient/public/share_form.html"
             manager.getMembers(o_id)
