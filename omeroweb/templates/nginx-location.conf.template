@@ -26,6 +26,7 @@ location %(STATIC_URL)s {
 }
 
 location @proxy_to_app%(PREFIX_NAME)s {
+    error_page 502 =502 @maintenance%(PREFIX_NAME)s;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header Host $http_host;
@@ -37,7 +38,7 @@ location @proxy_to_app%(PREFIX_NAME)s {
 
 location %(FORCE_SCRIPT_NAME)s {
 
-    error_page 502 @maintenance%(PREFIX_NAME)s;
+    error_page 502 =502 @maintenance%(PREFIX_NAME)s;
     # checks for static file, if not found proxy to app
     try_files $uri @proxy_to_app%(PREFIX_NAME)s;
 }
