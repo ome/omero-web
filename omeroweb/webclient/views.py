@@ -34,6 +34,7 @@ import re
 import sys
 import warnings
 from past.builtins import unicode
+from future.utils import bytes_to_native_str
 
 from io import StringIO
 from time import time
@@ -911,7 +912,11 @@ def api_links(request, conn=None, **kwargs):
             {'Error': 'Need to POST or DELETE JSON data to update links'},
             status=405)
     # Handle link creation/deletion
-    json_data = json.loads(request.body)
+    try:
+        json_data = json.loads(request.body)
+    except TypeError:
+        # for Python 3.5
+        json_data = json.loads(bytes_to_native_str(request.body))
 
     if request.method == 'POST':
         return _api_links_POST(conn, json_data)
