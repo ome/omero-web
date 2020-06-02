@@ -1566,8 +1566,11 @@ def get_thumbnails_json(request, w=None, conn=None, **kwargs):
     @param w:           Thumbnail max width. 96 by default
     @return:            http response containing base64 encoded thumbnails
     """
+    server_settings = request.session.get('server_settings', {}) \
+                                     .get('browser', {})
+    defaultSize = server_settings.get('thumb_default_size', 96)
     if w is None:
-        w = 96
+        w = defaultSize
     image_ids = get_longs(request, 'id')
     image_ids = list(set(image_ids))    # remove any duplicates
     # If we only have a single ID, simply use getThumbnail()
