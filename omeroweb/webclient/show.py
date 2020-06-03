@@ -452,7 +452,7 @@ def get_image_ids(conn, datasetId=None, groupId=-1, ownerId=None):
 def paths_to_object(conn, experimenter_id=None, project_id=None,
                     dataset_id=None, image_id=None, screen_id=None,
                     plate_id=None, acquisition_id=None, well_id=None,
-                    group_id=None, page_size=None):
+                    group_id=None, page_size=None, roi_id=None):
     """
     Retrieves the parents of an object (E.g. P/D/I for image) as a list
     of paths.
@@ -501,6 +501,10 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
     if dataset_id is not None:
         params.add('did', rlong(dataset_id))
         lowest_type = 'dataset'
+    if roi_id is not None:
+        roi = conn.getObject('Roi', roi_id)
+        if roi is not None:
+            image_id = roi.image.id
     if image_id is not None:
         params.add('iid', rlong(image_id))
         lowest_type = 'image'
@@ -628,6 +632,11 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     'type': 'image',
                     'id': imageId
                 })
+                if roi_id is not None:
+                    path.append({
+                        'type': 'roi',
+                        'id': roi_id
+                    })
                 paths.append(path)
 
     elif lowest_type == 'dataset':
