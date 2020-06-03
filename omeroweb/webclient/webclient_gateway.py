@@ -908,7 +908,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             links = exp._getAnnotationLinks()
             # there should be only one ExperimenterAnnotationLink
             # but if there is more then one all of them should be deleted.
-            linkIds = [l.id.val for l in links]
+            linkIds = [link.id.val for link in links]
             self.deleteObjects(
                 "ExperimenterAnnotationLink", linkIds, wait=True)
             # No error handling?
@@ -1424,8 +1424,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             admin_serv.addGroups(e, [group._obj])
         for e in to_remove:
             # Experimenter needs to stay in at least 1 non-user group
-            gs = [l.parent.id.val for l in e.copyGroupExperimenterMap()
-                  if l.parent.id.val != userGid]
+            gs = [link.parent.id.val for link in e.copyGroupExperimenterMap()
+                  if link.parent.id.val != userGid]
             if len(gs) == 1:
                 failures.append(ExperimenterWrapper(self, e))
                 continue

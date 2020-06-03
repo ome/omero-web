@@ -684,9 +684,9 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
         # doesn't support 'width' of line
         # draw.polygon(resizedXY, outline=lineColour)
         x2 = y2 = None
-        for l in range(1, len(resizedXY)):
-            x1, y1 = resizedXY[l-1]
-            x2, y2 = resizedXY[l]
+        for line in range(1, len(resizedXY)):
+            x1, y1 = resizedXY[line-1]
+            x2, y2 = resizedXY[line]
             draw.line((x1, y1, x2, y2), fill=lineColour, width=2)
         start_x, start_y = resizedXY[0]
         if shape['type'] != 'PolyLine':
@@ -1957,13 +1957,13 @@ def listLuts_json(request, conn=None, **kwargs):
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
     rv = []
-    for l in luts:
-        lut = l.path.val + l.name.val
-        png_index = LUTS_IN_PNG.index(lut) if lut in LUTS_IN_PNG else -1
-        rv.append({'id': l.id.val,
-                   'path': l.path.val,
-                   'name': l.name.val,
-                   'size': unwrap(l.size),
+    for lut in luts:
+        lutsrc = lut.path.val + lut.name.val
+        png_index = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
+        rv.append({'id': lut.id.val,
+                   'path': lut.path.val,
+                   'name': lut.name.val,
+                   'size': unwrap(lut.size),
                    'png_index': png_index,
                    })
     rv.sort(key=lambda x: x['name'].lower())
@@ -2770,7 +2770,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 
     data = []
     # Process all annotations from all objects...
-    links = [l for obj in objs for l in obj.copyAnnotationLinks()]
+    links = [link for obj in objs for link in obj.copyAnnotationLinks()]
     for link in links:
         annotation = link.child
         if not isinstance(annotation, omero.model.FileAnnotation):

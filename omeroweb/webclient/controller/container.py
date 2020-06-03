@@ -345,10 +345,10 @@ class BaseContainer(BaseController):
         figureScripts.append(makeMovie)
         return figureScripts
 
-    def formatMetadataLine(self, l):
-        if len(l) < 1:
+    def formatMetadataLine(self, line):
+        if len(line) < 1:
             return None
-        return l.split("=")
+        return line.split("=")
 
     def companionFiles(self):
         # Look for companion files on the Image
@@ -604,9 +604,9 @@ class BaseContainer(BaseController):
             try:
                 self.conn.saveArray(new_links)
             except omero.ValidationException:
-                for l in new_links:
+                for link in new_links:
                     try:
-                        self.conn.saveObject(l)
+                        self.conn.saveObject(link)
                     except Exception:
                         pass
         return ann.getId()
@@ -675,7 +675,8 @@ class BaseContainer(BaseController):
                 links = self.conn.getAnnotationLinks(
                     parent_type, parent_ids=parent_ids, ann_ids=tids,
                     params=params)
-                pcLinks = [(l.parent.id.val, l.child.id.val) for l in links]
+                pcLinks = [(link.parent.id.val, link.child.id.val)
+                           for link in links]
                 # Create link between each object and annotation
                 for obj in self.conn.getObjects(parent_type, parent_ids):
                     parent_objs.append(obj)
@@ -694,11 +695,11 @@ class BaseContainer(BaseController):
             saved_links = self.conn.getUpdateService().saveAndReturnArray(
                 new_links, self.conn.SERVICE_OPTS)
         except omero.ValidationException:
-            for l in new_links:
+            for link in new_links:
                 try:
                     saved_links.append(
                         self.conn.getUpdateService().saveAndReturnObject(
-                            l, self.conn.SERVICE_OPTS))
+                            link, self.conn.SERVICE_OPTS))
                 except Exception:
                     failed += 1
 
