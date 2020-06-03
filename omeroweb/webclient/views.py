@@ -34,6 +34,7 @@ import re
 import sys
 import warnings
 from past.builtins import unicode
+from future.utils import bytes_to_native_str
 
 from io import StringIO
 from time import time
@@ -50,7 +51,7 @@ from omero.gateway.utils import toBoolean
 from django.conf import settings
 from django.template import loader as template_loader
 from django.http import Http404, HttpResponse, HttpResponseRedirect, \
-    JsonResponse
+    JsonResponse, HttpResponseForbidden
 from django.http import HttpResponseServerError, HttpResponseBadRequest
 from django.utils.http import urlencode
 from django.core.urlresolvers import reverse
@@ -563,31 +564,6 @@ def api_group_list(request, conn=None, **kwargs):
 
 
 @login_required()
-def api_experimenter_list(request, conn=None, **kwargs):
-    # Get parameters
-    try:
-        page = get_long_or_default(request, 'page', 1)
-        limit = get_long_or_default(request, 'limit', settings.PAGE)
-        group_id = get_long_or_default(request, 'group', -1)
-    except ValueError:
-        return HttpResponseBadRequest('Invalid parameter value')
-
-    try:
-        # Get the experimenters
-        experimenters = tree.marshal_experimenters(conn=conn,
-                                                   group_id=group_id,
-                                                   page=page,
-                                                   limit=limit)
-        return JsonResponse({'experimenters': experimenters})
-    except ApiUsageException as e:
-        return HttpResponseBadRequest(e.serverStackTrace)
-    except ServerError as e:
-        return HttpResponseServerError(e.serverStackTrace)
-    except IceException as e:
-        return HttpResponseServerError(e.message)
-
-
-@login_required()
 def api_experimenter_detail(request, experimenter_id, conn=None, **kwargs):
     # Validate parameter
     try:
@@ -603,6 +579,9 @@ def api_experimenter_detail(request, experimenter_id, conn=None, **kwargs):
             # Get the experimenter
             experimenter = tree.marshal_experimenter(
                 conn=conn, experimenter_id=experimenter_id)
+            if experimenter is None:
+                raise Http404("No Experimenter found with ID %s"
+                              % experimenter_id)
         return JsonResponse({'experimenter': experimenter})
 
     except ApiUsageException as e:
@@ -629,6 +608,9 @@ def api_container_list(request, conn=None, **kwargs):
     # will actually get the limit for projects, datasets (without
     # parents), screens and plates (without parents). This is fine for
     # the first page, but the second page may not be what is expected.
+
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
 
     r = dict()
     try:
@@ -705,6 +687,9 @@ def api_dataset_list(request, conn=None, **kwargs):
     except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
 
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
+
     try:
         # Get the datasets
         datasets = tree.marshal_datasets(conn=conn,
@@ -748,6 +733,9 @@ def api_image_list(request, conn=None, **kwargs):
     except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
 
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
+
     # Share ID is in kwargs from api/share_images/<id>/ which will create
     # a share connection in @login_required.
     # We don't support ?share_id in query string since this would allow a
@@ -787,6 +775,9 @@ def api_plate_list(request, conn=None, **kwargs):
         screen_id = get_long_or_default(request, 'id', None)
     except ValueError:
         return HttpResponseBadRequest('Invalid parameter value')
+
+    if not conn.isValidGroup(group_id):
+        return HttpResponseForbidden("Not a member of Group: %s" % group_id)
 
     try:
         # Get the plates
@@ -934,7 +925,11 @@ def api_links(request, conn=None, **kwargs):
             {'Error': 'Need to POST or DELETE JSON data to update links'},
             status=405)
     # Handle link creation/deletion
-    json_data = json.loads(request.body)
+    try:
+        json_data = json.loads(request.body)
+    except TypeError:
+        # for Python 3.5
+        json_data = json.loads(bytes_to_native_str(request.body))
 
     if request.method == 'POST':
         return _api_links_POST(conn, json_data)
@@ -987,9 +982,9 @@ def _api_links_POST(conn, json_data, **kwargs):
                         % len(linksToSave))
             # If this fails, e.g. ValidationException because link
             # already exists, try to save individual links
-            for l in linksToSave:
+            for link in linksToSave:
                 try:
-                    conn.saveObject(l)
+                    conn.saveObject(link)
                 except Exception:
                     pass
             response['success'] = True
@@ -1112,6 +1107,7 @@ def api_paths_to_object(request, conn=None, **kwargs):
         well_id = request.GET.get('well', None)
         tag_id = get_long_or_default(request, 'tag', None)
         tagset_id = get_long_or_default(request, 'tagset', None)
+        roi_id = get_long_or_default(request, 'roi', None)
         group_id = get_long_or_default(request, 'group', None)
         page_size = get_long_or_default(request, 'page_size', settings.PAGE)
     except ValueError:
@@ -1124,7 +1120,7 @@ def api_paths_to_object(request, conn=None, **kwargs):
         paths = paths_to_object(conn, experimenter_id, project_id,
                                 dataset_id, image_id, screen_id, plate_id,
                                 acquisition_id, well_id, group_id,
-                                page_size=page_size)
+                                page_size, roi_id)
     return JsonResponse({'paths': paths})
 
 
@@ -1921,14 +1917,14 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
 
                 lasers = list(instrument.getLightSources())
                 if len(lasers) > 0:
-                    for l in lasers:
+                    for laser in lasers:
                         lstypes = lasertypes
-                        if l.OMERO_CLASS == "Arc":
+                        if laser.OMERO_CLASS == "Arc":
                             lstypes = arctypes
-                        elif l.OMERO_CLASS == "Filament":
+                        elif laser.OMERO_CLASS == "Filament":
                             lstypes = filamenttypes
                         form_laser = MetadataLightSourceForm(initial={
-                            'lightSource': l,
+                            'lightSource': laser,
                             'lstypes': lstypes,
                             'mediums': list(
                                 conn.getEnumerationEntries("LaserMediumI")),
@@ -2740,7 +2736,9 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
 
     elif action == 'edit':
         # form for editing Shares only
-        if o_type == "share" and o_id > 0:
+        if o_id is None:
+            raise Http404("No share ID")
+        if o_type == "share" and int(o_id) > 0:
             template = "webclient/public/share_form.html"
             manager.getMembers(o_id)
             manager.getComments(o_id)
@@ -3185,12 +3183,12 @@ def download_placeholder(request, conn=None, **kwargs):
                               'size': f.getSize()})
             if len(fList) > 0:
                 fileLists.append(fList)
-        fileCount = sum([len(l) for l in fileLists])
+        fileCount = sum([len(fList) for fList in fileLists])
     else:
         # E.g. JPEG/PNG - 1 file per image
         fileCount = len(ids)
 
-    query = "&".join([i.replace("-", "=") for i in ids])
+    query = "&".join([_id.replace("-", "=") for _id in ids])
     download_url = download_url + "?" + query
     if format is not None:
         download_url = (download_url + "&format=%s"
@@ -3696,12 +3694,12 @@ def list_scripts(request, conn=None, **kwargs):
 
         ul = scriptMenu
         dirs = fullpath.split(os.path.sep)
-        for l, d in enumerate(dirs):
+        for li, d in enumerate(dirs):
             if len(d) == 0:
                 continue
             if d not in ul:
                 # if last component in path:
-                if l+1 == len(dirs):
+                if li+1 == len(dirs):
                     ul[d] = scriptId
                 else:
                     ul[d] = {}
@@ -3935,11 +3933,11 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             tagMap = {}
             for iId in imageIds:
                 linkMap[iId] = []
-            for l in tagLinks:
-                c = l.getChild()
+            for link in tagLinks:
+                c = link.getChild()
                 if c._obj.__class__ == omero.model.TagAnnotationI:
                     tagMap[c.id] = c
-                    linkMap[l.getParent().id].append(c)
+                    linkMap[link.getParent().id].append(c)
             imageTags = []
             for iId in imageIds:
                 imageTags.append({'id': iId, 'tags': linkMap[iId]})

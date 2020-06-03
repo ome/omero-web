@@ -84,6 +84,11 @@ specifying ``major``, ``minor`` or ``patch`` depending on whether the developmen
 
 Remember to ``git push`` all commits and tags.
 
+omero-web-docker
+^^^^^^^^^^^^^^^^
+
+Following ``omero-web`` release, need to update and release ``omero-web-docker``.
+
 License
 -------
 

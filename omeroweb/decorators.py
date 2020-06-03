@@ -337,6 +337,9 @@ class login_required(object):
             is_anonymous = connection.isAnonymous()
             logger.debug('Is anonymous? %s' % is_anonymous)
             if is_anonymous and not is_valid_public_url:
+                if connection.c is not None:
+                    logger.debug("Closing anonymous connection")
+                    connection.close(hard=False)
                 return None
         return connection
 
