@@ -148,6 +148,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 self._shareId = self.getEventContext().shareId
         return self._shareId
 
+    def isValidGroup(self, group_id):
+        ec = self.getEventContext()
+        return ec.isAdmin or group_id == -1 or group_id in ec.memberOfGroups
+
     ##############################################
     #    Session methods                         #
 
