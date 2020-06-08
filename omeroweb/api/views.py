@@ -753,7 +753,12 @@ class ExperimentersView(ObjectsView):
     }
 
     def get_opts(self, request, **kwargs):
-        """Add extra parameters to the opts dict."""
+        """
+        Add extra parameters to the opts dict for GET /experimenters/.
+
+        Query will order by lastName, firstName
+        Includes option to filter by group
+        """
         opts = super(ExperimentersView, self).get_opts(request, **kwargs)
         # Default 'load_experimentergroups' is True, but we don't need groups
         opts['load_experimentergroups'] = False
@@ -787,7 +792,11 @@ class ExperimenterGroupsView(ObjectsView):
     }
 
     def get_opts(self, request, **kwargs):
-        """Add extra parameters to the opts dict."""
+        """
+        Add extra parameters to the opts dict.
+
+        Query will order Groups by name
+        """
         opts = super(ExperimenterGroupsView, self).get_opts(request, **kwargs)
         # Default 'load_experimenters' = True, but we don't want them
         opts['load_experimenters'] = False
