@@ -705,8 +705,11 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
 
     rv = BytesIO()
     compression = 0.9
-    img.save(rv, 'jpeg', quality=int(compression*100))
-    jpeg = rv.getvalue()
+    try:
+        img.save(rv, 'jpeg', quality=int(compression*100))
+        jpeg = rv.getvalue()
+    finally:
+        rv.close()
     return HttpResponse(jpeg, content_type='image/jpeg')
 
 
