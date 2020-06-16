@@ -453,7 +453,9 @@ def get_image_id_for_shape(conn, shape_id):
     """Find ROI ID and Image ID from a shape ID."""
     params = omero.sys.ParametersI()
     params.addId(shape_id)
-    query = "select roi from Roi roi left outer join roi.shapes as shape where shape.id=:id"
+    query = """select roi from Roi roi
+        left outer join roi.shapes as shape
+        where shape.id=:id"""
     query_service = conn.getQueryService()
     result = query_service.findByQuery(query, params, conn.SERVICE_OPTS)
     if result:
