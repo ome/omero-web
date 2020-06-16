@@ -363,7 +363,10 @@ CUSTOM_SETTINGS_MAPPINGS = {
         ["APPLICATION_SERVER_HOST",
          "127.0.0.1",
          str,
-         "Upstream application host"],
+         "The front-end webserver e.g. NGINX can be set up to run on a"
+         "different host from OMERO.web. The property ensures that OMERO.web"
+         "is accessible on an external IP. It requires copying all the"
+         "OMERO.web static files to the separate NGINX server."],
     "omero.web.application_server.port":
         ["APPLICATION_SERVER_PORT", 4080, int, "Upstream application port"],
     "omero.web.application_server.max_requests":
