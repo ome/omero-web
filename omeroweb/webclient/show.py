@@ -461,6 +461,7 @@ def get_image_id_for_shape(conn, shape_id):
     if result:
         roi = result
         return (roi.id.val, roi.image.id.val)
+    return (None, None)
 
 
 def paths_to_object(conn, experimenter_id=None, project_id=None,
