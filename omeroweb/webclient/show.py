@@ -449,10 +449,23 @@ def get_image_ids(conn, datasetId=None, groupId=-1, ownerId=None):
     return iids
 
 
+def get_image_id_for_shape(conn, shape_id):
+    """Find ROI ID and Image ID from a shape ID."""
+    params = omero.sys.ParametersI()
+    params.addId(shape_id)
+    query = "select roi from Roi roi left outer join roi.shapes as shape where shape.id=:id"
+    query_service = conn.getQueryService()
+    result = query_service.findByQuery(query, params, conn.SERVICE_OPTS)
+    if result:
+        roi = result
+        return (roi.id.val, roi.image.id.val)
+
+
 def paths_to_object(conn, experimenter_id=None, project_id=None,
                     dataset_id=None, image_id=None, screen_id=None,
                     plate_id=None, acquisition_id=None, well_id=None,
-                    group_id=None, page_size=None, roi_id=None):
+                    group_id=None, page_size=None, roi_id=None,
+                    shape_id=None):
     """
     Retrieves the parents of an object (E.g. P/D/I for image) as a list
     of paths.
@@ -505,6 +518,8 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
         roi = conn.getObject('Roi', roi_id)
         if roi is not None:
             image_id = roi.image.id
+    if shape_id is not None:
+        roi_id, image_id = get_image_id_for_shape(conn, shape_id)
     if image_id is not None:
         params.add('iid', rlong(image_id))
         lowest_type = 'image'
@@ -636,6 +651,11 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     path.append({
                         'type': 'roi',
                         'id': roi_id
+                    })
+                if shape_id is not None:
+                    path.append({
+                        'type': 'shape',
+                        'id': shape_id
                     })
                 paths.append(path)
 
