@@ -650,17 +650,19 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     'type': 'image',
                     'id': imageId
                 })
-                if roi_id is not None:
-                    path.append({
-                        'type': 'roi',
-                        'id': roi_id
-                    })
-                if shape_id is not None:
-                    path.append({
-                        'type': 'shape',
-                        'id': shape_id
-                    })
                 paths.append(path)
+        # Any roi/shape info to paths
+        for path in paths:
+            if roi_id is not None:
+                path.append({
+                    'type': 'roi',
+                    'id': roi_id
+                })
+            if shape_id is not None:
+                path.append({
+                    'type': 'shape',
+                    'id': shape_id
+                })
 
     elif lowest_type == 'dataset':
         q = '''
