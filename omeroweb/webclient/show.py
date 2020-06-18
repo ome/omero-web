@@ -449,8 +449,8 @@ def get_image_ids(conn, datasetId=None, groupId=-1, ownerId=None):
     return iids
 
 
-def get_image_id_for_shape(conn, shape_id):
-    """Find ROI ID and Image ID from a shape ID."""
+def get_image_roi_id_for_shape(conn, shape_id):
+    """Returns (Image_ID, ROI_ID) from a shape ID."""
     params = omero.sys.ParametersI()
     params.addId(shape_id)
     query = """select roi from Roi roi
@@ -460,7 +460,7 @@ def get_image_id_for_shape(conn, shape_id):
     result = query_service.findByQuery(query, params, conn.SERVICE_OPTS)
     if result:
         roi = result
-        return (roi.id.val, roi.image.id.val)
+        return (roi.image.id.val, roi.id.val)
     return (None, None)
 
 
@@ -522,7 +522,7 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
         if roi is not None:
             image_id = roi.image.id
     if shape_id is not None:
-        roi_id, image_id = get_image_id_for_shape(conn, shape_id)
+        image_id, roi_id = get_image_roi_id_for_shape(conn, shape_id)
     if image_id is not None:
         params.add('iid', rlong(image_id))
         lowest_type = 'image'
