@@ -897,7 +897,8 @@ def paths_to_well_image(conn, params, well_id=None, image_id=None,
                slink.parent.id,
                plate.id,
                acquisition.id,
-               well.id
+               well.id,
+               wellsample.id
         from WellSample wellsample
         join wellsample.details.owner wsowner
         left outer join wellsample.plateAcquisition acquisition
@@ -960,6 +961,18 @@ def paths_to_well_image(conn, params, well_id=None, image_id=None,
             path.append({
                 'type': 'well',
                 'id': e[4].val
+            })
+
+        # Include WellSampe if path is to image
+        if e[5] is not None and orphanedImage:
+            path.append({
+                'type': 'wellsample',
+                'id': e[5].val
+            })
+        if image_id is not None:
+            path.append({
+                'type': 'image',
+                'id': image_id
             })
 
         paths.append(path)
