@@ -414,7 +414,7 @@
     <script type="text/javascript">
     $(function () {
 
-        $('#removecontentButton').click(function() {
+        $('#removecontentButton').on('click', function() {
             var confirm_remove = OME.confirm_dialog('Remove Image?',
                 function() {
                     if(confirm_remove.data("clicked_button") == "OK") {
@@ -426,7 +426,7 @@
             );
         });
 
-        $('#refreshButton').click(function() {
+        $('#refreshButton').on('click', function() {
             var inst = $.jstree.reference('#dataTree');
             inst.refresh();
         });

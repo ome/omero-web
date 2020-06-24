@@ -24,7 +24,7 @@ $(document).ready(function() {
     // We use these controls to update the paramter fields themselves,
     // as well as updating the Figure preview.
 
-    $("#enableScalebar").click(function(){
+    $("#enableScalebar").on('click', function(){
         var enabled = $(this).is(":checked");
         if (enabled) {
             $("input[name=Scalebar]").prop("disabled", false).focus();
@@ -76,7 +76,7 @@ $(document).ready(function() {
 
     };
     // Add / Remove Channels
-    $("#split_channels input[type=checkbox]").click(updateChannelNames);
+    $("#split_channels input[type=checkbox]").on('click', updateChannelNames);
     // Renaming Channels
     $("#split_channels input[type=text]").keyup(updateChannelNames);
 
@@ -115,7 +115,7 @@ $(document).ready(function() {
 
     };
     // When merged channels are toggled
-    $("#merged_channels input[type=checkbox]").click(function() {
+    $("#merged_channels input[type=checkbox]").on('click', function() {
         updateMergedChannels();
         updateGrey();
     });
@@ -169,10 +169,10 @@ $(document).ready(function() {
         });
     };
     // Update grey on checkbox click
-    $splitPanelsGrey.click(updateGrey);
+    $splitPanelsGrey.on('click', updateGrey);
 
     // Merged names
-    $("input[name=Merged_Names]").click(function(){
+    $("input[name=Merged_Names]").on('click', function(){
         if ( $(this).is(":checked") ) {
             $("#merged_label").hide();
             $("#merged_names").show();
@@ -203,7 +203,7 @@ $(document).ready(function() {
             $zEnd.val(ui.values[ 1 ]);
         }
     }).slider( "disable" );     // enable if user chooses zProjection
-    $("input[name=zProjection]").click(function(){
+    $("input[name=zProjection]").on('click', function(){
         if($(this).attr('value') === "z_projection"){
             $zRangeSlider.slider( "enable" );
             $zProjectionControls.show();

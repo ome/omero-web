@@ -192,7 +192,7 @@
         }
 
         // When 'role' is changed, might need to add/remove 'system' group from choosers
-        $("input[name='role']").click( function(evt) {
+        $("input[name='role']").on('click', function(evt) {
             evt.stopPropagation();
             // If role of 'user' is picked, de-select 'system' from the 'default group' chooser
             if($("input[name='role'][value='user']").is(':checked')) {
@@ -237,7 +237,7 @@
             }
         });
         
-        $( "#change_password" ).click(function() {
+        $( "#change_password" ).on('click', function() {
             // clear fields
             var $pw_form = $("#change_password_form");
             $("div.error", $pw_form).text("");
@@ -248,7 +248,7 @@
             $( "#password_change_dialog" ).dialog( "open" );
             return false;
         });
-        $("#password_cancel").click(function() {
+        $("#password_cancel").on('click', function() {
             $( "#password_change_dialog" ).dialog( "close" );
             return false;
         });

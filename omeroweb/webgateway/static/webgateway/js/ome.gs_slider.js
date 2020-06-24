@@ -166,7 +166,7 @@ $.fn.gs_slider = function(cfg) {
         self.setSliderPos(rpos+self.sliderCfg.min);
       }
 
-      slider.click(handlesliderpos);
+      slider.on('click', handlesliderpos);
 
       var onrepeat = false;
       var repeat_timer;
@@ -205,7 +205,7 @@ $.fn.gs_slider = function(cfg) {
 	btnplaydown.removeClass('onplay');
       }
 
-      btnplayup.click(function () {
+      btnplayup.on('click', function () {
         var onplay = btnplayup.is('.onplay');
         self.stoprepeat();
   	if (!onplay) {
@@ -223,7 +223,7 @@ $.fn.gs_slider = function(cfg) {
       });
 
 
-      btnplaydown.click(function () {
+      btnplaydown.on('click', function () {
         var onplay = btnplaydown.is('.onplay');
         self.stoprepeat();
   	if (!onplay) {

@@ -108,7 +108,7 @@
                     }
                 });
                 // removing dates - clear fields and reset ranges.
-                $(".clearDate").click(function() {
+                $(".clearDate").on('click', function() {
                     $(this).hide().prev("input").val("");
                     var end = $( "#enddateinput" ).datepicker( "getDate" ) || 0;
                     $( "#startdateinput" ).datepicker( "option", "maxDate", end);
@@ -196,13 +196,13 @@
 
                 OME.table_selection_changed();     // clear selection (hides acquisition & preview tabs)
 
-                $("#showSearchHints").click(function(event){
+                $("#showSearchHints").on('click', function(event){
                     event.preventDefault();
                     $("#searchHints").toggle();
                     return false;
                 });
 
-                $("#show_annotations").click(function(){
+                $("#show_annotations").on('click', function(){
                     $("#search_ann_type").toggleClass("hide");
 
                     if ($(this).is(':checked')) {

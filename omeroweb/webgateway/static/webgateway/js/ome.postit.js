@@ -66,8 +66,8 @@ $.fn.postit = function(cfg) {
       .addClass('postit')
       .removeClass('sdialog');
     /* The buttons */
-    self.find('.postit-toggle-btn').click(function(e) { self.toggleClass('collapsed'); });
-    self.find('.postit-close-btn').click(function(e) { self.hide(); });
+    self.find('.postit-toggle-btn').on('click', function(e) { self.toggleClass('collapsed'); });
+    self.find('.postit-close-btn').on('click', function(e) { self.hide(); });
     self.find('.sdialog-content').removeClass('sdialog-content').addClass('postit-content');
     if (cfg && !cfg.noResize) {
       var target;

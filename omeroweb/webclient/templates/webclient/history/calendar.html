@@ -24,13 +24,13 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            $("#prevMonth").click(function() { 
+            $("#prevMonth").on('click', function() { 
                 $("div#history_calendar").html('<p>{% trans "Loading calendar... please wait" %} <img src ="{% static "webgateway/img/spinner.gif" %}"/></p>');
                 $("div#history_calendar").load('{% url 'load_calendar' controller.last_month.year controller.last_month.month %}');     
                 $("div#content_details").empty();
                 OME.table_selection_changed();    // clear selection - E.g. right-hand panel 
             });
-            $("#nextMonth").click(function() { 
+            $("#nextMonth").on('click', function() { 
                 $("div#history_calendar").html('<p>{% trans "Loading calendar... please wait" %} <img src ="{% static "webgateway/img/spinner.gif" %}"/></p>');
                 $("div#history_calendar").load('{% url 'load_calendar' controller.next_month.year controller.next_month.month %}');
                 $("div#content_details").empty();

@@ -113,14 +113,14 @@
             });
 
             // for any 'list' parameters with enum options, controls to add / remove
-            $(".addListSelect").click(function(e) {
+            $(".addListSelect").on('click', function(e) {
                 var $lastSelect = $(this).parent().children('select').last();
                 $lastSelect.after($lastSelect.clone());
                 $lastSelect.after(" ");
                 e.preventDefault();
                 return false;
             });
-            $(".removeListSelect").click(function(e) {
+            $(".removeListSelect").on('click', function(e) {
                 var selectCount = $(this).parent().find('select').length;
                 if (selectCount > 1) {
                     var $lastSelect = $(this).parent().children('select').last();
@@ -131,7 +131,7 @@
             });
 
             // for any 'map' parameters in the UI, add controls to add key:value fields
-            $(".addKeyValue").click(function() {
+            $(".addKeyValue").on('click', function() {
                 var $keyValueTable = $(this).parent().next().find(".map");
                 var rowCount = $keyValueTable.find('tr').length;
                 var $newRow = $("tr", $keyValueTable).first().clone();
@@ -146,7 +146,7 @@
                 $keyValueTable.append($newRow);
                 return false;
             });
-            $(".removeKeyValue").click(function(e) {
+            $(".removeKeyValue").on('click', function(e) {
                 var $keyValueTable = $(this).parent().next().find(".map");
                 var rowCount = $keyValueTable.find('tr').length;
                 if (rowCount > 1) {

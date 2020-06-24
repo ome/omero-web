@@ -184,7 +184,7 @@ window.OME.createViewportHistogram = function(viewport, chartSelector, checkboxS
     };
 
 
-    $(checkboxSelector).click(function(){
+    $(checkboxSelector).on('click', function(){
         var show = this.checked;
         if (OME.setPaneExpanded) {
             OME.setPaneExpanded('histogram', show);

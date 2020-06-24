@@ -838,7 +838,7 @@ OME.login_dialog = function(login_url, callback) {
                     if (findSortKey) {
                         $header
                             .addClass('clickable')
-                            .click(function() {
+                            .on('click', function() {
                                 var sortDirection = 1;
                                 if ($header.is('.sorted-asc')) {
                                     sortDirection = -1;

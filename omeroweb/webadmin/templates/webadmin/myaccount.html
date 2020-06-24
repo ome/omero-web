@@ -62,7 +62,7 @@
         });
         
         {% if edit_mode %}
-        $('#save_thumb').click(function() {
+        $('#save_thumb').on('click', function() {
             var x1 = $('#x1').val();
             var y1 = $('#y1').val();
             var x2 = $('#x2').val();
@@ -111,7 +111,7 @@
                 }
             });
             
-            $( "#change_password" ).click(function() {
+            $( "#change_password" ).on('click', function() {
                 // clear fields
                 var $pw_form = $("#change_password_form");
                 $("div.error", $pw_form).text("");
@@ -122,7 +122,7 @@
                 $( "#password_change_dialog" ).dialog( "open" );
                 return false;
             });
-            $("#password_cancel").click(function() {
+            $("#password_cancel").on('click', function() {
                 $( "#password_change_dialog" ).dialog( "close" );
                 return false;
             });
@@ -186,7 +186,7 @@
                 }
             });
 
-            $(".usageByGroup").click(function() {
+            $(".usageByGroup").on('click', function() {
               $(".usageBy").removeClass('selected');
               $(this).addClass('selected');
               var gid = $(this).attr("data-groupid");
@@ -198,7 +198,7 @@
                   }
               });
             });
-            $("#myUsage").click(function() {
+            $("#myUsage").on('click', function() {
               $(".usageBy").removeClass('selected');
               $(this).addClass('selected');
               var url = "{% url 'waloaddrivespace_user' experimenter.id %}";

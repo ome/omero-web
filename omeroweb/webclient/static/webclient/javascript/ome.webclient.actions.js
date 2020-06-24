@@ -345,7 +345,7 @@ OME.initToolbarDropdowns = function() {
     $(".toolbar_dropdown ul").css('visibility', 'hidden');
     // show on click
     var $toolbar_dropdownlists = $(".toolbar_dropdown ul");
-    $(".toolbar_dropdown button").click(function(e) {
+    $(".toolbar_dropdown button").on('click', function(e) {
         // hide any other lists that might be showing...
         $toolbar_dropdownlists.css('visibility', 'hidden');
         // then show this one...
@@ -359,7 +359,7 @@ OME.initToolbarDropdowns = function() {
     });
 
     // For Figure scripts, we need a popup:
-    $("#figScriptList li a").click(function(event){
+    $("#figScriptList li a").on('click', function(event){
         if (!$(this).parent().hasClass("disabled")) {
             OME.openScriptWindow(event, 800, 600);
         }

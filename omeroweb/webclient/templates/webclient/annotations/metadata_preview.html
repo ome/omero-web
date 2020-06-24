@@ -143,10 +143,10 @@
 
             // copy and paste refs is in browser via query string,
             // but we also save to session in case of page reload etc
-            $("#rdef-copy-btn").click(function() {
+            $("#rdef-copy-btn").on('click', function() {
                 copyRdefs(OME.preview_viewport);
             });
-            $("#rdef-paste-btn").click(function() {
+            $("#rdef-paste-btn").on('click', function() {
                 pasteRdefs(OME.preview_viewport);
             });
             // once image loads, check session via /getImgRDef/ to see if we can paste
@@ -181,18 +181,18 @@
             });
 
             // handle 'Color' checkbox
-            $('#rd-wblitz-rmodel').click(function(e){
+            $('#rd-wblitz-rmodel').on('click', function(e){
               setModel(OME.preview_viewport, $(this).get(0).checked?'g':'c');
             });
 
             // handle 'Active' checkbox
-            $('#showactive').click(function(e){
+            $('#showactive').on('click', function(e){
               $("#preview_tab #rdef-active-area table tr.rdef-window:not(:has(button.pressed))")
                   .css({'display': this.checked? 'none' : ''});
             });
 
             // Save settings
-            $("#rdef-setdef-btn").click(function(){
+            $("#rdef-setdef-btn").on('click', function(){
               setImageDefaults(OME.preview_viewport, this, function() {
                 OME.refreshThumbnails(
                     {'imageId':{{ manager.image.id }},
@@ -207,18 +207,18 @@
             });
 
             // Reset defaults without saving
-            $("#rdef-reset-btn").click(function(){
+            $("#rdef-reset-btn").on('click', function(){
               resetImageDefaults(OME.preview_viewport);
             });
 
-            $("#rdef-minmax-btn").click(function(){
+            $("#rdef-minmax-btn").on('click', function(){
               OME.preview_viewport.setChannelMinMax();
               syncRDCW(OME.preview_viewport);
               OME.preview_viewport.save_channels();
               updateUndoRedo(OME.preview_viewport);
             });
 
-            $("#rdef-fullrange-btn").click(function(){
+            $("#rdef-fullrange-btn").on('click', function(){
               OME.preview_viewport.setChannelFullRange();
               syncRDCW(OME.preview_viewport);
               OME.preview_viewport.save_channels();
@@ -226,11 +226,11 @@
             });
 
             // Undo/redo buttons
-            $("#rdef-undo-btn").click(function(){
+            $("#rdef-undo-btn").on('click', function(){
               OME.preview_viewport.undo_channels();
               syncRDCW(OME.preview_viewport);
             });
-            $("#rdef-redo-btn").click(function(){
+            $("#rdef-redo-btn").on('click', function(){
               OME.preview_viewport.redo_channels();
               syncRDCW(OME.preview_viewport);
             });
@@ -321,7 +321,7 @@
               $("#rdef-save-all")
                 .attr('title', "Apply and Save settings to all images in " + pid)
                 .removeAttr('disabled').removeClass("button-disabled")
-                .click(function(){
+                .on('click', function(){
                   var $span = $('span', this),
                     spanTxt = $span.text();
                   $span.text("Saving...");
@@ -357,7 +357,7 @@
             {% endif %}
 
 
-            $("#preview_open_viewer").click(function(event){
+            $("#preview_open_viewer").on('click', function(event){
               event.preventDefault();
               var url = $(this).attr('href');
               var vpQuery = OME.preview_viewport.getQuery();

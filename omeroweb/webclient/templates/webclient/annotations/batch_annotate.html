@@ -32,7 +32,7 @@
                     $("#batch_ann_msg").html(text).show().delay(1200).fadeOut(1000);
                 }
                 var show_batch_error = function(text) {
-                    $("#batch_ann_error").html(text + "<div><u>Click to Close</u></div>").show().click(function(){
+                    $("#batch_ann_error").html(text + "<div><u>Click to Close</u></div>").show().on('click', function(){
                         $(this).hide();
                     });
                 }
@@ -60,18 +60,18 @@
                 var mapAnnsPane = new MapAnnsPane($("#mapAnnsPane"), annPaneData);
 
                 // show a link to the current objects
-                $("#show_link_btn").click(function(){
+                $("#show_link_btn").on('click', function(){
                     $("#link_info_popup").show();
                     var link_input = $("#link_info_popup input");
                     link_input.get(0).focus();
                     link_input.get(0).select();
                 });
-                $("#link_info_popup img").click(function(){
+                $("#link_info_popup img").on('click', function(){
                     $("#link_info_popup").hide();
                 });
 
 
-                $(".dropdown_menu .menu_launch").click(function(e){
+                $(".dropdown_menu .menu_launch").on('click', function(e){
                     $(this).parent().find('ul').css('visibility', 'visible');
                     $(this).parent().find('.dropdown_menu_options').show();
                     return false;

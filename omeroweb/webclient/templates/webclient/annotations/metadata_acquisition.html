@@ -52,11 +52,11 @@
                         return false;
                     };
                 };
-                $(".metadata_details").click(toggleInvalidRows);
+                $(".metadata_details").on('click', toggleInvalidRows);
 
 
                 // Handle click on collapsible panes
-                $('#metadata_tab .can-collapse').click(function () {
+                $('#metadata_tab .can-collapse').on('click', function () {
                     $(this).toggleClass('closed').next().slideToggle();
                     // remember which panes are expanded
                     var open = [];
@@ -118,7 +118,7 @@
                     }
                 };
                 // Load either when we first expand tab, or on retry
-                $("h1.load_original_metadata").click(function() {
+                $("h1.load_original_metadata").on('click', function() {
                     if (!$(this).hasClass('closed')){
                         loadOriginalMetadata();
                     }

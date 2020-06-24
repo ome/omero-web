@@ -65,7 +65,7 @@
                 
                 highlightCurrent();
                 
-                $('#id_permissions_0').click(function(){
+                $('#id_permissions_0').on('click', function(){
                     OME.confirm_dialog("Changing group to Private unlinks data from other users'" +
                                     " containers and unlinks other users' annotations from data." +
                                     " The change to Private will abort if different users' data" +

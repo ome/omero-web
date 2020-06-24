@@ -719,9 +719,9 @@ var tagging_form = function(
         }
     };
 
-    $("#id_tag_select_button").click(select_tags);
-    $("#id_tag_deselect_button").click(deselect_tags);
-    $("#id_add_new_tag").click(add_new_tag);
+    $("#id_tag_select_button").on('click', select_tags);
+    $("#id_tag_deselect_button").on('click', deselect_tags);
+    $("#id_add_new_tag").on('click', add_new_tag);
     $("#add_tags_form").off('prepare-submit').on('prepare-submit', save_tags);
     tag_input.keyup(update_add_new_button_state).change(
         update_add_new_button_state);
@@ -745,7 +745,7 @@ var tagging_form = function(
             input.addClass('placeholder');
             input.val(input.attr('placeholder'));
         }
-    }).blur().parents('form').submit(function() {
+    }).blur().parents('form').on('submit', function() {
         $(this).find('[placeholder]').each(function() {
             var input = $(this);
             if (input.val() === input.attr('placeholder')) {

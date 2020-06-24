@@ -46,7 +46,7 @@
                 
                 // Most panes are expanded and collapsed in the Pane classes above.
                 // Manually add that behaviour for Details
-                $('.can-collapse[data-name="details"]').click(function(){
+                $('.can-collapse[data-name="details"]').on('click', function(){
                     var $this = $(this),
                         expanded = $this.hasClass('closed');
                     $this.toggleClass('closed')
@@ -83,7 +83,7 @@
                 
                 {% if manager.image %}
                 // handle loading of image hierarchy by ajax
-                $("#hierarchy-link").click(function(e){
+                $("#hierarchy-link").on('click', function(e){
                     var hierarchy_url = $(this).attr('href');
                     $("#hierarchy-spinner").show();  // waiting...
                     $("#hierarchy-pane").load(hierarchy_url);
@@ -93,7 +93,7 @@
                 {% endif %}
 
                 // show a link to the current object
-                $("#show_link_btn").click(function(){
+                $("#show_link_btn").on('click', function(){
                     $("#link_info_popup").show();
                     var lnk = location.protocol + "//" + location.host + "{{ webclient_path }}";
                     var obj_type = "{{manager.obj_type}}";
@@ -106,7 +106,7 @@
                     link_input.get(0).focus();
                     link_input.get(0).select();
                 });
-                $("#link_info_popup img").click(function(){
+                $("#link_info_popup img").on('click', function(){
                     $("#link_info_popup").hide();
                 });
 
@@ -132,7 +132,7 @@
                     return false;
                 });
 
-                $("#show_fs_files_btn").click(function(){
+                $("#show_fs_files_btn").on('click', function(){
 
                     // If we're already showing Image file info, toggle hide
                     if ($toolbar_info_panel.is(":visible") && 
@@ -186,7 +186,7 @@
                 {% endif %}
                 
                 // show Image hierarchy Project/Dataset tree.
-                $("#show_image_hierarchy").click(function(){
+                $("#show_image_hierarchy").on('click', function(){
 
                     // If we're already showing Image file info, toggle hide
                     if ($toolbar_info_panel.is(":visible") && 
@@ -208,12 +208,12 @@
                 });
 
 
-                $("#toolbar_info_panel img").click(function(){
+                $("#toolbar_info_panel img").on('click', function(){
                     $("#toolbar_info_panel").hide();
                 });
 
                 // Handle Download actions
-                $("#create-ometiff").click(function(e){
+                $("#create-ometiff").on('click', function(e){
                     
                     var url = $(this).attr('href');
                     $("#download_dropdown ul").css('visibility', 'hidden');// hide dropdown menu
@@ -296,13 +296,13 @@
                     $chNameForm.hide();
                 }
                 // Workflow starts by displaying the form
-                $("#editChannelNames").click(function(){
+                $("#editChannelNames").on('click', function(){
                     $("#channel_names_display").hide();
                     $("#editChannelNames").hide();
                     $chNameForm.show();
                 });
                 // Handling of all form buttons. NB: save & apply_confirm buttons submit
-                $chNameForm.find("button").click(function(event){
+                $chNameForm.find("button").on('click', function(event){
                     var name = $(this).attr('name');
                     if (name === "apply") {
                         // Ask users to confirm:
@@ -378,7 +378,7 @@
                     }
 
                     // If user opens tables tab, also load tables
-                    $('.can-collapse.closed[data-name="tables"]').click(function(){
+                    $('.can-collapse.closed[data-name="tables"]').on('click', function(){
                         var $header = $(this),
                             $body = $header.next();
 

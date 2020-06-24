@@ -417,7 +417,7 @@ jQuery.fn.viewportImage = function(options) {
     var drag_px;
     var drag_py;
     dragdiv
-      .click(function (e) {
+      .on('click', function (e) {
           if (clickinterval != null) {
             clickinterval = null;
             image.trigger(e);
@@ -483,11 +483,11 @@ jQuery.fn.viewportImage = function(options) {
 
 
     // Handle zoom buttons
-    $wb_zoomIn.click(function() {
+    $wb_zoomIn.on('click', function() {
       var zm = _this.getZoom();
       _this.setZoom(zm + 20);
     });
-    $wb_zoomOut.click(function() {
+    $wb_zoomOut.on('click', function() {
       var zm = _this.getZoom();
       if (zm > 21) {
         _this.setZoom(zm - 20);
@@ -495,7 +495,7 @@ jQuery.fn.viewportImage = function(options) {
         _this.setZoom(zm - 10);
       }
     });
-    $wb_zoom11.click(function() {
+    $wb_zoom11.on('click', function() {
       _this.setZoom(100);
     });
 

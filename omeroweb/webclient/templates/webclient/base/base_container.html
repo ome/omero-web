@@ -238,7 +238,7 @@
             // initially hidden
             $("#user_dropdown ul").css('visibility', 'hidden');
             // show on click
-            $("#show_user_dropdown").click(function(e) {
+            $("#show_user_dropdown").on('click', function(e) {
                 
                 $("ul", $(this).parent()).css('visibility', 'visible');
                 e.preventDefault();

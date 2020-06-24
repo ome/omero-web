@@ -220,8 +220,8 @@
       css: {width: '50%', left: '25%', top: '20%'}
 {% endif %}
     });
-    $('.blockMsg').attr('title','Click to close').click($.unblockUI);
-    $('.blockOverlay').attr('title','Click to close').click($.unblockUI);
+    $('.blockMsg').attr('title','Click to close').on('click', $.unblockUI);
+    $('.blockOverlay').attr('title','Click to close').on('click', $.unblockUI);
     return false;
   }
 
@@ -248,7 +248,7 @@
     var p = viewport.getProjection();
     if (p) {
       $('[name="wblitz-proj"]').parent().removeClass('selected');
-      $('[name="wblitz-proj"][value='+p+']').click().parent().addClass('selected');
+      $('[name="wblitz-proj"][value='+p+']').on('click', ).parent().addClass('selected');
 //    if (p) {
 //      var pr = $('#wblitz-proj > [value='+p+']');
 //      if (pr.length) {
@@ -1129,14 +1129,14 @@
     });
 
     // 'Color' checkbox to left of image
-    $("#wblitz-rmodel").click(function(){
+    $("#wblitz-rmodel").on('click', function(){
       setModel(viewport, $(this).get(0).checked?'g':'c');
     });
 
     /* Prepare pop tools */
     $(".popover > h1")
       .prepend('<div class="drop-img drop-left"></div><div class="drop-img drop-right"></div>')
-      .click(function () {
+      .on('click', function () {
         var this_popped = $(this).parent().is('.popped');
         $(".popped").removeClass('popped');
         if (this_popped) {
@@ -1147,11 +1147,11 @@
         return false;
       });
 
-    $(".popclose").click(function () {
+    $(".popclose").on('click', function () {
       $(".popped").removeClass('popped');
     });
 
-    $("#weblitz-viewport").click(function () {
+    $("#weblitz-viewport").on('click', function () {
       $(".popped").removeClass('popped');
       return false;
     })
@@ -1178,7 +1178,7 @@
     });
 
     // Create Histogram - displayed when #showhistogram checkbox is checked
-    // NB: we do this AFTER the postit init above, otherwise $("#showhistogram").click() gets unbound!
+    // NB: we do this AFTER the postit init above, otherwise $("#showhistogram").on('click', ) gets unbound!
     OME.createViewportHistogram(viewport, "#histogram", "#showhistogram", "{% url 'webgateway' %}");
 
     var legend_open = function () {
@@ -1203,7 +1203,7 @@
                     hidePicker();
                   });
 
-    $('.can-collapse').click(function () {
+    $('.can-collapse').on('click', function () {
       $(this).toggleClass('closed').next().slideToggle();
     });
 
@@ -1221,7 +1221,7 @@
     /* Bind actions needed on window resize */
     $(window).resize(calcResize);
 
-    $('input[name=wblitz-quality]').click(function () {
+    $('input[name=wblitz-quality]').on('click', function () {
       viewport.setQuality(this.value);
     });
 
@@ -1238,14 +1238,14 @@
     var copy_paste_rdef_url = "{% url 'webgateway_copy_image_rdef_json' %}";
     // Handle clicks on Copy/paste in toolbar and left of main viewer
     // NB: Need to use IDs for robot tests
-    $("#rdef-copy-btn, #rdef-copy-btn-viewer").click(function() {
+    $("#rdef-copy-btn, #rdef-copy-btn-viewer").on('click', function() {
         copyRdefs(viewport);
     });
-    $("#rdef-paste-btn, #rdef-paste-btn-viewer").click(function() {
+    $("#rdef-paste-btn, #rdef-paste-btn-viewer").on('click', function() {
         pasteRdefs(viewport);
     });
 
-    $("#wblitz-interpolate").click(function(event){
+    $("#wblitz-interpolate").on('click', function(event){
       var interpolate = $(this).is(":checked");
       if (viewport) {
         viewport.setPixelated(!interpolate);
@@ -1253,18 +1253,18 @@
     });
 
     // Reset defaults without saving
-    $("#rdef-reset-btn").click(function(){
+    $("#rdef-reset-btn").on('click', function(){
       resetImageDefaults(viewport);
     });
 
-    $("#rdef-minmax-btn").click(function(){
+    $("#rdef-minmax-btn").on('click', function(){
       viewport.setChannelMinMax();
       syncRDCW(viewport);
       viewport.save_channels();
       updateUndoRedo(viewport);
     });
 
-    $("#rdef-fullrange-btn").click(function(){
+    $("#rdef-fullrange-btn").on('click', function(){
       viewport.setChannelFullRange();
       syncRDCW(viewport);
       viewport.save_channels();
@@ -1322,7 +1322,7 @@
         }
     }
 
-    $("#roi_small_table").click(function(event) {
+    $("#roi_small_table").on('click', function(event) {
         var $target = $(event.target);
         if ($target.attr('id') == "toggle_roi_thumbs") {
             update_roi_thumbs();
@@ -1492,10 +1492,10 @@
           e.preventDefault();
       });
 
-      $("#prevImage").click(function(){
+      $("#prevImage").on('click', function(){
         nextPrevImage(-1);
       });
-      $("#nextImage").click(function(){
+      $("#nextImage").on('click', function(){
         nextPrevImage(1);
       });
     }
@@ -1514,7 +1514,7 @@
     });
   
     // set up handlers for 'Save' button
-    $("#rdef-setdef-btn").click(function(){
+    $("#rdef-setdef-btn").on('click', function(){
       setImageDefaults(viewport, this, function() {
         if (window.opener && window.opener.OME.refreshThumbnails) {
             window.opener.OME.refreshThumbnails({'imageId':{{ image.id }},

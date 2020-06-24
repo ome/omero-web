@@ -149,7 +149,7 @@ Download files
 <script>
 
 
-    $("#downloadForm").submit(function(event){
+    $("#downloadForm").on('submit', function(event){
         event.preventDefault();
 
         var zipName = $("#zipName").val();
@@ -165,7 +165,7 @@ Download files
 
     $("#zipName").focus().select();
 
-    $("#reset").click(function(){
+    $("#reset").on('click', function(){
         window.close();
     });
 

@@ -518,7 +518,7 @@
                 });
 
                 // same code is called from closing dialog or 'submit' of form
-                $("#new-container-form").submit(function() {
+                $("#new-container-form").on('submit', function() {
                     $("#new-container-form").dialog( "close" );
                     createNewContainer();
                     return false;
@@ -682,41 +682,41 @@
 
         // Attach click handlers to the individual buttons
 
-        $('#addprojectButton').click(function() {
+        $('#addprojectButton').on('click', function() {
             OME.handleNewContainer("project");
         });
 
-        $('#adddatasetButton').click(function() {
+        $('#adddatasetButton').on('click', function() {
             OME.handleNewContainer("dataset");
         });
 
-        $('#addscreenButton').click(function() {
+        $('#addscreenButton').on('click', function() {
             OME.handleNewContainer("screen");
         });
 
-        $('#addtagButton').click(function() {
+        $('#addtagButton').on('click', function() {
             OME.handleNewContainer("tag");
         });
 
-        $('#addtagsetButton').click(function() {
+        $('#addtagsetButton').on('click', function() {
             OME.handleNewContainer("tagset");
         });
 
-        $('#copyButton').click(function() {
+        $('#copyButton').on('click', function() {
             var objs = inst.get_selected(true)
             inst.copy(objs);
         });
 
-        $('#cutButton').click(function() {
+        $('#cutButton').on('click', function() {
             var objs = inst.get_selected(true)
             inst.cut(objs);
         });
 
-        $('#createshareButton').click(function() {
+        $('#createshareButton').on('click', function() {
             OME.createShare(inst.get_selected());
         });
 
-        $('#pasteButton').click(function() {
+        $('#pasteButton').on('click', function() {
             var objs = inst.get_selected(true);
             if (objs.length == 1) {
                 inst.paste(objs[0]);
@@ -725,13 +725,13 @@
             }
         });
 
-        $('#deleteButton').click(function() {
+        $('#deleteButton').on('click', function() {
             var deleteUrl = "{% url 'manage_action_containers' 'deletemany' %}",
                 filesetCheckUrl = "{% url 'fileset_check' 'delete' %}";
             OME.handleDelete(deleteUrl, filesetCheckUrl, {{ ome.user.id }});
         });
 
-        $('#refreshButton').click(function() {
+        $('#refreshButton').on('click', function() {
             // Ensure the button cannot be clicked again while we are
             // performing a refresh.  The "refresh.jstree" event handler
             // is in ome.tree.js and will be responsible for enabling the

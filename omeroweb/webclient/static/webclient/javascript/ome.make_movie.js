@@ -39,7 +39,7 @@ $(document).ready(function() {
         });
         $channels.val(active.join(","));
     };
-    $(".ch-btn").click(function(event){
+    $(".ch-btn").on('click', function(event){
         event.preventDefault();
         var $this = $(this);
         $this.toggleClass("pressed");
@@ -111,7 +111,7 @@ $(document).ready(function() {
     }
     // Z/T range can be enabled / disabled if we have a choice
     if (tEnd > 1 && zEnd > 1) {
-        $(".sliderToggle").click(function(){
+        $(".sliderToggle").on('click', function(){
             var $this = $(this),
                 enabled = $this.prop('checked'),
                 $controls = $this.parent();
@@ -123,14 +123,14 @@ $(document).ready(function() {
     }
 
     // Scalebar - can be disabled
-    $("#scalebarToggle").click(function(){
+    $("#scalebarToggle").on('click', function(){
         var enabled = $(this).prop('checked');
         $("input[name='Scalebar']").prop('disabled', !enabled);
     });
 
 
     // Keep 'Show Labels' checkboxes in sync
-    $("input[name='Show_Plane_Info']").click(function(){
+    $("input[name='Show_Plane_Info']").on('click', function(){
         var chkd = $(this).prop('checked');
         $("input[name='Show_Time']").prop('checked', chkd);
     });

@@ -271,8 +271,8 @@ $(function() {
                     // toggle any children
                     $("ul" ,$(this).parent()).toggle();
                 };
-                $("#move_group_tree a").click(node_click);
-                $("#move_group_tree ins").click(node_click);
+                $("#move_group_tree a").on('click', node_click);
+                $("#move_group_tree ins").on('click', node_click);
                 $newbtn.show();
             });
         }

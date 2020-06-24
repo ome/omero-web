@@ -67,7 +67,7 @@ OME.nav.set_right_panel_width = function(pixels) {
 
 $(document).ready(function() 
     {
-        $('#swapTree').click(function() { 
+        $('#swapTree').on('click', function() { 
             var flag_l = true;
             if($('img#lhid_trayhandle_icon_left').hasClass('collapsed-left')) {
                 flag_l = false
@@ -81,7 +81,7 @@ $(document).ready(function()
             }
         });
 
-        $('#swapMeta').click(function() { 
+        $('#swapMeta').on('click', function() { 
             var flag_r = true;
             if($('img#lhid_trayhandle_icon_right').attr('class')=='expanded-right') {
                 flag_r = false

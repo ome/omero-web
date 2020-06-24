@@ -61,14 +61,14 @@
             $("#jobsTable").alternateRowColors();
             
             // bind events
-            $("#activities_content a").click(function() {
+            $("#activities_content a").on('click', function() {
                 var href = $(this).attr('href');
                 if (href) {
                     window.location.href = href;
                 }
             });
             // show chgrp errors in new window
-            $(".chgrp_error a").click(function(event) {
+            $(".chgrp_error a").on('click', function(event) {
                 var error_msg = $(this).next().html();
                 var newWindow=window.open('','','height=500,width=500,scrollbars=yes, top=50, left=100');
                 newWindow.document.write(error_msg);
@@ -139,7 +139,7 @@
         $("#activities_panel").hide();
         
         // add click handler to entire body, to close the activities panel 
-        $('body').click(function(event) {
+        $('body').on('click', function(event) {
             var id = event.target.id;
             //$(".info_panel").hide();
             if ((id == 'launch_activities') || (id == 'jobstatus') || (id == 'runningStatus')) {
@@ -150,11 +150,11 @@
             }
 
         }); // BUT also stop any events bubbling up from panel itself
-        $("#activities_panel").click(function(event) {
+        $("#activities_panel").on('click', function(event) {
             return false;
         });
         
-        $("#clear_activities").click(function() {
+        $("#clear_activities").on('click', function() {
             $.post("{% url 'activities_update' action='clean' %}");
             $("#jobsTable>tbody>tr").filter(":not(.in_progress)").remove();
         });

@@ -81,14 +81,14 @@
                 highlightCurrent();
                 hideSystemUserX();
                 
-                $('#id_permissions_0').click(function(){
+                $('#id_permissions_0').on('click', function(){
                     OME.confirm_dialog("Changing group to Private unlinks data from other users'" +
                                     " containers and unlinks other users' annotations from data." +
                                     " The change to Private will abort if different users' data" +
                                     " is too closely related to be separated.",
                         null, "WARNING", ['OK'], null, 200);
                 });
-                $('#id_permissions_3').click(function(){
+                $('#id_permissions_3').on('click', function(){
                     OME.confirm_dialog("Read-Write groups allow members to delete other members' data. " +
                         "Follow the 'OMERO permissions' link below for full details.",
                         null, "WARNING", ['OK'], null, 180);

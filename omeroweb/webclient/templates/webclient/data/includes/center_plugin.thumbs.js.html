@@ -134,7 +134,7 @@ $(document).ready(function() {
             }
         });
         // handle Radio buttons
-        $("#layout_chooser button").click(function(event) {
+        $("#layout_chooser button").on('click', function(event) {
             if ($(event.target).attr('id') == 'table_layout') {
                 layout = 'table';
             } else {
@@ -582,7 +582,7 @@ $(document).ready(function() {
         };
 
         // filter by rating
-        $("#filterrating img").click(function(event) {
+        $("#filterrating img").on('click', function(event) {
             var iids = [],
                 $rating = $(this),
                 clickX = event.pageX - $rating.offset().left;

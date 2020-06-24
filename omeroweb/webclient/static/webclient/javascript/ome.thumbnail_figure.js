@@ -31,7 +31,7 @@ $(document).ready(function() {
             $(".notTagged").hide();
         }
     };
-    $("input[name=Show_Untagged_Images]").click(updateNotTagged);
+    $("input[name=Show_Untagged_Images]").on('click', updateNotTagged);
 
 
     // Add <br> to break up long rows of thumbnails

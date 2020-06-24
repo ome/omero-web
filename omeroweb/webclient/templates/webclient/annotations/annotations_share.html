@@ -40,7 +40,7 @@
                     success: function(html) {
                         var $comment = $(html)
                         $('#share_comments_container').prepend( $comment ).show();
-                        $(".removeComment", $comment).click(function(event) {
+                        $(".removeComment", $comment).on('click', function(event) {
                             removeItem(event, "ann_comment_wrapper");
                         });
                         var textArea = $('#add_share_comment_form textarea');
@@ -48,7 +48,7 @@
                     },
                 });
 
-                $(".removeComment").click(function(event) {
+                $(".removeComment").on('click', function(event) {
                     removeItem(event, "ann_comment_wrapper");
                 });
                 
@@ -119,7 +119,7 @@
                 });
 
                 {% if manager.share.id %}
-                $("#editshareButton").click(function() {
+                $("#editshareButton").on('click', function() {
 
                     $("#edit_share_form").dialog("open");
                     $("#edit_share_form").load(

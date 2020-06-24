@@ -809,7 +809,7 @@ $.fn.roi_display = function(options) {
                                     txt.toFront();
                                     // clicking the text should do the same as clicking the shape
                                     txt.id = shape['id'] + "_shape_text";
-                                    txt.click(handle_shape_click);
+                                    txt.on('click', handle_shape_click);
 
                                 }
 
@@ -850,7 +850,7 @@ $.fn.roi_display = function(options) {
                             }
                             newShape.attr({'cursor':'default'});
                             if (shape['strokeWidth']) { newShape.attr({'stroke-width': shape['strokeWidth']}); }
-                            newShape.click(handle_shape_click);
+                            newShape.on('click', handle_shape_click);
                             newShape.attr({ title: toolTip });
                             newShape.id = shape['id'] + "_shape";
                             shape_objects.push(newShape);

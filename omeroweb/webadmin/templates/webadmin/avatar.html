@@ -58,7 +58,7 @@
     $(document).ready(function () { 
         
         {% if edit_mode %}
-        $('#save_thumb').click(function() {
+        $('#save_thumb').on('click', function() {
             var x1 = $('#x1').val();
             var y1 = $('#y1').val();
             var x2 = $('#x2').val();

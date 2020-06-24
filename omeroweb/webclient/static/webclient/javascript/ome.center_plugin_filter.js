@@ -107,7 +107,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
         }
     }.bind(this));
 
-    $(".removefilter", $filter).click(function() {
+    $(".removefilter", $filter).on('click', function() {
         let i = filterObjects.indexOf(this);
         // remove this filter from array
         filterObjects.splice(i, 1);

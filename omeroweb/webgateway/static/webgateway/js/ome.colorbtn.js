@@ -71,10 +71,10 @@ $.fn.colorbtn = function(cfg) {
       $('<div id="'+this.cfg.prefix+'"></div>').appendTo($cpickerPane);
       $cpickerPane.append('<div style="text-align: center;">Hex RGB <input type="text" id="'+this.cfg.prefix+'-tb" /></div>');
       $('<button id="cbpicker-OK-btn" style="float:right">OK</button>').appendTo($cpickerPane);
-      $('<button style="float:right">Cancel</button>').appendTo($cpickerPane).click(function(){
+      $('<button style="float:right">Cancel</button>').appendTo($cpickerPane).on('click', function(){
         jQuery("#"+that.cfg.prefix+"-box").hide();
       });
-      $('a', $showColorPicker).click(function(event){
+      $('a', $showColorPicker).on('click', function(event){
         event.preventDefault();
         $cpickerPane.toggle();
         $luts.toggle();
@@ -175,7 +175,7 @@ $.fn.colorbtn = function(cfg) {
         self.attr('data-picked-color', this.value);
         ok_callback();
       });
-      $("#invert").off('click').click(function(){
+      $("#invert").off('click').on('click', function(){
         self.data('data-reverse-intensity', this.checked);
         ok_callback();
       });
@@ -201,6 +201,6 @@ $.fn.colorbtn = function(cfg) {
     };
 
     /* Event handlers */
-    self.click(this.show_picker);
+    self.on('click', this.show_picker);
   });
 };
