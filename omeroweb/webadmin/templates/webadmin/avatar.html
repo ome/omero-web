@@ -76,7 +76,7 @@
     }); 
 
     {% if edit_mode %}
-    $(window).load(function () { 
+    $(window).on("load", function () {
         var dim = {{ photo_size.0.0 }}/4
         var x1 = {{ photo_size.0.0 }}/2-dim
         var x2 = {{ photo_size.0.0 }}/2+dim

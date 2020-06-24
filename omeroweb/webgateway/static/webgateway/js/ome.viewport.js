@@ -402,7 +402,7 @@ jQuery._WeblitzViewport = function (container, server, options) {
     if (href != _this.viewportimg.attr('src')) {
           showLoading();
     }
-          _this.viewportimg.load(rcb);
+          _this.viewportimg.on('load', rcb);
           _this.viewportimg.attr('src', href);
       }
     }
