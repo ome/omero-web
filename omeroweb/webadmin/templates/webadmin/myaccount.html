@@ -135,7 +135,7 @@
                     var new_pw = $("input[name='password']", $pw_form).val();
                     var conf_pw = $("input[name='confirmation']", $pw_form).val();
                     var old_pw = $("input[name='old_password']", $pw_form).val();
-                    if ($.trim(new_pw).length==0 || $.trim(conf_pw).length==0 || $.trim(old_pw).length==0) {
+                    if (new_pw.trim().length==0 || conf_pw.trim().length==0 || old_pw.trim().length==0) {
                         $("div.error", $pw_form).text("All fields must be filled in.");
                         return false;
                     }
@@ -147,7 +147,7 @@
                         $("div.error", $pw_form).text("New password is the same as Old password");
                         return false;
                     }
-                    if ($.trim(new_pw).length<3 || $.trim(conf_pw).length<3 || $.trim(old_pw).length==0) {
+                    if (new_pw.trim().length<3 || conf_pw.trim().length<3 || old_pw.trim().length==0) {
                         $("div.error", $pw_form).text("Passwords should be at least 3 characters long.");
                         return false;
                     }

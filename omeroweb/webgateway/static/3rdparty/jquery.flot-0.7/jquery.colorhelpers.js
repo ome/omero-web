@@ -121,7 +121,7 @@
             return m(parseInt(res[1]+res[1], 16), parseInt(res[2]+res[2], 16), parseInt(res[3]+res[3], 16));
 
         // Otherwise, we're most likely dealing with a named color
-        var name = $.trim(str).toLowerCase();
+        var name = str.trim().toLowerCase();
         if (name == "transparent")
             return m(255, 255, 255, 0);
         else {

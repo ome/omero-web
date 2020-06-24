@@ -35,7 +35,7 @@
                 $("#add_share_comment_form").ajaxForm({
                     beforeSubmit: function(data) {
                         var textArea = $('#add_share_comment_form textarea');
-                        if ($.trim(textArea.val()).length == 0) return false;
+                        if (textArea.val().trim().length == 0) return false;
                     },
                     success: function(html) {
                         var $comment = $(html)
@@ -59,7 +59,7 @@
                     var dType = removeId.split("-")[1]; // E.g. 461-comment
                     var annId = parseInt(removeId);
                     // /webclient/action/remove/comment/461/?parent=image-257
-                    var parentId = $.trim($("#parent-id").text());
+                    var parentId = $("#parent-id").text().trim();
                     var url = '{% url 'manage_action_containers' "delete" %}'+ dType +'/'+ annId +'/';
                     var $parent = $(event.target).parents("."+domClass);
                     var $annContainer = $parent.parent();

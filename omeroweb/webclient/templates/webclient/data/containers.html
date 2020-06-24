@@ -530,7 +530,7 @@
                     var new_container_name = $("input[name='name']", $f).val();
                     var new_container_desc = $("textarea[name='description']", $f).val();
                     var new_container_owner = $("input[name='owner']", $f).val();
-                    if ($.trim(new_container_name).length == 0) {
+                    if (new_container_name.trim().length == 0) {
                         alert("Please enter a Name");
                         return;
                     }

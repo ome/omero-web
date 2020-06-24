@@ -512,7 +512,7 @@ var tagging_form = function(
         }
         var owner_mode = $(
             "select[name=filter_owner_mode] option:selected").val();
-        filters = $.trim(input).toLowerCase();
+        filters = input.trim().toLowerCase();
         var filters_split = filters.split(/ +/);
         var no_filter = filters === "" && owner_mode === "any";
         if (no_filter) {
@@ -527,7 +527,7 @@ var tagging_form = function(
                     var tag = tags.eq(idx);
                     var tagobj = all_tags[tag.attr("data-id")];
                     var match = true;
-                    var text = $.trim(tagobj.t.toLowerCase());
+                    var text = tagobj.t.toLowerCase().trim();
                     if (mode === "any") {
                         for (var filter in filters_split) {
                             match = match && text.indexOf(
@@ -563,12 +563,12 @@ var tagging_form = function(
         if (text === tag_input.attr('placeholder')) {
             text = '';
         }
-        text = $.trim(text);
+        text = text.trim();
         var description = description_input.val();
         if (description === description_input.attr('placeholder')) {
             description = '';
         }
-        description = $.trim(description);
+        description = description.trim();
 
         var tagset = get_selected_tagset();
         if (text.length > 0) {

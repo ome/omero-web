@@ -2930,7 +2930,7 @@ $.widget( "ui.button", {
 				buttonClasses.push( multipleIcons ? "ui-button-icons-only" : "ui-button-icon-only" );
 
 				if ( !this.hasTitle ) {
-					buttonElement.attr( "title", $.trim( buttonText ) );
+					buttonElement.attr( "title", buttonText.trim() );
 				}
 			}
 		} else {
@@ -10246,7 +10246,7 @@ $.widget("ui.resizable", $.ui.mouse, {
 
 			for(i = 0; i < n.length; i++) {
 
-				handle = $.trim(n[i]);
+				handle = n[i].trim();
 				hname = "ui-resizable-"+handle;
 				axis = $("<div class='ui-resizable-handle " + hname + "'></div>");
 

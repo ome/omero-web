@@ -53,7 +53,7 @@
                 type: "GET",
                 url: form_url,
                 success: function(html) {
-                    html = $.trim(html);
+                    html = html.trim();
                     $( self ).parent().fadeOut('fast', function(){                    
                         
                         $( self ).parent().hide();

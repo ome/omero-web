@@ -143,7 +143,7 @@
                             q = $("input[name='query']").val();
                         }
                         // check we have some search query...
-                        q = $.trim(q);
+                        q = q.trim();
                         if (q.length <= 0) {
                             OME.alert_dialog("Search must contain some text.");
                             return false;
