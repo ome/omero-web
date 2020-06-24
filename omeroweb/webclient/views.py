@@ -1750,7 +1750,8 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
                     'contrastMethods': list(conn.getEnumerationEntries(
                         "ContrastMethodI")),
                     'modes': list(conn.getEnumerationEntries(
-                        "AcquisitionModeI"))})
+                        "AcquisitionModeI"))},
+                    auto_id=False)
                 # 9853 Much metadata is not available to 'shares'
                 if share_id is None:
                     lightPath = logicalChannel.getLightPath()
@@ -1887,20 +1888,22 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
                         'objective': o,
                         'mediums': mediums,
                         'immersions': immersions,
-                        'corrections': corrections})
+                        'corrections': corrections}, auto_id=False)
                     form_instrument_objectives.append(obj_form)
                 filters = list(instrument.getFilters())
                 if len(filters) > 0:
                     for f in filters:
                         form_filter = MetadataFilterForm(initial={
                             'filter': f, 'types': list(
-                                conn.getEnumerationEntries("FilterTypeI"))})
+                                conn.getEnumerationEntries("FilterTypeI"))},
+                            auto_id=False)
                         form_filters.append(form_filter)
 
                 dichroics = list(instrument.getDichroics())
                 for d in dichroics:
                     form_dichroic = MetadataDichroicForm(
-                        initial={'dichroic': d})
+                        initial={'dichroic': d},
+                        auto_id=False)
                     form_dichroics.append(form_dichroic)
 
                 detectors = list(instrument.getDetectors())
@@ -1910,7 +1913,8 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
                             'detectorSettings': None,
                             'detector': d,
                             'types': list(
-                                conn.getEnumerationEntries("DetectorTypeI"))})
+                                conn.getEnumerationEntries("DetectorTypeI"))},
+                            auto_id=False)
                         form_detectors.append(form_detector)
 
                 lasers = list(instrument.getLightSources())
@@ -1927,7 +1931,8 @@ def load_metadata_acquisition(request, c_type, c_id, conn=None, share_id=None,
                             'mediums': list(
                                 conn.getEnumerationEntries("LaserMediumI")),
                             'pulses': list(
-                                conn.getEnumerationEntries("PulseI"))})
+                                conn.getEnumerationEntries("PulseI"))},
+                            auto_id=False)
                         form_lasers.append(form_laser)
 
     # TODO: remove this 'if' since we should only have c_type = 'image'?
