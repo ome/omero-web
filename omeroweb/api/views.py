@@ -803,11 +803,11 @@ class ExperimenterGroupsView(ObjectsView):
         # order_by group name
         opts['order_by'] = 'lower(obj.name)'
 
-        # handle /experimenters/:experimenter_id/groups/
+        # handle /experimenters/:experimenter_id/experimentergroups/
         if 'experimenter_id' in kwargs:
             opts['experimenter'] = int(kwargs['experimenter_id'])
         else:
-            # filter by query /groups/?experimenter=:id
+            # filter by query /experimentergroups/?experimenter=:id
             group = getIntOrDefault(request, 'experimenter', None)
             if group is not None:
                 opts['experimenter'] = group
