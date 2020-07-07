@@ -10,8 +10,8 @@
    - Fix moving data in webclient tree in Python 3.5 ([#170](https://github.com/ome/omero-web/pull/170))
 
 - API changes:
-   - Added ROI support to `paths_to_object` ([#159](https://github.com/ome/omero-web/pull/159))
-   - Added Shape support to `paths_to_object` ([#178](https://github.com/ome/omero-web/pull/178))
+   - Add ROI support to `paths_to_object` ([#159](https://github.com/ome/omero-web/pull/159))
+   - Add Shape support to `paths_to_object` ([#178](https://github.com/ome/omero-web/pull/178))
    - Add JSON API support for Experimenters and Groups ([#148](https://github.com/ome/omero-web/pull/148))
 
 - Other:
