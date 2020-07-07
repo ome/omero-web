@@ -6,7 +6,7 @@
    - Improve filtering Images by numerical Key-Value pairs ([#147](https://github.com/ome/omero-web/pull/147))
    - Fix editing of 'Shares' in webclient ([#162](https://github.com/ome/omero-web/pull/162))
    - Fix error when user logged-out and public user configured ([#154](https://github.com/ome/omero-web/pull/154))
-   - Fix thumb_default_size config in webclient ([#165](https://github.com/ome/omero-web/pull/165))
+   - No longer ignore the default thumbnail size from the configuration ([#165](https://github.com/ome/omero-web/pull/165))
    - Fix moving data in webclient tree in Python 3.5 ([#170](https://github.com/ome/omero-web/pull/170))
 
 - API changes:
