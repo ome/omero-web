@@ -17,6 +17,11 @@
 - Other:
    - Fix `render_roi_thumbnail` for unset Z/T index ([#157](https://github.com/ome/omero-web/pull/157))
    - `omero-web` now requires `omero-py 5.7.0`
+   - Add doc for APPLICATION_SERVER_HOST to settings ([#177](https://github.com/ome/omero-web/pull/177))
+   - Set sign_tags to True by default in .bumpversion.cfg ([#176](https://github.com/ome/omero-web/pull/176))
+   - Fix new flake8 warnings ([#174](https://github.com/ome/omero-web/pull/174))
+   - Add `omero-web-docker` to release process instructions ([#156](https://github.com/ome/omero-web/pull/156))
+
 
 5.6.3 (March 2020)
 ------------------
