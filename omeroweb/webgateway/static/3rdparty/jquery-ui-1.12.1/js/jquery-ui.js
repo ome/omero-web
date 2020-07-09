@@ -75,12 +75,12 @@ $.widget = function( name, base, prototype ) {
 		base = $.Widget;
 	}
 
-	if ( $.isArray( prototype ) ) {
+	if ( Array.isArray( prototype ) ) {
 		prototype = $.extend.apply( null, [ {} ].concat( prototype ) );
 	}
 
 	// Create selector for plugin
-	$.expr[ ":" ][ fullName.toLowerCase() ] = function( elem ) {
+	$.expr.pseudos[ fullName.toLowerCase() ] = function( elem ) {
 		return !!$.data( elem, fullName );
 	};
 
@@ -1246,7 +1246,7 @@ var position = $.ui.position;
 //>>docs: http://api.jqueryui.com/data-selector/
 
 
-var data = $.extend( $.expr[ ":" ], {
+var data = $.extend( $.expr.pseudos, {
 	data: $.expr.createPseudo ?
 		$.expr.createPseudo( function( dataName ) {
 			return function( elem ) {
@@ -2220,12 +2220,12 @@ $.fn.extend( {
 
 ( function() {
 
-if ( $.expr && $.expr.filters && $.expr.filters.animated ) {
-	$.expr.filters.animated = ( function( orig ) {
+if ( $.expr && $.expr.pseudos && $.expr.pseudos.animated ) {
+	$.expr.pseudos.animated = ( function( orig ) {
 		return function( elem ) {
 			return !!$( elem ).data( dataSpaceAnimated ) || orig( elem );
 		};
-	} )( $.expr.filters.animated );
+	} )( $.expr.pseudos.animated );
 }
 
 if ( $.uiBackCompat !== false ) {
@@ -3935,7 +3935,7 @@ function visible( element ) {
 	return visibility !== "hidden";
 }
 
-$.extend( $.expr[ ":" ], {
+$.extend( $.expr.pseudos, {
 	focusable: function( element ) {
 		return $.ui.focusable( element, $.attr( element, "tabindex" ) != null );
 	}
@@ -4245,7 +4245,7 @@ var scrollParent = $.fn.scrollParent = function( includeHidden ) {
 
 
 
-var tabbable = $.extend( $.expr[ ":" ], {
+var tabbable = $.extend( $.expr.pseudos, {
 	tabbable: function( element ) {
 		var tabIndex = $.attr( element, "tabindex" ),
 			hasTabindex = tabIndex != null;
@@ -5946,7 +5946,7 @@ $.widget( "ui.autocomplete", {
 	_initSource: function() {
 		var array, url,
 			that = this;
-		if ( $.isArray( this.options.source ) ) {
+		if ( Array.isArray( this.options.source ) ) {
 			array = this.options.source;
 			this.source = function( request, response ) {
 				response( $.ui.autocomplete.filter( array, request.term ) );
@@ -8048,7 +8048,7 @@ $.extend( Datepicker.prototype, {
 			inst = this._getInst( obj ),
 			isRTL = this._get( inst, "isRTL" );
 
-		while ( obj && ( obj.type === "hidden" || obj.nodeType !== 1 || $.expr.filters.hidden( obj ) ) ) {
+		while ( obj && ( obj.type === "hidden" || obj.nodeType !== 1 || $.expr.pseudos.hidden( obj ) ) ) {
 			obj = obj[ isRTL ? "previousSibling" : "nextSibling" ];
 		}
 
@@ -9916,7 +9916,7 @@ $.widget( "ui.draggable", $.ui.mouse, {
 		if ( typeof obj === "string" ) {
 			obj = obj.split( " " );
 		}
-		if ( $.isArray( obj ) ) {
+		if ( Array.isArray( obj ) ) {
 			obj = { left: +obj[ 0 ], top: +obj[ 1 ] || 0 };
 		}
 		if ( "left" in obj ) {
@@ -14580,7 +14580,7 @@ var widgetsSlider = $.widget( "ui.slider", $.ui.mouse, {
 					options.values = [ this._valueMin(), this._valueMin() ];
 				} else if ( options.values.length && options.values.length !== 2 ) {
 					options.values = [ options.values[ 0 ], options.values[ 0 ] ];
-				} else if ( $.isArray( options.values ) ) {
+				} else if ( Array.isArray( options.values ) ) {
 					options.values = options.values.slice( 0 );
 				}
 			}
@@ -14843,7 +14843,7 @@ var widgetsSlider = $.widget( "ui.slider", $.ui.mouse, {
 		}
 
 		if ( arguments.length ) {
-			if ( $.isArray( arguments[ 0 ] ) ) {
+			if ( Array.isArray( arguments[ 0 ] ) ) {
 				vals = this.options.values;
 				newValues = arguments[ 0 ];
 				for ( i = 0; i < vals.length; i += 1 ) {
@@ -14877,7 +14877,7 @@ var widgetsSlider = $.widget( "ui.slider", $.ui.mouse, {
 			}
 		}
 
-		if ( $.isArray( this.options.values ) ) {
+		if ( Array.isArray( this.options.values ) ) {
 			valsLength = this.options.values.length;
 		}
 
@@ -16285,7 +16285,7 @@ var widgetsSortable = $.widget( "ui.sortable", $.ui.mouse, {
 		if ( typeof obj === "string" ) {
 			obj = obj.split( " " );
 		}
-		if ( $.isArray( obj ) ) {
+		if ( Array.isArray( obj ) ) {
 			obj = { left: +obj[ 0 ], top: +obj[ 1 ] || 0 };
 		}
 		if ( "left" in obj ) {
@@ -17371,7 +17371,7 @@ $.widget( "ui.tabs", {
 
 		// Take disabling tabs via class attribute from HTML
 		// into account and update option properly.
-		if ( $.isArray( options.disabled ) ) {
+		if ( Array.isArray( options.disabled ) ) {
 			options.disabled = $.unique( options.disabled.concat(
 				$.map( this.tabs.filter( ".ui-state-disabled" ), function( li ) {
 					return that.tabs.index( li );
@@ -17779,7 +17779,7 @@ $.widget( "ui.tabs", {
 	_setOptionDisabled: function( disabled ) {
 		var currentItem, li, i;
 
-		if ( $.isArray( disabled ) ) {
+		if ( Array.isArray( disabled ) ) {
 			if ( !disabled.length ) {
 				disabled = false;
 			} else if ( disabled.length === this.anchors.length ) {
@@ -18067,7 +18067,7 @@ $.widget( "ui.tabs", {
 			disabled = false;
 		} else {
 			index = this._getIndex( index );
-			if ( $.isArray( disabled ) ) {
+			if ( Array.isArray( disabled ) ) {
 				disabled = $.map( disabled, function( num ) {
 					return num !== index ? num : null;
 				} );
@@ -18093,7 +18093,7 @@ $.widget( "ui.tabs", {
 			if ( $.inArray( index, disabled ) !== -1 ) {
 				return;
 			}
-			if ( $.isArray( disabled ) ) {
+			if ( Array.isArray( disabled ) ) {
 				disabled = $.merge( [ index ], disabled ).sort();
 			} else {
 				disabled = [ index ];
