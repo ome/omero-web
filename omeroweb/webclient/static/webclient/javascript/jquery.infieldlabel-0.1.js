@@ -38,15 +38,15 @@
 			
 			base.$field.on("focus", function(){
 				base.fadeOnFocus();
-			}).blur(function(){
+			}).on("blur", function(){
 				base.checkForEmpty(true);
-			}).bind('keydown.infieldlabel',function(e){
+			}).on('keydown.infieldlabel',function(e){
 				// Use of a namespace (.infieldlabel) allows us to
 				// unbind just this method later
 				base.hideOnChange(e);
-			}).change(function(e){
+			}).on("change", function(e){
 				base.checkForEmpty();
-			}).bind('onPropertyChange', function(){
+			}).on('onPropertyChange', function(){
 				base.checkForEmpty();
 			});
         };
