@@ -1107,6 +1107,7 @@ def api_paths_to_object(request, conn=None, **kwargs):
         tag_id = get_long_or_default(request, 'tag', None)
         tagset_id = get_long_or_default(request, 'tagset', None)
         roi_id = get_long_or_default(request, 'roi', None)
+        shape_id = get_long_or_default(request, 'shape', None)
         group_id = get_long_or_default(request, 'group', None)
         page_size = get_long_or_default(request, 'page_size', settings.PAGE)
     except ValueError:
@@ -1119,7 +1120,7 @@ def api_paths_to_object(request, conn=None, **kwargs):
         paths = paths_to_object(conn, experimenter_id, project_id,
                                 dataset_id, image_id, screen_id, plate_id,
                                 acquisition_id, well_id, group_id,
-                                page_size, roi_id)
+                                page_size, roi_id, shape_id)
     return JsonResponse({'paths': paths})
 
 
