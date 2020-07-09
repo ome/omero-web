@@ -755,7 +755,7 @@ OME.nodeHasPermission = function(node, permission) {
     */
 
     // Require that all nodes have the necessary permissions
-    if ($.isArray(node)) {
+    if (Array.isArray(node)) {
         for (var index in node) {
             if (!OME.nodeHasPermission(node[index], permission)) {
                 return false;

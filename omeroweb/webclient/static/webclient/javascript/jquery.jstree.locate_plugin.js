@@ -285,7 +285,7 @@
         this.copy_node = function (obj, par, node, pos, callback, is_loaded) {
             var copied_node = parent.copy_node.call(this, obj, par, node, pos, callback, is_loaded);
             // copy_node calls itself if it is presented with an array, ignore those cases
-            if (!$.isArray(obj) &&
+            if (!Array.isArray(obj) &&
                 (typeof copied_node == 'string' || copied_node instanceof String)) {
                 this._locate_add(copied_node);
             }
