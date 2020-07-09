@@ -268,7 +268,7 @@
 			});
 
 		} else if (options.success) {
-			if ($.isArray(options.success)) {
+			if (Array.isArray(options.success)) {
 				$.merge(callbacks, options.success);
 			} else {
 				callbacks.push(options.success);
