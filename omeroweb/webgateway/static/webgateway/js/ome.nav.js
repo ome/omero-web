@@ -103,7 +103,7 @@ $(document).ready(function()
          */
         // Left
         $("#dragLeft").draggable({ axis: "x" })
-        .bind("dragstart", function(event, ui) {
+        .on("dragstart", function(event, ui) {
             // note the starting position and original width
             $(this).data("drag_start_x", event.pageX);
             var lp_width = $("#left_panel").width();
@@ -111,7 +111,7 @@ $(document).ready(function()
             $(this).data("cp_width", $("#center_panel").width());
             $("#swapTree").children('img').removeClass("collapsed-left").addClass("expanded-left");     // show 'expanded'
         })
-        .bind("drag", function(event, ui) {
+        .on("drag", function(event, ui) {
             var moved = event.pageX - $(this).data("drag_start_x");
             var new_width = $(this).data("lp_width") + moved;
             var new_center_w = $(this).data("cp_width") - moved;
@@ -120,14 +120,14 @@ $(document).ready(function()
                 $("#center_container").css('left', new_width+"px");
             }
         })
-        .bind("dragstop", function(event, ui) {
+        .on("dragstop", function(event, ui) {
             $(this).css("left", "0px");
             $("#left_panel").trigger('resize');
         });
         
         // Right
         $("#dragRight").draggable({ axis: "x" })
-        .bind("dragstart", function(event, ui) {
+        .on("dragstart", function(event, ui) {
             // note the starting position and original width
             $(this).data("drag_start_x", event.pageX);
             var rp_width = $("#right_panel").width();
@@ -135,7 +135,7 @@ $(document).ready(function()
             $(this).data("cp_width", $("#center_panel").width());
             $("#swapMeta").children('img').removeClass("expanded-right").addClass("collapsed-right");   // show 'expanded'
         })
-        .bind("drag", function(event, ui) {
+        .on("drag", function(event, ui) {
             var moved = event.pageX - $(this).data("drag_start_x");
             var new_width = $(this).data("rp_width") - moved;
             var new_center_w = $(this).data("cp_width") + moved;
@@ -144,7 +144,7 @@ $(document).ready(function()
                 $("#center_container").css('right', new_width +"px");
             }
         })
-        .bind("dragstop", function(event, ui) {
+        .on("dragstop", function(event, ui) {
             $(this).css("left", "0px");
             $("#right_panel").trigger('resize');
         });
