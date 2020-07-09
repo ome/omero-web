@@ -36,7 +36,7 @@
 				base.showing = false;
 			};
 			
-			base.$field.focus(function(){
+			base.$field.on("focus", function(){
 				base.fadeOnFocus();
 			}).blur(function(){
 				base.checkForEmpty(true);
