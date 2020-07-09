@@ -354,7 +354,7 @@ OME.initToolbarDropdowns = function() {
         return false;
     });
     // on hover-out, hide drop-down menus
-    $toolbar_dropdownlists.hover(function(){}, function(){
+    $toolbar_dropdownlists.on("hover", function(){}, function(){
         $(this).css('visibility', 'hidden');
     });
 

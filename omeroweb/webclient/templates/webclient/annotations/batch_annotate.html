@@ -77,7 +77,7 @@
                     return false;
                 });
                 // on hover-out of the menu itself, hide drop-down menus
-                $(".dropdown_menu_options").hover(function(){}, function(){
+                $(".dropdown_menu_options").on("hover", function(){}, function(){
                     $(this).css('visibility', 'hidden');
                 }).hide();
 

@@ -245,7 +245,7 @@
                 return false;
             });
             // on hover-out, hide drop-down menus
-            $("#user_dropdown ul").hover(function(){}, function(){
+            $("#user_dropdown ul").on("hover", function(){}, function(){
                 $(this).css('visibility', 'hidden');
             });
 

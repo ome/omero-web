@@ -302,6 +302,6 @@ $.fn.gs_slider = function(cfg) {
         slider.unbind('mousemove', follow_pos);
       }
 
-      slider.hover(ttshow, tthide);
+      slider.on("hover", ttshow, tthide);
   });
 }

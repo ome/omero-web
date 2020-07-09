@@ -578,7 +578,7 @@
 
           // now bind mouseover
           var $roi_thumb_popup = $('#roi_thumb_popup');
-          $('.roi_thumb').hover(function(e) {
+          $('.roi_thumb').on("hover", function(e) {
               $roi_thumb_popup.attr('src', $(this).attr('src')).show();
           }, function(e){
               $roi_thumb_popup.hide();
