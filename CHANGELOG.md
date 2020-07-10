@@ -8,6 +8,7 @@
    - Fix error when user logged-out and public user configured ([#154](https://github.com/ome/omero-web/pull/154))
    - No longer ignore the default thumbnail size from the configuration ([#165](https://github.com/ome/omero-web/pull/165))
    - Fix moving data in webclient tree in Python 3.5 ([#170](https://github.com/ome/omero-web/pull/170))
+   - Handle no 'callback' in request.session ([#186](https://github.com/ome/omero-web/pull/186))
 
 - API changes:
    - Add ROI support to `paths_to_object` ([#159](https://github.com/ome/omero-web/pull/159))
