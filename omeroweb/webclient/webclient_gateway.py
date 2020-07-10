@@ -1384,6 +1384,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         @rtype                  List of L{ExperimenterWrapper}
         """
 
+        # Make sure we've loaded experimenters
+        group = self.getObject("ExperimenterGroup", group.id,
+                               opts={'load_experimenters': True})
+
         experimenters = list(self.getObjects("Experimenter"))
 
         new_membersIds = [nm.id for nm in new_members]
@@ -1391,11 +1395,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         old_members = group.getMembers()
         old_membersIds = [om.id for om in old_members]
 
-        old_available = list()
+        old_availableIds = []
         for e in experimenters:
             if e.id not in old_membersIds:
-                old_available.append(e)
-        old_availableIds = [oa.id for oa in old_available]
+                old_availableIds.append(e.id)
 
         new_available = list()
         for e in experimenters:
@@ -1413,23 +1416,23 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             if e.id in rm_exps:
                 # removing user from their default group #9193
                 # if e.getDefaultGroup().id != group.id:
-                to_remove.append(e._obj)
+                to_remove.append(e)
             if e.id in add_exps:
-                to_add.append(e._obj)
+                to_add.append(e)
 
         admin_serv = self.getAdminService()
         userGid = admin_serv.getSecurityRoles().userGroupId
         failures = []
         for e in to_add:
-            admin_serv.addGroups(e, [group._obj])
+            admin_serv.addGroups(e._obj, [group._obj])
         for e in to_remove:
             # Experimenter needs to stay in at least 1 non-user group
-            gs = [link.parent.id.val for link in e.copyGroupExperimenterMap()
+            gs = [link.parent.id for link in e.copyGroupExperimenterMap()
                   if link.parent.id.val != userGid]
             if len(gs) == 1:
-                failures.append(ExperimenterWrapper(self, e))
+                failures.append(ExperimenterWrapper(self, e._obj))
                 continue
-            admin_serv.removeGroups(e, [group._obj])
+            admin_serv.removeGroups(e._obj, [group._obj])
         return failures
 
     def setOwnersOfGroup(self, group, owners):
@@ -2370,6 +2373,8 @@ class ExperimenterGroupWrapper(OmeroWebObjectWrapper,
                 yield ExperimenterWrapper(self._conn, gem.child)
 
     def getOwnersNames(self):
+        warnings.warn("getOwnersNames() deprecated in 5.7.0",
+                      DeprecationWarning)
         owners = list()
         for e in self.getOwners():
             owners.append(e.getFullName())
