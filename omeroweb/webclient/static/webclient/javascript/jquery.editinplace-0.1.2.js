@@ -40,7 +40,7 @@
         
         this.each( function( ) {
             var self = this;
-            $(this).bind( opt.edit_event, function( e ) {
+            $(this).on( opt.edit_event, function( e ) {
                 _editMode(this);
             } );
         } ); // this.each
@@ -127,7 +127,7 @@
                                         }); // this.each
                                         
                                         $("#form-"+field_id).remove( ).fadeOut( "fast" );
-                                        $( self ).bind( opt.edit_event, function( e ) {
+                                        $( self ).on( opt.edit_event, function( e ) {
                                             _editMode( self );
                                         } );
                                         $( self ).parent().show().fadeIn( "fast" );
@@ -144,7 +144,7 @@
                                 return true;
                             },
                             error: function(responce) {
-                                $( self ).bind( opt.edit_event, function( e ) {
+                                $( self ).on( opt.edit_event, function( e ) {
                                     _editMode( self );
                                 } );
                             }
@@ -153,7 +153,7 @@
                     });
                 },
                 error: function(responce) {
-                    $( self ).bind( opt.edit_event, function( e ) {
+                    $( self ).on( opt.edit_event, function( e ) {
                         _editMode( self );
                     } );
                 }
@@ -163,7 +163,7 @@
         
         var _cancelEdit = function( self ) {
             $("#form-"+field_id).remove().fadeOut( "fast" );
-            $( self ).bind( opt.edit_event, function( e ) {
+            $( self ).on( opt.edit_event, function( e ) {
                 _editMode( self );
             } );
             $( self ).parent().show().fadeIn( "fast" );        

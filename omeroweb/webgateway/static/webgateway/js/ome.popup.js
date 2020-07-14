@@ -648,7 +648,7 @@ OME.login_dialog = function(login_url, callback) {
             });
 
             // on change of selection in tree, update which tabs are enabled
-            $("body").bind("selection_change.ome", function(event) {
+            $("body").on("bind", "selection_change.ome", function(event) {
 
                 // clear contents of panel
                 $this.empty();
@@ -732,7 +732,7 @@ OME.login_dialog = function(login_url, callback) {
             $('#center_panel_chooser').bind('center_plugin_changed.ome', update_plugin_content);
 
             // on change of selection in tree, update which tabs are enabled
-            $("body").bind("selection_change.ome", function(event) {
+            $("body").on("bind", "selection_change.ome", function(event) {
 
                 // clear contents of panel
                 if (empty_on_sel_change) {
