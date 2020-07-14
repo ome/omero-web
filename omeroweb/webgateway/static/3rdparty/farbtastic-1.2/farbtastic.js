@@ -157,7 +157,7 @@ jQuery._farbtastic = function (container, callback) {
   fb.mousedown = function (event) {
     // Capture mouse
     if (!document.dragging) {
-      $(document).bind('mousemove', fb.mousemove).bind('mouseup', fb.mouseup);
+      $(document).on('mousemove', fb.mousemove).on('mouseup', fb.mouseup);
       document.dragging = true;
     }
 
