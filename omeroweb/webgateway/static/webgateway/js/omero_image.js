@@ -239,8 +239,8 @@
                 .slider( "option", "min", Math.min(w.min, w.start) )   // extend range if needed
                 .slider( "option", "max", Math.max(w.max, w.end) );
             $('#wblitz-ch'+i+'-color').attr('data-color', channels[i].color);
-            $('#wblitz-ch'+i+'-cw-start').val(channels[i].window.start).change();
-            $('#wblitz-ch'+i+'-cw-end').val(channels[i].window.end).change();
+            $('#wblitz-ch' + i + '-cw-start').val(channels[i].window.start).trigger('change');
+            $('#wblitz-ch' + i + '-cw-end').val(channels[i].window.end).trigger('change');
         }
         // Colorpicker buttons store 'reverse-intensity' with .data() to populate colorbtn dialog
         $(".picker").each(function(i, pickerBtn) {
@@ -477,9 +477,9 @@
                 var s = $(this).data('channel_start');
                 var e = $(this).data('channel_end');
                 if (ui.values[0] !== s) {
-                    $('#wblitz-ch'+$(event.target).data('channel-idx')+'-cw-start').val(ui.values[0]).change();
+                    $('#wblitz-ch' + $(event.target).data('channel-idx') + '-cw-start').val(ui.values[0]).trigger('change');
                 } else if (ui.values[1] !== e) {
-                    $('#wblitz-ch'+$(event.target).data('channel-idx')+'-cw-end').val(ui.values[1]).change();
+                    $('#wblitz-ch'+ $(event.target).data('channel-idx') + '-cw-end').val(ui.values[1]).trigger('change');
                 }
                 viewport.self.trigger("channelSlide", [viewport, $(event.target).data('channel-idx'), ui.values[0], ui.values[1]]);
             };

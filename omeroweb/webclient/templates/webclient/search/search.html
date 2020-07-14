@@ -55,7 +55,7 @@
                 }
 
                 // Choose group, then pick a user from that group
-                $("#searchGroup").change(function() {
+                $("#searchGroup").on('change', function() {
                     var gid = $(this).val();
                     selectUsersFromGroup(gid);
                 });

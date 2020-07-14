@@ -51,7 +51,7 @@
         $("#id_experimenters").chosen({placeholder_text:'Choose one or more users'});
 
         // Disable user/group fields if 'all' field is checked, and vice-versa
-        $("#id_everyone").change(function(e){
+        $("#id_everyone").on('change', function(e){
           var state =  $(e.target).is(':checked');
           // Disable/Enable Users/Groups
           $('#id_experimenters').prop('disabled', state).trigger("chosen:updated");

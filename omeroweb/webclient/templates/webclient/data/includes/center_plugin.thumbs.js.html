@@ -426,7 +426,7 @@ $(document).ready(function() {
         }
 
         // Chooser for revealing various filter components
-        $("#choosefilter").change(function() {
+        $("#choosefilter").on('change', function() {
             var $this = $(this),
                 filterby = $this.val();
             // reset chooser
@@ -669,7 +669,7 @@ $(document).ready(function() {
             $("#currentFilterTags").html(html);
         };
 
-        $("#filter_by_tag").change(function(event){
+        $("#filter_by_tag").on('change', function(event){
             var $this = $(event.target);
             var tagId = $this.val();
             if (filter_tag_ids.indexOf(tagId) === -1) {

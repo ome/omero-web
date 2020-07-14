@@ -1505,7 +1505,7 @@
     viewport.viewportimg.bind("rois_loaded", handle_rois_loaded);
     
     // 'Scalebar' checkbox to left of image
-    $("#wblitz-scalebar").change(function() {
+    $("#wblitz-scalebar").on('change', function() {
         if(this.checked) {
             show_scalebar();
         } else {

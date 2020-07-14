@@ -723,11 +723,11 @@ var tagging_form = function(
     $("#id_tag_deselect_button").on('click', deselect_tags);
     $("#id_add_new_tag").on('click', add_new_tag);
     $("#add_tags_form").off('prepare-submit').on('prepare-submit', save_tags);
-    tag_input.keyup(update_add_new_button_state).change(
+    tag_input.keyup(update_add_new_button_state).on('change',
         update_add_new_button_state);
     update_add_new_button_state();
-    tag_input_filter.keyup(update_filter).change(update_filter);
-    $("select[name=filter_mode],select[name=filter_owner_mode]").change(
+    tag_input_filter.keyup(update_filter).on('change', update_filter);
+    $("select[name=filter_mode],select[name=filter_owner_mode]").on('change',
         update_filter);
 
     loader();
