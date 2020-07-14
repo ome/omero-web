@@ -589,7 +589,7 @@
 					});
 					
 					// apply easy methods that trigger binded events
-					$this.bind("update",function() {
+					$this.on("update",function() {
 						
 						// rebuild parsers.
 						this.config.parsers = buildParserCache(this,$headers);
@@ -597,7 +597,7 @@
 						// rebuild the cache map
 						cache = buildCache(this);
 						
-					}).bind("sorton",function(e,list) {
+					}).on("sorton",function(e,list) {
 						
 						$(this).trigger("sortStart");
 						
@@ -616,15 +616,15 @@
 						// sort the table and append it to the dom
 						appendToTable(this,multisort(this,sortList,cache));
 
-					}).bind("appendCache",function() {
+					}).on("appendCache",function() {
 						
 						appendToTable(this,cache);
 					
-					}).bind("applyWidgetId",function(e,id) {
+					}).on("applyWidgetId",function(e,id) {
 						
 						getWidgetById(id).format(this);
 						
-					}).bind("applyWidgets",function() {
+					}).on("applyWidgets",function() {
 						// apply widgets
 						applyWidget(this);
 					});
