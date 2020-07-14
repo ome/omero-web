@@ -772,6 +772,11 @@ var cachedScrollbarWidth,
 	rpercent = /%$/,
 	_position = $.fn.position;
 
+// https://api.jquery.com/jQuery.isWindow/
+function isWindowObj(obj) {
+	return obj != null && obj === obj.window;
+}
+
 function getOffsets( offsets, width, height ) {
 	return [
 		parseFloat( offsets[ 0 ] ) * ( rpercent.test( offsets[ 0 ] ) ? width / 100 : 1 ),
@@ -792,7 +797,7 @@ function getDimensions( elem ) {
 			offset: { top: 0, left: 0 }
 		};
 	}
-	if ( $.isWindow( raw ) ) {
+	if (isWindowObj( raw ) ) {
 		return {
 			width: elem.width(),
 			height: elem.height(),
@@ -854,7 +859,7 @@ $.position = {
 	},
 	getWithinInfo: function( element ) {
 		var withinElement = $( element || window ),
-			isWindow = $.isWindow( withinElement[ 0 ] ),
+			isWindow = isWindowObj( withinElement[ 0 ] ),
 			isDocument = !!withinElement[ 0 ] && withinElement[ 0 ].nodeType === 9,
 			hasOffset = !isWindow && !isDocument;
 		return {
