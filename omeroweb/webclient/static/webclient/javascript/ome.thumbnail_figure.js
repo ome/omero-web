@@ -56,7 +56,7 @@ $(document).ready(function() {
             });
         });
     };
-    $("input[name=Max_Columns]").bind('keyup input', updateRowCount);
+    $("input[name=Max_Columns]").on('keyup input', updateRowCount);
 
     updateRowCount();   // initialise layout
 

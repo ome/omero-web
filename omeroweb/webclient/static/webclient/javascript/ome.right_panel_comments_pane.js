@@ -45,12 +45,12 @@ var CommentsPane = function CommentsPane($element, opts) {
     // Comment field - show/hide placeholder and submit button.
     $("#add_comment_wrapper label").inFieldLabels();
     $("#id_comment")
-        .blur(function(event){
+        .on('blur', function(event){
             setTimeout(function(){
                 $("#add_comment_form input[type='submit']").hide();
             }, 200);    // Delay allows clicking on the submit button!
         })
-        .focus(function(){
+        .on('focus', function(){
             $("#add_comment_form input[type='submit']").show();
         });
 

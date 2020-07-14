@@ -25,7 +25,7 @@
              *
             */
             var lf = this.settings.locate.locate_function;
-            if (lf !== undefined && $.isFunction(lf)) {
+            if (lf !== undefined && typeof lf === 'function') {
                 return lf.call(this, node);
             }
             return false;
