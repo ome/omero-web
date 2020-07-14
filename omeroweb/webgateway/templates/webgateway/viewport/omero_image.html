@@ -1183,7 +1183,7 @@
 
     var legend_open = function () {
       var d = $(this);
-      d.unbind('opening', legend_open);
+      d.off('opening', legend_open);
       /* Calculate the size for legend post-it */
       var h = $('#weblitz-viewport-vp').height();
       var w = ($('#weblitz-viewport-vp').width() - h) /2;
@@ -1193,12 +1193,12 @@
       }
       d.trigger('jqResize');
     };
-    $("#legend-postit").bind('opening', legend_open);
+    $("#legend-postit").on('opening', legend_open);
 
     zindex_automator('.postit', 210);
 
     /* Make (kind of) sure that closing the rendering defs window closes an eventually opened color picker */
-    $("#rdef-postit").bind('closed',
+    $("#rdef-postit").on('closed',
       function () {
                     hidePicker();
                   });

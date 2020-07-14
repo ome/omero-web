@@ -138,8 +138,8 @@
             $(self).css('z-index', z);
         };
         $.each(wspace, function () {
-            $(this).bind('opening', tofront);
-            $(this).bind('mousedown', tofront);
+            $(this).on('opening', tofront);
+            $(this).on('mousedown', tofront);
         });
     };
 
@@ -552,15 +552,15 @@
 
             $('#wblitz-ch'+(i)+'-cw').append('<td width="10%"><span class="min" title="min: ' + channels[i].window.min + '"><input type="text" id="wblitz-ch' + i + '-cw-start" /></span></td><td><div class="rangeslider" id="wblitz-ch' + i + '-cwslider"></div></td> <td width="10%"><span class="max" title="max: ' + channels[i].window.max + '"><input type="text" id="wblitz-ch' + i + '-cw-end" /></span></td>');
             init_ch_slider(i, channels);
-            $('#wblitz-ch'+i+'-cw-start').val(channels[i].window.start).unbind('change').bind('change', start_cb(i));
+            $('#wblitz-ch'+i+'-cw-start').val(channels[i].window.start).off('change').on('change', start_cb(i));
             $('#wblitz-ch'+i+'-cw-start').keyup(keyup_cb()).focusout(focusout_cb());
-            $('#wblitz-ch'+i+'-cw-end').val(channels[i].window.end).unbind('change').bind('change', end_cb(i));
+            $('#wblitz-ch'+i+'-cw-end').val(channels[i].window.end).off('change').on('change', end_cb(i));
             $('#wblitz-ch'+i+'-cw-end').keyup(keyup_cb()).focusout(focusout_cb());
         }
 
         // bind clicking on channel checkboxes
         $(".rd-wblitz-ch").each(function(i){
-            $(this).bind('click', doToggle(i));
+            $(this).on('click', doToggle(i));
         });
 
 
