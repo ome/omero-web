@@ -404,7 +404,7 @@
         });
 
         // When we filter annotations by 'me'/'others', need to update toolbar
-        $("#annotationFilter").change(function(){
+        $("#annotationFilter").on('change', function(){
             // wait for annotations to be shown/hidden
             setTimeout(function(){
                 // de-select all rows first
