@@ -206,7 +206,7 @@
 		var qx, a = this.formToArray(options.semantic, elements, options.filtering);
 
 		if (options.data) {
-			var optionsData = $.isFunction(options.data) ? options.data(a) : options.data;
+			var optionsData = typeof options.data === 'function' ? options.data(a) : options.data;
 
 			options.extraData = optionsData;
 			qx = $.param(optionsData, traditional);
@@ -690,7 +690,7 @@
 					setTimeout(checkState, 15);
 
 					try {
-						form.submit();
+						form.trigger('submit');
 
 					} catch (err) {
 						// just in case form has element with name/id of 'submit'
@@ -981,7 +981,7 @@
 		}
 
 		options = options || {};
-		options.delegation = options.delegation && $.isFunction($.fn.on);
+		options.delegation = options.delegation && typeof $.fn.on === 'function';
 
 		// in jQuery 1.3+ we can fix mistakes with the ready state
 		if (!options.delegation && this.length === 0) {
@@ -1119,7 +1119,7 @@
 			return a;
 		}
 
-		if ($.isFunction(filtering)) {
+		if (typeof filtering === 'function') {
 			els = $.map(els, filtering);
 		}
 
