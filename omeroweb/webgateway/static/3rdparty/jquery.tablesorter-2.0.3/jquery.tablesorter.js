@@ -517,7 +517,7 @@
 					
 					// apply event handling to headers
 					// this is to big, perhaps break it out?
-					$headers.click(function(e) {
+					$headers.on('click', function(e) {
 						
 						$this.trigger("sortStart");
 						
