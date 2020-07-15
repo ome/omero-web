@@ -47,7 +47,7 @@
 
         // Private functions
         var _editMode = function( self ) {
-            $( self ).unbind( opt.edit_event );
+            $( self ).off( opt.edit_event );
 
             $.ajax({
                 type: "GET",
@@ -67,7 +67,7 @@
                         .appendTo($("#form-"+field_id));            
                         
                         $('<input id="cancel-'+field_id+'" type="button" value="Cancel" />')
-                        .bind( "click", function( e ) {
+                        .on( "click", function( e ) {
                             _cancelEdit( self );
                         } )
                         .appendTo($("#form-"+field_id));
