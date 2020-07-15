@@ -476,31 +476,31 @@
 				}
 				else {
 					var o = this.get_parent(e.currentTarget);
-					if(o && o.id !== $.jstree.root) { this.get_node(o, true).children('.jstree-anchor').focus(); }
+					if(o && o.id !== $.jstree.root) { this.get_node(o, true).children('.jstree-anchor').trigger('focus'); }
 				}
 			},
 			'up': function (e) {
 				// up
 				e.preventDefault();
 				var o = this.get_prev_dom(e.currentTarget);
-				if(o && o.length) { o.children('.jstree-anchor').focus(); }
+				if(o && o.length) { o.children('.jstree-anchor').trigger('focus'); }
 			},
 			'right': function (e) {
 				// right
 				e.preventDefault();
 				if(this.is_closed(e.currentTarget)) {
-					this.open_node(e.currentTarget, function (o) { this.get_node(o, true).children('.jstree-anchor').focus(); });
+					this.open_node(e.currentTarget, function (o) { this.get_node(o, true).children('.jstree-anchor').trigger('focus'); });
 				}
 				else if (this.is_open(e.currentTarget)) {
 					var o = this.get_node(e.currentTarget, true).children('.jstree-children')[0];
-					if(o) { $(this._firstChild(o)).children('.jstree-anchor').focus(); }
+					if(o) { $(this._firstChild(o)).children('.jstree-anchor').trigger('focus'); }
 				}
 			},
 			'down': function (e) {
 				// down
 				e.preventDefault();
 				var o = this.get_next_dom(e.currentTarget);
-				if(o && o.length) { o.children('.jstree-anchor').focus(); }
+				if(o && o.length) { o.children('.jstree-anchor').trigger('focus'); }
 			},
 			'*': function (e) {
 				// aria defines * on numpad as open_all - not very common
@@ -510,12 +510,12 @@
 				// home
 				e.preventDefault();
 				var o = this._firstChild(this.get_container_ul()[0]);
-				if(o) { $(o).children('.jstree-anchor').filter(':visible').focus(); }
+				if(o) { $(o).children('.jstree-anchor').filter(':visible').trigger('focus'); }
 			},
 			'end': function (e) {
 				// end
 				e.preventDefault();
-				this.element.find('.jstree-anchor').filter(':visible').last().focus();
+				this.element.find('.jstree-anchor').filter(':visible').last().trigger('focus');
 			},
 			'f2': function (e) {
 				// f2 - safe to include - if check_callback is false it will fail
@@ -713,7 +713,7 @@
 		 * @name teardown()
 		 */
 		teardown : function () {
-			this.unbind();
+			this.off();
 			this.element
 				.removeClass('jstree')
 				.removeData('jstree')
@@ -844,7 +844,7 @@
 						if(word.length > 1) {
 							col.slice(ind).each($.proxy(function (i, v) {
 								if($(v).text().toLowerCase().indexOf(word) === 0) {
-									$(v).focus();
+									$(v).trigger('focus');
 									end = true;
 									return false;
 								}
@@ -854,7 +854,7 @@
 							// match for whole word from the beginning of the tree
 							col.slice(0, ind).each($.proxy(function (i, v) {
 								if($(v).text().toLowerCase().indexOf(word) === 0) {
-									$(v).focus();
+									$(v).trigger('focus');
 									end = true;
 									return false;
 								}
@@ -866,7 +866,7 @@
 							// search for the next node starting with that letter
 							col.slice(ind + 1).each($.proxy(function (i, v) {
 								if($(v).text().toLowerCase().charAt(0) === chr) {
-									$(v).focus();
+									$(v).trigger('focus');
 									end = true;
 									return false;
 								}
@@ -876,7 +876,7 @@
 							// search from the beginning
 							col.slice(0, ind + 1).each($.proxy(function (i, v) {
 								if($(v).text().toLowerCase().charAt(0) === chr) {
-									$(v).focus();
+									$(v).trigger('focus');
 									end = true;
 									return false;
 								}
@@ -919,7 +919,7 @@
 							was_click = 0;
 							var act = this.get_node(this.element.attr('aria-activedescendant'), true);
 							if(act) {
-								act.find('> .jstree-anchor').focus();
+								act.find('> .jstree-anchor').trigger('focus');
 							}
 						}
 					}, this))
@@ -2356,7 +2356,7 @@
 			if(fe !== null && this.settings.core.restore_focus) {
 				tmp = this.get_node(fe, true);
 				if(tmp && tmp.length && tmp.children('.jstree-anchor')[0] !== document.activeElement) {
-					tmp.children('.jstree-anchor').focus();
+					tmp.children('.jstree-anchor').trigger('focus');
 				}
 				else {
 					this._data.core.focused = null;
@@ -4026,11 +4026,11 @@
 				lft = this.element[0].scrollLeft;
 				if(par.id === $.jstree.root) {
 					if (this._model.data[$.jstree.root].children[0]) {
-						this.get_node(this._model.data[$.jstree.root].children[0], true).children('.jstree-anchor').focus();
+						this.get_node(this._model.data[$.jstree.root].children[0], true).children('.jstree-anchor').trigger('focus');
 					}
 				}
 				else {
-					this.get_node(par, true).children('.jstree-anchor').focus();
+					this.get_node(par, true).children('.jstree-anchor').trigger('focus');
 				}
 				this.element[0].scrollTop  = top;
 				this.element[0].scrollLeft = lft;
@@ -4522,7 +4522,7 @@
 			rtl = this._data.core.rtl;
 			w  = this.element.width();
 			this._data.core.focused = tmp.id;
-			a  = obj.children('.jstree-anchor').focus();
+			a  = obj.children('.jstree-anchor').trigger('focus');
 			s  = $('<span></span>');
 			/*!
 			oi = obj.children("i:visible"),
@@ -4568,7 +4568,7 @@
 								var node = this.get_node(tmp.id, true);
 								if(node.length) {
 									this._data.core.focused = tmp.id;
-									node.children('.jstree-anchor').focus();
+									node.children('.jstree-anchor').trigger('focus');
 								}
 							}, this), 0);
 							if(callback) {
@@ -4587,7 +4587,7 @@
 							}
 							if(key === 27 || key === 13) {
 								e.preventDefault();
-								this.blur();
+								this.trigger('blur');
 							}
 						},
 						"click" : function (e) { e.stopImmediatePropagation(); },
@@ -6489,7 +6489,7 @@
 					vakata_context.element
 						.css({ "left" : x, "top" : y })
 						.show()
-						.find('a').first().focus().parent().addClass("vakata-context-hover");
+						.find('a').first().trigger('focus').parent().addClass("vakata-context-hover");
 					vakata_context.is_visible = true;
 					/**
 					 * triggered on the document when the contextmenu is shown
@@ -6505,7 +6505,7 @@
 			},
 			hide : function () {
 				if(vakata_context.is_visible) {
-					vakata_context.element.hide().find("ul").hide().end().find(':focus').blur().end().detach();
+					vakata_context.element.hide().find("ul").hide().end().find(':focus').trigger('blur').end().detach();
 					vakata_context.is_visible = false;
 					/**
 					 * triggered on the document when the contextmenu is hidden
@@ -6576,7 +6576,7 @@
 								break;
 							case 37:
 								if(vakata_context.is_visible) {
-									vakata_context.element.find(".vakata-context-hover").last().closest("li").first().find("ul").hide().find(".vakata-context-hover").removeClass("vakata-context-hover").end().end().children('a').focus();
+									vakata_context.element.find(".vakata-context-hover").last().closest("li").first().find("ul").hide().find(".vakata-context-hover").removeClass("vakata-context-hover").end().end().children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
@@ -6585,14 +6585,14 @@
 								if(vakata_context.is_visible) {
 									o = vakata_context.element.find("ul:visible").addBack().last().children(".vakata-context-hover").removeClass("vakata-context-hover").prevAll("li:not(.vakata-context-separator)").first();
 									if(!o.length) { o = vakata_context.element.find("ul:visible").addBack().last().children("li:not(.vakata-context-separator)").last(); }
-									o.addClass("vakata-context-hover").children('a').focus();
+									o.addClass("vakata-context-hover").children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
 								break;
 							case 39:
 								if(vakata_context.is_visible) {
-									vakata_context.element.find(".vakata-context-hover").last().children("ul").show().children("li:not(.vakata-context-separator)").removeClass("vakata-context-hover").first().addClass("vakata-context-hover").children('a').focus();
+									vakata_context.element.find(".vakata-context-hover").last().children("ul").show().children("li:not(.vakata-context-separator)").removeClass("vakata-context-hover").first().addClass("vakata-context-hover").children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
@@ -6601,7 +6601,7 @@
 								if(vakata_context.is_visible) {
 									o = vakata_context.element.find("ul:visible").addBack().last().children(".vakata-context-hover").removeClass("vakata-context-hover").nextAll("li:not(.vakata-context-separator)").first();
 									if(!o.length) { o = vakata_context.element.find("ul:visible").addBack().last().children("li:not(.vakata-context-separator)").first(); }
-									o.addClass("vakata-context-hover").children('a').focus();
+									o.addClass("vakata-context-hover").children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
@@ -8576,17 +8576,17 @@
 				.on("click.jstree", ".jstree-wholerow", function (e) {
 						e.stopImmediatePropagation();
 						var tmp = $.Event('click', { metaKey : e.metaKey, ctrlKey : e.ctrlKey, altKey : e.altKey, shiftKey : e.shiftKey });
-						$(e.currentTarget).closest(".jstree-node").children(".jstree-anchor").first().trigger(tmp).focus();
+						$(e.currentTarget).closest(".jstree-node").children(".jstree-anchor").first().trigger(tmp).trigger('focus');
 					})
 				.on("dblclick.jstree", ".jstree-wholerow", function (e) {
 						e.stopImmediatePropagation();
 						var tmp = $.Event('dblclick', { metaKey : e.metaKey, ctrlKey : e.ctrlKey, altKey : e.altKey, shiftKey : e.shiftKey });
-						$(e.currentTarget).closest(".jstree-node").children(".jstree-anchor").first().trigger(tmp).focus();
+						$(e.currentTarget).closest(".jstree-node").children(".jstree-anchor").first().trigger(tmp).trigger('focus');
 					})
 				.on("click.jstree", ".jstree-leaf > .jstree-ocl", $.proxy(function (e) {
 						e.stopImmediatePropagation();
 						var tmp = $.Event('click', { metaKey : e.metaKey, ctrlKey : e.ctrlKey, altKey : e.altKey, shiftKey : e.shiftKey });
-						$(e.currentTarget).closest(".jstree-node").children(".jstree-anchor").first().trigger(tmp).focus();
+						$(e.currentTarget).closest(".jstree-node").children(".jstree-anchor").first().trigger(tmp).trigger('focus');
 					}, this))
 				.on("mouseover.jstree", ".jstree-wholerow, .jstree-icon", $.proxy(function (e) {
 						e.stopImmediatePropagation();
