@@ -44,7 +44,7 @@ jQuery._farbtastic = function (container, callback) {
   fb.linkTo = function (callback) {
     // Unbind previous nodes
     if (typeof fb.callback == 'object') {
-      $(fb.callback).unbind('keyup', fb.updateValue);
+      $(fb.callback).off('keyup', fb.updateValue);
     }
 
     // Reset color
@@ -196,8 +196,8 @@ jQuery._farbtastic = function (container, callback) {
    */
   fb.mouseup = function () {
     // Uncapture mouse
-    $(document).unbind('mousemove', fb.mousemove);
-    $(document).unbind('mouseup', fb.mouseup);
+    $(document).off('mousemove', fb.mousemove);
+    $(document).off('mouseup', fb.mouseup);
     document.dragging = false;
   }
 
