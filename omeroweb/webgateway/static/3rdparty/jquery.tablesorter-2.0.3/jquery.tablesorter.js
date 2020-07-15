@@ -581,7 +581,7 @@
 							return false;
 						}
 					// cancel selection	
-					}).mousedown(function() {
+					}).on('mousedown', function() {
 						if(config.cancelSelection) {
 							this.onselectstart = function() {return false};
 							return false;
