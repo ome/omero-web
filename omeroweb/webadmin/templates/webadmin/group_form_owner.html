@@ -45,8 +45,8 @@
                     var selected = $.grep($('#id_members').data('chosen').results_data, function(item){
                         return item.value == userId;
                     });
-                    $("#id_owners_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().unbind("click").remove();
-                    $("#id_members_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().unbind("click").remove();
+                    $("#id_owners_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().off("click").remove();
+                    $("#id_members_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().off("click").remove();
                 }
                 
                 $("#id_owners").chosen({placeholder_text:'Type owners names to add...'});

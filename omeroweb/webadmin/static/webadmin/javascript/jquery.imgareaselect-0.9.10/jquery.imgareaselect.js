@@ -440,7 +440,7 @@ $.imgAreaSelect = function (img, options) {
         startX = x1 = evX(event);
         startY = y1 = evY(event);
 
-        $(document).on('mousemove', startSelection).mouseup(cancelSelection);
+        $(document).on('mousemove', startSelection).on('mouseup', cancelSelection);
 
         return false;
     }
@@ -635,7 +635,7 @@ $.imgAreaSelect = function (img, options) {
                 if (options.resizable || options.movable)
                     $box.on('mousemove', areaMouseMove).on('mousedown', areaMouseDown);
 
-                $(window).resize(windowResize);
+                $(window).on('resize', windowResize);
             }
 
             if (!options.persistent)

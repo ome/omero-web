@@ -156,7 +156,7 @@
         // Setup chosen plugin on 'Groups' chooser
         $("#id_other_groups")
             .chosen({placeholder_text:'Type group names to add...'})
-            .change(function(evt, data) {
+            .on('change', function(evt, data) {
                 // In case we've added the system group:
                 hideSystemGroupX();
 
@@ -222,7 +222,7 @@
             buttons: {
                 "OK": function() {
                     // simply submit the form (AJAX handling set-up above)
-                    $("#change_password_form").submit();
+                    $("#change_password_form").trigger('submit');
                 },
                 "Cancel": function() {
                     $( this ).dialog( "close" );

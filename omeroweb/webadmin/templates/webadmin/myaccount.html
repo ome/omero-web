@@ -96,7 +96,7 @@
                 buttons: {
                     "OK": function() {
                         // simply submit the form (AJAX handling set-up above)
-                        $("#change_password_form").submit();
+                        $("#change_password_form").trigger('submit');
                     },
                     "Cancel": function() {
                         $( this ).dialog( "close" );
