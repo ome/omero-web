@@ -215,7 +215,7 @@ $(function() {
         var ownerId = data_owners[0][0];
         $move_group_tree.hide();
         $("<p>New " + target_type.capitalize() + " name: <input name='new_container_name'/></p>")
-                .appendTo($chgrpform).click();
+                .appendTo($chgrpform).trigger('click');
         // Hidden input
         $("<input name='new_container_type' value='" + target_type + "'/>")
                 .appendTo($chgrpform).hide();

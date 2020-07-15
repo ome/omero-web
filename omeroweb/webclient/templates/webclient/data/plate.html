@@ -31,17 +31,17 @@
 
             // Drag to resize #wellImagesContainer bottom panel
             $(".verticalDragHandle").draggable({ axis: "y" })
-            .bind("dragstart", function(event, ui) {
+            .on("dragstart", function(event, ui) {
                 var wellImgs_h = $("#wellImagesContainer").height();
                 $(this).data({'dragstart': ui.offset.top, 'wellImgs_h': wellImgs_h});
             })
-            .bind("drag", function(event, ui) {
+            .on("drag", function(event, ui) {
                 var dy = ui.offset.top - $(this).data('dragstart');
                 var newH = $(this).data('wellImgs_h') - dy;
                 $("#wellImagesContainer").css('height', newH + 'px');
                 $("#spwContainer").css('bottom', newH + 'px');
-            }).
-            bind("dragstop", function(event, ui) {
+            })
+            .on("dragstop", function(event, ui) {
                 // Save the current size
                 var dy = ui.offset.top - $(this).data('dragstart');
                 var newH = $(this).data('wellImgs_h') - dy;
@@ -167,7 +167,7 @@
                 }
             });
             {% if select_wells %}
-                wpv.self.bind('_resetLoaded', function(){
+                wpv.self.on('_resetLoaded', function(){
                     var sel_well_ids = [{{ select_wells }}],
                         well_id, $well
                         selected_wells = $("");
@@ -200,7 +200,7 @@
 
             // Need to apply correct thumb size once loaded
             // and scroll to selected well
-            wpv.self.bind('_resetLoaded', function(){
+            wpv.self.on('_resetLoaded', function(){
                 // scroll to selected well:
                 var selection = $("td.ui-selected").first();
                 if (typeof selection !== 'undefined' && selection.length > 0) {

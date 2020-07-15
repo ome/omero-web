@@ -206,7 +206,7 @@ $(function() {
                                 inst.select_node(node);
                                 inst.open_node(node);
                                 // we also focus the node, to scroll to it and setup hotkey events
-                                $("#" + node.id).children('.jstree-anchor').focus();
+                                $("#" + node.id).children('.jstree-anchor').trigger('focus');
                                 // Handle multiple selection. E.g. extra images in same dataset
                                 for(var n=1; n<WEBCLIENT.initially_select.length; n++) {
                                     node = inst.locate_node(WEBCLIENT.initially_select[n], parentNode)[0];

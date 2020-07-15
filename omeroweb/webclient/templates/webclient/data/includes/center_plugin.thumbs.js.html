@@ -356,9 +356,9 @@ $(document).ready(function() {
     var focusThumbnail = function() {
         // We focus the thumbnail to make sure it's scrolled into view
         var $focused = $(':focus');
-        $("#dataIcons li.ui-selected").first().focus();
+        $("#dataIcons li.ui-selected").first().trigger('focus');
         // Then re-focus the jstree node, so that hot-keys work etc
-        $focused.focus();
+        $focused.trigger('focus');
     }
 
     var getRandom = function() {
