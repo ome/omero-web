@@ -874,7 +874,7 @@ OME.login_dialog = function(login_url, callback) {
                             });
                         // In this case, we sort by this column during plugin init.
                         if ($header.is('.sort-init')) {
-                            $header.click();
+                            $header.trigger('click');
                         }
                     }
                 });

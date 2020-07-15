@@ -198,7 +198,7 @@ window.OME.createViewportHistogram = function(viewport, chartSelector, checkboxS
 
     // on load, check to see if we should show histogram...
     if (OME.getPaneExpanded && OME.getPaneExpanded('histogram')) {
-        $(checkboxSelector).click();
+        $(checkboxSelector).trigger('click');
     }
 
     // Will get lots of channelChange events on Copy/Paste/Reset etc
@@ -234,11 +234,11 @@ window.OME.createViewportHistogram = function(viewport, chartSelector, checkboxS
         plotHistogram({'chIdx': chIdx});
     });
 
-    viewport.zslider.bind('change', function (e,pos) {
+    viewport.zslider.on('change', function (e,pos) {
         plotHistogram({'theZ': pos-1});
     });
 
-    viewport.tslider.bind('change', function (e,pos) {
+    viewport.tslider.on('change', function (e,pos) {
         plotHistogram({'theT': pos-1});
     });
 

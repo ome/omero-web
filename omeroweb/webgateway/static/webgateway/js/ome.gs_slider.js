@@ -214,10 +214,10 @@ $.fn.gs_slider = function(cfg) {
 	}
       });
 
-      btnup.mousedown(function () {
-	self.stoprepeat();
-	btnup.mouseup(self.stoprepeat);
-	btnup.mouseout(self.stoprepeat);
+      btnup.on('mousedown', function () {
+	      self.stoprepeat();
+        btnup.on('mouseup', self.stoprepeat);
+        btnup.on('mouseout', self.stoprepeat);
         startrepeat(-self.sliderCfg.direction);
         return false;
       });
@@ -232,7 +232,7 @@ $.fn.gs_slider = function(cfg) {
 	}
       });
 
-      btndown.mousedown(function () {
+      btndown.on('mousedown', function () {
 	self.stoprepeat();
         btndown.mouseup(self.stoprepeat);
         btndown.mouseout(self.stoprepeat);
@@ -241,9 +241,9 @@ $.fn.gs_slider = function(cfg) {
       });
 
 
-      handle.mousedown(function (e) {
+      handle.on('mousedown', function (e) {
         /* Start handle drag */
-        jQuery(document).mousemove(domove);
+        jQuery(document).on('mousemove', domove);
         jQuery(document).mouseup(stopdrag);
         ondrag = true;
         handle.addClass('ondrag');
@@ -254,8 +254,8 @@ $.fn.gs_slider = function(cfg) {
       var stopdrag = function (e) {
         /* Stop handle drag */
         clearTimeout(repeat_timer);
-        jQuery(document).unbind('mousemove', domove);
-        jQuery(document).unbind('mouseup', stopdrag);
+        jQuery(document).off('mousemove', domove);
+        jQuery(document).off('mouseup', stopdrag);
         ondrag = false;
         handle.addClass('draggable');
         handle.removeClass('ondrag');
@@ -279,7 +279,7 @@ $.fn.gs_slider = function(cfg) {
         }
       };
 
-      //jQuery(document).mousemove(domove);
+      //jQuery(document).on('mousemove', domove);
 
       function follow_pos (e) {
         var pos = posFromEvent(e);
@@ -295,11 +295,11 @@ $.fn.gs_slider = function(cfg) {
       }
 
       function ttshow (e) {
-        slider.mousemove(follow_pos);
+        slider.on('mousemove', follow_pos);
       }
 
       function tthide (e) {
-        slider.unbind('mousemove', follow_pos);
+        slider.off('mousemove', follow_pos);
       }
 
       slider.on("hover", ttshow, tthide);

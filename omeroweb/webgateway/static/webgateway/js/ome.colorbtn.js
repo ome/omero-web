@@ -189,7 +189,7 @@ $.fn.colorbtn = function(cfg) {
       picker.linkTo(null_cb).setColor(color).linkTo(callback);
       jQuery("#"+this.cfg.prefix+"-tb").val(color.substring(1).toUpperCase());
       jQuery("#"+this.cfg.prefix+"-defc").css("background-color", self.css("background-color"));
-      jQuery("#"+this.cfg.prefix+"-box").mousedown(function () {self.trigger('mousedown');}).show();
+      jQuery("#" + this.cfg.prefix + "-box").on('mousedown', function () {self.trigger('mousedown');}).show();
       jQuery("#"+this.cfg.prefix+"-box").off('closed').on('closed', function () {self.trigger('hiding');});
       self.trigger('showing');
       //self.addClass('picking');

@@ -1045,36 +1045,36 @@
 
 
     viewport = $.WeblitzViewport($('#weblitz-viewport'), '{{ viewport_server }}',{% block viewport_opts %}{'mediaroot': '{{ STATIC_URL }}' }{% endblock %});
-    viewport.bind('imageLoad', _refresh_cb);
-    viewport.bind('imageLoad', _load_metadata);
+    viewport.on('imageLoad', _refresh_cb);
+    viewport.on('imageLoad', _load_metadata);
 
     /* Bind zoom changes to the zoom button */
-    viewport.bind('zoom', function(e, percent) {
+    viewport.on('zoom', function(e, percent) {
       $("#wblitz-zoom").val(''+percent);
       $(".popped").removeClass('popped');
     });
 
     /* Bind projection changes */
-    viewport.bind('projectionChange', projectionChange);
+    viewport.on('projectionChange', projectionChange);
     /* Bind model changes */
-    viewport.bind('modelChange', modelChange);
+    viewport.on('modelChange', modelChange);
     /* Bind channel changes */
-    viewport.bind('channelChange', channelChange);
-    viewport.bind('imageChange', function(){
+    viewport.on('channelChange', channelChange);
+    viewport.on('imageChange', function(){
       syncChannelsActive(viewport);
     });
     /* Bind image changes */
-    viewport.bind('imageChange', function(){
+    viewport.on('imageChange', function(){
       imageChange(viewport);
       axisChange();
     });
     /* Bind line plot changes */
-    viewport.bind('linePlotChange', linePlotChange);
+    viewport.on('linePlotChange', linePlotChange);
     /* Bind line plot position pick */
-    viewport.bind('linePlotPos', linePlotPos);
+    viewport.on('linePlotPos', linePlotPos);
 
     // once image loads, check session via /getImgRDef/ to see if we can paste
-    viewport.bind('imageLoad', function() {
+    viewport.on('imageLoad', function() {
       // disable histogram for big images
       if (viewport.loadedImg.tiles) {
         $("#showhistogram").attr('disabled', true)
@@ -1155,7 +1155,7 @@
       $(".popped").removeClass('popped');
       return false;
     })
-    .bind("imageChange", function () {
+    .on("imageChange", function () {
       $(".popped").removeClass('popped');
     });
 
@@ -1225,8 +1225,8 @@
       viewport.setQuality(this.value);
     });
 
-    viewport.bind('imageChange', refresh_rois);
-    viewport.bind('instant_zoom', function(e, percent) {
+    viewport.on('imageChange', refresh_rois);
+    viewport.on('instant_zoom', function(e, percent) {
         if (viewport.viewportimg.get(0).setRoiZoom) {
             viewport.viewportimg.get(0).setRoiZoom(percent);
         }
@@ -1501,8 +1501,8 @@
     }
     
     // we can bind events to viewportimg for roi_display-plugin to trigger (plugin not created yet)
-    viewport.viewportimg.bind("shape_click", handle_shape_selection);
-    viewport.viewportimg.bind("rois_loaded", handle_rois_loaded);
+    viewport.viewportimg.on("shape_click", handle_shape_selection);
+    viewport.viewportimg.on("rois_loaded", handle_rois_loaded);
     
     // 'Scalebar' checkbox to left of image
     $("#wblitz-scalebar").on('change', function() {

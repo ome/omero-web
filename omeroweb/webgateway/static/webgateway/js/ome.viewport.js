@@ -162,11 +162,11 @@ jQuery._WeblitzViewport = function (container, server, options) {
   };
 
   this.viewportimg.viewportImage(options);
-  this.viewportimg.bind('zoom', function (e,z) { _this.loadedImg.current.zoom = z; });
+  this.viewportimg.on('zoom', function (e,z) { _this.loadedImg.current.zoom = z; });
   this.zslider.gs_slider({ orientation: 'v', min:0, max:0, tooltip_prefix: 'Z=', repeatCallback: done_reload });
   this.tslider.gs_slider({ tooltip_prefix: 'T=', min:0, max:0, repeatCallback: done_reload });
   this.viewportimg.css('overflow', 'hidden');
-  this.zslider.bind('change', function (e,pos) {
+  this.zslider.on('change', function (e,pos) {
       if (_this.loadedImg.rdefs.invertAxis) {
 	_this.loadedImg.current.t = pos-1;
       } else {
@@ -174,7 +174,7 @@ jQuery._WeblitzViewport = function (container, server, options) {
       }
         _load();
      });
-  this.tslider.bind('change', function (e,pos) {
+  this.tslider.on('change', function (e,pos) {
       if (_this.loadedImg.rdefs.invertAxis) {
 	_this.loadedImg.current.z = pos-1;
       } else {
@@ -508,7 +508,7 @@ jQuery._WeblitzViewport = function (container, server, options) {
   };
 
   this.startPickPos = function () {
-    this.viewportimg.bind('click', pickPosHandler);
+    this.viewportimg.on('click', pickPosHandler);
     this.viewportimg.parent().addClass('pick-pos');
   };
 
@@ -1235,13 +1235,13 @@ jQuery._WeblitzViewport = function (container, server, options) {
     if (event == 'projectionChange' || event == 'modelChange' || event == 'channelChange' || event == 'channelSlide' ||
     event == 'imageChange' || event == 'imageLoad' || event == 'linePlotPos' || event == 'linePlotChange' ||
     event == 'channelToggle' || event == 'channelFocus' || event == 'channelColorChange') {
-      _this.self.bind(event, callback);
+      _this.self.on(event, callback);
     } else {
-      _this.viewportimg.bind(event, callback);
+      _this.viewportimg.on(event, callback);
     }
   };
 
-  this.self.mousedown(function () {
+  this.self.on('mousedown', function () {
     // Try to avoid selection on double click
     return false;
   });

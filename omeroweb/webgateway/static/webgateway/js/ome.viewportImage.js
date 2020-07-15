@@ -75,7 +75,7 @@ jQuery.fn.viewportImage = function(options) {
       e.queue("fx", []);
       e.children().queue("fx", []);
       e.unbind("mouseover", e.do_extend)
-      .mouseout(e.do_collapse)
+      .on('mouseout', e.do_collapse)
       .animate(opt);
       opt2[s == 'width' && 'top' || 'left'] = e._img_pos_extended;
       e.children("img").animate(opt2);
@@ -86,7 +86,7 @@ jQuery.fn.viewportImage = function(options) {
       var opt2 = {};
       opt[s] = opt2[s] = min;
       e.unbind("mouseout", e.do_collapse)
-      .mouseover(e.do_extend)
+      .on('mouseover', e.do_extend)
       .animate(opt);
       opt2[s == 'width' && 'top' || 'left'] = e._img_pos_collapsed;
       e.children("img").animate(opt2);
@@ -136,9 +136,9 @@ jQuery.fn.viewportImage = function(options) {
       e.do_collapse = function () {panside_collapse(e,min,max,mintm,maxtm,side);};
       e.do_collapse();
       //panside_collapse(e, min, max, mintm + 'px', maxtm+ 'px', side);
-      e.mouseout(function() { e.removeClass('auto-val'); });
-      e.mousedown(function () { e.addClass('auto-val'); self.doMove(x,y,1, function() {return e.is('.auto-val');}); return false;});
-      e.mouseup(function() { e.removeClass('auto-val'); return false;});
+      e.on('mouseout', function() { e.removeClass('auto-val'); });
+      e.on('mousedown', function () { e.addClass('auto-val'); self.doMove(x,y,1, function() {return e.is('.auto-val');}); return false;});
+      e.on('mouseup', function() { e.removeClass('auto-val'); return false;});
       e.css({'cursor': 'pointer'});
 
       e.display = function (show) {
@@ -397,7 +397,7 @@ jQuery.fn.viewportImage = function(options) {
       this.setZoom(parseInt(increment, 10), null, null, center);
     };
 
-    dragdiv.bind('mousewheel', function (e, delta) {
+    dragdiv.on('mousewheel', function (e, delta) {
       // calculate zoom point within viewport
        var o = wrapdiv.offset(),
           relX = e.pageX - o.left,
@@ -423,7 +423,7 @@ jQuery.fn.viewportImage = function(options) {
             image.trigger(e);
           }
         })
-    .mousedown(function (e) {
+    .on('mousedown', function (e) {
       drag_px = e.screenX;
       drag_py = e.screenY;
       //jQuery(this).css('cursor', 'move');
@@ -435,7 +435,7 @@ jQuery.fn.viewportImage = function(options) {
       clickinterval = setTimeout(function () {clearTimeout(clickinterval); clickinterval = null;}, 250);
       return false;
     })
-    .mouseup(function (e) {
+    .on('mouseup', function (e) {
       if (ondrag) {
         ondrag = false;
         jQuery(this).removeClass('ondrag');
@@ -443,7 +443,7 @@ jQuery.fn.viewportImage = function(options) {
         //jQuery(this).css('cursor', 'default');
       }
     })
-    .mouseout(function (e) {
+    .on('mouseout', function (e) {
       if (ondrag) {
         ondrag = false;
         jQuery(this).removeClass('ondrag');
@@ -451,7 +451,7 @@ jQuery.fn.viewportImage = function(options) {
         //jQuery(this).css('cursor', 'default');
       }
     })
-    .mousemove(function (e) {
+    .on('mousemove', function (e) {
       if (ondrag) {
         self.doMove(e.screenX-drag_px, e.screenY-drag_py);
         drag_px = e.screenX;
