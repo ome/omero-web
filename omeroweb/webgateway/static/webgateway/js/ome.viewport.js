@@ -388,7 +388,7 @@ jQuery._WeblitzViewport = function (container, server, options) {
       
       var rcb = function () {
         after_img_load_cb(callback);
-        _this.viewportimg.unbind('load', rcb);
+        _this.viewportimg.off('load', rcb);
         _this.self.trigger('imageChange', [_this]);
       };
       
@@ -513,7 +513,7 @@ jQuery._WeblitzViewport = function (container, server, options) {
   };
 
   this.stopPickPos = function () {
-    this.viewportimg.unbind('click', pickPosHandler);
+    this.viewportimg.off('click', pickPosHandler);
     this.viewportimg.parent().removeClass('pick-pos');
   };
 

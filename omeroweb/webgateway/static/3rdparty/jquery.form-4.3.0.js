@@ -455,11 +455,7 @@
 				// ensure that every serialized input is still enabled
 				for (i = 0; i < elements.length; i++) {
 					el = $(elements[i]);
-					if (hasProp) {
-						el.prop('disabled', false);
-					} else {
-						el.removeAttr('disabled');
-					}
+					el.prop('disabled', false);
 				}
 			}
 

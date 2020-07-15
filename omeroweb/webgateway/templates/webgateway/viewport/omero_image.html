@@ -1101,7 +1101,7 @@
                     .attr('title', 'Copied settings are not compatible with this image');
                   return;
                 }
-                $("#rdef-paste-btn").removeAttr('disabled').removeClass("button-disabled");
+                $("#rdef-paste-btn").prop('disabled', false).removeClass("button-disabled");
             }
         }
       );
@@ -1453,10 +1453,10 @@
       }
       // Enable Prev / Next buttons if available (disabled by default)
       if (prevImgId) {
-        $("#prevImage").removeAttr('disabled').prop('disabled', false);
+        $("#prevImage").prop('disabled', false);
       }
       if (nextImgId) {
-        $("#nextImage").removeAttr('disabled').prop('disabled', false);
+        $("#nextImage").prop('disabled', false);
       }
 
       // Handle Prev / Next button clicks or keys

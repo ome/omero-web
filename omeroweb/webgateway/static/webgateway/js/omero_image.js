@@ -31,7 +31,7 @@
         // save to session
         var jqxhr = $.getJSON(viewport.viewport_server + "/copyImgRDef/?" + rdefQry);
         jqxhr.complete(function() {
-            $("#rdef-paste-btn").removeAttr('disabled').removeClass("button-disabled");
+            $("#rdef-paste-btn").prop('disabled', false).removeClass("button-disabled");
 
             // Optional : only present on webclient app
             if (WEBCLIENT) {
@@ -256,12 +256,12 @@
     window.updateUndoRedo = function(viewport) {
         // update disabled status of undo/redo buttons
         if (viewport.has_channels_undo()) {
-            $('#rdef-undo-btn').removeAttr('disabled').removeClass("button-disabled");
+            $('#rdef-undo-btn').prop('disabled', false).removeClass("button-disabled");
         } else {
             $('#rdef-undo-btn').attr("disabled", "disabled").addClass("button-disabled");
         }
         if (viewport.has_channels_redo()) {
-            $('#rdef-redo-btn').removeAttr('disabled').removeClass("button-disabled");
+            $('#rdef-redo-btn').prop('disabled', false).removeClass("button-disabled");
         } else {
             $('#rdef-redo-btn').attr("disabled", "disabled").addClass("button-disabled");
         }
@@ -269,7 +269,7 @@
         if (viewport.getSaved() || !canSaveRdef) {
             $("#rdef-setdef-btn").attr("disabled", "disabled").addClass("button-disabled");
         } else {
-            $("#rdef-setdef-btn").removeAttr('disabled').removeClass("button-disabled");
+            $("#rdef-setdef-btn").prop('disabled', false).removeClass("button-disabled");
         }
     };
 
@@ -395,7 +395,7 @@
                 '" title="' + channels[i].label +
                 '"><div class="lutBackground"></div><div class="btnLabel">'+channels[i].label+'</div></button>')
             .appendTo(box)
-            .bind('click', doToggle(i));
+            .on('click', doToggle(i));
         }
 
         // disable 'split' view for single channel images.
@@ -423,7 +423,7 @@
         }
         /* Fill in the Rendering Details box */
 
-        $(".picker").unbind('prepared').unbind('showing').unbind('hiding');
+        $(".picker").off('prepared').off('showing').off('hiding');
         // $('#rdef-postit ul').not('ul:last-child').remove();
 
         var template = '' +
@@ -553,9 +553,9 @@
             $('#wblitz-ch'+(i)+'-cw').append('<td width="10%"><span class="min" title="min: ' + channels[i].window.min + '"><input type="text" id="wblitz-ch' + i + '-cw-start" /></span></td><td><div class="rangeslider" id="wblitz-ch' + i + '-cwslider"></div></td> <td width="10%"><span class="max" title="max: ' + channels[i].window.max + '"><input type="text" id="wblitz-ch' + i + '-cw-end" /></span></td>');
             init_ch_slider(i, channels);
             $('#wblitz-ch'+i+'-cw-start').val(channels[i].window.start).off('change').on('change', start_cb(i));
-            $('#wblitz-ch'+i+'-cw-start').keyup(keyup_cb()).focusout(focusout_cb());
+            $('#wblitz-ch'+i+'-cw-start').on('keyup', keyup_cb()).on('focusout', focusout_cb());
             $('#wblitz-ch'+i+'-cw-end').val(channels[i].window.end).off('change').on('change', end_cb(i));
-            $('#wblitz-ch'+i+'-cw-end').keyup(keyup_cb()).focusout(focusout_cb());
+            $('#wblitz-ch'+i+'-cw-end').on('keyup', keyup_cb()).on('focusout', focusout_cb());
         }
 
         // bind clicking on channel checkboxes
@@ -570,7 +570,7 @@
         });
         $(".picker")
             .colorbtn({'server': viewport.viewport_server})
-            .bind('showing', function () {
+            .on('showing', function () {
                 var t = $(this).parents('.postit'),
                     offset;
                 if (t.length) {
@@ -583,11 +583,11 @@
                 $('.picker-selected').html('&nbsp;');
                 $(this).parent().siblings('.picker-selected').html('&gt;');
             })
-            .bind('hiding', function () {$(this).parent().siblings('.picker-selected').html('&nbsp;');})
-            .bind('prepared', function () {
+            .on('hiding', function () {$(this).parent().siblings('.picker-selected').html('&nbsp;');})
+            .on('prepared', function () {
                 zindex_automator('.postit', 210, $('#cbpicker-box'));
             })
-            .bind('changed', function () {
+            .on('changed', function () {
                 applyRDCW(viewport);
             });
 
