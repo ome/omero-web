@@ -138,7 +138,7 @@ $.fn.SpinButton = function(cfg){
 			window.clearTimeout(this.spinCfg._delay);
 		})
 		
-		.dblclick(function(e) {
+		.on('dblclick', function(e) {
 			if ($.browser.msie)
 				this.adjustValue(this.spinCfg._direction * this.spinCfg.step);
 		})
@@ -163,11 +163,7 @@ $.fn.SpinButton = function(cfg){
 			
 			e.preventDefault();
 		})
-          /*		
-		.change(function(e){
-			this.adjustValue(0);
-		});
-          */
+
 		if (this.addEventListener) {
 			// Respond to mouse wheel in Firefox
 			this.addEventListener('DOMMouseScroll', function(e) {
