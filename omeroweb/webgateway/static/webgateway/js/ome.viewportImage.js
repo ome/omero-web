@@ -74,7 +74,7 @@ jQuery.fn.viewportImage = function(options) {
       opt[s] = opt2[s] = max;
       e.queue("fx", []);
       e.children().queue("fx", []);
-      e.unbind("mouseover", e.do_extend)
+      e.off("mouseover", e.do_extend)
       .on('mouseout', e.do_collapse)
       .animate(opt);
       opt2[s == 'width' && 'top' || 'left'] = e._img_pos_extended;
@@ -85,7 +85,7 @@ jQuery.fn.viewportImage = function(options) {
       var opt = {};
       var opt2 = {};
       opt[s] = opt2[s] = min;
-      e.unbind("mouseout", e.do_collapse)
+      e.off("mouseout", e.do_collapse)
       .on('mouseover', e.do_extend)
       .animate(opt);
       opt2[s == 'width' && 'top' || 'left'] = e._img_pos_collapsed;
@@ -99,7 +99,7 @@ jQuery.fn.viewportImage = function(options) {
       var max, min, maxtm, mintm, side;
       wrapwidth = wrapdiv.width();
       wrapheight = wrapdiv.height();
-      img.unbind('load');
+      img.off('load');
 
       if (iw === 0 || iw === 0) {
         img.load(function() {panside_prepare(e,x,y);});
@@ -148,7 +148,7 @@ jQuery.fn.viewportImage = function(options) {
         }
         if (!show && this.css('display') != 'none') {
           this.removeClass('auto-val')
-          .unbind("mouseout")
+          .off("mouseout")
           .hide();
         }
       };
@@ -183,8 +183,8 @@ jQuery.fn.viewportImage = function(options) {
     this.showOverlay = function (url, cb, error_cb) {
       if (url) {
         overlay.addClass('loading').hide();
-        var load = function () {overlay.unbind('error',error); overlay.removeClass('loading').show(); cb && cb();};
-        var error = function () {overlay.unbind('load',load); overlay.removeClass('loading'); error_cb && error_cb();};
+        var load = function () {overlay.off('error',error); overlay.removeClass('loading').show(); cb && cb();};
+        var error = function () {overlay.off('load',load); overlay.removeClass('loading'); error_cb && error_cb();};
         overlay.one('load', load);
         overlay.one('error', error);
         overlay.attr('src', url);

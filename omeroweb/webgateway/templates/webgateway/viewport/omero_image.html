@@ -1219,7 +1219,7 @@
     viewport.load({{ image.id }}, did.length ? parseInt(did) : null, location.search);
 
     /* Bind actions needed on window resize */
-    $(window).resize(calcResize);
+    $(window).on('resize', calcResize);
 
     $('input[name=wblitz-quality]').on('click', function () {
       viewport.setQuality(this.value);

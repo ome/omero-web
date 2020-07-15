@@ -46,7 +46,7 @@ $.fn.postit = function(cfg) {
     };
     /* Some extra details on the dragbar */
     var dragbar = self.find('h1:first');
-    dragbar.dblclick(function(e) { self.toggleClass('collapsed'); });
+    dragbar.on('dblclick', function(e) { self.toggleClass('collapsed'); });
 
     if (dragbar.get(0).addEventListener) {
       // Respond to mouse wheel in Firefox
@@ -99,6 +99,6 @@ $.fn.postit = function(cfg) {
       }
     };
       self.draggable({handle: 'h1:first', scroll: false, containment: 'document'});
-    self.find('h1:first').bind('mouseup', dropEvent)
+    self.find('h1:first').on('mouseup', dropEvent)
   });
 }

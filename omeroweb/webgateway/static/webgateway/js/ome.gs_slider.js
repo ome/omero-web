@@ -197,10 +197,10 @@ $.fn.gs_slider = function(cfg) {
       this.stoprepeat = function () {
         onrepeat = false;
         clearTimeout(repeat_timer);
-        btnup.unbind('mouseout', self.stoprepeat);
-        btnup.unbind('mouseup', self.stoprepeat);
-        btndown.unbind('mouseout', self.stoprepeat);
-        btndown.unbind('mouseup', self.stoprepeat);
+        btnup.off('mouseout', self.stoprepeat);
+        btnup.off('mouseup', self.stoprepeat);
+        btndown.off('mouseout', self.stoprepeat);
+        btndown.off('mouseup', self.stoprepeat);
 	btnplayup.removeClass('onplay');
 	btnplaydown.removeClass('onplay');
       }
@@ -234,8 +234,8 @@ $.fn.gs_slider = function(cfg) {
 
       btndown.on('mousedown', function () {
 	self.stoprepeat();
-        btndown.mouseup(self.stoprepeat);
-        btndown.mouseout(self.stoprepeat);
+        btndown.on('mouseup', self.stoprepeat);
+        btndown.on('mouseout', self.stoprepeat);
         startrepeat(self.sliderCfg.direction);
         return false;
       });
@@ -244,7 +244,7 @@ $.fn.gs_slider = function(cfg) {
       handle.on('mousedown', function (e) {
         /* Start handle drag */
         jQuery(document).on('mousemove', domove);
-        jQuery(document).mouseup(stopdrag);
+        jQuery(document).on('mouseup', stopdrag);
         ondrag = true;
         handle.addClass('ondrag');
         handle.removeClass('draggable');

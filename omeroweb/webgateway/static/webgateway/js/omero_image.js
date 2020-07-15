@@ -30,7 +30,7 @@
         rdefQry = rdefQry + "&imageId=" + viewport.loadedImg.id;
         // save to session
         var jqxhr = $.getJSON(viewport.viewport_server + "/copyImgRDef/?" + rdefQry);
-        jqxhr.complete(function() {
+        jqxhr.always(function() {
             $("#rdef-paste-btn").prop('disabled', false).removeClass("button-disabled");
 
             // Optional : only present on webclient app

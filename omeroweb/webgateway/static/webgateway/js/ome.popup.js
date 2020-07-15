@@ -207,7 +207,7 @@ jQuery.fn.numbersOnly = function(options) {
     this.each(function() {
         $(this).data('numbersOnly', $(this).val());
     })
-    .keypress(function(event){
+    .on('keypress', function(event){
 
         // we allow copy, paste, left or right
         var allowedChars = [37, 39, 99, 118];
@@ -503,7 +503,7 @@ OME.feedback_dialog = function(error, feedbackUrl) {
                 $( this ).dialog( "close" );
             },
             "Send": function() {
-                $("form", $feedback_dialog).submit();
+                $("form", $feedback_dialog).trigger('submit');
             }
         }
     });
