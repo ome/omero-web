@@ -83,7 +83,7 @@
 				base.$label.css({opacity: 0.0}).show();
 				
 				// Reattach the keydown event
-				base.$field.bind('keydown.infieldlabel',function(e){
+				base.$field.on('keydown.infieldlabel',function(e){
 					base.hideOnChange(e);
 				});
 			};
