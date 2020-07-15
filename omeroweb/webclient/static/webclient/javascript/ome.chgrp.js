@@ -313,7 +313,7 @@ $(function() {
                     $thisBtn.text('OK');
                     return false;
                 }
-                $chgrpform.submit();
+                $chgrpform.trigger('submit');
             },
             "Cancel": function() {
                 resetChgrpForm();

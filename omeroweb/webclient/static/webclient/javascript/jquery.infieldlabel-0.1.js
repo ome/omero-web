@@ -101,7 +101,7 @@
 			};
 			
 			// Remove keydown event to save on CPU processing
-			base.$field.unbind('keydown.infieldlabel');
+			base.$field.off('keydown.infieldlabel');
 		};
       
 		// Run the initialization method
