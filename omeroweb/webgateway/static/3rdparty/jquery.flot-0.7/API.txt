@@ -1119,7 +1119,7 @@ hooks in the plugins bundled with Flot.
    canvas, e.g.
 
      function (plot, eventHolder) {
-         eventHolder.mousedown(function (e) {
+         eventHolder.on('mousedown', function (e) {
              alert("You pressed the mouse at " + e.pageX + " " + e.pageY);
          });
      }
