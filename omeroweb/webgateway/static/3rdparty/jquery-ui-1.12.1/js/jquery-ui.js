@@ -1563,8 +1563,11 @@ color.fn = jQuery.extend( color.prototype, {
 		}
 
 		var inst = this,
-			type = jQuery.type( red ),
+			type = typeof red,
 			rgba = this._rgba = [];
+		if (Array.isArray(red)) {
+			type = "array";
+		}
 
 		// More than 1 argument specified - assume ( red, green, blue, alpha )
 		if ( green !== undefined ) {
@@ -1853,9 +1856,12 @@ each( spaces, function( spaceName, space ) {
 		}
 
 		var ret,
-			type = jQuery.type( value ),
-			arr = ( type === "array" || type === "object" ) ? value : arguments,
+			type = typeof value,
+			arr = ( Array.isArray(value) || type === "object" ) ? value : arguments,
 			local = this[ cache ].slice();
+		if (Array.isArray(value)) {
+			type = "array";
+		}
 
 		each( props, function( key, prop ) {
 			var val = arr[ type === "object" ? key : prop.idx ];
@@ -1882,7 +1888,7 @@ each( spaces, function( spaceName, space ) {
 			return;
 		}
 		color.fn[ key ] = function( value ) {
-			var vtype = jQuery.type( value ),
+			var vtype = typeof value,
 				fn = ( key === "alpha" ? ( this._hsla ? "hsla" : "rgba" ) : spaceName ),
 				local = this[ fn ](),
 				cur = local[ prop.idx ],
@@ -1894,7 +1900,7 @@ each( spaces, function( spaceName, space ) {
 
 			if ( vtype === "function" ) {
 				value = value.call( this, cur );
-				vtype = jQuery.type( value );
+				vtype = typeof value;
 			}
 			if ( value == null && prop.empty ) {
 				return this;
@@ -1921,7 +1927,7 @@ color.hook = function( hook ) {
 				var parsed, curElem,
 					backgroundColor = "";
 
-				if ( value !== "transparent" && ( jQuery.type( value ) !== "string" ||
+				if ( value !== "transparent" && ( typeof value !== "string" ||
 						( parsed = stringParse( value ) ) ) ) {
 					value = color( parsed || value );
 					if ( !support.rgba && value._rgba[ 3 ] !== 1 ) {
