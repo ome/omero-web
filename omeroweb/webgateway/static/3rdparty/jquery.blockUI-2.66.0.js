@@ -556,7 +556,7 @@
 
 		// former impl...
 		//		var $e = $('a,:input');
-		//		b ? $e.bind(events, opts, handler) : $e.unbind(events, handler);
+		//		b ? $e.bind(events, opts, handler) : $e.off(events, handler);
 		}
 
 		// event handler to suppress keyboard/mouse events when blocking
