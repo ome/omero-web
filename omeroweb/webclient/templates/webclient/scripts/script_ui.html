@@ -166,8 +166,8 @@
                 $Data_Type.data(dt, ids);
             };
             noteIDs();                  // note the initial value...
-            $IDs.keyup(noteIDs);                // ...update any changes
-            $Data_Type.change(function() {      // Clear IDs (or add back previous data)
+            $IDs.on('keyup', noteIDs);                // ...update any changes
+            $Data_Type.on('change', function() {      // Clear IDs (or add back previous data)
                 var dt = $Data_Type.val(),
                     ids = $Data_Type.data(dt);
                 if (typeof ids !== "undefined") {
@@ -193,7 +193,7 @@
             });
 
             // Focus first input
-            $('input:visible, select:visible').first().focus();
+            $('input:visible, select:visible').first().trigger('focus');
         });
     </script>
 {% endblock %}

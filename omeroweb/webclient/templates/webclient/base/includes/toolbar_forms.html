@@ -81,7 +81,7 @@ if (typeof OME === "undefined") { OME={}; }
             buttons: {
                 "Accept": function() {
                     // simply submit the form
-                    $("#create_share_form").submit();
+                    $("#create_share_form").trigger('submit');
                 },
                 "Cancel": function() {
                     $( this ).dialog( "close" );

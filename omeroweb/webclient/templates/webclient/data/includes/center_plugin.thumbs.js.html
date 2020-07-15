@@ -830,7 +830,7 @@ $(document).ready(function() {
                 inst.select_node(selectedNode, true);
                 // we also focus the node, so that hotkey events come from the node
                 if (selectedNode) {
-                    $("#" + selectedNode.id).children('.jstree-anchor').focus();
+                    $("#" + selectedNode.id).children('.jstree-anchor').trigger('focus');
                 }
             });
         } else {

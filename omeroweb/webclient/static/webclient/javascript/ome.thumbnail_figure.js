@@ -83,7 +83,7 @@ $(document).ready(function() {
     var selectedTagIds = [];
     $("#tagChooser")
         .chosen({placeholder_text:'Choose Tags'})
-        .change(function(evt, data) {
+        .on('change', function(evt, data) {
             if (data.deselected) {
                 var toRemove = data.deselected;
                 selectedTagIds.splice(selectedTagIds.indexOf(toRemove), 1);

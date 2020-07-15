@@ -190,7 +190,7 @@
 
                 {% if init.query %}
                     // query field is already populated with init.query
-                    $("#searching_form").submit();
+                    $("#searching_form").trigger('submit');
                 {% endif %}
 
 

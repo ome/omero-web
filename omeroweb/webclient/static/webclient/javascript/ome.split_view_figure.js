@@ -78,7 +78,7 @@ $(document).ready(function() {
     // Add / Remove Channels
     $("#split_channels input[type=checkbox]").on('click', updateChannelNames);
     // Renaming Channels
-    $("#split_channels input[type=text]").keyup(updateChannelNames);
+    $("#split_channels input[type=text]").on('keyup', updateChannelNames);
 
     var $mergecColoursMap = $("#mergedColoursMap");
     var updateMergedChannels = function() {
@@ -231,7 +231,7 @@ $(document).ready(function() {
         $imgName = $("div.imgName"),
         $imgTags = $("div.imgTags"),
         $imgDatasets = $("div.imgDatasets");
-    $Image_Labels.change(function(){
+    $Image_Labels.on('change', function(){
         var labels = $(this).val();
         $rowLabels.hide(); // hide all then show one...
         if (labels == "Image Name") {

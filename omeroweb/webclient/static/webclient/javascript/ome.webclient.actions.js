@@ -554,7 +554,7 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     // clear previous stuff from form
     $.removeData(del_form, "clicked_button");
     $("#delete_contents_form").show();
-    del_form.unbind("dialogclose");
+    del_form.off("dialogclose");
     del_form.find("input[type='checkbox']").prop('checked', false);
 
     // set up form - process all the objects for data-types and children
@@ -623,7 +623,7 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     if (!askDeleteContents) $("#delete_contents_form").hide();  // don't ask about deleting contents
 
     // callback when delete dialog is closed
-    del_form.bind("dialogclose", function(event, ui) {
+    del_form.on("dialogclose", function(event, ui) {
         if (del_form.data("clicked_button") == "Yes") {
             var delete_anns = $("#delete_anns").prop('checked');
             var delete_content = true;      // $("#delete_content").prop('checked');
@@ -720,7 +720,7 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
             $deleteYesBtn.hide();
             $deleteNoBtn.text("Cancel");
             // On dialog close, clean-up what we changed above
-            del_form.bind("dialogclose", function(event, ui) {
+            del_form.on("dialogclose", function(event, ui) {
                 $deleteYesBtn.show();
                 $deleteNoBtn.text("No");
                 $(".split_filesets_info", del_form).remove();

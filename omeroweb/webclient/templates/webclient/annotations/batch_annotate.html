@@ -94,7 +94,7 @@
                 $(".tooltip").tooltip_init();
 
                 // Filtering annotations added by 'me' or 'others' or 'all'
-                $("#annotationFilter").change(function(){
+                $("#annotationFilter").on('change', function(){
                     OME.filterAnnotationsAddedBy();
                 });
             });

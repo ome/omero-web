@@ -74,7 +74,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
         buttons: {
             "Accept": function() {
                 // simply submit the form (AJAX handling set-up above)
-                $("#choose_attachments_form").submit();
+                $("#choose_attachments_form").trigger('submit');
                 $( this ).dialog( "close" );
             },
             "Cancel": function() {

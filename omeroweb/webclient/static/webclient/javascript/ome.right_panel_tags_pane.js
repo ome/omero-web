@@ -66,7 +66,7 @@ var TagPane = function TagPane($element, opts) {
         buttons: {
             "Save": function() {
                 // simply submit the form (AJAX handling set-up above)
-                $("#add_tags_form").trigger('prepare-submit').submit();
+                $("#add_tags_form").trigger('prepare-submit').trigger('submit');
                 $( this ).dialog( "close" );
             },
             "Cancel": function() {

@@ -110,7 +110,7 @@
                     buttons: {
                         "Accept": function() {
                             // simply submit the form
-                            $("#edit_share_form").submit();
+                            $("#edit_share_form").trigger('submit');
                         },
                         "Cancel": function() {
                             $( this ).empty().dialog( "close" ).attr("action", "#");

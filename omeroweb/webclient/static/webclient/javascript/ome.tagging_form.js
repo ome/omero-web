@@ -447,7 +447,7 @@ var tagging_form = function(
         event.preventDefault();
     };
 
-    tag_input_filter.keypress(function(event) {
+    tag_input_filter.on('keypress', function(event) {
         if (event.which === 13) {
             select_tags(event);
             tag_input_filter.val('');
@@ -675,8 +675,8 @@ var tagging_form = function(
             add_new_tag(event);
         }
     };
-    tag_input.keypress(add_new_tag_on_enter_key);
-    description_input.keypress(add_new_tag_on_enter_key);
+    tag_input.on('keypress', add_new_tag_on_enter_key);
+    description_input.on('keypress', add_new_tag_on_enter_key);
 
     var save_tags = function() {
         var existing_tags = [];
@@ -723,29 +723,29 @@ var tagging_form = function(
     $("#id_tag_deselect_button").on('click', deselect_tags);
     $("#id_add_new_tag").on('click', add_new_tag);
     $("#add_tags_form").off('prepare-submit').on('prepare-submit', save_tags);
-    tag_input.keyup(update_add_new_button_state).on('change',
+    tag_input.on('keyup', update_add_new_button_state).on('change',
         update_add_new_button_state);
     update_add_new_button_state();
-    tag_input_filter.keyup(update_filter).on('change', update_filter);
+    tag_input_filter.on('keyup', update_filter).on('change', update_filter);
     $("select[name=filter_mode],select[name=filter_owner_mode]").on('change',
         update_filter);
 
     loader();
 
     // placeholder fixes - should probably be in a more generic place
-    $('[placeholder]').focus(function() {
+    $('[placeholder]').on('focus', function() {
         var input = $(this);
         if (input.val() === input.attr('placeholder')) {
             input.val('');
             input.removeClass('placeholder');
         }
-    }).blur(function() {
+    }).on('blur', function() {
         var input = $(this);
         if (input.val() === '' || input.val() === input.attr('placeholder')) {
             input.addClass('placeholder');
             input.val(input.attr('placeholder'));
         }
-    }).blur().parents('form').on('submit', function() {
+    }).trigger('blur').parents('form').on('submit', function() {
         $(this).find('[placeholder]').each(function() {
             var input = $(this);
             if (input.val() === input.attr('placeholder')) {
