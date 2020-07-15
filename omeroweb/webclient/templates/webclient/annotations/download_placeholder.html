@@ -163,7 +163,7 @@ Download files
         return false;
     });
 
-    $("#zipName").focus().select();
+    $("#zipName").trigger('focus').trigger('select');
 
     $("#reset").on('click', function(){
         window.close();

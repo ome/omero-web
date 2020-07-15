@@ -354,7 +354,7 @@ $(function() {
         // Re-enable the refresh button as it may have been disabled to
         // prevent race conditions occurring from multiple clicks in quick
         // succession.
-        $('#refreshButton').removeAttr("disabled");
+        $('#refreshButton').prop("disabled", false);
     })
 
     // Setup jstree

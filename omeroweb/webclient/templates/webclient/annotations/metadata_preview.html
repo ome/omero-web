@@ -162,7 +162,7 @@
                             .attr('title', 'Copied settings are not compatible with this image');
                           return;
                         }
-                        $("#rdef-paste-btn").removeAttr('disabled').removeClass("button-disabled");
+                        $("#rdef-paste-btn").prop("disabled", false).removeClass("button-disabled");
                     }
                 }
               );
@@ -320,7 +320,7 @@
             if (pid) {
               $("#rdef-save-all")
                 .attr('title', "Apply and Save settings to all images in " + pid)
-                .removeAttr('disabled').removeClass("button-disabled")
+                .prop('disabled', false).removeClass("button-disabled")
                 .on('click', function(){
                   var $span = $('span', this),
                     spanTxt = $span.text();

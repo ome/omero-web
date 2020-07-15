@@ -657,7 +657,7 @@ var tagging_form = function(
             });
             $("div.ui-selected", div_selected_tags).removeClass('ui-selected');
             div_selected_tags.append(div);
-            tag_input.val('').focus();
+            tag_input.val('').trigger('focus');
             description_input.val('');
             enable_buttons();
         }

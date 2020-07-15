@@ -127,7 +127,7 @@
                     return;
                 }
 
-                $('#submit').removeAttr('disabled');
+                $('#submit').prop('disabled', false);
 
                 var folder = $("#scriptFolder").val();
                 if (!folder.endsWith('/')){

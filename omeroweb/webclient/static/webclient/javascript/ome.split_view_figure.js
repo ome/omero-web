@@ -27,7 +27,7 @@ $(document).ready(function() {
     $("#enableScalebar").on('click', function(){
         var enabled = $(this).is(":checked");
         if (enabled) {
-            $("input[name=Scalebar]").prop("disabled", false).focus();
+            $("input[name=Scalebar]").prop("disabled", false).trigger('focus');
         } else {
             $("input[name=Scalebar]").prop("disabled", true);
         }
