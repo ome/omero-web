@@ -56,7 +56,7 @@ jQuery._farbtastic = function (container, callback) {
     }
     else if (typeof callback == 'object' || typeof callback == 'string') {
       fb.callback = $(callback);
-      fb.callback.bind('keyup', fb.updateValue);
+      fb.callback.on('keyup', fb.updateValue);
       if (fb.callback.get(0).value) {
         fb.setColor(fb.callback.get(0).value);
       }
@@ -317,7 +317,7 @@ jQuery._farbtastic = function (container, callback) {
   }
 
   // Install mousedown handler (the others are set on the document on-demand)
-  $('*', e).mousedown(fb.mousedown);
+  $('*', e).on('mousedown', fb.mousedown);
 
     // Init color
   fb.setColor('#000000');
