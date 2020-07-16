@@ -34,7 +34,7 @@
             $("#rdef-paste-btn").prop('disabled', false).removeClass("button-disabled");
 
             // Optional : only present on webclient app
-            if (WEBCLIENT) {
+            if (window.WEBCLIENT) {
                 WEBCLIENT.HAS_RDEF = true;
             }
         });
@@ -132,10 +132,10 @@
                 }
             });
             $.each(objs.sort(sorter), function () {
-                this.css('z-index', z);
+                this.css('zIndex', z);
                 z++;
             });
-            $(self).css('z-index', z);
+            $(self).css('zIndex', z);
         };
         $.each(wspace, function () {
             $(this).on('opening', tofront);

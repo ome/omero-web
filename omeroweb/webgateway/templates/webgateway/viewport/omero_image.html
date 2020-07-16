@@ -1045,36 +1045,36 @@
 
 
     viewport = $.WeblitzViewport($('#weblitz-viewport'), '{{ viewport_server }}',{% block viewport_opts %}{'mediaroot': '{{ STATIC_URL }}' }{% endblock %});
-    viewport.on('imageLoad', _refresh_cb);
-    viewport.on('imageLoad', _load_metadata);
+    viewport.bind('imageLoad', _refresh_cb);
+    viewport.bind('imageLoad', _load_metadata);
 
     /* Bind zoom changes to the zoom button */
-    viewport.on('zoom', function(e, percent) {
+    viewport.bind('zoom', function(e, percent) {
       $("#wblitz-zoom").val(''+percent);
       $(".popped").removeClass('popped');
     });
 
     /* Bind projection changes */
-    viewport.on('projectionChange', projectionChange);
+    viewport.bind('projectionChange', projectionChange);
     /* Bind model changes */
-    viewport.on('modelChange', modelChange);
+    viewport.bind('modelChange', modelChange);
     /* Bind channel changes */
-    viewport.on('channelChange', channelChange);
-    viewport.on('imageChange', function(){
+    viewport.bind('channelChange', channelChange);
+    viewport.bind('imageChange', function(){
       syncChannelsActive(viewport);
     });
     /* Bind image changes */
-    viewport.on('imageChange', function(){
+    viewport.bind('imageChange', function(){
       imageChange(viewport);
       axisChange();
     });
     /* Bind line plot changes */
-    viewport.on('linePlotChange', linePlotChange);
+    viewport.bind('linePlotChange', linePlotChange);
     /* Bind line plot position pick */
-    viewport.on('linePlotPos', linePlotPos);
+    viewport.bind('linePlotPos', linePlotPos);
 
     // once image loads, check session via /getImgRDef/ to see if we can paste
-    viewport.on('imageLoad', function() {
+    viewport.bind('imageLoad', function() {
       // disable histogram for big images
       if (viewport.loadedImg.tiles) {
         $("#showhistogram").attr('disabled', true)
@@ -1225,8 +1225,8 @@
       viewport.setQuality(this.value);
     });
 
-    viewport.on('imageChange', refresh_rois);
-    viewport.on('instant_zoom', function(e, percent) {
+    viewport.bind('imageChange', refresh_rois);
+    viewport.bind('instant_zoom', function(e, percent) {
         if (viewport.viewportimg.get(0).setRoiZoom) {
             viewport.viewportimg.get(0).setRoiZoom(percent);
         }
@@ -1473,7 +1473,7 @@
       }
 
       // Prev / Next keys
-      $(document).keydown(function(e) {
+      $(document).on('keydown', function(e) {
 
           // ignore keystrokes on other inputs, sliders etc.
           if ($(e.target).prop("tagName") !== "BODY") return;
