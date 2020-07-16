@@ -4615,7 +4615,7 @@
 			h2.css(fn).width(Math.min(h1.text("pW" + h2[0].value).width(),w))[0].select();
 			$(document).one('mousedown.jstree touchstart.jstree dnd_start.vakata', function (e) {
 				if (h2 && e.target !== h2) {
-					$(h2).blur();
+					$(h2).trigger('blur');
 				}
 			});
 		},
@@ -6561,7 +6561,7 @@
 					e.preventDefault();
 				//})
 				//.on("mouseup", "a", function (e) {
-					if(!$(this).blur().parent().hasClass("vakata-context-disabled") && $.vakata.context._execute($(this).attr("rel")) !== false) {
+					if(!$(this).trigger('blur').parent().hasClass("vakata-context-disabled") && $.vakata.context._execute($(this).attr("rel")) !== false) {
 						$.vakata.context.hide();
 					}
 				})
