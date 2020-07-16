@@ -281,7 +281,8 @@
 	
 	#annotation_tabs {
 	    position:absolute;
-	    padding:0;
+        padding:0;
+        border-width: 0;
 	}
 	
 	.ui-tabs {
@@ -383,7 +384,7 @@
 		}
 		
 		.ui-tabs-panel {
-			padding: 0 !important;
+            padding: 0 !important
 		}
 	
 	
@@ -498,6 +499,7 @@
     
         #annotation_tabs_list li {
             opacity:1;
+            border-bottom-width: 1px;
         }
 		
 		#annotation_tabs_list li:first-child	{
@@ -533,6 +535,7 @@
     /* Right Inner Content */
     
     .right_tab_inner {
+        background: hsl(220,20%,95%);
         padding:10px 15px;
         overflow: auto;
         top:6px ;bottom:0px; left:0px; right:0px;
