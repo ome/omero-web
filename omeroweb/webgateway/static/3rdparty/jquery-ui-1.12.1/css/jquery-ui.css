@@ -1,3 +1,7 @@
+/* 
+	NB: manually edited to preserve webclient UI as it looked with jquery-ui 1.10.4
+	See https://github.com/ome/omero-web/pull/180
+*/
 /*! jQuery UI - v1.12.1 - 2016-09-14
 * http://jqueryui.com
 * Includes: core.css, accordion.css, autocomplete.css, menu.css, button.css, controlgroup.css, checkboxradio.css, datepicker.css, dialog.css, draggable.css, resizable.css, progressbar.css, selectable.css, selectmenu.css, slider.css, sortable.css, spinner.css, tabs.css, tooltip.css, theme.css
@@ -900,7 +904,8 @@ body .ui-tooltip {
 .ui-widget.ui-widget-content {
 	border: 1px solid #c5c5c5;
 }
-.ui-widget-content {
+/* Remove these to preserve webclient UI */
+/* .ui-widget-content {
 	border: 1px solid #dddddd;
 	background: #ffffff;
 	color: #333333;
@@ -913,17 +918,18 @@ body .ui-tooltip {
 	background: #e9e9e9;
 	color: #333333;
 	font-weight: bold;
-}
+} */
 .ui-widget-header a {
 	color: #333333;
 }
 
 /* Interaction states
 ----------------------------------*/
-.ui-state-default,
+/* Remove these to preserve webclient UI */
+/* .ui-state-default,
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default,
-.ui-button,
+.ui-button, */
 
 /* We use html here because we need a greater specificity to make sure disabled
 works properly when clicked or hovered */
@@ -944,7 +950,8 @@ a:visited.ui-button,
 	color: #454545;
 	text-decoration: none;
 }
-.ui-state-hover,
+/* Remove these to preserve webclient UI */
+/* .ui-state-hover,
 .ui-widget-content .ui-state-hover,
 .ui-widget-header .ui-state-hover,
 .ui-state-focus,
@@ -995,7 +1002,7 @@ a.ui-button:active,
 .ui-state-active a:visited {
 	color: #ffffff;
 	text-decoration: none;
-}
+} */
 
 /* Interaction Cues
 ----------------------------------*/
@@ -1275,7 +1282,7 @@ a.ui-button:active,
 ----------------------------------*/
 
 /* Corner radius */
-.ui-corner-all,
+/* .ui-corner-all,
 .ui-corner-top,
 .ui-corner-left,
 .ui-corner-tl {
@@ -1298,7 +1305,7 @@ a.ui-button:active,
 .ui-corner-right,
 .ui-corner-br {
 	border-bottom-right-radius: 3px;
-}
+} */
 
 /* Overlays */
 .ui-widget-overlay {
