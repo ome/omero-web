@@ -89,6 +89,19 @@ class ConnCleaningHttpResponse(StreamingHttpResponse):
             logger.error('Failed to clean up connection.', exc_info=True)
 
 
+class TableClosingHttpResponse(ConnCleaningHttpResponse):
+    """Extension of L{HttpResponse} which closes the OMERO connection."""
+
+    def close(self):
+        try:
+            if self.table is not None:
+                self.table.close()
+        except Exception:
+            logger.error('Failed to close OMERO.table.', exc_info=True)
+        # Now call super to close conn
+        super(TableClosingHttpResponse, self).close()
+
+
 class login_required(object):
     """
     OMERO.web specific extension of the Django login_required() decorator,
