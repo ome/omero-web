@@ -37,11 +37,6 @@
                 "{% static 'webgateway/img/image128.png' %}"
             );
 
-            // double-click handler on image - launches image viewer
-            //$("table#dataTable tbody tr").dblclick(function(event) {
-                // TODO: path to the object should be rendered on the server side
-            //});
-
             // single click handler on image (container). Selection then update toolbar & metadata pane
             $("table#dataTable tbody tr").on('click', function(event) {
                 OME.handleTableClickSelection(event);

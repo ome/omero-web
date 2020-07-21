@@ -157,7 +157,7 @@
             }
             $input = $("<input />").attr('value', value);
             $td.empty().append($input);
-            $input.focus();
+            $input.trigger('focus');
             $input.get(0).select();
         }
 
