@@ -27,6 +27,7 @@ import logging
 import traceback
 from django.http import Http404, HttpResponse, HttpResponseRedirect, \
     JsonResponse
+from django.http.response import HttpResponseBase
 from django.shortcuts import render
 from django.http import HttpResponseForbidden, StreamingHttpResponse
 
@@ -556,7 +557,7 @@ class render_response(object):
             context = f(request, *args, **kwargs)
 
             # if we happen to have a Response, return it
-            if isinstance(context, HttpResponse):
+            if isinstance(context, HttpResponseBase):
                 return context
 
             # get template from view dict. Can be overridden from the **kwargs
