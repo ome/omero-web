@@ -2789,7 +2789,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 annotations = login_required()(jsonp(_bulk_file_annotations))
 
 
-def _table_query(request, fileid, conn=None, query=None, **kwargs):
+def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     """
     Query a table specified by fileid
     Returns a dictionary with query result if successful, error information
@@ -2801,8 +2801,14 @@ def _table_query(request, fileid, conn=None, query=None, **kwargs):
                         if will be run as (word==number), e.g. "(Well==7)".
                         This is supported to allow more readable query strings.
     @param fileid:      Numeric identifier of file containing the table
+    @param query:       The table query. If None, use request.GET.get('query')
+                        E.g. '*' to return all rows.
+                        If in the form 'colname-1', query will be (colname==1)
+    @param lazy:        If True, instead of 'rows' list, 'lazy_rows' will be generator.
+                        Each gen.next() will return a list of row data
+                        AND 'table' returned MUST be closed.
     @param conn:        L{omero.gateway.BlitzGateway}
-    @param **kwargs:    unused
+    @param **kwargs:    offset, limit
     @return:            A dictionary with key 'error' with an error message
                         or with key 'data' containing a dictionary with keys
                         'columns' (an array of column names) and 'rows'
@@ -2848,13 +2854,34 @@ def _table_query(request, fileid, conn=None, query=None, **kwargs):
             except Exception:
                 return dict(error='Error executing query: %s' % query)
 
-        return {
+        def row_generator(table, h):
+            if query == '*':
+                # hits are all consecutive rows - can load them in batches
+                idx = 0
+                batch = 1000
+                while(idx < len(h)):
+                    batch = min(batch, len(h) - idx)
+                    row_data = [[] for r in range(batch)]
+                    for col in table.read(
+                            range(len(cols)), h[idx], h[idx] + batch).columns:
+                        for r in range(batch):
+                            row_data[r].append(str(col.values[r]))
+                    idx += batch
+                    # yield a list of rows
+                    yield row_data
+            else:
+                for hit in h:
+                    row_vals = [str(col.values[0]) for col in
+                        table.read(range(len(cols)), hit, hit+1).columns]
+                    # yield a list of rows, with only a single row
+                    yield [row_vals]
+
+        row_gen = row_generator(t, hits)
+
+        rsp_data = {
             'data': {
                 'column_types': [col.__class__.__name__ for col in cols],
                 'columns': [col.name for col in cols],
-                'rows': [[col.values[0] for col in t.read(
-                         range(len(cols)), hit, hit+1).columns]
-                         for hit in hits]
             },
             'meta': {
                 'rowCount': rows,
@@ -2863,8 +2890,21 @@ def _table_query(request, fileid, conn=None, query=None, **kwargs):
                 'offset': offset,
             }
         }
+
+        if not lazy:
+            row_data = []
+            # Use the generator to add all rows in batches
+            for rows in list(row_gen):
+                row_data.extend(rows)
+            rsp_data['data']['rows'] = row_data
+        else:
+            rsp_data['data']['lazy_rows'] = row_gen
+            rsp_data['table'] = t
+
+        return rsp_data
     finally:
-        t.close()
+        if not lazy:
+            t.close()
 
 
 table_query = login_required()(jsonp(_table_query))
