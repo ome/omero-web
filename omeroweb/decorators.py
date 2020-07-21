@@ -489,6 +489,9 @@ class login_required(object):
             finally:
                 # If f() raised Exception, e.g. Http404() we must still cleanup
                 try:
+                    if isinstance(retval, ConnCleaningHttpResponse):
+                        # conn will be closed by response.close()
+                        doConnectionCleanup = False
                     logger.debug(
                         'Doing connection cleanup? %s' % doConnectionCleanup)
                     if doConnectionCleanup:

@@ -2461,7 +2461,7 @@ def download_as(request, iid=None, conn=None, **kwargs):
     return rsp
 
 
-@login_required(doConnectionCleanup=False)
+@login_required()
 def archived_files(request, iid=None, conn=None, **kwargs):
     """
     Downloads the archived file(s) as a single file or as a zip (if more than
