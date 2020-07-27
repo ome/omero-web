@@ -3029,7 +3029,6 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
         rsp['Content-Disposition'] = ('attachment; filename=%s' % downloadName)
         return rsp
 
-
     context['data']['name'] = orig_file.name
     context['data']['path'] = orig_file.path
     context['data']['id'] = file_id

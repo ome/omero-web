@@ -2804,7 +2804,8 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     @param query:       The table query. If None, use request.GET.get('query')
                         E.g. '*' to return all rows.
                         If in the form 'colname-1', query will be (colname==1)
-    @param lazy:        If True, instead of 'rows' list, 'lazy_rows' will be generator.
+    @param lazy:        If True, instead of returning a 'rows' list,
+                        'lazy_rows' will be a generator.
                         Each gen.next() will return a list of row data
                         AND 'table' returned MUST be closed.
     @param conn:        L{omero.gateway.BlitzGateway}
@@ -2871,7 +2872,8 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                     yield row_data
             else:
                 for hit in h:
-                    row_vals = [str(col.values[0]) for col in
+                    row_vals = [
+                        str(col.values[0]) for col in
                         table.read(range(len(cols)), hit, hit+1).columns]
                     # yield a list of rows, with only a single row
                     yield [row_vals]

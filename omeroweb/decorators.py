@@ -25,7 +25,7 @@ Decorators for use with OMERO.web applications.
 
 import logging
 import traceback
-from django.http import Http404, HttpResponse, HttpResponseRedirect, \
+from django.http import Http404, HttpResponseRedirect, \
     JsonResponse
 from django.http.response import HttpResponseBase
 from django.shortcuts import render
