@@ -3678,8 +3678,8 @@ def list_scripts(request, conn=None, **kwargs):
 
     # group scripts into 'folders' (path), named by parent folder name
     scriptMenu = {}
-    scripts_to_ignore = request.session.get('server_settings') \
-                                       .get('scripts_to_ignore').split(",")
+    scripts_to_ignore = request.session.get('server_settings', {}) \
+        .get('scripts_to_ignore', "").split(",")
     for s in scripts:
         scriptId = s.id.val
         path = s.path.val
