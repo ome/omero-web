@@ -168,11 +168,11 @@ def imageMarshal(image, key=None, request=None):
         return rv       # Return what we have already, in case it's useful
 
     # big images
-    tiles = image._re.requiresPixelsPyramid()
+    levels = image._re.getResolutionLevels()
+    tiles = levels > 1
     rv['tiles'] = tiles
-    if (tiles):
+    if tiles:
         width, height = image._re.getTileSize()
-        levels = image._re.getResolutionLevels()
         zoomLevelScaling = image.getZoomLevelScaling()
 
         rv.update({'tile_size': {'width': width,
