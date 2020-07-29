@@ -1,3 +1,10 @@
+5.7.1 (July 2020)
+-----------------
+
+- webgateway
+
+   - Always marshal tile metadata on presence of pyramid ([#193](https://github.com/ome/omero-web/pull/193))
+
 5.7.0 (July 2020)
 -----------------
 
