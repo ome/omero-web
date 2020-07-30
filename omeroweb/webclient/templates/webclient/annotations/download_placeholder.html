@@ -101,6 +101,17 @@ Download files
     <p>Create and download a zip file which will contain these
         {% if fileLists %} files{% else %} images{% endif %}:</p>
 
+    {% if downloadTooLarge %}
+
+    <p class="error">
+        Not available:
+        Total size of files {{ filesTotalSize|filesizeformat }}
+        is larger than {{ downloadTooLarge|filesizeformat }}.
+        Try requesting fewer files.
+    </p>
+
+    {% else %}
+
     <div style="padding: 15px; float: right">
         <input type="submit" value="Create Zip"/>
     </div>
@@ -109,6 +120,7 @@ Download files
         Zip file name:
         <input id="zipName" value="{{ defaultName }}.zip"/>
     </p>
+    {% endif %}
 
     <div style="clear:both"></div>
 
