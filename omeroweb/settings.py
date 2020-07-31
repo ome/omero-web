@@ -598,7 +598,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
          1024 ** 3,
          int,
          "Prevent multiple files with total aggregate size greater than this "
-         " value in bytes from being downloaded as a zip archive."],
+         "value in bytes from being downloaded as a zip archive."],
 
     # VIEWER
     "omero.web.viewer.view":
