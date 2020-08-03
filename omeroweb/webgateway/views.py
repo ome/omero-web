@@ -2873,7 +2873,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             else:
                 for hit in h:
                     row_vals = [
-                        str(col.values[0]) for col in
+                        col.values[0] for col in
                         table.read(range(len(cols)), hit, hit+1).columns]
                     # yield a list of rows, with only a single row
                     yield [row_vals]
