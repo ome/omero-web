@@ -2866,7 +2866,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                     for col in table.read(
                             range(len(cols)), h[idx], h[idx] + batch).columns:
                         for r in range(batch):
-                            row_data[r].append(str(col.values[r]))
+                            row_data[r].append(col.values[r])
                     idx += batch
                     # yield a list of rows
                     yield row_data
