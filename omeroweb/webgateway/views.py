@@ -24,7 +24,9 @@ from past.builtins import unicode
 
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseServerError, JsonResponse
-from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed, \
+    Http404, StreamingHttpResponse, HttpResponseNotFound
+
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
@@ -54,7 +56,6 @@ try:
 except ImportError:
     long = int
 
-from io import StringIO
 from io import BytesIO
 import tempfile
 
@@ -2444,8 +2445,7 @@ def download_as(request, iid=None, conn=None, **kwargs):
                 zipName = "%s.zip" % zipName
 
             # return the zip or single file
-            rsp = ConnCleaningHttpResponse(FileWrapper(temp))
-            rsp.conn = conn
+            rsp = StreamingHttpResponse(FileWrapper(temp))
             rsp['Content-Length'] = temp.tell()
             rsp['Content-Disposition'] = 'attachment; filename=%s' % zipName
             temp.seek(0)
@@ -2474,11 +2474,9 @@ def archived_files(request, iid=None, conn=None, **kwargs):
     wellIds = request.GET.getlist('well')
     if iid is None:
         if len(imgIds) == 0 and len(wellIds) == 0:
-            rsp = ConnCleaningHttpResponse(StringIO(
+            return HttpResponseServerError(
                 "No images or wells specified in request."
-                " Use ?image=123 or ?well=123"), status=400)
-            rsp.conn = conn
-            return rsp
+                " Use ?image=123 or ?well=123")
     else:
         imgIds = [iid]
 
@@ -2498,17 +2496,13 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         message = 'Cannot download archived file because Images not ' \
             'found (ids: %s)' % (imgIds)
         logger.debug(message)
-        rsp = ConnCleaningHttpResponse(StringIO(message), status=404)
-        rsp.conn = conn
-        return rsp
+        return HttpResponseServerError(message)
 
     # Test permissions on images and weels
     for ob in (wells):
         if hasattr(ob, 'canDownload'):
             if not ob.canDownload():
-                rsp = ConnCleaningHttpResponse(status=404)
-                rsp.conn = conn
-                return rsp
+                return HttpResponseNotFound()
 
     for ob in (images):
         well = None
@@ -2517,15 +2511,12 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         except Exception:
             if hasattr(ob, 'canDownload'):
                 if not ob.canDownload():
-                    rsp = ConnCleaningHttpResponse(status=404)
-                    rsp.conn = conn
+                    return HttpResponseNotFound()
         else:
             if well and isinstance(well, omero.gateway.WellWrapper):
                 if hasattr(well, 'canDownload'):
                     if not well.canDownload():
-                        rsp = ConnCleaningHttpResponse(status=404)
-                        rsp.conn = conn
-                        return rsp
+                        return HttpResponseNotFound()
 
     # make list of all files, removing duplicates
     fileMap = {}
@@ -2538,9 +2529,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         message = 'Tried downloading archived files from image with no' \
             ' files archived.'
         logger.debug(message)
-        rsp = ConnCleaningHttpResponse(message, status=404)
-        rsp.conn = conn
-        return rsp
+        return HttpResponseServerError(message)
 
     if len(files) == 1:
         orig_file = files[0]
@@ -2571,9 +2560,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
             temp.close()
             message = 'Cannot download file (id:%s)' % (iid)
             logger.error(message, exc_info=True)
-            rsp = ConnCleaningHttpResponse(StringIO(message), status=500)
-            rsp.conn = conn
-            return rsp
+            return HttpResponseServerError(message)
 
     rsp['Content-Type'] = 'application/force-download'
     return rsp
