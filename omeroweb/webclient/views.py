@@ -3013,10 +3013,11 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
         table_data = context.get('data')
 
         def csv_gen():
-            csv_rows = ",".join(table_data.get('columns')) + '\n'
-            yield csv_rows
+            csv_cols = ",".join(table_data.get('columns'))
+            yield csv_cols
             for rows in table_data.get('lazy_rows'):
-                yield '\n'.join([",".join(row) for row in rows]) + '\n'
+                yield ('\n' + '\n'.join([",".join([str(d) for d in row])
+                       for row in rows]))
 
         downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
         downloadName = downloadName + ".csv"
