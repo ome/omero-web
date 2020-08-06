@@ -104,7 +104,7 @@ from omero.model import AnnotationAnnotationLinkI, \
     ProjectDatasetLinkI, \
     ScreenI, \
     ScreenPlateLinkI, \
-    TagAnnotationI,
+    TagAnnotationI
 from omero import ApiUsageException, ServerError, CmdError
 from omeroweb.webgateway.views import LoginView
 
