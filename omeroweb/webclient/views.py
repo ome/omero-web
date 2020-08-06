@@ -93,11 +93,18 @@ from omeroweb.webclient.show import Show, IncorrectMenuError, \
 from omeroweb.decorators import ConnCleaningHttpResponse, parse_url
 from omeroweb.webgateway.util import getIntOrDefault
 
-from omero.model import ProjectI, DatasetI, ImageI, \
-    ScreenI, PlateI, \
-    ProjectDatasetLinkI, DatasetImageLinkI, \
+from omero.model import AnnotationAnnotationLinkI, \
+    DatasetI, \
+    DatasetImageLinkI, \
+    ExperimenterI, \
+    ImageI, \
     OriginalFileI, \
-    ScreenPlateLinkI, AnnotationAnnotationLinkI, TagAnnotationI
+    PlateI, \
+    ProjectI, \
+    ProjectDatasetLinkI, \
+    ScreenI, \
+    ScreenPlateLinkI, \
+    TagAnnotationI,
 from omero import ApiUsageException, ServerError, CmdError
 from omeroweb.webgateway.views import LoginView
 
@@ -913,6 +920,22 @@ def create_link(parent_type, parent_id, child_type, child_id):
     return None
 
 
+def set_link_owner(conn, link, parent_type, child_type):
+    """
+    If user doesn't own the Parent, link should belong
+    to the owner of the parent
+    """
+    exp_id = conn.getUserId()
+    qs = conn.getQueryService()
+    child = qs.get(child_type.title(), link.child.id.val, conn.SERVICE_OPTS)
+    is_child_mine = child.details.owner.id.val == exp_id
+    if not is_child_mine:
+        # link owner should match parent owner
+        parent = qs.get(parent_type.title(), link.parent.id.val,
+                        conn.SERVICE_OPTS)
+        link.details.owner = ExperimenterI(parent.details.owner.id.val, False)
+
+
 @login_required()
 def api_links(request, conn=None, **kwargs):
     """
@@ -955,12 +978,16 @@ def _api_links_POST(conn, json_data, **kwargs):
         if parent_type == "orphaned":
             continue
         for parent_id, children in parents.items():
+            parent = conn.getObject(parent_type, parent_id)
+            is_parent_mine = parent.details.owner.id.val == conn.getUserId()
             for child_type, child_ids in children.items():
                 for child_id in child_ids:
                     parent_id = int(parent_id)
                     link = create_link(parent_type, parent_id,
                                        child_type, child_id)
                     if link and link != 'orphan':
+                        if not is_parent_mine:
+                            set_link_owner(conn, link, parent_type, child_type)
                         linksToSave.append(link)
 
     if len(linksToSave) > 0:
