@@ -960,6 +960,8 @@ $(function() {
                 };
 
                 config["chown"] = {
+                    // title support needs js-tree patch: 5317ad21c
+                    "title": "Only Admins or Group Owners can change ownership",
                     "label" : "Change Owner...",
                     "_disabled": true,
                     "icon"  : WEBCLIENT.URLS.static_webclient + 'image/icon_basic_user_16.png',
@@ -1162,6 +1164,7 @@ $(function() {
                 // Can chown if Admin (with 'Chown' privilege) or Group owner
                 if (WEBCLIENT.current_admin_privileges.indexOf("Chown") > -1 || 
                     WEBCLIENT.leader_of_groups.indexOf(WEBCLIENT.active_group_id) > -1) {
+                        config["chown"]["title"] = false;
                         config["chown"]["_disabled"] = false;
                 }
 
