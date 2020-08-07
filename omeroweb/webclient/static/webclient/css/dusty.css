@@ -803,8 +803,9 @@ button::-moz-focus-inner {
 	------------------------------------------------
 */
 
-.ui-widget-overlay {
+html .ui-widget-overlay {
 	background:rgba(255,255,255,.6);
+	opacity: 1;
 }
 
 .ui-dialog {
