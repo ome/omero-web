@@ -858,6 +858,8 @@ button::-moz-focus-inner {
 			height: 18px; 
 			border:none;
 			background:url(../../webgateway/img/close.png) center center no-repeat;
+			/* https://github.com/ome/omero-web/pull/180#issuecomment-670499867 */
+			color: transparent;
 		}
 	
 		.ui-dialog .ui-dialog-titlebar-close:hover, .ui-dialog .ui-dialog-titlebar-close:focus {
