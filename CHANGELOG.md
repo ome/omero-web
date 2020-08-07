@@ -1,3 +1,42 @@
+5.7.1 (July 2020)
+-----------------
+
+- webgateway
+
+   - Always marshal tile metadata on presence of pyramid ([#193](https://github.com/ome/omero-web/pull/193))
+
+5.7.0 (July 2020)
+-----------------
+
+- webclient:
+   - Preserve whitespace and linebreaks in Comments ([#150](https://github.com/ome/omero-web/pull/150))
+   - Improve filtering Images by numerical Key-Value pairs ([#147](https://github.com/ome/omero-web/pull/147))
+   - Fix editing of 'Shares' in webclient ([#162](https://github.com/ome/omero-web/pull/162))
+   - Fix error when user logged-out and public user configured ([#154](https://github.com/ome/omero-web/pull/154))
+   - No longer ignore the default thumbnail size from the configuration ([#165](https://github.com/ome/omero-web/pull/165))
+   - Fix moving data in webclient tree in Python 3.5 ([#170](https://github.com/ome/omero-web/pull/170))
+   - Handle no 'callback' in request.session ([#186](https://github.com/ome/omero-web/pull/186))
+
+- API changes:
+   - Add ROI support to `paths_to_object` ([#159](https://github.com/ome/omero-web/pull/159))
+   - Add Shape support to `paths_to_object` ([#178](https://github.com/ome/omero-web/pull/178))
+   - Add JSON API support for Experimenters and Groups ([#148](https://github.com/ome/omero-web/pull/148))
+
+- Other:
+   - Fix `render_roi_thumbnail` for unset Z/T index ([#157](https://github.com/ome/omero-web/pull/157))
+   - `omero-web` now requires `omero-py 5.7.0`
+   - Add doc for APPLICATION_SERVER_HOST to settings ([#177](https://github.com/ome/omero-web/pull/177))
+   - Set sign_tags to True by default in .bumpversion.cfg ([#176](https://github.com/ome/omero-web/pull/176))
+   - Fix new flake8 warnings ([#174](https://github.com/ome/omero-web/pull/174))
+   - Add `omero-web-docker` to release process instructions ([#156](https://github.com/ome/omero-web/pull/156))
+
+
+5.6.3 (March 2020)
+------------------
+
+- `omero.web.root_application`: allow "/" to be overridden ([#123](https://github.com/ome/omero-web/pull/123))
+- Close sessions where user is anonymous but `is_valid_public_url` is false ([#151](https://github.com/ome/omero-web/pull/151))
+
 5.6.2 (February 2020)
 ---------------------
 

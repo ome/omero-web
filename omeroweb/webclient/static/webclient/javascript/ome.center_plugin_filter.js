@@ -6,7 +6,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
     this.moreLess = "more";
     this.filterObjects = filterObjects;
 
-    var $filter = $('<div class="imagefilter filtersearch">' +
+    var $filter = $('<div class="imagefilter filtersearch" style="width:100%">' +
         '<select class="choose_map_key">' +
         '</select>' +
         '<select class="map_more_less" style="width: 40px; display:none">' +
@@ -17,7 +17,8 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
             '<option value="equal">=</option>' +
         '</select>' +
         '<input class="filter_map_value" style="float:left; margin:2px; position:relative" />' +
-        '<span title="Remove filter" class="removefilter" style="float:left">X</span>' +
+        '<span class="filter_map_units" style="float:left; margin: 5px; font-size: 12px"></span>' +
+        '<span title="Remove filter" class="removefilter" style="float:left; margin-left:5px">X</span>' +
     '</div>');
 
     $element.append($filter);
@@ -33,17 +34,24 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
         } else {
             this.currentKeyValues = this.usedKeyValues[this.currentFilterKey].values;
             this.keyisNumber = this.usedKeyValues[this.currentFilterKey].type === 'number';
+            this.keyUnits = this.usedKeyValues[this.currentFilterKey].units;
         }
         if (this.keyisNumber) {
             $(".map_more_less", $filter).show();
         } else {
             $(".map_more_less", $filter).hide();
         }
+        if (!this.keyUnits) {
+            $(".filter_map_units", $filter).text("");
+        } else {
+            $(".filter_map_units", $filter).text(this.keyUnits.escapeHTML());
+        }
         var placeholder = 'filter text';
         if (this.keyisNumber) {
             let min = this.usedKeyValues[this.currentFilterKey].min;
             let max = this.usedKeyValues[this.currentFilterKey].max;
             placeholder = min + '-' + max;
+            $(".filter_map_value", $filter).autocomplete({disabled: true})
         } else {
             var autocompVals = [];
             for (var values of Object.values(this.currentKeyValues)) {
@@ -56,6 +64,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
             autocompVals.sort();
             var self = this;
             $(".filter_map_value", $filter).autocomplete({
+                disabled: false,
                 source: autocompVals,
                 select: function( event, ui ) {
                     self.filterText = ui.item.value;
@@ -75,7 +84,17 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
     }.bind(this));
 
     $(".filter_map_value", $filter).on('input', function(event){
-        this.filterText = $(event.target).val();
+        var val = $(event.target).val();
+        if (this.keyisNumber) {
+            // remove non-number characters. Allow . or - or 0-9
+            val = val.split("").filter(function(c){c = c.charCodeAt(); return c == 45 || c == 46 || (c > 47 && c < 58)}).join('');
+            $(event.target).val(val);
+            if (isNaN(val)) {
+                val = '';
+            }
+        }
+        this.filterText = val;
+
         if (callback) {
             callback();
         }
@@ -129,6 +148,7 @@ MapAnnFilter.prototype.isImageVisible = function(iid) {
     } else if (this.keyisNumber) {
         let cutoff = parseFloat(text);
         this.currentKeyValues[iid].forEach(function(v){
+            v = parseFloat(v);
             // compare: more, less, moreequal, lessequal, equal
             if (v == cutoff && this.moreLess.indexOf('equal') > -1) {
                 visible = true;
@@ -140,7 +160,7 @@ MapAnnFilter.prototype.isImageVisible = function(iid) {
         }.bind(this));
     } else {
         this.currentKeyValues[iid].forEach(function(v){
-            if (v.toLowerCase().indexOf(text.toLowerCase()) > -1) {
+            if (v.indexOf(text) > -1) {
                 visible = true;
             }
         });
@@ -164,14 +184,42 @@ MapAnnFilter.prototype.loadAnnotations = function(callback) {
                 if (val.length == 0) continue;
 
                 if (!prev[key]) {
-                    prev[key] = {values: {}, type: 'number', min: Infinity, max: -Infinity};
+                    prev[key] = {
+                        values: {},
+                        type: 'number',
+                        units: undefined,   // just a suffix e.g 'mM' for 10mM
+                        min: Infinity,
+                        max: -Infinity,
+                    };
                 }
-                if (isNaN(val)) {
-                    prev[key].type = 'string';
-                } else {
-                    val = parseFloat(val);
-                    prev[key].min = Math.min(val, prev[key].min);
-                    prev[key].max = Math.max(val, prev[key].max);
+                // if type is NOT string, check if val is a number...
+                if (prev[key].type !== 'string') {
+                    // If 'units' are a string (not empty), value must be number+units
+                    var num = undefined;
+                    if (prev[key].units) {
+                        // We remove units and strictly check it's a number...
+                        let digits = val.replace(prev[key].units, '');
+                        if (isNaN(digits) || isNaN(parseFloat(val))) {
+                            // If not - we treat data as a string
+                            prev[key].type = 'string';
+                            prev[key].units = undefined
+                        } else {
+                            num = parseFloat(val);
+                        }
+                    // We haven't defined units yet... Check if NaN
+                    } else if (isNaN(parseFloat(val))) {
+                        // Can't cast to a number - bail!
+                        prev[key].type = 'string';
+                    } else {
+                        // it IS a number - and we don't have any units yet...
+                        num = parseFloat(val);
+                        prev[key].units = val.replace(num, '').trim();   // '10 mM' -> 'mM'
+                    }
+                    // update min/max
+                    if (num != undefined) {
+                        prev[key].min = Math.min(num, prev[key].min);
+                        prev[key].max = Math.max(num, prev[key].max);
+                    }
                 }
                 if (!prev[key].values[iid]) {
                     prev[key].values[iid] = [val];

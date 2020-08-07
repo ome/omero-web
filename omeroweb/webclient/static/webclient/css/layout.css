@@ -1167,17 +1167,10 @@
 					font-weight: bold;
 					color:#333;
 				}
-			
-			.commentText p{
-                -webkit-border-radius:2px;
-				display:block;
-				border:solid 1px transparent;
-				-webkit-border-radius:2px; /* Saf3+, Chrome */
-				   -moz-border-radius:2px; /* FF1+ */
-				        border-radius:2px; /* Opera 10.5, IE 9 */ 
-                line-height:1.4em;
-			}
-	
+
+            .commentText {
+                white-space: pre-wrap
+            }
 	
 			.removeComment {
 				float:right;

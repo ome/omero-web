@@ -66,7 +66,7 @@ def _formatReport(callback):
 
 def _purgeCallback(request):
 
-    callbacks = request.session.get('callback').keys()
+    callbacks = request.session.get('callback', {}).keys()
     if len(callbacks) > 200:
         for (cbString, count) in zip(request.session.get('callback').keys(),
                                      range(0, len(callbacks)-200)):

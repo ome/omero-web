@@ -416,42 +416,46 @@ def render_roi_thumbnail(request, roiId, w=None, h=None, conn=None, **kwargs):
     server_id = request.session['connector'].server_id
 
     # need to find the z indices of the first shape in T
-    roiResult = conn.getRoiService().findByRoi(
+    result = conn.getRoiService().findByRoi(
         long(roiId), None, conn.SERVICE_OPTS)
-    if roiResult is None or roiResult.rois is None:
+    if result is None or result.rois is None or len(result.rois) == 0:
         raise Http404
-    zz = set()
-    minT = None
-    shapes = {}
-    for roi in roiResult.rois:
+
+    for roi in result.rois:
         imageId = roi.image.id.val
-        for s in roi.copyShapes():
-            if s is None:   # seems possible in some situations
-                continue
-            t = unwrap(s.getTheT())
-            z = unwrap(s.getTheZ())
-            shapes[(z, t)] = s
-            if minT is None:
-                minT = t
-            if t < minT:
-                zz = set([z])
-                minT = t
-            elif minT == t:
-                zz.add(z)
-    zList = list(zz)
-    if len(zList) == 0:
+        shapes = roi.copyShapes()
+    shapes = [s for s in shapes if s is not None]
+
+    if len(shapes) == 0:
         raise Http404("No Shapes found for ROI %s" % roiId)
-    zList.sort()
-    midZ = zList[len(zList)/2]
-    s = shapes[(midZ, minT)]
 
     pi = _get_prepared_image(request, imageId, server_id=server_id, conn=conn)
-
     if pi is None:
         raise Http404
     image, compress_quality = pi
 
-    return get_shape_thumbnail(request, conn, image, s, compress_quality)
+    shape = None
+    # if only single shape, use it...
+    if len(shapes) == 1:
+        shape = shapes[0]
+    else:
+        default_t = image.getDefaultT()
+        default_z = image.getDefaultZ()
+        # find shapes on default Z/T plane
+        def_shapes = [s for s in shapes if unwrap(s.getTheT()) is None
+                      or unwrap(s.getTheT()) == default_t]
+        if len(def_shapes) == 1:
+            shape = def_shapes[0]
+        else:
+            def_shapes = [s for s in def_shapes if unwrap(s.getTheZ()) is None
+                          or unwrap(s.getTheZ()) == default_z]
+            if len(def_shapes) > 0:
+                shape = def_shapes[0]
+        # otherwise pick first shape
+        if shape is None and len(shapes) > 0:
+            shape = shapes[0]
+
+    return get_shape_thumbnail(request, conn, image, shape, compress_quality)
 
 
 @login_required()
@@ -504,8 +508,10 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
 
     bBox = None   # bounding box: (x, y, w, h)
     shape = {}
-    theT = s.getTheT() is not None and s.getTheT().getValue() or 0
-    theZ = s.getTheZ() is not None and s.getTheZ().getValue() or 0
+    theT = unwrap(s.getTheT())
+    theT = theT if theT is not None else image.getDefaultT()
+    theZ = unwrap(s.getTheZ())
+    theZ = theZ if theZ is not None else image.getDefaultZ()
     if type(s) == omero.model.RectangleI:
         shape['type'] = 'Rectangle'
         shape['x'] = s.getX().getValue()
@@ -684,9 +690,9 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
         # doesn't support 'width' of line
         # draw.polygon(resizedXY, outline=lineColour)
         x2 = y2 = None
-        for l in range(1, len(resizedXY)):
-            x1, y1 = resizedXY[l-1]
-            x2, y2 = resizedXY[l]
+        for line in range(1, len(resizedXY)):
+            x1, y1 = resizedXY[line-1]
+            x2, y2 = resizedXY[line]
             draw.line((x1, y1, x2, y2), fill=lineColour, width=2)
         start_x, start_y = resizedXY[0]
         if shape['type'] != 'PolyLine':
@@ -699,8 +705,11 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
 
     rv = BytesIO()
     compression = 0.9
-    img.save(rv, 'jpeg', quality=int(compression*100))
-    jpeg = rv.getvalue()
+    try:
+        img.save(rv, 'jpeg', quality=int(compression*100))
+        jpeg = rv.getvalue()
+    finally:
+        rv.close()
     return HttpResponse(jpeg, content_type='image/jpeg')
 
 
@@ -1566,8 +1575,11 @@ def get_thumbnails_json(request, w=None, conn=None, **kwargs):
     @param w:           Thumbnail max width. 96 by default
     @return:            http response containing base64 encoded thumbnails
     """
+    server_settings = request.session.get('server_settings', {}) \
+                                     .get('browser', {})
+    defaultSize = server_settings.get('thumb_default_size', 96)
     if w is None:
-        w = 96
+        w = defaultSize
     image_ids = get_longs(request, 'id')
     image_ids = list(set(image_ids))    # remove any duplicates
     # If we only have a single ID, simply use getThumbnail()
@@ -1954,13 +1966,13 @@ def listLuts_json(request, conn=None, **kwargs):
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
     rv = []
-    for l in luts:
-        lut = l.path.val + l.name.val
-        png_index = LUTS_IN_PNG.index(lut) if lut in LUTS_IN_PNG else -1
-        rv.append({'id': l.id.val,
-                   'path': l.path.val,
-                   'name': l.name.val,
-                   'size': unwrap(l.size),
+    for lut in luts:
+        lutsrc = lut.path.val + lut.name.val
+        png_index = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
+        rv.append({'id': lut.id.val,
+                   'path': lut.path.val,
+                   'name': lut.name.val,
+                   'size': unwrap(lut.size),
                    'png_index': png_index,
                    })
     rv.sort(key=lambda x: x['name'].lower())
@@ -2767,7 +2779,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 
     data = []
     # Process all annotations from all objects...
-    links = [l for obj in objs for l in obj.copyAnnotationLinks()]
+    links = [link for obj in objs for link in obj.copyAnnotationLinks()]
     for link in links:
         annotation = link.child
         if not isinstance(annotation, omero.model.FileAnnotation):

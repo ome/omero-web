@@ -168,11 +168,11 @@ def imageMarshal(image, key=None, request=None):
         return rv       # Return what we have already, in case it's useful
 
     # big images
-    tiles = image._re.requiresPixelsPyramid()
+    levels = image._re.getResolutionLevels()
+    tiles = levels > 1
     rv['tiles'] = tiles
-    if (tiles):
+    if tiles:
         width, height = image._re.getTileSize()
-        levels = image._re.getResolutionLevels()
         zoomLevelScaling = image.getZoomLevelScaling()
 
         rv.update({'tile_size': {'width': width,
@@ -458,11 +458,11 @@ def chgrpMarshal(conn, rsp):
                            'ome.model.annotations.ScreenAnnotationLink',
                            'ome.model.annotations.PlateAnnotationLink',
                            'ome.model.annotations.WellAnnotationLink']
-        for l in annotationLinks:
-            if l in deleted:
-                linkType = l.split(".")[-1]
+        for link in annotationLinks:
+            if link in deleted:
+                linkType = link.split(".")[-1]
                 params = omero.sys.ParametersI()
-                params.addIds(deleted[l])
+                params.addIds(deleted[link])
                 query = ("select annLink from %s as annLink "
                          "join fetch annLink.child as ann "
                          "left outer join fetch ann.file "
@@ -503,11 +503,11 @@ def chgrpMarshal(conn, rsp):
             'ome.model.containers.ProjectDatasetLink': 'Datasets',
             'ome.model.containers.DatasetImageLink': 'Images',
             'ome.model.screen.ScreenPlateLink': 'Screens'}
-        for l, ch in containerLinks.items():
-            if l in deleted:
-                linkType = l.split(".")[-1]
+        for link, ch in containerLinks.items():
+            if link in deleted:
+                linkType = link.split(".")[-1]
                 params = omero.sys.ParametersI()
-                params.addIds(deleted[l])
+                params.addIds(deleted[link])
                 query = ("select conLink from %s as conLink "
                          "join fetch conLink.child as ann "
                          "where conLink.id in (:ids)" % linkType)

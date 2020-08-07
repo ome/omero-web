@@ -3,7 +3,7 @@
 #
 #
 #
-# Copyright (c) 2008-2018 University of Dundee.
+# Copyright (c) 2008-2020 University of Dundee.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -100,7 +100,8 @@ class render_response_admin(omeroweb.webclient.decorators.render_response):
 def prepare_experimenter(conn, eid=None):
     if eid is None:
         eid = conn.getEventContext().userId
-    experimenter = conn.getObject("Experimenter", eid)
+    experimenter = conn.getObject("Experimenter", eid,
+                                  opts={'load_experimentergroups': True})
     defaultGroup = experimenter.getDefaultGroup()
     otherGroups = list(experimenter.getOtherGroups())
     hasAvatar = conn.hasExperimenterPhoto()
@@ -391,7 +392,8 @@ def logout(request, **kwargs):
 def experimenters(request, conn=None, **kwargs):
     template = "webadmin/experimenters.html"
 
-    experimenterList = list(conn.getObjects("Experimenter"))
+    experimenterList = list(conn.getObjects(
+        "Experimenter", opts={'load_experimentergroups': True}))
     can_modify_user = 'ModifyUser' in conn.getCurrentAdminPrivileges()
 
     context = {'experimenterList': experimenterList,

@@ -280,8 +280,6 @@ urlpatterns = [
     url(r'^api/groups/$', views.api_group_list,
         name='api_groups'),
 
-    url(r'^api/experimenters/$', views.api_experimenter_list,
-        name='api_experimenters'),
     url(r'^api/experimenters/(?P<experimenter_id>-?\d+)/$',
         views.api_experimenter_detail, name='api_experimenter'),
 

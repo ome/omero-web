@@ -449,10 +449,26 @@ def get_image_ids(conn, datasetId=None, groupId=-1, ownerId=None):
     return iids
 
 
+def get_image_roi_id_for_shape(conn, shape_id):
+    """Returns (Image_ID, ROI_ID) from a shape ID."""
+    params = omero.sys.ParametersI()
+    params.addId(shape_id)
+    query = """select roi from Roi roi
+        left outer join roi.shapes as shape
+        where shape.id=:id"""
+    query_service = conn.getQueryService()
+    result = query_service.findByQuery(query, params, conn.SERVICE_OPTS)
+    if result:
+        roi = result
+        return (roi.image.id.val, roi.id.val)
+    return (None, None)
+
+
 def paths_to_object(conn, experimenter_id=None, project_id=None,
                     dataset_id=None, image_id=None, screen_id=None,
                     plate_id=None, acquisition_id=None, well_id=None,
-                    group_id=None, page_size=None):
+                    group_id=None, page_size=None, roi_id=None,
+                    shape_id=None):
     """
     Retrieves the parents of an object (E.g. P/D/I for image) as a list
     of paths.
@@ -501,6 +517,12 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
     if dataset_id is not None:
         params.add('did', rlong(dataset_id))
         lowest_type = 'dataset'
+    if roi_id is not None:
+        roi = conn.getObject('Roi', roi_id)
+        if roi is not None:
+            image_id = roi.image.id
+    if shape_id is not None:
+        image_id, roi_id = get_image_roi_id_for_shape(conn, shape_id)
     if image_id is not None:
         params.add('iid', rlong(image_id))
         lowest_type = 'image'
@@ -629,6 +651,18 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                     'id': imageId
                 })
                 paths.append(path)
+        # Any roi/shape info to paths
+        for path in paths:
+            if roi_id is not None:
+                path.append({
+                    'type': 'roi',
+                    'id': roi_id
+                })
+            if shape_id is not None:
+                path.append({
+                    'type': 'shape',
+                    'id': shape_id
+                })
 
     elif lowest_type == 'dataset':
         q = '''
@@ -863,7 +897,8 @@ def paths_to_well_image(conn, params, well_id=None, image_id=None,
                slink.parent.id,
                plate.id,
                acquisition.id,
-               well.id
+               well.id,
+               wellsample.id
         from WellSample wellsample
         join wellsample.details.owner wsowner
         left outer join wellsample.plateAcquisition acquisition
@@ -926,6 +961,18 @@ def paths_to_well_image(conn, params, well_id=None, image_id=None,
             path.append({
                 'type': 'well',
                 'id': e[4].val
+            })
+
+        # Include WellSampe if path is to image
+        if e[5] is not None and orphanedImage:
+            path.append({
+                'type': 'wellsample',
+                'id': e[5].val
+            })
+        if image_id is not None:
+            path.append({
+                'type': 'image',
+                'id': image_id
             })
 
         paths.append(path)

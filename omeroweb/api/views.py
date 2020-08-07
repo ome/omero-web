@@ -78,7 +78,10 @@ def api_versions(request, **kwargs):
 def api_base(request, api_version=None, **kwargs):
     """Base url of the webgateway json api for a specified version."""
     v = api_version
-    rv = {'url:projects': build_url(request, 'api_projects', v),
+    rv = {'url:experimenters': build_url(request, 'api_experimenters', v),
+          'url:experimentergroups': build_url(request,
+                                              'api_experimentergroups', v),
+          'url:projects': build_url(request, 'api_projects', v),
           'url:datasets': build_url(request, 'api_datasets', v),
           'url:images': build_url(request, 'api_images', v),
           'url:screens': build_url(request, 'api_screens', v),
@@ -378,6 +381,34 @@ class RoiView(ObjectView):
         opts = super(RoiView, self).get_opts(request, **kwargs)
         opts['load_shapes'] = True
         return opts
+
+
+class ExperimenterView(ObjectView):
+
+    OMERO_TYPE = 'Experimenter'
+
+    CAN_DELETE = False
+
+    # Urls to add to marshalled object. See ProjectsView for more details
+    urls = {
+        'url:experimentergroups': {
+            'name': 'api_experimenter_experimentergroups',
+            'kwargs': {'experimenter_id': 'OBJECT_ID'}
+        },
+    }
+
+
+class ExperimenterGroupView(ObjectView):
+
+    OMERO_TYPE = 'ExperimenterGroup'
+
+    CAN_DELETE = False
+
+    # Urls to add to marshalled object. See ProjectsView for more details
+    urls = {
+        'url:experimenters': {'name': 'api_experimentergroup_experimenters',
+                              'kwargs': {'group_id': 'OBJECT_ID'}},
+    }
 
 
 class ObjectsView(ApiView):
@@ -702,6 +733,84 @@ class RoisView(ObjectsView):
             image = getIntOrDefault(request, 'image', None)
             if image is not None:
                 opts['image'] = image
+
+        return opts
+
+
+class ExperimentersView(ObjectsView):
+    """Handles GET for /experimenters/ to list Experimenters."""
+
+    OMERO_TYPE = 'Experimenter'
+
+    # Urls to add to marshalled object. See ProjectsView for more details
+    urls = {
+        'url:experimenter': {'name': 'api_experimenter',
+                             'kwargs': {'object_id': 'OBJECT_ID'}},
+        'url:experimentergroups': {
+            'name': 'api_experimenter_experimentergroups',
+            'kwargs': {'experimenter_id': 'OBJECT_ID'}
+        },
+    }
+
+    def get_opts(self, request, **kwargs):
+        """
+        Add extra parameters to the opts dict for GET /experimenters/.
+
+        Query will order by lastName, firstName
+        Includes option to filter by group
+        """
+        opts = super(ExperimentersView, self).get_opts(request, **kwargs)
+        # Default 'load_experimentergroups' is True, but we don't need groups
+        opts['load_experimentergroups'] = False
+        # order_by lastName, firstName
+        opts['order_by'] = 'lower(obj.lastName), lower(obj.firstName)'
+
+        # at /experimentergroups/:group_id/experimenters/
+        # we have 'group_id' in kwargs
+        if 'group_id' in kwargs:
+            opts['experimentergroup'] = int(kwargs['group_id'])
+        else:
+            # filter by query /experimenters/?experimentergroup=:id
+            group = getIntOrDefault(request, 'experimentergroup', None)
+            if group is not None:
+                opts['experimentergroup'] = group
+
+        return opts
+
+
+class ExperimenterGroupsView(ObjectsView):
+    """Handles GET for /experimentergroups/ to list ExperimenterGroups."""
+
+    OMERO_TYPE = 'ExperimenterGroup'
+
+    # Urls to add to marshalled object. See ProjectsView for more details
+    urls = {
+        'url:experimentergroup': {'name': 'api_experimentergroup',
+                                  'kwargs': {'object_id': 'OBJECT_ID'}},
+        'url:experimenters': {'name': 'api_experimentergroup_experimenters',
+                              'kwargs': {'group_id': 'OBJECT_ID'}},
+    }
+
+    def get_opts(self, request, **kwargs):
+        """
+        Add extra parameters to the opts dict.
+
+        Query will order Groups by name
+        """
+        opts = super(ExperimenterGroupsView, self).get_opts(request, **kwargs)
+        # Default 'load_experimenters' = True, but we don't want them
+        opts['load_experimenters'] = False
+        # order_by group name
+        opts['order_by'] = 'lower(obj.name)'
+
+        # handle /experimenters/:experimenter_id/experimentergroups/
+        if 'experimenter_id' in kwargs:
+            opts['experimenter'] = int(kwargs['experimenter_id'])
+        else:
+            # filter by query /experimentergroups/?experimenter=:id
+            group = getIntOrDefault(request, 'experimenter', None)
+            if group is not None:
+                opts['experimenter'] = group
 
         return opts
 
