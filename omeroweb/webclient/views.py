@@ -929,8 +929,8 @@ def set_link_owner(conn, link, parent_type, child_type):
     qs = conn.getQueryService()
     child = qs.get(child_type.title(), link.child.id.val, conn.SERVICE_OPTS)
     is_child_mine = child.details.owner.id.val == exp_id
-    if not is_child_mine:
-        # link owner should match parent owner
+    if WEBCLIENT.current_admin_privileges.indexOf('WriteOwned') > -1:
+        # If we have permissions, link owner should match parent owner
         parent = qs.get(parent_type.title(), link.parent.id.val,
                         conn.SERVICE_OPTS)
         link.details.owner = ExperimenterI(parent.details.owner.id.val, False)
