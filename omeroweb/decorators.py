@@ -94,6 +94,12 @@ class login_required(object):
     https://docs.djangoproject.com/en/dev/topics/auth/, which is responsible
     for ensuring a valid L{omero.gateway.BlitzGateway} connection. Is
     configurable by various options.
+
+    doConnectionCleanup:
+        If True (default), then returning a ConnCleaningHttpResponse will
+        raise an Exception since cleanup is intended to be immediate; if
+        False, connection cleanup will be skipped for all
+        ConnCleaningHttpResponse values.
     """
 
     def __init__(self, useragent='OMERO.web', isAdmin=False,
@@ -489,9 +495,18 @@ class login_required(object):
             finally:
                 # If f() raised Exception, e.g. Http404() we must still cleanup
                 try:
-                    if isinstance(retval, ConnCleaningHttpResponse):
-                        # conn will be closed by response.close()
-                        doConnectionCleanup = False
+                    delayConnectionCleanup = isinstance(
+                        retval, ConnCleaningHttpResponse
+                    )
+                    if doConnectionCleanup and delayConnectionCleanup:
+                        raise Exception(
+                            (
+                                "FIXME: do whatever here is "
+                                "appropriate to force a developer to "
+                                "fix the issue _before_ release"
+                            )
+                        )
+                    doConnectionCleanup = not delayConnectionCleanup
                     logger.debug(
                         'Doing connection cleanup? %s' % doConnectionCleanup)
                     if doConnectionCleanup:
