@@ -970,7 +970,7 @@ def _api_links_POST(conn, json_data, **kwargs):
 
     linksToSave = []
     for parent_type, parents in json_data.items():
-        if parent_type == "orphaned":
+        if parent_type in ("orphaned", "experimenter"):
             continue
         for parent_id, children in parents.items():
             parent = conn.getObject(
