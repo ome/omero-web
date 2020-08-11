@@ -2980,11 +2980,12 @@ def get_original_file(request, fileId, download=False, conn=None, **kwargs):
     return rsp
 
 
-@login_required()
+@login_required(doConnectionCleanup=False)
 @render_response()
 def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     """
-    Download OMERO.table as CSV or show as HTML table
+    Download OMERO.table as CSV (streaming response) or return as HTML or json
+
     @param file_id:     OriginalFile ID
     @param mtype:       None for html table or 'csv' or 'json'
     @param conn:        BlitzGateway connection
