@@ -2948,7 +2948,7 @@ def manage_action_containers(request, action, o_type=None, o_id=None,
     return context
 
 
-@login_required()
+@login_required(doConnectionCleanup=False)
 def get_original_file(request, fileId, download=False, conn=None, **kwargs):
     """
     Returns the specified original file as an http response. Used for
@@ -3070,7 +3070,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     return context
 
 
-@login_required()
+@login_required(doConnectionCleanup=False)
 def download_annotation(request, annId, conn=None, **kwargs):
     """ Returns the file annotation as an http response for download """
     ann = conn.getObject("FileAnnotation", annId)
