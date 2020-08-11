@@ -920,20 +920,15 @@ def create_link(parent_type, parent_id, child_type, child_id):
     return None
 
 
-def set_link_owner(conn, link, parent_type, child_type):
+def set_link_owner(conn, link, parent):
     """
     If user doesn't own the Parent, link should belong
     to the owner of the parent
     """
-    exp_id = conn.getUserId()
-    qs = conn.getQueryService()
-    child = qs.get(child_type.title(), link.child.id.val, conn.SERVICE_OPTS)
-    is_child_mine = child.details.owner.id.val == exp_id
-    if WEBCLIENT.current_admin_privileges.indexOf('WriteOwned') > -1:
+    print(conn.getCurrentAdminPrivileges())
+    if 'WriteOwned' in conn.getCurrentAdminPrivileges():
         # If we have permissions, link owner should match parent owner
-        parent = qs.get(parent_type.title(), link.parent.id.val,
-                        conn.SERVICE_OPTS)
-        link.details.owner = ExperimenterI(parent.details.owner.id.val, False)
+        link.details.owner = ExperimenterI(parent.details.owner.id, False)
 
 
 @login_required()
@@ -978,7 +973,8 @@ def _api_links_POST(conn, json_data, **kwargs):
         if parent_type == "orphaned":
             continue
         for parent_id, children in parents.items():
-            parent = conn.getObject(parent_type, parent_id)
+            parent = conn.getObject(
+                parent_type.replace('tagset', 'Annotation'), parent_id)
             is_parent_mine = parent.details.owner.id.val == conn.getUserId()
             for child_type, child_ids in children.items():
                 for child_id in child_ids:
@@ -987,7 +983,7 @@ def _api_links_POST(conn, json_data, **kwargs):
                                        child_type, child_id)
                     if link and link != 'orphan':
                         if not is_parent_mine:
-                            set_link_owner(conn, link, parent_type, child_type)
+                            set_link_owner(conn, link, parent)
                         linksToSave.append(link)
 
     if len(linksToSave) > 0:
