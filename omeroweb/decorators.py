@@ -500,10 +500,9 @@ class login_required(object):
                 )
                 if doConnectionCleanup and delayConnectionCleanup:
                     raise Exception(
-                        (
-                            "FIXME: methods that return a ConnCleaningHttpResponse"
-                            " must be marked with @login_required(doConnectionCleanup=False)"
-                        )
+                        "FIXME: methods that return a"
+                        " ConnCleaningHttpResponse must be marked with"
+                        " @login_required(doConnectionCleanup=False)"
                     )
                 doConnectionCleanup = not delayConnectionCleanup
                 logger.debug(
