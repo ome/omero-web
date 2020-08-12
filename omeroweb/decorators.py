@@ -96,10 +96,11 @@ class login_required(object):
     configurable by various options.
 
     doConnectionCleanup:
+        Used to indicate methods that may return ConnCleaningHttpResponse.
         If True (default), then returning a ConnCleaningHttpResponse will
         raise an Exception since cleanup is intended to be immediate; if
-        False, connection cleanup will be skipped for all
-        ConnCleaningHttpResponse values.
+        False, connection cleanup will be skipped ONLY when a
+        ConnCleaningHttpResponse is returned.
     """
 
     def __init__(self, useragent='OMERO.web', isAdmin=False,
