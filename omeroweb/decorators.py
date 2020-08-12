@@ -494,21 +494,20 @@ class login_required(object):
                 retval = f(request, *args, **kwargs)
             finally:
                 # If f() raised Exception, e.g. Http404() we must still cleanup
-                try:
-                    delayConnectionCleanup = isinstance(
-                        retval, ConnCleaningHttpResponse
-                    )
-                    if doConnectionCleanup and delayConnectionCleanup:
-                        raise Exception(
-                            (
-                                "FIXME: do whatever here is "
-                                "appropriate to force a developer to "
-                                "fix the issue _before_ release"
-                            )
+                delayConnectionCleanup = isinstance(
+                    retval, ConnCleaningHttpResponse
+                )
+                if doConnectionCleanup and delayConnectionCleanup:
+                    raise Exception(
+                        (
+                            "FIXME: methods that return a ConnCleaningHttpResponse"
+                            " must be marked with @login_required(doConnectionCleanup=False)"
                         )
-                    doConnectionCleanup = not delayConnectionCleanup
-                    logger.debug(
-                        'Doing connection cleanup? %s' % doConnectionCleanup)
+                    )
+                doConnectionCleanup = not delayConnectionCleanup
+                logger.debug(
+                    'Doing connection cleanup? %s' % doConnectionCleanup)
+                try:
                     if doConnectionCleanup:
                         if conn is not None and conn.c is not None:
                             conn.close(hard=False)
