@@ -17,14 +17,57 @@
   // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-  $(function() {
+$(function() {
 
     if (typeof window.OME === "undefined") { window.OME={}; }
 
-    var $chownform = $("#chown-form"),
-        $newbtn,
-        $okbtn;
+    var $chownform = $("#chown-form");
+    var datatree;
+    // Ojbects selected in jsTree
+    var selobjs = [];
+    var dataOwners = [];
+    var loadingExps = false;
+    var exps = [];
+    var $newbtn;
+    var $okbtn;
 
+    // template literals not supported on IE 11 (1.3% global browser share)
+    var templateText = `
+        <!-- Hidden fields for objects. e.g. name='Image' value='1,2,3' -->
+        <% _.each(selobjs, function(obj, idx) { %>
+            <input name='<%= obj.split("=")[0] %>' value='<%= obj.split("=")[1] %>' hidden/>
+        <% }) %>
+
+        <!-- List target new owners -->
+
+        <% if (loadingExps) { %>
+            <p>Loading users...</p>
+        <% } else if (exps.length > 0) { %>
+            <h1>Please choose new owner for the selected data:</h1>
+
+            <% _.each(exps, function(exp, idx) { %>
+                <label>
+                    <input name='owner_id' type='radio' value='<%= exp['@id'] %>'/>
+                    <%= exp.FirstName%> <%= exp.LastName %> 
+                </label>
+                <br/>
+            <% }) %>
+        <% } else { %>
+            <p>No users found</p>
+        <% } %>
+    `
+    var template = _.template(templateText);
+
+    // Update the $chownform with current state
+    function render() {
+
+        var html = template({
+            selobjs: selobjs,
+            exps: exps,
+            loadingExps: loadingExps,
+        });
+        $chownform.html(html);
+    }
 
     // external entry point, called by jsTree right-click menu
     window.OME.handleChown = function() {
@@ -33,44 +76,36 @@
             height: 450,
             width: 400});
         $chownform.dialog('open');
-        $chownform.empty();
+
 
         // Add selected items to chown form as hidden inputs
-        var selobjs = OME.get_tree_selection().split("&");  // E.g. Image=1,2&Dataset=3
-        for (var i = 0; i < selobjs.length; i++) {
-            dtype = selobjs[i].split("=")[0];
-            dids = selobjs[i].split("=")[1];
-            $("<input name='"+ dtype +"' value='"+ dids +"'/>")
-                .appendTo($chownform).hide();
-        }
-        var datatree = $.jstree.reference('#dataTree');
-        var dataOwners = datatree.get_selected(true).map(function(s){return s.data.obj.ownerId});
+        selobjs = OME.get_tree_selection().split("&");  // E.g. Image=1,2&Dataset=3
+        datatree = $.jstree.reference('#dataTree');
+        dataOwners = datatree.get_selected(true).map(function(s){return s.data.obj.ownerId});
 
+        loadUsers();
+
+        render();
+    };
+
+    function loadUsers() {
         // Need to find users we can move selected objects to.
         // Object owner must be member of current group.
         var gid = WEBCLIENT.active_group_id;
         var url = WEBCLIENT.URLS.api_base + "m/experimentergroups/" + gid + "/experimenters/";
-        $.getJSON(url, function(data) {
+        loadingExps = true;
+        $.getJSON(url, function (data) {
+            loadingExps = false;
             // Other group members (ignore current owner if just 1)
-            var exps = data.data;
+            exps = data.data;
             if (dataOwners.length === 1) {
-                exps = exps.filter(function(exp){
+                exps = exps.filter(function (exp) {
                     return exp['@id'] != dataOwners[0];
                 });
             }
-            // List the target users...
-            var html = exps.map(function(exp) {
-                return "<label><input name='owner_id' type='radio' value='" + exp['@id'] + "'/>" + exp.FirstName + " " + exp.LastName + "</label><br/>";
-            }).join("");
-            // If no target groups found...
-            if (html.length === 0) {
-                html = "<hr><p>No users found</p><hr>";
-            } else {
-                html = "<h1>Please choose new owner for the selected data:</h1>" + html;
-            }
-            $chownform.append(html);
+            render();
         });
-    };
+    }
 
     // set-up the dialog
     $chownform.dialog({
@@ -93,8 +128,9 @@
     // handle chown 
     $chownform.ajaxForm({
         beforeSubmit: function(data, $form){
+            var owner_data = data.filter(d => d.name === 'owner_id');
             // Don't submit if we haven't populated the form with users etc.
-            if (data.length === 0) {
+            if (owner_data.length === 0) {
                 OME.alert_dialog("Please choose target user.");
                 return false;
             }
