@@ -55,6 +55,11 @@ $(function() {
         <% } else { %>
             <p>No users found</p>
         <% } %>
+        <hr/>
+
+        <!-- Show dry-run here -->
+        <div class='dryrun'></div>
+        <hr/>
     `
     var template = _.template(templateText);
 
@@ -77,16 +82,26 @@ $(function() {
             width: 400});
         $chownform.dialog('open');
 
-
         // Add selected items to chown form as hidden inputs
         selobjs = OME.get_tree_selection().split("&");  // E.g. Image=1,2&Dataset=3
         datatree = $.jstree.reference('#dataTree');
-        dataOwners = datatree.get_selected(true).map(function(s){return s.data.obj.ownerId});
+        dataOwners = _.uniq(datatree.get_selected(true).map(function(s){return s.data.obj.ownerId}));
+        $okbtn = $('.chown_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
 
         loadUsers();
 
         render();
     };
+
+    function setupEvents() {
+
+        // When user chooses target Owner, do chown dry-run...
+        $chownform.on("click", "input[name='owner_id']", function (event) {
+            dryRun(event.target.value);
+        });
+    }
+
+    setupEvents();
 
     function loadUsers() {
         // Need to find users we can move selected objects to.
@@ -107,6 +122,55 @@ $(function() {
         });
     }
 
+    // We do a chown 'dryRun' to check for loss of annotations etc.
+    function dryRun(ownerId) {
+        var dryRunUrl = WEBCLIENT.URLS.webindex + "chownDryRun/",
+            data = { 'owner_id': ownerId };
+            selobjs.forEach(o => {
+                data[o.split('=')[0]] = o.split("=")[1];
+            });
+        // Show message and start dry-run
+        var msg = "<p style='margin-bottom:0'><img alt='Loading' src='" + WEBCLIENT.URLS.static_webclient + "../webgateway/img/spinner.gif'> " +
+            "Checking which objects will be moved...</p>";
+        $('.dryrun', $chownform).html(msg);
+
+        $.post(dryRunUrl, data, function (jobId) {
+            // keep polling for dry-run completion...
+            var getDryRun = function () {
+                var url = WEBCLIENT.URLS.webindex + "activities_json/",
+                    data = { 'jobId': jobId };
+                $.get(url, data, function (dryRunData) {
+                    if (dryRunData.finished) {
+                        // Handle chown errors by showing message...
+                        if (dryRunData.error) {
+                            var errMsg = dryRunData.error;
+                            // More assertive error message
+                            errMsg = errMsg.replace("may not move", "Cannot move");
+                            var errHtml = "<img style='vertical-align: middle; position:relative; top:-3px' src='" +
+                                static_url + "../webgateway/img/failed.png'> ";
+                            // In messages, replace Image[123] with link to image
+                            var getLinkHtml = function (imageId) {
+                                var id = imageId.replace("Image[", "").replace("]", "");
+                                return "<a href='" + webindex_url + "?show=image-" + id + "'>" + imageId + "</a>";
+                            };
+                            errHtml += errMsg.replace(/Image\[([0-9]*)\]/g, getLinkHtml);
+                            $('.dryrun', $chownform).html(errHtml);
+                            $okbtn.hide();
+                            return;
+                        }
+                        // formatDryRun is in ome.chgrp.js
+                        let html = OME.formatDryRun(dryRunData);
+                        $('.dryrun', $chownform).html(html);
+                    } else {
+                        // try again...
+                        setTimeout(getDryRun, 200);
+                    }
+                });
+            };
+            getDryRun();
+        });
+    };
+
     // set-up the dialog
     $chownform.dialog({
         dialogClass: 'chown_confirm_dialog',
@@ -116,12 +180,12 @@ $(function() {
         width:520,
         modal: true,
         buttons: {
-            "OK": function() {
-                $chownform.submit();
-            },
             "Cancel": function() {
                 $( this ).dialog( "close" );
-            }
+            },
+            "OK": function () {
+                $chownform.submit();
+            },
         }
     });
 
@@ -141,7 +205,6 @@ $(function() {
                 // Otherwise, we need to remove selected nodes
                 var inst = $.jstree.reference('#dataTree');
                 inst.get_selected(true).forEach(function(node){
-                    console.log('delete', node);
                     inst.delete_node(node);
                 });
             }

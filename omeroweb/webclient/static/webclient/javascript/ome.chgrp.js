@@ -156,45 +156,8 @@ $(function() {
                             $okbtn.hide();
                             return;
                         }
-                        var html = "<b style='font-weight: bold'>Move:</b> ",
-                            move = [], count,
-                            unlink = [], unlinked;
-                        ["Projects", "Datasets", "Screens",
-                         "Plates", "Wells", "Images"].forEach(function(otype){
-                            if (otype in dryRunData.includedObjects) {
-                                count = dryRunData.includedObjects[otype].length;
-                                if (count === 1) otype = otype.slice(0, -1);  // remove s
-                                move.push(count + " " + otype);
-                            }
-                        });
-                        html += move.join(", ");
 
-                        ["Datasets", "Plates", "Images", "Tags", "Files"].forEach(function(otype){
-                            if (otype in dryRunData.unlinkedDetails) {
-                                unlinked = dryRunData.unlinkedDetails[otype];
-                                count = unlinked.length;
-                                if (count === 0) return;
-                                if (count === 1) otype = otype.slice(0, -1);  // remove s
-                                var namesList = [], names;
-                                unlinked.forEach(function(u){
-                                    namesList.push(u.name);
-                                });
-                                names = namesList.join(", ");
-                                names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";
-                                unlink.push(count + " " + otype + names);
-                            }
-                        });
-                        if (dryRunData.unlinkedDetails.Comments > 0) {
-                            count = dryRunData.unlinkedDetails.Comments;
-                            unlink.push(count + " Comment" + (count > 1 ? "s" : ""));
-                        }
-                        if (dryRunData.unlinkedDetails.Others > 0) {
-                            count = dryRunData.unlinkedDetails.Others;
-                            unlink.push(count + " Other" + (count > 1 ? "s" : ""));
-                        }
-                        if (unlink.length > 0) {
-                            html += "<br><b style='font-weight: bold'>Not included:</b> " + unlink.join(", ");
-                        }
+                        let html = OME.formatDryRun(dryRunData);
                         $dryRunSpinner.html(html);
                     } else {
                         // try again...
@@ -421,4 +384,47 @@ $(function() {
         }
     });
 
+    window.OME.formatDryRun = function (dryRunData) {
+        var html = "<b style='font-weight: bold'>Move:</b> ",
+            move = [], count,
+            unlink = [], unlinked;
+        ["Projects", "Datasets", "Screens",
+            "Plates", "Wells", "Images"].forEach(function (otype) {
+                if (otype in dryRunData.includedObjects) {
+                    count = dryRunData.includedObjects[otype].length;
+                    if (count === 1) otype = otype.slice(0, -1);  // remove s
+                    move.push(count + " " + otype);
+                }
+            });
+        html += move.join(", ");
+
+        ["Datasets", "Plates", "Images", "Tags", "Files"].forEach(function (otype) {
+            if (otype in dryRunData.unlinkedDetails) {
+                unlinked = dryRunData.unlinkedDetails[otype];
+                count = unlinked.length;
+                if (count === 0) return;
+                if (count === 1) otype = otype.slice(0, -1);  // remove s
+                var namesList = [], names;
+                unlinked.forEach(function (u) {
+                    namesList.push(u.name);
+                });
+                names = namesList.join(", ");
+                names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";
+                unlink.push(count + " " + otype + names);
+            }
+        });
+        if (dryRunData.unlinkedDetails.Comments > 0) {
+            count = dryRunData.unlinkedDetails.Comments;
+            unlink.push(count + " Comment" + (count > 1 ? "s" : ""));
+        }
+        if (dryRunData.unlinkedDetails.Others > 0) {
+            count = dryRunData.unlinkedDetails.Others;
+            unlink.push(count + " Other" + (count > 1 ? "s" : ""));
+        }
+        html = '<p>' + html + '</p>';
+        if (unlink.length > 0) {
+            html += "<p><b style='font-weight: bold'>Not included:</b> " + unlink.join(", ") + '</p>';
+        }
+        return html;
+    }
 });

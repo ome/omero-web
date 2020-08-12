@@ -39,7 +39,7 @@ import omero.scripts
 
 from omero.rtypes import rbool, rint, rstring, rlong, rlist, rtime, unwrap
 from omero.model import ExperimenterI, ExperimenterGroupI
-from omero.cmd import Chmod2, Chgrp2, DoAll
+from omero.cmd import Chmod2, Chgrp2, DoAll, Chown2
 
 from omero.gateway import AnnotationWrapper
 from omero.gateway import OmeroGatewaySafeCallWrapper
@@ -223,20 +223,24 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                     "omero.client.ui.menu.dropdown.everyone")
         return dropdown_menu
 
-    def chgrpDryRun(self, targetObjects, group_id):
+    def submitDryRun(self, action, targetObjects, target_id):
         """
-        Submits a 'dryRun' chgrp to test for links that would be broken.
+        Submits a 'dryRun' chgrp or chown to test for links that would be broken.
         Returns a handle.
 
+        :param action:          'chown' or 'chgrp'
         :param targetObjects:   Dict of dtype: [ids]. E.g. {'Dataset': [1,2]}
-        :param group_id:        The group to move the data to.
+        :param target_id:       The group or owner to move the data to.
         """
 
-        chgrp = Chgrp2(targetObjects=targetObjects, groupId=group_id)
-        chgrp.dryRun = True
-
         da = DoAll()
-        da.requests = [chgrp]
+        if action == 'chgrp':
+            todo = Chgrp2(targetObjects=targetObjects, groupId=target_id)
+        elif action == 'chown':
+            todo = Chown2(targetObjects=targetObjects)
+            todo.userId = target_id
+        todo.dryRun = True
+        da.requests = [todo]
 
         ctx = self.SERVICE_OPTS.copy()
         prx = self.c.sf.submit(da, ctx)

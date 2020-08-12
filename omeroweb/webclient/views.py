@@ -3309,7 +3309,7 @@ def activities(request, conn=None, **kwargs):
     _purgeCallback(request)
 
     # If we have a jobId (not added to request.session) just process it...
-    # ONLY used for chgrp dry-run in Chgrp dialog.
+    # ONLY used for chgrp/chown dry-run.
     jobId = request.GET.get('jobId', None)
     if jobId is not None:
         jobId = str(jobId)
@@ -4232,9 +4232,8 @@ def getAllObjects(conn, project_ids, dataset_ids, image_ids, screen_ids,
 
 @require_POST
 @login_required()
-def chgrpDryRun(request, conn=None, **kwargs):
-
-    group_id = getIntOrDefault(request, 'group_id', None)
+def dryRun(request, action, conn=None, **kwargs):
+    """Submit chgrp or chown dry-run"""
     targetObjects = {}
     dtypes = ["Project", "Dataset", "Image", "Screen", "Plate", "Fileset"]
     for dtype in dtypes:
@@ -4243,7 +4242,11 @@ def chgrpDryRun(request, conn=None, **kwargs):
             obj_ids = [int(oid) for oid in oids.split(",")]
             targetObjects[dtype] = obj_ids
 
-    handle = conn.chgrpDryRun(targetObjects, group_id)
+    if action == 'chgrp':
+        target_id = getIntOrDefault(request, 'group_id', None)
+    elif action == 'chown':
+        target_id = getIntOrDefault(request, 'owner_id', None)
+    handle = conn.submitDryRun(action, targetObjects, target_id)
     jobId = str(handle)
     return HttpResponse(jobId)
 
