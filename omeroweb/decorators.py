@@ -39,6 +39,7 @@ from django.core.cache import cache
 from omeroweb.utils import reverse_with_params
 from omeroweb.connector import Connector
 from omero.gateway.utils import propertiesToDict
+from omero import ApiUsageException
 
 logger = logging.getLogger(__name__)
 
@@ -500,7 +501,7 @@ class login_required(object):
                     retval, ConnCleaningHttpResponse
                 )
                 if doConnectionCleanup and delayConnectionCleanup:
-                    raise Exception(
+                    raise ApiUsageException(
                         "FIXME: methods that return a"
                         " ConnCleaningHttpResponse must be marked with"
                         " @login_required(doConnectionCleanup=False)"
