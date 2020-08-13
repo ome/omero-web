@@ -920,15 +920,16 @@ def create_link(parent_type, parent_id, child_type, child_id):
     return None
 
 
-def set_link_owner(conn, link, parent):
+def get_objects_owners(conn, child_type, child_ids):
     """
-    If user doesn't own the Parent, link should belong
-    to the owner of the parent
+    Returns a dict of child_id: owner_id
     """
-    print(conn.getCurrentAdminPrivileges())
-    if 'WriteOwned' in conn.getCurrentAdminPrivileges():
-        # If we have permissions, link owner should match parent owner
-        link.details.owner = ExperimenterI(parent.details.owner.id, False)
+    if child_type == 'tag':
+        child_type = 'Annotation'
+    owners = {}
+    for obj in conn.getObjects(child_type, child_ids):
+        owners[obj.id] = obj.details.owner.id.val
+    return owners
 
 
 @login_required()
@@ -969,21 +970,24 @@ def _api_links_POST(conn, json_data, **kwargs):
     # e.g. {"dataset":{"10":{"image":[1,2,3]}}}
 
     linksToSave = []
+    write_owned = 'WriteOwned' in conn.getCurrentAdminPrivileges()
+    user_id = conn.getUserId()
     for parent_type, parents in json_data.items():
         if parent_type in ("orphaned", "experimenter"):
             continue
         for parent_id, children in parents.items():
-            parent = conn.getObject(
-                parent_type.replace('tagset', 'Annotation'), parent_id)
-            is_parent_mine = parent.details.owner.id.val == conn.getUserId()
             for child_type, child_ids in children.items():
+                # batch look-up owners of all child objects
+                child_owners = get_objects_owners(conn, child_type, child_ids)
                 for child_id in child_ids:
                     parent_id = int(parent_id)
                     link = create_link(parent_type, parent_id,
                                        child_type, child_id)
                     if link and link != 'orphan':
-                        if not is_parent_mine:
-                            set_link_owner(conn, link, parent)
+                        # link owner should match child owner
+                        if write_owned and child_owners[child_id] != user_id:
+                            link.details.owner = ExperimenterI(
+                                child_owners[child_id], False)
                         linksToSave.append(link)
 
     if len(linksToSave) > 0:
