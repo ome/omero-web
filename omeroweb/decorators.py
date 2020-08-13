@@ -491,6 +491,7 @@ class login_required(object):
 
                     # kwargs['error'] = request.GET.get('error')
                     kwargs['url'] = url
+            retval = None
             try:
                 retval = f(request, *args, **kwargs)
             finally:
