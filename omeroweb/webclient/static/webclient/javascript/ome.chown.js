@@ -28,8 +28,10 @@ $(function() {
     var dataOwners = [];
     var loadingExps = false;
     var exps = [];
-    var $newbtn;
+    var dryrunInProgress = false;
+    var dryrunJobId;
     var $okbtn;
+    var dryrunTimout;
 
     // template literals not supported on IE 11 (1.3% global browser share)
     var templateText = `
@@ -58,7 +60,15 @@ $(function() {
         <hr/>
 
         <!-- Show dry-run here -->
-        <div class='dryrun'></div>
+        <div class='dryrun'>
+        <% if (dryrunInProgress) { %>
+            <p style='margin-bottom:0'>
+                <img alt='Loading' src='<%= static_url %>../webgateway/img/spinner.gif' />
+                Checking which objects will be moved...
+                <button title="Cancel dry-run" type="button">Cancel</button>
+            </p>
+        <% } %>
+        </div>
         <hr/>
     `
     var template = _.template(templateText);
@@ -70,6 +80,8 @@ $(function() {
             selobjs: selobjs,
             exps: exps,
             loadingExps: loadingExps,
+            dryrunInProgress: dryrunInProgress,
+            static_url: WEBCLIENT.URLS.static_webclient,
         });
         $chownform.html(html);
     }
@@ -88,7 +100,7 @@ $(function() {
         dataOwners = _.uniq(datatree.get_selected(true).map(function(s){return s.data.obj.ownerId}));
         $okbtn = $('.chown_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
 
-        loadUsers();
+        loadUsers();    // this will then call dryRun()
 
         render();
     };
@@ -96,8 +108,8 @@ $(function() {
     function setupEvents() {
 
         // When user chooses target Owner, do chown dry-run...
-        $chownform.on("click", "input[name='owner_id']", function (event) {
-            dryRun(event.target.value);
+        $chownform.on("click", ".dryrun button", function (event) {
+            cancelDryRun();
         });
     }
 
@@ -118,29 +130,34 @@ $(function() {
                     return exp['@id'] != dataOwners[0];
                 });
             }
+
+            // we can do dry-run with any user (result is always the same)
+            if (exps.length > 0) {
+                dryRun(exps[0]['@id']);
+            }
+
             render();
         });
     }
 
     // We do a chown 'dryRun' to check for loss of annotations etc.
     function dryRun(ownerId) {
+        dryrunInProgress = true;
         var dryRunUrl = WEBCLIENT.URLS.webindex + "chownDryRun/",
             data = { 'owner_id': ownerId };
             selobjs.forEach(o => {
                 data[o.split('=')[0]] = o.split("=")[1];
             });
-        // Show message and start dry-run
-        var msg = "<p style='margin-bottom:0'><img alt='Loading' src='" + WEBCLIENT.URLS.static_webclient + "../webgateway/img/spinner.gif'> " +
-            "Checking which objects will be moved...</p>";
-        $('.dryrun', $chownform).html(msg);
 
         $.post(dryRunUrl, data, function (jobId) {
+            dryrunJobId = jobId;
             // keep polling for dry-run completion...
             var getDryRun = function () {
                 var url = WEBCLIENT.URLS.webindex + "activities_json/",
                     data = { 'jobId': jobId };
                 $.get(url, data, function (dryRunData) {
                     if (dryRunData.finished) {
+                        dryrunJobId = undefined;
                         // Handle chown errors by showing message...
                         if (dryRunData.error) {
                             var errMsg = dryRunData.error;
@@ -158,18 +175,38 @@ $(function() {
                             $okbtn.hide();
                             return;
                         }
+                        dryrunInProgress = false;
+
                         // formatDryRun is in ome.chgrp.js
                         let html = OME.formatDryRun(dryRunData);
+                        // replace spinner and 'Cancel' button...
                         $('.dryrun', $chownform).html(html);
                     } else {
                         // try again...
-                        setTimeout(getDryRun, 200);
+                        dryrunTimout = setTimeout(getDryRun, 2000);
                     }
                 });
             };
             getDryRun();
         });
     };
+
+    function cancelDryRun() {
+        if (dryrunTimout) {
+            clearTimeout(dryrunTimout);
+        }
+        if (!dryrunJobId) return;
+
+        var dryRunUrl = WEBCLIENT.URLS.webindex + "activities_json/";
+        $.ajax({
+            url: dryRunUrl,
+            type: 'DELETE',
+            data: JSON.stringify({jobId: dryrunJobId}),
+            success: function (result) {
+                // Do something with the result
+            }
+        });
+    }
 
     // set-up the dialog
     $chownform.dialog({
@@ -181,11 +218,15 @@ $(function() {
         modal: true,
         buttons: {
             "Cancel": function() {
+                cancelDryRun();
                 $( this ).dialog( "close" );
             },
             "OK": function () {
                 $chownform.submit();
             },
+        },
+        close: function (event, ui) {
+            cancelDryRun();
         }
     });
 

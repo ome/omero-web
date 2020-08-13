@@ -3316,14 +3316,49 @@ def activities(request, conn=None, **kwargs):
         try:
             prx = omero.cmd.HandlePrx.checkedCast(
                 conn.c.ic.stringToProxy(jobId))
+            status = prx.getStatus()
+            logger.debug("job status: %s", status)
             rsp = prx.getResponse()
             if rsp is not None:
                 rv = chgrpMarshal(conn, rsp)
                 rv['finished'] = True
             else:
                 rv = {'finished': False}
+            rv['status'] = {
+                'currentStep': status.currentStep,
+                'steps': status.steps,
+                'startTime': status.startTime,
+                'stopTime': status.stopTime,
+            }
         except IceException:
             rv = {'finished': True}
+        return rv
+
+    elif request.method == 'DELETE':
+        try:
+            json_data = json.loads(request.body)
+        except TypeError:
+            # for Python 3.5
+            json_data = json.loads(bytes_to_native_str(request.body))
+        jobId = json_data.get('jobId', None)
+        if jobId is not None:
+            jobId = str(jobId)
+            rv = {'jobId': jobId}
+            try:
+                prx = omero.cmd.HandlePrx.checkedCast(
+                    conn.c.ic.stringToProxy(jobId))
+                status = prx.getStatus()
+                logger.debug("pre-cancel() job status: %s", status)
+                rv['status'] = {
+                    'currentStep': status.currentStep,
+                    'steps': status.steps,
+                    'startTime': status.startTime,
+                    'stopTime': status.stopTime,
+                }
+                prx.cancel()
+            except omero.LockTimeout:
+                # expected that it will take > 5 seconds to cancel
+                logger.info("Timeout on prx.cancel()")
         return rv
 
     # test each callback for failure, errors, completion, results etc
