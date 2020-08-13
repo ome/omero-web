@@ -195,8 +195,10 @@ urlpatterns = [
 
     # chgrp/chown dry run - 'group/owner_id', obj-types and ids in POST data.
     # E.g. Dataset=1,2,3 & Fileset=4. Multiple datatypes in one chgrp.
-    url(r'^chgrpDryRun/$', views.dryRun, {'action': 'chgrp'}, name="chgrpDryRun",),
-    url(r'^chownDryRun/$', views.dryRun, {'action': 'chown'}, name="chownDryRun",),
+    url(r'^chgrpDryRun/$', views.dryRun, {'action': 'chgrp'},
+        name="chgrpDryRun",),
+    url(r'^chownDryRun/$', views.dryRun, {'action': 'chown'},
+        name="chownDryRun",),
 
     # Popup for downloading original archived files for images
     url(r'^download_placeholder/$', views.download_placeholder,

@@ -225,7 +225,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
     def submitDryRun(self, action, targetObjects, target_id):
         """
-        Submits a 'dryRun' chgrp or chown to test for links that would be broken.
+        Submits a 'dryRun' chgrp or chown to test for links that will break.
         Returns a handle.
 
         :param action:          'chown' or 'chgrp'
