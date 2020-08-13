@@ -1000,21 +1000,21 @@ def _api_links_POST(conn, json_data, **kwargs):
         conn.SERVICE_OPTS.setOmeroGroup(p.details.group.id.val)
         logger.info("api_link: Saving %s links" % len(linksToSave))
 
-        # try:
-        # We try to save all at once, for speed.
-        conn.saveArray(linksToSave)
-        response['success'] = True
-        # except Exception:
-        #     logger.info("api_link: Exception on saveArray with %s links"
-        #                 % len(linksToSave))
-        #     # If this fails, e.g. ValidationException because link
-        #     # already exists, try to save individual links
-        #     for link in linksToSave:
-        #         try:
-        #             conn.saveObject(link)
-        #         except Exception:
-        #             pass
-        #     response['success'] = True
+        try:
+            # We try to save all at once, for speed.
+            conn.saveArray(linksToSave)
+            response['success'] = True
+        except Exception:
+            logger.info("api_link: Exception on saveArray with %s links"
+                        % len(linksToSave))
+            # If this fails, e.g. ValidationException because link
+            # already exists, try to save individual links
+            for link in linksToSave:
+                try:
+                    conn.saveObject(link)
+                except Exception:
+                    pass
+            response['success'] = True
 
     return JsonResponse(response)
 
