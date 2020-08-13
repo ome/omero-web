@@ -4267,6 +4267,12 @@ def getAllObjects(conn, project_ids, dataset_ids, image_ids, screen_ids,
 
 @require_POST
 @login_required()
+def chgrpDryRun(request, conn=None, **kwargs):
+    return dryRun(request, action="chgrp", conn=conn, **kwargs)
+
+
+@require_POST
+@login_required()
 def dryRun(request, action, conn=None, **kwargs):
     """Submit chgrp or chown dry-run"""
     targetObjects = {}
