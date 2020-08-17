@@ -179,6 +179,7 @@ $(function() {
 
                         // formatDryRun is in ome.chgrp.js
                         let html = OME.formatDryRun(dryRunData);
+                        html = "'<p><b style='font-weight: bold'>Change owner of:</b> " + html + '</p>';
                         // replace spinner and 'Cancel' button...
                         $('.dryrun', $chownform).html(html);
                     } else {

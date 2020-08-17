@@ -158,6 +158,7 @@ $(function() {
                         }
 
                         let html = OME.formatDryRun(dryRunData);
+                        html = "<b style='font-weight: bold'>Move:</b> " + html;
                         $dryRunSpinner.html(html);
                     } else {
                         // try again...
@@ -385,7 +386,7 @@ $(function() {
     });
 
     window.OME.formatDryRun = function (dryRunData) {
-        var html = "<b style='font-weight: bold'>Move:</b> ",
+        var html = "",
             move = [], count,
             unlink = [], unlinked;
         ["Projects", "Datasets", "Screens",
@@ -421,9 +422,8 @@ $(function() {
             count = dryRunData.unlinkedDetails.Others;
             unlink.push(count + " Other" + (count > 1 ? "s" : ""));
         }
-        html = '<p>' + html + '</p>';
         if (unlink.length > 0) {
-            html += "<p><b style='font-weight: bold'>Not included:</b> " + unlink.join(", ") + '</p>';
+            html += "<br/><b style='font-weight: bold'>Not included:</b> " + unlink.join(", ");
         }
         return html;
     }
