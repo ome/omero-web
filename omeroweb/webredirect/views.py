@@ -29,7 +29,7 @@ or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything.'''
 
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from omeroweb.feedback.views import handlerInternalError
 import logging
 

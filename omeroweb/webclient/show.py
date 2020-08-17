@@ -28,7 +28,7 @@ import omero
 import re
 
 from omero.rtypes import rint, rlong
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from copy import deepcopy
 from django.conf import settings
 

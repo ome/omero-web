@@ -22,8 +22,8 @@
 import logging
 
 from django.utils.http import urlencode
-from django.core.urlresolvers import reverse
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import reverse
+from django.urls import NoReverseMatch
 from past.builtins import basestring
 
 
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 def reverse_with_params(*args, **kwargs):
     """
-    Adds query string to django.core.urlresolvers.reverse
+    Adds query string to django.urls.reverse
     """
 
     url = ''
