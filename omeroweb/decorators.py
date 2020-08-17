@@ -502,7 +502,7 @@ class login_required(object):
                 )
                 if doConnectionCleanup and delayConnectionCleanup:
                     raise ApiUsageException(
-                        "FIXME: methods that return a"
+                        "Methods that return a"
                         " ConnCleaningHttpResponse must be marked with"
                         " @login_required(doConnectionCleanup=False)"
                     )
