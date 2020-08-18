@@ -500,35 +500,42 @@ def chgrpMarshal(conn, rsp):
         # expect the link to be broken (can ignore)
         objects = {}
         containerLinks = {
-            'ome.model.containers.ProjectDatasetLink': 'Datasets',
-            'ome.model.containers.DatasetImageLink': 'Images',
-            'ome.model.screen.ScreenPlateLink': 'Screens'}
-        for link, ch in containerLinks.items():
+            'ome.model.containers.ProjectDatasetLink': ['Project', 'Dataset'],
+            'ome.model.containers.DatasetImageLink': ['Dataset', 'Image'],
+            'ome.model.screen.ScreenPlateLink': ['Screen', 'Plate']}
+        for link, types in containerLinks.items():
+            pa_type = types[0]
+            ch_type = types[1]
             if link in deleted:
                 linkType = link.split(".")[-1]
                 params = omero.sys.ParametersI()
                 params.addIds(deleted[link])
                 query = ("select conLink from %s as conLink "
-                         "join fetch conLink.child as ann "
+                         "join fetch conLink.child "
+                         "join fetch conLink.parent "
                          "where conLink.id in (:ids)" % linkType)
                 links = conn.getQueryService().findAllByQuery(
                     query, params, conn.SERVICE_OPTS)
                 for lnk in links:
-                    child = lnk.child
-                    if (ch not in includedObjects or
-                            child.id.val not in includedObjects[ch]):
-                        name = unwrap(child.getName())
+                    child = lnk.child.id.val
+                    parent = lnk.parent.id.val
+                    # If child IS included, then parent is the unlinked object
+                    if child in includedObjects[ch_type + 's']:
+                        name = unwrap(lnk.parent.getName())
                         # Put objects in a dictionary to avoid duplicates
-                        if ch not in objects:
-                            objects[ch] = {}
-                        # E.g. objects['Dataset']['1'] = {}
-                        objects[ch][child.id.val] = {'id': child.id.val,
-                                                     'name': name}
+                        if pa_type not in objects:
+                            objects[pa_type] = {}
+                        objects[pa_type][parent] = {'id': child, 'name': name}
+                    else:
+                        name = unwrap(lnk.child.getName())
+                        if ch_type not in objects:
+                            objects[ch_type] = {}
+                        objects[ch_type][child] = {'id': child, 'name': name}
         # sort objects
         for otype, objs in objects.items():
             objs = list(objs.values())
             objs.sort(key=lambda x: x['name'])
             # E.g. 'Dataset' objects in 'Datasets'
-            rv['unlinkedDetails'][otype] = objs
+            rv['unlinkedDetails'][otype + 's'] = objs
 
     return rv

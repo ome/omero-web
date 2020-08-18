@@ -399,7 +399,7 @@ $(function() {
             });
         html += move.join(", ");
 
-        ["Datasets", "Plates", "Images", "Tags", "Files"].forEach(function (otype) {
+        ["Projects", "Datasets", "Plates", "Images", "Tags", "Files"].forEach(function (otype) {
             if (otype in dryRunData.unlinkedDetails) {
                 unlinked = dryRunData.unlinkedDetails[otype];
                 count = unlinked.length;
