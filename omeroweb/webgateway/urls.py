@@ -13,15 +13,15 @@
 #
 # Author: Carlos Neves <carlos(at)glencoesoftware.com>
 
-from django.conf.urls import url
+from django.urls import re_path
 from omeroweb.webgateway import views
 
-webgateway = url(r'^$', views.index, name="webgateway")
+webgateway = re_path(r'^$', views.index, name="webgateway")
 """
 Returns a main prefix
 """
 
-annotations = url(r'^annotations/(?P<objtype>[\w.]+)/(?P<objid>\d+)/$',
+annotations = re_path(r'^annotations/(?P<objtype>[\w.]+)/(?P<objid>\d+)/$',
                   views.annotations,
                   name="webgateway_annotations")
 """
@@ -29,14 +29,14 @@ Retrieve annotations for object specified by object type and identifier,
 optionally traversing object model graph.
 """
 
-table_query = url(r'^table/(?P<fileid>\d+)/query/$',
+table_query = re_path(r'^table/(?P<fileid>\d+)/query/$',
                   views.table_query,
                   name="webgateway_table_query")
 """
 Query a table specified by fileid
 """
 
-object_table_query = url(
+object_table_query = re_path(
     r'^table/(?P<objtype>[\w.]+)/(?P<objid>\d+)/query/$',
     views.object_table_query,
     name="webgateway_object_table_query")
@@ -45,7 +45,7 @@ Query bulk annotations table attached to an object specified by
 object type and identifier, optionally traversing object model graph.
 """
 
-render_image = url(
+render_image = re_path(
     r'^render_image/(?P<iid>[0-9]+)/(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$',
     views.render_image, name="webgateway_render_image")
 """
@@ -58,7 +58,7 @@ Params in render_image/<iid>/<z>/<t>/ are:
     - t:    T index
 """
 
-render_image_region = url(
+render_image_region = re_path(
     r'^render_image_region/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$',
     views.render_image_region, name="webgateway_render_image_region")
 """
@@ -72,7 +72,7 @@ Params in render_image/<iid>/<z>/<t>/ are:
     - t:    T index
 """
 
-render_split_channel = url(
+render_split_channel = re_path(
     r'^render_split_channel/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$',
     views.render_split_channel, name="webgateway_render_split_channel")
 """
@@ -85,7 +85,7 @@ Params in render_split_channel/<iid>/<z>/<t> are:
     - t:    T index
 """
 
-render_row_plot = url(
+render_row_plot = re_path(
     r'^render_row_plot/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/'
     '(?P<y>[0-9]+)/(?:(?P<w>[0-9]+)/)?$',
     views.render_row_plot, name="webgateway_render_row_plot")
@@ -101,7 +101,7 @@ Params in render_row_plot/<iid>/<z>/<t>/<y>/<w> are:
     - w:    Optional line width of plot
 """
 
-render_col_plot = url(
+render_col_plot = re_path(
     r'^render_col_plot/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)'
     '/(?P<x>[0-9]+)/(?:(?P<w>[0-9]+)/)?$',
     views.render_col_plot, name="webgateway_render_col_plot")
@@ -117,7 +117,7 @@ Params in render_col_plot/<iid>/<z>/<t>/<x>/<w> are:
     - w:    Optional line width of plot
 """
 
-render_thumbnail = url(
+render_thumbnail = re_path(
     r'^render_thumbnail/(?P<iid>[0-9]+)'
     '/(?:(?P<w>[0-9]+)/)?(?:(?P<h>[0-9]+)/)?$',
     views.render_thumbnail, name="webgateway_render_thumbnail")
@@ -132,7 +132,7 @@ Params in render_thumbnail/<iid>/<w>/<h> are:
     - h:    Optional max height
 """
 
-render_roi_thumbnail = url(
+render_roi_thumbnail = re_path(
     r'^render_roi_thumbnail/(?P<roiId>[0-9]+)/?$',
     views.render_roi_thumbnail, name="webgateway_render_roi_thumbnail")
 """
@@ -140,7 +140,7 @@ Returns a thumbnail jpeg of the OMERO ROI. See L{views.render_roi_thumbnail}.
 Uses current rendering settings.
 """
 
-render_shape_thumbnail = url(
+render_shape_thumbnail = re_path(
     r'^render_shape_thumbnail/(?P<shapeId>[0-9]+)/?$',
     views.render_shape_thumbnail, name="webgateway_render_shape_thumbnail")
 """
@@ -148,13 +148,13 @@ Returns a thumbnail jpeg of the OMERO Shape. See
 L{views.render_shape_thumbnail}. Uses current rendering settings.
 """
 
-render_shape_mask = url(r'^render_shape_mask/(?P<shapeId>[0-9]+)/$',
+render_shape_mask = re_path(r'^render_shape_mask/(?P<shapeId>[0-9]+)/$',
                         views.render_shape_mask)
 """
 Returns a mask for the specified shape
 """
 
-render_birds_eye_view = url(
+render_birds_eye_view = re_path(
     r'^render_birds_eye_view/(?P<iid>[0-9]+)/(?:(?P<size>[0-9]+)/)?$',
     views.render_birds_eye_view, name="webgateway_render_birds_eye_view")
 """
@@ -166,7 +166,7 @@ Params in render_birds_eye_view/<iid>/ are:
              view.
 """
 
-render_ome_tiff = url(r'^render_ome_tiff/(?P<ctx>[^/]+)/(?P<cid>[0-9]+)/$',
+render_ome_tiff = re_path(r'^render_ome_tiff/(?P<ctx>[^/]+)/(?P<cid>[0-9]+)/$',
                       views.render_ome_tiff, name="webgateway_render_ome_tiff")
 """
 Generates an OME-TIFF of an Image (or zip for multiple OME-TIFFs) and returns
@@ -177,7 +177,7 @@ Image.
     - cid:      ID of container.
 """
 
-render_movie = url(
+render_movie = re_path(
     r'^render_movie/(?P<iid>[0-9]+)/(?P<axis>[zt])/(?P<pos>[0-9]+)/$',
     views.render_movie, name="webgateway_render_movie")
 """
@@ -192,7 +192,7 @@ Params in render_movie/<iid>/<axis>/<pos> are:
 
 # json methods...
 
-listProjects_json = url(r'^proj/list/$', views.listProjects_json,
+listProjects_json = re_path(r'^proj/list/$', views.listProjects_json,
                         name="webgateway_listProjects_json")
 """
 json method: returning list of all projects available to current user. See
@@ -200,7 +200,7 @@ L{views.listProjects_json} .
 List of E.g. {"description": "", "id": 651, "name": "spim"}
 """
 
-projectDetail_json = url(r'^proj/(?P<pid>[0-9]+)/detail/$',
+projectDetail_json = re_path(r'^proj/(?P<pid>[0-9]+)/detail/$',
                          views.projectDetail_json,
                          name="webgateway_projectDetail_json")
 """
@@ -211,7 +211,7 @@ L{views.projectDetail_json}. Returns E.g
     - pid:  Project ID
 """
 
-listDatasets_json = url(r'^proj/(?P<pid>[0-9]+)/children/$',
+listDatasets_json = re_path(r'^proj/(?P<pid>[0-9]+)/children/$',
                         views.listDatasets_json,
                         name="webgateway_listDatasets_json")
 """
@@ -223,7 +223,7 @@ list of {"child_count": 4, "description": "", "type": "Dataset", "id": 901,
     - pid:  Project ID
 """
 
-datasetDetail_json = url(r'^dataset/(?P<did>[0-9]+)/detail/$',
+datasetDetail_json = re_path(r'^dataset/(?P<did>[0-9]+)/detail/$',
                          views.datasetDetail_json,
                          name="webgateway_datasetDetail_json")
 """
@@ -234,7 +234,7 @@ L{views.datasetDetail_json}. Returns E.g
     - did:  Dataset ID
 """
 
-webgateway_listimages_json = url(
+webgateway_listimages_json = re_path(
     r'^dataset/(?P<did>[0-9]+)/children/$', views.listImages_json,
     name="webgateway_listimages_json")
 """
@@ -254,7 +254,7 @@ L{views.listImages_json}. Returns E.g list of
 
 """
 
-webgateway_listwellimages_json = url(
+webgateway_listwellimages_json = re_path(
     r'^well/(?P<did>[0-9]+)/children/$',
     views.listWellImages_json,
     name="webgateway_listwellimages_json")
@@ -268,14 +268,14 @@ L{views.listWellImages_json}. Returns E.g list of
     - did:  Well ID
 """
 
-webgateway_plategrid_json = url(
+webgateway_plategrid_json = re_path(
     r'^plate/(?P<pid>[0-9]+)/(?:(?P<field>[0-9]+)/)?$',
     views.plateGrid_json, name="webgateway_plategrid_json")
 """
 """
 
 
-webgateway_get_thumbnails_json = url(
+webgateway_get_thumbnails_json = re_path(
     r'^get_thumbnails/(?:(?P<w>[0-9]+)/)?$',
     views.get_thumbnails_json, name="webgateway_get_thumbnails_json")
 """
@@ -284,7 +284,7 @@ optionally scaled to max-longest-side.
 Image ids are specified in query string as list, e.g. id=1&id=2.
 """
 
-webgateway_get_thumbnail_json = url(
+webgateway_get_thumbnail_json = re_path(
     r'^get_thumbnail/(?P<iid>[0-9]+)'
     '/(?:(?P<w>[0-9]+)/)?(?:(?P<h>[0-9]+)/)?$',
     views.get_thumbnail_json, name="webgateway_get_thumbnail_json")
@@ -299,7 +299,7 @@ Params in render_thumbnail/<iid>/<w>/<h> are:
     - h:    Optional max height
 """
 
-imageData_json = url(r'^imgData/(?P<iid>[0-9]+)/(?:(?P<key>[^/]+)/)?$',
+imageData_json = re_path(r'^imgData/(?P<iid>[0-9]+)/(?:(?P<key>[^/]+)/)?$',
                      views.imageData_json, name="webgateway_imageData_json")
 """
 json method: returns details of specified Image. See L{views.imageData_json}.
@@ -311,7 +311,7 @@ Returns E.g
             pixel_range, rdefs, split_channel, size etc
 """
 
-wellData_json = url(r'^wellData/(?P<wid>[0-9]+)/$',
+wellData_json = re_path(r'^wellData/(?P<wid>[0-9]+)/$',
                     views.wellData_json,
                     name='webgateway_wellData_json')
 """
@@ -320,14 +320,14 @@ json method: returns details of specified Well. See L{views.wellData_json}.
     - wid:  Well ID
 """
 
-webgateway_search_json = url(r'^search/$', views.search_json,
+webgateway_search_json = re_path(r'^search/$', views.search_json,
                              name="webgateway_search_json")
 """
 json method: returns search results. All parameters in request. See
 L{views.search_json}
 """
 
-get_rois_json = url(r'^get_rois_json/(?P<imageId>[0-9]+)/$',
+get_rois_json = re_path(r'^get_rois_json/(?P<imageId>[0-9]+)/$',
                     views.get_rois_json,
                     name='webgateway_get_rois_json')
 """
@@ -336,7 +336,7 @@ gets all the ROIs for an Image as json. Image-ID is request: imageId=123
                        'y':100, 'width':10 'height':45} ]
 """
 
-get_shape_json = url(
+get_shape_json = re_path(
     r'^get_shape_json/(?P<roiId>[0-9]+)/(?P<shapeId>[0-9]+)/$',
     views.get_shape_json, name='webgateway_get_shape_json')
 """
@@ -345,7 +345,7 @@ gets a Shape as json. ROI-ID, Shape-ID is request: roiId=123 and shapeId=123
 'height':45}
 """
 
-histogram_json = url(
+histogram_json = re_path(
     r'^histogram_json/(?P<iid>[0-9]+)/channel/(?P<theC>[0-9]+)/',
     views.histogram_json,
     name="histogram_json")
@@ -354,7 +354,7 @@ Gets a histogram of 256 columns (grey levels) for the chosen
 channel of an image. A single plane is specified by ?theT=1&theZ=2.
 """
 
-full_viewer = url(r'^img_detail/(?P<iid>[0-9]+)/$',
+full_viewer = re_path(r'^img_detail/(?P<iid>[0-9]+)/$',
                   views.full_viewer,
                   name="webgateway_full_viewer")
 """
@@ -365,7 +365,7 @@ See L{views.full_viewer}.
     - iid:  Image ID.
 """
 
-save_image_rdef_json = url(r'^saveImgRDef/(?P<iid>[0-9]+)/$',
+save_image_rdef_json = re_path(r'^saveImgRDef/(?P<iid>[0-9]+)/$',
                            views.save_image_rdef_json,
                            name="webgateway_save_image_rdef_json")
 """
@@ -377,7 +377,7 @@ Returns 'true' if worked OK.
     - iid:  Image ID.
 """
 
-get_image_rdef_json = url(r'^getImgRDef/$',
+get_image_rdef_json = re_path(r'^getImgRDef/$',
                           views.get_image_rdef_json,
                           name="webgateway_get_image_rdef_json")
 """
@@ -385,7 +385,7 @@ Gets rendering definition from the 'session' if saved.
 Returns json dict of 'c', 'm', 'z', 't'.
 """
 
-listLuts_json = url(r'^luts/$', views.listLuts_json,
+listLuts_json = re_path(r'^luts/$', views.listLuts_json,
                     name="webgateway_listLuts_json")
 """
 json method: returning list of all lookup tables available
@@ -393,7 +393,7 @@ for rendering engine.
 E.g. list of {path: "/luts/", size: 800, id: 37, name: "cool.lut"},
 """
 
-list_compatible_imgs_json = url(r'^compatImgRDef/(?P<iid>[0-9]+)/$',
+list_compatible_imgs_json = re_path(r'^compatImgRDef/(?P<iid>[0-9]+)/$',
                                 views.list_compatible_imgs_json,
                                 name="webgateway_list_compatible_imgs_json")
 """
@@ -405,14 +405,14 @@ specified image is in.
     - iid:  Image ID.
 """
 
-copy_image_rdef_json = url(r'^copyImgRDef/$', views.copy_image_rdef_json,
+copy_image_rdef_json = re_path(r'^copyImgRDef/$', views.copy_image_rdef_json,
                            name="webgateway_copy_image_rdef_json")
 """
 Copy the rendering settings from one image to a list of images, specified in
 request by 'fromid' and list of 'toids'. See L{views.copy_image_rdef_json}
 """
 
-reset_rdef_json = url(r'^resetRDef/$', views.reset_rdef_json,
+reset_rdef_json = re_path(r'^resetRDef/$', views.reset_rdef_json,
                       name="reset_rdef_json")
 """
 Reset the images within specified objects to their rendering settings at
@@ -420,7 +420,7 @@ import time"
 Objects defined in request by E.g. totype=dataset&toids=1&toids=2
 """
 
-reset_owners_rdef_json = url(r'^applyOwnersRDef/$',
+reset_owners_rdef_json = re_path(r'^applyOwnersRDef/$',
                              views.reset_rdef_json,
                              {'toOwners': True},
                              name="reset_owners_rdef_json")
@@ -429,17 +429,17 @@ Apply the owner's rendering settings to the specified objects.
 Objects defined in request by E.g. totype=dataset&toids=1&toids=2
 """
 
-webgateway_su = url(r'^su/(?P<user>[^/]+)/$', views.su,
+webgateway_su = re_path(r'^su/(?P<user>[^/]+)/$', views.su,
                     name="webgateway_su")
 """
 Admin method to switch to the specified user, identified by username: <user>
 Returns 'true' if switch went OK.
 """
 
-download_as = url(r'^download_as/(?:(?P<iid>[0-9]+)/)?$',
+download_as = re_path(r'^download_as/(?:(?P<iid>[0-9]+)/)?$',
                   views.download_as, name="download_as")
 
-archived_files = url(r'^archived_files/download/(?:(?P<iid>[0-9]+)/)?$',
+archived_files = re_path(r'^archived_files/download/(?:(?P<iid>[0-9]+)/)?$',
                      views.archived_files, name="archived_files")
 """
 This url will download the Original Image File(s) archived at import time. If
@@ -447,7 +447,7 @@ it's a single file, this will be downloaded directly. For multiple files, they
 are assembled into a zip file on the fly, and this is downloaded.
 """
 
-original_file_paths = url(r'^original_file_paths/(?P<iid>[0-9]+)/$',
+original_file_paths = re_path(r'^original_file_paths/(?P<iid>[0-9]+)/$',
                           views.original_file_paths,
                           name="original_file_paths")
 """
@@ -456,14 +456,14 @@ Get a json dict of original file paths.
 'client' is a list of paths for original files on the client when imported
 """
 
-open_with_options = url(r'^open_with/$', views.open_with_options,
+open_with_options = re_path(r'^open_with/$', views.open_with_options,
                         name='webgateway_open_with_options')
 """
 This makes the settings.OPEN_WITH configuration available via json
 """
 
 
-get_image_rdefs_json = url(r'^get_image_rdefs_json/(?P<img_id>[0-9]+)/$',
+get_image_rdefs_json = re_path(r'^get_image_rdefs_json/(?P<img_id>[0-9]+)/$',
                            views.get_image_rdefs_json,
                            name="webgateway_get_image_rdefs_json")
 """
