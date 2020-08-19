@@ -3139,6 +3139,7 @@ def download_placeholder(request, conn=None, **kwargs):
 
     fileLists = []
     fileCount = 0
+    filesTotalSize = 0
     # If we're downloading originals, list original files so user can
     # download individual files.
     if format is None:
@@ -3177,6 +3178,7 @@ def download_placeholder(request, conn=None, **kwargs):
                 fList.append({'id': f.id,
                               'name': f.name,
                               'size': f.getSize()})
+                filesTotalSize += f.getSize()
             if len(fList) > 0:
                 fileLists.append(fList)
         fileCount = sum([len(fList) for fList in fileLists])
@@ -3195,8 +3197,12 @@ def download_placeholder(request, conn=None, **kwargs):
         'url': download_url,
         'defaultName': defaultName,
         'fileLists': fileLists,
-        'fileCount': fileCount
-        }
+        'fileCount': fileCount,
+        'filesTotalSize': filesTotalSize,
+    }
+    if filesTotalSize > settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE:
+        context['downloadTooLarge'] = \
+            settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE
     return context
 
 
@@ -3673,8 +3679,8 @@ def list_scripts(request, conn=None, **kwargs):
 
     # group scripts into 'folders' (path), named by parent folder name
     scriptMenu = {}
-    scripts_to_ignore = request.session.get('server_settings') \
-                                       .get('scripts_to_ignore').split(",")
+    scripts_to_ignore = request.session.get('server_settings', {}) \
+        .get('scripts_to_ignore', "").split(",")
     for s in scripts:
         scriptId = s.id.val
         path = s.path.val

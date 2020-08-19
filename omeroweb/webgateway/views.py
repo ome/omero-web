@@ -2541,6 +2541,16 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         fname = orig_file.getName().replace(" ", "_").replace(",", ".")
         rsp['Content-Disposition'] = 'attachment; filename=%s' % (fname)
     else:
+        total_size = sum(f.size for f in files)
+        if total_size > settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE:
+            message = ('Total size of files %d is larger than %d. '
+                       'Try requesting fewer files.' % (
+                           total_size,
+                           settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE))
+            logger.warn(message)
+            rsp = ConnCleaningHttpResponse(StringIO(message), status=403)
+            rsp.conn = conn
+            return rsp
 
         temp = tempfile.NamedTemporaryFile(suffix='.archive')
         zipName = request.GET.get('zipname', image.getName())
