@@ -23,7 +23,7 @@ import omero.clients
 from past.builtins import unicode
 
 from django.http import HttpResponse, HttpResponseBadRequest, \
-    HttpResponseServerError, JsonResponse
+    HttpResponseServerError, JsonResponse, HttpResponseForbidden
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, \
     Http404, StreamingHttpResponse, HttpResponseNotFound
 
@@ -2548,9 +2548,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
                            total_size,
                            settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE))
             logger.warn(message)
-            rsp = ConnCleaningHttpResponse(StringIO(message), status=403)
-            rsp.conn = conn
-            return rsp
+            return HttpResponseForbidden(message)
 
         temp = tempfile.NamedTemporaryFile(suffix='.archive')
         zipName = request.GET.get('zipname', image.getName())
