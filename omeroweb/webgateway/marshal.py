@@ -497,8 +497,7 @@ def graphResponseMarshal(conn, rsp):
         rv['unlinkedAnnotations'] = {'Tags': tags,
                                      'Files': files,
                                      'Comments': comments,
-                                     'Others': others
-                                    }
+                                     'Others': others}
 
         # Container links - only report these if we are moving the *parent*,
         # E.g. DatasetImageLinks are only reported if we are moving the Dataset
