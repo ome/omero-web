@@ -412,9 +412,9 @@ def rgb_int2rgba(rgbint):
     return (r, g, b, alpha)
 
 
-def chgrpMarshal(conn, rsp):
+def graphResponseMarshal(conn, rsp):
     """
-    Helper for marshalling a Chgrp response.
+    Helper for marshalling a Chgrp or Chown response.
     Uses conn to lookup unlinked objects.
     Returns dict of e.g.
     {'includedObjects': {'Datasets':[1,2,3]},
@@ -450,7 +450,7 @@ def chgrpMarshal(conn, rsp):
         # Annotation links - need to get info on linked objects
         tags = {}
         files = {}
-        comments = 0
+        comments = {}
         others = 0
         annotationLinks = ['ome.model.annotations.ProjectAnnotationLink',
                            'ome.model.annotations.DatasetAnnotationLink',
@@ -480,7 +480,9 @@ def chgrpMarshal(conn, rsp):
                         tags[ann.id.val] = {'id': ann.id.val,
                                             'name': name}
                     elif isinstance(ann, omero.model.CommentAnnotationI):
-                        comments += 1
+                        text = unwrap(ann.getTextValue())
+                        comments[ann.id.val] = {'id': ann.id.val,
+                                                'text': text}
                     else:
                         others += 1
         # sort tags & comments
@@ -488,17 +490,22 @@ def chgrpMarshal(conn, rsp):
         tags.sort(key=lambda x: x['name'])
         files = list(files.values())
         files.sort(key=lambda x: x['name'])
-        rv['unlinkedDetails'] = {'Tags': tags,
-                                 'Files': files,
-                                 'Comments': comments,
-                                 'Others': others
-                                 }
+        comments = list(comments.values())
+        comments.sort(key=lambda x: x['text'])
+        rv['unlinkedParents'] = {}
+        rv['unlinkedChildren'] = {}
+        rv['unlinkedAnnotations'] = {'Tags': tags,
+                                     'Files': files,
+                                     'Comments': comments,
+                                     'Others': others
+                                    }
 
         # Container links - only report these if we are moving the *parent*,
         # E.g. DatasetImageLinks are only reported if we are moving the Dataset
         # (and the image is left behind). If we were moving the Image then we'd
         # expect the link to be broken (can ignore)
-        objects = {}
+        children = {}
+        parents = {}
         containerLinks = {
             'ome.model.containers.ProjectDatasetLink': ['Project', 'Dataset'],
             'ome.model.containers.DatasetImageLink': ['Dataset', 'Image'],
@@ -520,22 +527,27 @@ def chgrpMarshal(conn, rsp):
                     child = lnk.child.id.val
                     parent = lnk.parent.id.val
                     # If child IS included, then parent is the unlinked object
-                    if child in includedObjects[ch_type + 's']:
+                    if child in includedObjects.get(ch_type + 's', []):
                         name = unwrap(lnk.parent.getName())
                         # Put objects in a dictionary to avoid duplicates
-                        if pa_type not in objects:
-                            objects[pa_type] = {}
-                        objects[pa_type][parent] = {'id': child, 'name': name}
+                        if pa_type not in parents:
+                            parents[pa_type] = {}
+                        parents[pa_type][parent] = {'id': parent, 'name': name}
                     else:
                         name = unwrap(lnk.child.getName())
-                        if ch_type not in objects:
-                            objects[ch_type] = {}
-                        objects[ch_type][child] = {'id': child, 'name': name}
+                        if ch_type not in children:
+                            children[ch_type] = {}
+                        children[ch_type][child] = {'id': child, 'name': name}
         # sort objects
-        for otype, objs in objects.items():
+        for otype, objs in parents.items():
             objs = list(objs.values())
             objs.sort(key=lambda x: x['name'])
             # E.g. 'Dataset' objects in 'Datasets'
-            rv['unlinkedDetails'][otype + 's'] = objs
+            rv['unlinkedParents'][otype + 's'] = objs
+
+        for otype, objs in children.items():
+            objs = list(objs.values())
+            objs.sort(key=lambda x: x['name'])
+            rv['unlinkedChildren'][otype + 's'] = objs
 
     return rv

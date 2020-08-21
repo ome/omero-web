@@ -81,7 +81,7 @@ from .controller.share import BaseShare
 from omeroweb.webadmin.forms import LoginForm
 
 from omeroweb.webgateway import views as webgateway_views
-from omeroweb.webgateway.marshal import chgrpMarshal
+from omeroweb.webgateway.marshal import graphResponseMarshal
 from omeroweb.webgateway.util import get_longs as webgateway_get_longs
 
 from omeroweb.feedback.views import handlerInternalError
@@ -3320,7 +3320,7 @@ def activities(request, conn=None, **kwargs):
             logger.debug("job status: %s", status)
             rsp = prx.getResponse()
             if rsp is not None:
-                rv = chgrpMarshal(conn, rsp)
+                rv = graphResponseMarshal(conn, rsp)
                 rv['finished'] = True
             else:
                 rv = {'finished': False}

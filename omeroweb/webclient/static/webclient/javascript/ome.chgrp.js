@@ -385,10 +385,10 @@ $(function() {
         }
     });
 
-    window.OME.formatDryRun = function (dryRunData) {
+    window.OME.formatDryRun = function (dryRunData, showParents) {
         var html = "",
             move = [], count,
-            unlink = [], unlinked;
+            unlink = [];
         ["Projects", "Datasets", "Screens",
             "Plates", "Wells", "Images"].forEach(function (otype) {
                 if (otype in dryRunData.includedObjects) {
@@ -399,29 +399,41 @@ $(function() {
             });
         html += move.join(", ");
 
-        ["Projects", "Datasets", "Plates", "Images", "Tags", "Files"].forEach(function (otype) {
-            if (otype in dryRunData.unlinkedDetails) {
-                unlinked = dryRunData.unlinkedDetails[otype];
-                count = unlinked.length;
-                if (count === 0) return;
-                if (count === 1) otype = otype.slice(0, -1);  // remove s
-                var namesList = [], names;
-                unlinked.forEach(function (u) {
-                    namesList.push(u.name);
-                });
-                names = namesList.join(", ");
-                names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";
-                unlink.push(count + " " + otype + names);
-            }
-        });
-        if (dryRunData.unlinkedDetails.Comments > 0) {
-            count = dryRunData.unlinkedDetails.Comments;
+        function formatObjects(item) {
+            otype = item[0];
+            unlinked = item[1];
+            count = unlinked.length;
+            if (count === 0) return '';
+            if (count === 1) otype = otype.slice(0, -1);  // remove s
+            var namesList = [], names;
+            unlinked.forEach(function (u) {
+                namesList.push(u.name);
+            });
+            names = namesList.join(", ");
+            names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";
+            return count + " " + otype + names;
+        }
+
+        if (showParents) {
+            parents = Object.entries(dryRunData.unlinkedParents).map(formatObjects);
+            html += "<br/><b style='font-weight: bold'>Will be removed from:</b> " + parents.join(", ");
+        }
+
+        unlink = Object.entries(dryRunData.unlinkedChildren).map(formatObjects);
+        anns = dryRunData.unlinkedAnnotations;
+        // Format Tags, Files
+        unlink = unlink.concat(Object.entries({'Tags': anns.Tags, 'Files': anns.Files}).map(formatObjects));
+        unlink = unlink.filter(l => l.length > 0);
+
+        if (anns.Comments.length > 0) {
+            count = anns.Comments.length;
             unlink.push(count + " Comment" + (count > 1 ? "s" : ""));
         }
-        if (dryRunData.unlinkedDetails.Others > 0) {
-            count = dryRunData.unlinkedDetails.Others;
+        if (anns.Others > 0) {
+            count = anns.Others;
             unlink.push(count + " Other" + (count > 1 ? "s" : ""));
         }
+
         if (unlink.length > 0) {
             html += "<br/><b style='font-weight: bold'>Not included:</b> " + unlink.join(", ");
         }
