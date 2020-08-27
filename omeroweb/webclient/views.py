@@ -119,7 +119,6 @@ logger = logging.getLogger(__name__)
 
 logger.info("INIT '%s'" % os.getpid())
 
-
 def get_long_or_default(request, name, default):
     """
     Retrieves a parameter from the request. If the parameter is not present
