@@ -1494,7 +1494,7 @@ def imageData_json(request, conn=None, _internal=False, **kwargs):
     key = kwargs.get('key', None)
     image = conn.getObject("Image", iid)
     if image is None:
-        return HttpJavascriptResponseServerError('""')
+        return HttpResponseNotFound(f'Image:{iid} not found')
     if request.GET.get('getDefaults') == 'true':
         image.resetDefaults(save=False)
     rv = imageMarshal(image, key=key, request=request)
