@@ -76,7 +76,7 @@ def get_client_ip(request):
     return ip
 
 
-def is_pubic_user(conn):
+def is_public_user(conn):
     """Is the current user the same as the configured public user?"""
     return (hasattr(settings, 'PUBLIC_USER') and
             settings.PUBLIC_USER == conn.getUser().getOmeName())
