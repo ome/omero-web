@@ -27,7 +27,7 @@ import logging
 import pkgutil
 from django.conf import settings
 from django.apps import AppConfig
-from django.urls import re_path, include
+from django.urls import re_path, include, path
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
 
@@ -105,7 +105,7 @@ OMERO.web are compatible
         logger.debug('Module not found: %s' % urlmodule)
 
 urlpatterns += [
-    re_path(r'^favicon\.ico$',
+    path(r'favicon\.ico',
         lambda request: redirect('%swebgateway/img/ome.ico'
                                  % settings.STATIC_URL)),
     re_path(r'^(?i)webgateway/', include('omeroweb.webgateway.urls')),
@@ -117,7 +117,7 @@ urlpatterns += [
 
     re_path(r'^(?i)api/', include('omeroweb.api.urls')),
 
-    re_path(r'^index/$', webclient_views.custom_index,
+    path(r'index/', webclient_views.custom_index,
         name="webindex_custom"),
 ]
 
