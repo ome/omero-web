@@ -1494,7 +1494,7 @@ def imageData_json(request, conn=None, _internal=False, **kwargs):
     key = kwargs.get('key', None)
     image = conn.getObject("Image", iid)
     if image is None:
-        if is_public_user(conn):
+        if is_public_user(request):
             # 403 - Should try logging in
             return HttpResponseForbidden()
         else:

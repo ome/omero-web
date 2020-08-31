@@ -76,10 +76,15 @@ def get_client_ip(request):
     return ip
 
 
-def is_public_user(conn):
-    """Is the current user the same as the configured public user?"""
-    return (hasattr(settings, 'PUBLIC_USER') and
-            settings.PUBLIC_USER == conn.getUser().getOmeName())
+def is_public_user(request):
+    """
+    Is the session connector created for public user?
+
+    Returns None if no connector found
+    """
+    connector = request.session.get('connector')
+    if connector is not None:
+        return connector.is_public
 
 
 class ConnCleaningHttpResponse(StreamingHttpResponse):
