@@ -23,17 +23,17 @@
 # Version: 1.0
 #
 
-from django.urls import re_path
+from django.urls import path
 from django.views.generic import TemplateView
 
 from omeroweb.feedback import views
 
 # url patterns
 urlpatterns = [
-    re_path(r'^feedback/', views.send_feedback, name="fsend"),
-    re_path(r'^comment/', views.send_comment, name="csend"),
-    re_path(r'^thanks/', TemplateView.as_view(template_name='thanks.html'),
+    path(r'feedback/', views.send_feedback, name="fsend"),
+    path(r'comment/', views.send_comment, name="csend"),
+    path(r'thanks/', TemplateView.as_view(template_name='thanks.html'),
         name="fthanks"),
-    re_path(r'^disabled/', TemplateView.as_view(template_name='disabled.html'),
+    path(r'disabled/', TemplateView.as_view(template_name='disabled.html'),
         name="feedback_disabled"),
 ]
