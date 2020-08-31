@@ -43,7 +43,7 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.views.generic import View
 from django.shortcuts import render
 from omeroweb.webadmin.forms import LoginForm
-from omeroweb.decorators import get_client_ip
+from omeroweb.decorators import get_client_ip, is_pubic_user
 from omeroweb.webadmin.webadmin_utils import upgradeCheck
 
 try:
@@ -1494,7 +1494,11 @@ def imageData_json(request, conn=None, _internal=False, **kwargs):
     key = kwargs.get('key', None)
     image = conn.getObject("Image", iid)
     if image is None:
-        return HttpResponseNotFound(f'Image:{iid} not found')
+        if is_pubic_user(conn):
+            # 403 - Should try logging in
+            return HttpResponseForbidden()
+        else:
+            return HttpResponseNotFound(f'Image:{iid} not found')
     if request.GET.get('getDefaults') == 'true':
         image.resetDefaults(save=False)
     rv = imageMarshal(image, key=key, request=request)
