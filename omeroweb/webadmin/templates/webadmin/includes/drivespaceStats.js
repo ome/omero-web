@@ -62,7 +62,7 @@
 
                     $('#total').text(total.filesizeformat());
                     var usagePercent = 100 * total/(total + FREE_SPACE);
-                    progressbar.progressbar( "value", parseInt(usagePercent, 10));
+                    progressbar.progressbar( "value", parseInt(Math.round(usagePercent), 10));
 
                     $("#placeholder").css('width',700).css('height',300);
                     $.plot($("#placeholder"), chart_data,
