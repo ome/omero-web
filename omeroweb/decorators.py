@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (C) 2011-2013 University of Dundee & Open Microscopy Environment.
+# Copyright (C) 2011-2020 University of Dundee & Open Microscopy Environment.
 # All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -40,6 +40,7 @@ from django.core.cache import cache
 from omeroweb.utils import reverse_with_params
 from omeroweb.connector import Connector
 from omero.gateway.utils import propertiesToDict
+from omero import ApiUsageException
 
 logger = logging.getLogger(__name__)
 
@@ -110,10 +111,11 @@ class login_required(object):
     configurable by various options.
 
     doConnectionCleanup:
+        Used to indicate methods that may return ConnCleaningHttpResponse.
         If True (default), then returning a ConnCleaningHttpResponse will
         raise an Exception since cleanup is intended to be immediate; if
-        False, connection cleanup will be skipped for all
-        ConnCleaningHttpResponse values.
+        False, connection cleanup will be skipped ONLY when a
+        ConnCleaningHttpResponse is returned.
     """
 
     def __init__(self, useragent='OMERO.web', isAdmin=False,
@@ -504,25 +506,24 @@ class login_required(object):
 
                     # kwargs['error'] = request.GET.get('error')
                     kwargs['url'] = url
+            retval = None
             try:
                 retval = f(request, *args, **kwargs)
             finally:
                 # If f() raised Exception, e.g. Http404() we must still cleanup
-                try:
-                    delayConnectionCleanup = isinstance(
-                        retval, ConnCleaningHttpResponse
+                delayConnectionCleanup = isinstance(
+                    retval, ConnCleaningHttpResponse
+                )
+                if doConnectionCleanup and delayConnectionCleanup:
+                    raise ApiUsageException(
+                        "Methods that return a"
+                        " ConnCleaningHttpResponse must be marked with"
+                        " @login_required(doConnectionCleanup=False)"
                     )
-                    if doConnectionCleanup and delayConnectionCleanup:
-                        raise Exception(
-                            (
-                                "FIXME: do whatever here is "
-                                "appropriate to force a developer to "
-                                "fix the issue _before_ release"
-                            )
-                        )
-                    doConnectionCleanup = not delayConnectionCleanup
-                    logger.debug(
-                        'Doing connection cleanup? %s' % doConnectionCleanup)
+                doConnectionCleanup = not delayConnectionCleanup
+                logger.debug(
+                    'Doing connection cleanup? %s' % doConnectionCleanup)
+                try:
                     if doConnectionCleanup:
                         if conn is not None and conn.c is not None:
                             conn.close(hard=False)

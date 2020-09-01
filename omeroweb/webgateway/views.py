@@ -3,7 +3,7 @@
 #
 # webgateway/views.py - django application view handling functions
 #
-# Copyright (c) 2007-2015 Glencoe Software, Inc. All rights reserved.
+# Copyright (c) 2007-2020 Glencoe Software, Inc. All rights reserved.
 #
 # This software is distributed under the terms described by the LICENCE file
 # you can find at the root of the distribution bundle, which states you are
@@ -23,7 +23,7 @@ import omero.clients
 from past.builtins import unicode
 
 from django.http import HttpResponse, HttpResponseBadRequest, \
-    HttpResponseServerError, JsonResponse
+    HttpResponseServerError, JsonResponse, HttpResponseForbidden
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed, \
     Http404, StreamingHttpResponse, HttpResponseNotFound
 
@@ -2541,6 +2541,14 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         fname = orig_file.getName().replace(" ", "_").replace(",", ".")
         rsp['Content-Disposition'] = 'attachment; filename=%s' % (fname)
     else:
+        total_size = sum(f.size for f in files)
+        if total_size > settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE:
+            message = ('Total size of files %d is larger than %d. '
+                       'Try requesting fewer files.' % (
+                           total_size,
+                           settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE))
+            logger.warn(message)
+            return HttpResponseForbidden(message)
 
         temp = tempfile.NamedTemporaryFile(suffix='.archive')
         zipName = request.GET.get('zipname', image.getName())
