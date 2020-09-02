@@ -82,10 +82,10 @@ def ago(value):
     hours, remainder = divmod(ago.seconds, 3600)
     mins, secs = divmod(remainder, 60)
     if ago.days >= 365:
-        years = ago.days / 365
+        years = ago.days // 365
         return "%s year%s" % (years, plurals(years))
     if ago.days > 28:
-        months = ago.days / 30
+        months = ago.days // 30
         return "%s month%s" % (months, plurals(months))
     if ago.days > 0:
         return "%s day%s" % (ago.days, plurals(ago.days))
