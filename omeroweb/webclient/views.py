@@ -3011,9 +3011,9 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     context['data']['id'] = file_id
     context['meta']['query'] = query
 
-    # if we're on an exact page:
-    if offset == 0 or float(offset)/limit == offset/limit:
-        context['meta']['page'] = (offset/limit) + 1 if offset > 0 else 1
+    # check if offset matches an integer page number:
+    if offset == 0 or offset/limit == offset//limit:
+        context['meta']['page'] = (offset//limit) + 1 if offset > 0 else 1
 
     # pagination links
     url = reverse('omero_table', args=[file_id])
