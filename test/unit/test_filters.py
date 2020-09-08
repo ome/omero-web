@@ -25,6 +25,7 @@ Simple unit tests for the webgateway common_filters.
 from datetime import datetime, timedelta
 from omeroweb.webgateway.templatetags.common_filters import ago
 
+
 class TestFilters(object):
     """
     Tests various filter methods
