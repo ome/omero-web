@@ -46,3 +46,4 @@ class TestFilters(object):
         assert ago(now - timedelta(weeks=2)) == '14 days'
         assert ago(now - timedelta(weeks=5)) == '1 month'
         assert ago(now - timedelta(weeks=260)) == '4 years'
+        assert ago(now + timedelta(seconds=15)) == 'Future times not supported'
