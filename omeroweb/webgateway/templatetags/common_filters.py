@@ -84,7 +84,7 @@ def ago(value):
     if ago.days >= 365:
         years = ago.days // 365
         return "%s year%s" % (years, plurals(years))
-    if ago.days > 28:
+    if ago.days > 31:
         months = ago.days // 30
         return "%s month%s" % (months, plurals(months))
     if ago.days > 0:

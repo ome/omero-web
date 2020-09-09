@@ -42,6 +42,7 @@ class TestFilters(object):
         assert ago(now - timedelta(days=1)) == '1 day'
         assert ago(now - timedelta(days=5, hours=12)) == '5 days'
         assert ago(now - timedelta(days=24)) == '24 days'
+        assert ago(now - timedelta(days=29)) == '29 days'
         assert ago(now - timedelta(weeks=2)) == '14 days'
         assert ago(now - timedelta(weeks=5)) == '1 month'
         assert ago(now - timedelta(weeks=260)) == '4 years'
