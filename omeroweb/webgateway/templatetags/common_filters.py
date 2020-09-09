@@ -79,6 +79,7 @@ def ago(value):
 
     if ago.total_seconds() < 0:
         return "Future times not supported"
+
     def plurals(val):
         return val != 1 and "s" or ""
     hours, remainder = divmod(ago.seconds, 3600)
