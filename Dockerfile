@@ -24,6 +24,8 @@ COPY --chown=tox:tox omeroweb /src/omeroweb
 WORKDIR /src
 
 # Copy test-related files and run
+COPY --chown=tox:tox .git /src/.git
+COPY --chown=tox:tox .pre-commit-config.yaml /src/
 COPY --chown=tox:tox *.ini /src/
 COPY --chown=tox:tox test /src/test
 ENV PIP_CACHE_DIR=/tmp/pip-cache
