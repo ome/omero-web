@@ -92,11 +92,18 @@ from omeroweb.webclient.show import Show, IncorrectMenuError, \
 from omeroweb.decorators import ConnCleaningHttpResponse, parse_url
 from omeroweb.webgateway.util import getIntOrDefault
 
-from omero.model import ProjectI, DatasetI, ImageI, \
-    ScreenI, PlateI, \
-    ProjectDatasetLinkI, DatasetImageLinkI, \
+from omero.model import AnnotationAnnotationLinkI, \
+    DatasetI, \
+    DatasetImageLinkI, \
+    ExperimenterI, \
+    ImageI, \
     OriginalFileI, \
-    ScreenPlateLinkI, AnnotationAnnotationLinkI, TagAnnotationI
+    PlateI, \
+    ProjectI, \
+    ProjectDatasetLinkI, \
+    ScreenI, \
+    ScreenPlateLinkI, \
+    TagAnnotationI
 from omero import ApiUsageException, ServerError, CmdError
 from omeroweb.webgateway.views import LoginView
 
@@ -912,6 +919,18 @@ def create_link(parent_type, parent_id, child_type, child_id):
     return None
 
 
+def get_objects_owners(conn, child_type, child_ids):
+    """
+    Returns a dict of child_id: owner_id
+    """
+    if child_type == 'tag':
+        child_type = 'Annotation'
+    owners = {}
+    for obj in conn.getObjects(child_type, child_ids):
+        owners[obj.id] = obj.details.owner.id.val
+    return owners
+
+
 @login_required()
 def api_links(request, conn=None, **kwargs):
     """
@@ -950,16 +969,24 @@ def _api_links_POST(conn, json_data, **kwargs):
     # e.g. {"dataset":{"10":{"image":[1,2,3]}}}
 
     linksToSave = []
+    write_owned = 'WriteOwned' in conn.getCurrentAdminPrivileges()
+    user_id = conn.getUserId()
     for parent_type, parents in json_data.items():
-        if parent_type == "orphaned":
+        if parent_type in ("orphaned", "experimenter"):
             continue
         for parent_id, children in parents.items():
             for child_type, child_ids in children.items():
+                # batch look-up owners of all child objects
+                child_owners = get_objects_owners(conn, child_type, child_ids)
                 for child_id in child_ids:
                     parent_id = int(parent_id)
                     link = create_link(parent_type, parent_id,
                                        child_type, child_id)
                     if link and link != 'orphan':
+                        # link owner should match child owner
+                        if write_owned and child_owners[child_id] != user_id:
+                            link.details.owner = ExperimenterI(
+                                child_owners[child_id], False)
                         linksToSave.append(link)
 
     if len(linksToSave) > 0:
