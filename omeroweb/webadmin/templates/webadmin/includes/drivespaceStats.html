@@ -34,8 +34,17 @@
 
             <div class="summary">
                 <!-- show 'Total usage' or 'Group usage' or 'User usage' -->
-                <h3><span class="totalUsage">Total</span> {% trans "usage" %}: <span id="total"></span></h3>
-                <h3>{% trans "Free space" %}: <span id="free_space"></span></h3>
+                <p>
+                    <span class="totalUsage">Total</span> {% trans "usage" %}:
+                    <span id="total" style="color:black"></span><br>
+                    {% trans "Free space" %}:
+                    <span id="free_space" style="color:black"></span>
+                </p>
+                <p>
+                    NB: Total usage is calculated as the sum of all data, including any 'in-place' imports,
+                    where the data is not on the server's drive. This may result in inaccurate percentages
+                    above when calculated against the free space on the server's drive.
+                </p>
             </div>
 
             <table id="drivespaceTable" class="tablesorter" style="display: none;">
