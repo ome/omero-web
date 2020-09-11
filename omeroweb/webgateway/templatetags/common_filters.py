@@ -140,17 +140,15 @@ def shortening(value, arg):
         length = int(arg)
     except ValueError:  # invalid literal for int()
         return value  # Fail silently.
-    front = length/2-3
-    end = length/2-3
+    chunk = length//2-3
 
     if not isinstance(value, basestring):
         value = str(value)
     try:
-        length = len(value)
-        if length < length:
+        if len(value) < length:
             return value
-        elif length >= length:
-            return value[:front]+"..."+value[length-end:]
+        else:
+            return value[:chunk]+"..."+value[length-chunk:]
     except Exception:
         logger.error(traceback.format_exc())
         return value
