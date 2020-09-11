@@ -1399,7 +1399,9 @@ def load_chgrp_groups(request, conn=None, **kwargs):
     # if all the Objects are in a single group, exclude it from the target
     # groups
     if len(currentGroups) == 1:
-        targetGroupIds.remove(currentGroups.pop())
+        curr_grp = currentGroups.pop()
+        if curr_grp in targetGroupIds:
+            targetGroupIds.remove(curr_grp)
 
     def getPerms(group):
         p = group.getDetails().permissions
