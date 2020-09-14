@@ -89,7 +89,8 @@ from omeroweb.webclient.decorators import login_required
 from omeroweb.webclient.decorators import render_response
 from omeroweb.webclient.show import Show, IncorrectMenuError, \
     paths_to_object, paths_to_tag
-from omeroweb.decorators import ConnCleaningHttpResponse, parse_url
+from omeroweb.decorators import ConnCleaningHttpResponse, parse_url, \
+    TableClosingHttpResponse
 from omeroweb.webgateway.util import getIntOrDefault
 
 from omero.model import AnnotationAnnotationLinkI, \
@@ -3008,11 +3009,12 @@ def get_original_file(request, fileId, download=False, conn=None, **kwargs):
     return rsp
 
 
-@login_required()
+@login_required(doConnectionCleanup=False)
 @render_response()
 def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     """
-    Download OMERO.table as CSV or show as HTML table
+    Download OMERO.table as CSV (streaming response) or return as HTML or json
+
     @param file_id:     OriginalFile ID
     @param mtype:       None for html table or 'csv' or 'json'
     @param conn:        BlitzGateway connection
@@ -3028,12 +3030,35 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     if orig_file is None:
         raise Http404("OriginalFile %s not found" % file_id)
 
-    context = webgateway_views._table_query(request, file_id, conn=conn,
-                                            query=query, offset=offset,
-                                            limit=limit)
+    lazy = mtype == 'csv'
+    context = webgateway_views._table_query(
+            request, file_id, conn=conn, query=query, offset=offset,
+            limit=limit, lazy=lazy)
 
     if context.get('error') or not context.get('data'):
         return JsonResponse(context)
+
+    # OR, return as csv or html
+    if mtype == 'csv':
+        table_data = context.get('data')
+
+        def csv_gen():
+            csv_cols = ",".join(table_data.get('columns'))
+            yield csv_cols
+            for rows in table_data.get('lazy_rows'):
+                yield ('\n' + '\n'.join([",".join([str(d) for d in row])
+                       for row in rows]))
+
+        downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
+        downloadName = downloadName + ".csv"
+
+        rsp = TableClosingHttpResponse(csv_gen(), content_type='text/csv')
+        rsp.conn = conn
+        rsp.table = context.get('table')
+        rsp['Content-Type'] = 'application/force-download'
+        # rsp['Content-Length'] = ann.getFileSize()
+        rsp['Content-Disposition'] = ('attachment; filename=%s' % downloadName)
+        return rsp
 
     context['data']['name'] = orig_file.name
     context['data']['path'] = orig_file.path
@@ -3056,21 +3081,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
         context['meta']['prev'] = url + '&offset=%s' % (max(0, offset - limit))
 
     # by default, return context as JSON data
-    # OR, return as csv or html
-    if mtype == 'csv':
-        table_data = context.get('data')
-        csv_rows = [",".join(table_data.get('columns'))]
-        for row in table_data.get('rows'):
-            csv_rows.append(",".join([str(r).replace(',', '.') for r in row]))
-        csv_data = '\n'.join(csv_rows)
-        rsp = HttpResponse(csv_data, content_type='text/csv')
-        rsp['Content-Type'] = 'application/force-download'
-        rsp['Content-Length'] = len(csv_data)
-        downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
-        downloadName = downloadName + ".csv"
-        rsp['Content-Disposition'] = 'attachment; filename=%s' % downloadName
-        return rsp
-    elif mtype is None:
+    if mtype is None:
         context['template'] = 'webclient/annotations/omero_table.html'
         col_types = context['data']['column_types']
         if 'ImageColumn' in col_types:

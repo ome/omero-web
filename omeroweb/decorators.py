@@ -25,8 +25,9 @@ Decorators for use with OMERO.web applications.
 
 import logging
 import traceback
-from django.http import Http404, HttpResponse, HttpResponseRedirect, \
+from django.http import Http404, HttpResponseRedirect, \
     JsonResponse
+from django.http.response import HttpResponseBase
 from django.shortcuts import render
 from django.http import HttpResponseForbidden, StreamingHttpResponse
 
@@ -87,6 +88,19 @@ class ConnCleaningHttpResponse(StreamingHttpResponse):
                 self.conn.close(hard=False)
         except Exception:
             logger.error('Failed to clean up connection.', exc_info=True)
+
+
+class TableClosingHttpResponse(ConnCleaningHttpResponse):
+    """Extension of L{HttpResponse} which closes the OMERO connection."""
+
+    def close(self):
+        try:
+            if self.table is not None:
+                self.table.close()
+        except Exception:
+            logger.error('Failed to close OMERO.table.', exc_info=True)
+        # Now call super to close conn
+        super(TableClosingHttpResponse, self).close()
 
 
 class login_required(object):
@@ -557,7 +571,7 @@ class render_response(object):
             context = f(request, *args, **kwargs)
 
             # if we happen to have a Response, return it
-            if isinstance(context, HttpResponse):
+            if isinstance(context, HttpResponseBase):
                 return context
 
             # get template from view dict. Can be overridden from the **kwargs
