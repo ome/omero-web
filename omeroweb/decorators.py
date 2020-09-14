@@ -77,6 +77,17 @@ def get_client_ip(request):
     return ip
 
 
+def is_public_user(request):
+    """
+    Is the session connector created for public user?
+
+    Returns None if no connector found
+    """
+    connector = request.session.get('connector')
+    if connector is not None:
+        return connector.is_public
+
+
 class ConnCleaningHttpResponse(StreamingHttpResponse):
     """Extension of L{HttpResponse} which closes the OMERO connection."""
 
