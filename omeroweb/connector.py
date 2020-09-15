@@ -33,8 +33,8 @@ logger = logging.getLogger(__name__)
 
 class IterRegistry(type):
     def __new__(cls, name, bases, attr):
-        attr['_registry'] = {}
-        attr['_frozen'] = False
+        attr["_registry"] = {}
+        attr["_frozen"] = False
         return type.__new__(cls, name, bases, attr)
 
     def __iter__(cls):
@@ -46,12 +46,12 @@ class ServerBase(with_metaclass(IterRegistry)):
     _next_id = 1
 
     def __init__(self, host, port, server=None):
-        if hasattr(self, 'host') or hasattr(self, 'port'):
+        if hasattr(self, "host") or hasattr(self, "port"):
             return
         self.id = type(self)._next_id
         self.host = host
         self.port = port
-        self.server = (server is not None and server != '') and server or None
+        self.server = (server is not None and server != "") and server or None
         type(self)._registry[self.id] = self
         type(self)._next_id += 1
 
@@ -62,7 +62,7 @@ class ServerBase(with_metaclass(IterRegistry)):
                 return cls._registry[key]
 
         if cls._frozen:
-            raise TypeError('No more instances allowed')
+            raise TypeError("No more instances allowed")
         else:
             return object.__new__(cls)
 
@@ -84,7 +84,6 @@ class ServerBase(with_metaclass(IterRegistry)):
 
 
 class Server(ServerBase):
-
     def __repr__(self):
         """
         Json for printin settings.py: [["localhost", 4064, "omero"]]'
@@ -92,7 +91,7 @@ class Server(ServerBase):
         return """["%s", %s, "%s"]""" % (self.host, self.port, self.server)
 
     def __str__(self):
-        return force_text(self).encode('utf-8')
+        return force_text(self).encode("utf-8")
 
     def __unicode__(self):
         return str(self.id)
@@ -113,9 +112,11 @@ class Server(ServerBase):
     def find(cls, host=None, port=None, server=None):
         rv = []
         for s in cls._registry.values():
-            if (host is not None and host != s.host) or \
-               (port is not None and port != s.port) or \
-               (server is not None and server != s.server):
+            if (
+                (host is not None and host != s.host)
+                or (port is not None and port != s.port)
+                or (server is not None and server != s.server)
+            ):
                 continue
             rv.append(s)
         return rv
@@ -142,12 +143,18 @@ class Connector(object):
             server = Server.find(server=self.server_id)[0]
         return (server.host, server.port)
 
-    def create_gateway(self, useragent, username=None, password=None,
-                       userip=None):
+    def create_gateway(self, useragent, username=None, password=None, userip=None):
         host, port = self.lookup_host_and_port()
         return client_wrapper(
-            username, password, host=host, port=port, secure=self.is_secure,
-            useragent=useragent, anonymous=self.is_public, userip=userip)
+            username,
+            password,
+            host=host,
+            port=port,
+            secure=self.is_secure,
+            useragent=useragent,
+            anonymous=self.is_public,
+            userip=userip,
+        )
 
     def prepare_gateway(self, connection):
         connection.server_id = self.server_id
@@ -155,42 +162,40 @@ class Connector(object):
         # the omeroweb.webgateway.views package.
         # TODO: UserProxy needs to be moved to this package or similar
         from omeroweb.webgateway.views import UserProxy
+
         connection.user = UserProxy(connection)
         connection.user.logIn()
         self.omero_session_key = connection._sessionUuid
         self.user_id = connection.getUserId()
-        logger.debug('Successfully prepared gateway: %s'
-                     % self.omero_session_key)
+        logger.debug("Successfully prepared gateway: %s" % self.omero_session_key)
         # TODO: Properly handle activating the weblitz_cache
 
-    def create_connection(self, useragent, username, password,
-                          is_public=False, userip=None):
+    def create_connection(
+        self, useragent, username, password, is_public=False, userip=None
+    ):
         self.is_public = is_public
-        connection = self.create_gateway(
-            useragent, username, password, userip
-        )
+        connection = self.create_gateway(useragent, username, password, userip)
         try:
             if connection.connect():
-                logger.debug('Successfully created connection for: %s'
-                             % username)
+                logger.debug("Successfully created connection for: %s" % username)
                 self.prepare_gateway(connection)
                 return connection
         except Exception:
-            logger.debug('Cannot create a new connection.', exc_info=True)
+            logger.debug("Cannot create a new connection.", exc_info=True)
         connection.close()
         return None
 
     def create_guest_connection(self, useragent, is_public=False):
-        guest = 'guest'
+        guest = "guest"
         connection = self.create_gateway(useragent, guest, guest, None)
         try:
             if connection.connect():
-                logger.debug('Successfully created a guest connection.')
+                logger.debug("Successfully created a guest connection.")
                 return connection
             else:
-                logger.warn('Cannot create a guest connection.')
+                logger.warn("Cannot create a guest connection.")
         except Exception:
-            logger.error('Cannot create a guest connection.', exc_info=True)
+            logger.error("Cannot create a guest connection.", exc_info=True)
         connection.close()
         return None
 
@@ -198,13 +203,14 @@ class Connector(object):
         connection = self.create_gateway(useragent, userip=userip)
         try:
             if connection.connect(sUuid=self.omero_session_key):
-                logger.debug('Successfully joined connection: %s'
-                             % self.omero_session_key)
+                logger.debug(
+                    "Successfully joined connection: %s" % self.omero_session_key
+                )
                 connection.setUserId(self.user_id)
                 self.prepare_gateway(connection)
                 return connection
         except Exception:
-            logger.debug('Cannot create a new connection.', exc_info=True)
+            logger.debug("Cannot create a new connection.", exc_info=True)
         connection.close()
         return None
 
@@ -217,7 +223,7 @@ class Connector(object):
                 connection.getServerVersion()
                 return True
             except Exception:
-                logger.error('Cannot request server version.', exc_info=True)
+                logger.error("Cannot request server version.", exc_info=True)
             return False
         finally:
             connection.close()
@@ -233,16 +239,17 @@ class Connector(object):
             try:
                 server_version = connection.getServerVersion()
                 server_version = self.SERVER_VERSION_RE.match(server_version)
-                server_version = server_version.group(1).split('.')
+                server_version = server_version.group(1).split(".")
 
                 client_version = self.SERVER_VERSION_RE.match(omero_version)
-                client_version = client_version.group(1).split('.')
-                logger.info("Client version: '%s'; Server version: '%s'"
-                            % (client_version, server_version))
+                client_version = client_version.group(1).split(".")
+                logger.info(
+                    "Client version: '%s'; Server version: '%s'"
+                    % (client_version, server_version)
+                )
                 return self.is_compatible(server_version, client_version)
             except Exception:
-                logger.error('Cannot compare server to client version.',
-                             exc_info=True)
+                logger.error("Cannot compare server to client version.", exc_info=True)
             return False
         finally:
             connection.close()
@@ -255,6 +262,6 @@ class Connector(object):
         if server_version[0] != client_version[0]:
             return False
         # Currently, web 5.6+ is compatible with server 5.5+
-        if client_version[0] == '5' and int(client_version[1]) >= 6:
+        if client_version[0] == "5" and int(client_version[1]) >= 6:
             return int(server_version[1]) >= 5
         return server_version[:2] == client_version[:2]

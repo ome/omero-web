@@ -19,6 +19,7 @@ import logging
 from random import random
 from io import open
 import datetime
+
 # Support python2 and python3
 from past.builtins import basestring
 from builtins import str
@@ -33,21 +34,21 @@ import stat
 
 logger = logging.getLogger(__name__)
 
-size_of_double = len(struct.pack('d', 0))
+size_of_double = len(struct.pack("d", 0))
 # string_type = type('')
 
-CACHE = getattr(settings, 'WEBGATEWAY_CACHE', None)
-TMPROOT = getattr(settings, 'WEBGATEWAY_TMPROOT', None)
+CACHE = getattr(settings, "WEBGATEWAY_CACHE", None)
+TMPROOT = getattr(settings, "WEBGATEWAY_TMPROOT", None)
 THUMB_CACHE_TIME = 3600  # 1 hour
-THUMB_CACHE_SIZE = 20*1024  # KB == 20MB
+THUMB_CACHE_SIZE = 20 * 1024  # KB == 20MB
 IMG_CACHE_TIME = 3600  # 1 hour
-IMG_CACHE_SIZE = 512*1024  # KB == 512MB
+IMG_CACHE_SIZE = 512 * 1024  # KB == 512MB
 JSON_CACHE_TIME = 3600  # 1 hour
-JSON_CACHE_SIZE = 1*1024  # KB == 1MB
+JSON_CACHE_SIZE = 1 * 1024  # KB == 1MB
 TMPDIR_TIME = 3600 * 12  # 12 hours
 
 
-class CacheBase (object):  # pragma: nocover
+class CacheBase(object):  # pragma: nocover
     """
     Caching base class - extended by L{FileCache} for file-based caching.
     Methods of this base class return None or False providing a no-caching
@@ -76,6 +77,7 @@ class FileCache(CacheBase):
     Implements file-based caching within the directory specified in
     constructor.
     """
+
     _purge_holdoff = 4
 
     def __init__(self, dir, timeout=60, max_entries=0, max_size=0):
@@ -124,12 +126,12 @@ class FileCache(CacheBase):
         """
         fname = self._key_to_file(key)
         try:
-            f = open(fname, 'rb')
+            f = open(fname, "rb")
             if not self._check_entry(f):
                 f.close()
                 self._delete(fname)
             else:
-                return f.read().decode('utf-8')
+                return f.read().decode("utf-8")
         except (IOError, OSError, EOFError, struct.error):
             pass
         return default
@@ -165,13 +167,13 @@ class FileCache(CacheBase):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
 
-            f = open(fname, 'wb')
+            f = open(fname, "wb")
             if timeout > 0:
                 exp = time.time() + timeout + (timeout / 5 * random())
             else:
                 exp = 0
-            f.write(struct.pack('d', exp))
-            f.write(value.encode('utf-8'))
+            f.write(struct.pack("d", exp))
+            f.write(value.encode("utf-8"))
             f.close()
         except (IOError, OSError):  # pragma: nocover
             pass
@@ -230,11 +232,11 @@ class FileCache(CacheBase):
         """
         try:
             if isinstance(fname, basestring):
-                f = open(fname, 'rb')
-                exp = struct.unpack('d', f.read(size_of_double))[0]
+                f = open(fname, "rb")
+                exp = struct.unpack("d", f.read(size_of_double))[0]
             else:
                 f = None
-                exp = struct.unpack('d', fname.read(size_of_double))[0]
+                exp = struct.unpack("d", fname.read(size_of_double))[0]
             if self._default_timeout > 0 and exp > 0:
                 now = time.time()
                 if exp < now:
@@ -264,8 +266,8 @@ class FileCache(CacheBase):
         @rtype: int
         @return: the current usage, in KB
         """
-        cmd = 'du -sk %s' % os.path.join(os.getcwd(), self._dir)
-        return int(os.popen(cmd).read().split('\t')[0].strip())
+        cmd = "du -sk %s" % os.path.join(os.getcwd(), self._dir)
+        return int(os.popen(cmd).read().split("\t")[0].strip())
 
     def _full(self, _on_retry=False):
         """
@@ -281,17 +283,18 @@ class FileCache(CacheBase):
         # Check nr of entries
         if self._max_entries:
             try:
-                x = int(os.popen('find %s -type f | wc -l'
-                                 % self._dir).read().strip())
+                x = int(os.popen("find %s -type f | wc -l" % self._dir).read().strip())
                 if x >= self._max_entries:
                     if not _on_retry:
                         self._purge()
                         return self._full(True)
-                    logger.warn('caching limits reached on %s: max entries %d'
-                                % (self._dir, self._max_entries))
+                    logger.warn(
+                        "caching limits reached on %s: max entries %d"
+                        % (self._dir, self._max_entries)
+                    )
                     return True
             except ValueError:  # pragma: nocover
-                logger.error('Counting cache entries failed')
+                logger.error("Counting cache entries failed")
         # Check for space usage
         if self._max_size:
             try:
@@ -300,11 +303,13 @@ class FileCache(CacheBase):
                     if not _on_retry:
                         self._purge()
                         return self._full(True)
-                    logger.warn('caching limits reached on %s: max size %d'
-                                % (self._dir, self._max_size))
+                    logger.warn(
+                        "caching limits reached on %s: max size %d"
+                        % (self._dir, self._max_size)
+                    )
                     return True
             except ValueError:  # pragma: nocover
-                logger.error('Counting cache size failed')
+                logger.error("Counting cache size failed")
         return False
 
     def _purge(self):
@@ -314,17 +319,17 @@ class FileCache(CacheBase):
         this method may be expensive, so only call it when really necessary.
         """
         now = time.time()
-        if now-self._last_purge < self._purge_holdoff:
+        if now - self._last_purge < self._purge_holdoff:
             return
         self._last_purge = now
 
-        logger.debug('entering purge')
+        logger.debug("entering purge")
         count = 0
         for p, _, files in os.walk(self._dir):
             for f in files:
                 if not self._check_entry(os.path.join(p, f)):
                     count += 1
-        logger.debug('purge finished, removed %d files' % count)
+        logger.debug("purge finished, removed %d files" % count)
 
     def _createdir(self):
         """
@@ -333,8 +338,10 @@ class FileCache(CacheBase):
         try:
             os.makedirs(self._dir)
         except OSError:  # pragma: nocover
-            raise EnvironmentError("Cache directory '%s' does not exist and"
-                                   " could not be created'" % self._dir)
+            raise EnvironmentError(
+                "Cache directory '%s' does not exist and"
+                " could not be created'" % self._dir
+            )
 
     def _key_to_file(self, key):
         """
@@ -344,7 +351,7 @@ class FileCache(CacheBase):
         @rtype:         String
         """
 
-        if key.find('..') > 0 or key.startswith('/'):
+        if key.find("..") > 0 or key.startswith("/"):
             raise ValueError('Invalid value for cache key: "%s"' % key)
         return os.path.join(self._dir, key)
 
@@ -357,13 +364,14 @@ class FileCache(CacheBase):
         for _, _, files in os.walk(self._dir):
             count += len(files)
         return count
+
     _num_entries = property(_get_num_entries)
 
 
-FN_REGEX = re.compile('[#$,|]')
+FN_REGEX = re.compile("[#$,|]")
 
 
-class WebGatewayCache (object):
+class WebGatewayCache(object):
     """
     Caching class for webgateway.
     """
@@ -385,21 +393,28 @@ class WebGatewayCache (object):
             self._img_cache = CacheBase()
             self._thumb_cache = CacheBase()
         else:
-            self._json_cache = backend(dir=os.path.join(basedir, 'json'),
-                                       timeout=JSON_CACHE_TIME,
-                                       max_entries=0,
-                                       max_size=JSON_CACHE_SIZE)
-            self._img_cache = backend(dir=os.path.join(basedir, 'img'),
-                                      timeout=IMG_CACHE_TIME,
-                                      max_entries=0,
-                                      max_size=IMG_CACHE_SIZE)
-            self._thumb_cache = backend(dir=os.path.join(basedir, 'thumb'),
-                                        timeout=THUMB_CACHE_TIME,
-                                        max_entries=0,
-                                        max_size=THUMB_CACHE_SIZE)
+            self._json_cache = backend(
+                dir=os.path.join(basedir, "json"),
+                timeout=JSON_CACHE_TIME,
+                max_entries=0,
+                max_size=JSON_CACHE_SIZE,
+            )
+            self._img_cache = backend(
+                dir=os.path.join(basedir, "img"),
+                timeout=IMG_CACHE_TIME,
+                max_entries=0,
+                max_size=IMG_CACHE_SIZE,
+            )
+            self._thumb_cache = backend(
+                dir=os.path.join(basedir, "thumb"),
+                timeout=THUMB_CACHE_TIME,
+                max_entries=0,
+                max_size=THUMB_CACHE_SIZE,
+            )
 
-    def _updateCacheSettings(self, cache, timeout=None, max_entries=None,
-                             max_size=None):
+    def _updateCacheSettings(
+        self, cache, timeout=None, max_entries=None, max_size=None
+    ):
         """
         Updates the timeout, max_entries and max_size (if specified) for the
         given cache
@@ -424,7 +439,7 @@ class WebGatewayCache (object):
         """
         if self._lastlock:
             try:
-                logger.debug('removing cache lock file on __del__')
+                logger.debug("removing cache lock file on __del__")
                 os.remove(self._lastlock)
             except Exception:
                 pass
@@ -440,8 +455,8 @@ class WebGatewayCache (object):
                  otherwise.
         """
         lockfile = os.path.join(
-            self._basedir, '%s_lock'
-            % datetime.datetime.now().strftime('%Y%m%d_%H%M'))
+            self._basedir, "%s_lock" % datetime.datetime.now().strftime("%Y%m%d_%H%M")
+        )
         if self._lastlock:
             if lockfile == self._lastlock:
                 return True
@@ -467,9 +482,17 @@ class WebGatewayCache (object):
         @param client_base:     TODO: docs!
         @param e:
         """
-        logger.debug('## %s#%i %s user #%i group #%i(%i)' % (
-            e.entityType.val, e.entityId.val, e.action.val,
-            e.details.owner.id.val, e.details.group.id.val, e.event.id.val))
+        logger.debug(
+            "## %s#%i %s user #%i group #%i(%i)"
+            % (
+                e.entityType.val,
+                e.entityId.val,
+                e.action.val,
+                e.details.owner.id.val,
+                e.details.group.id.val,
+                e.event.id.val,
+            )
+        )
 
     def eventListener(self, client_base, events):
         """
@@ -499,13 +522,13 @@ class WebGatewayCache (object):
     def _cache_set(self, cache, key, obj):
         """ Calls cache.set(key, obj) """
 
-        logger.debug('   set: %s' % key)
+        logger.debug("   set: %s" % key)
         cache.set(key, obj)
 
     def _cache_clear(self, cache, key):
         """ Calls cache.delete(key) """
 
-        logger.debug(' clear: %s' % key)
+        logger.debug(" clear: %s" % key)
         cache.delete(key)
 
     def invalidateObject(self, client_base, user_id, obj):
@@ -518,10 +541,10 @@ class WebGatewayCache (object):
                                 L{omero.gateway.ImageWrapper}
         """
 
-        if obj.OMERO_CLASS == 'Image':
+        if obj.OMERO_CLASS == "Image":
             self.clearImage(None, client_base, user_id, obj)
         else:
-            logger.debug('unhandled object type: %s' % obj.OMERO_CLASS)
+            logger.debug("unhandled object type: %s" % obj.OMERO_CLASS)
             self.clearJson(client_base, obj)
 
     ##
@@ -540,14 +563,17 @@ class WebGatewayCache (object):
         """
         pre = str(iid)[:-4]
         if len(pre) == 0:
-            pre = '0'
+            pre = "0"
         if size is not None and len(size):
-            return 'thumb_user_%s/%s/%s/%s/%s' % (
-                client_base, pre, str(iid), user_id,
-                'x'.join([str(x) for x in size]))
+            return "thumb_user_%s/%s/%s/%s/%s" % (
+                client_base,
+                pre,
+                str(iid),
+                user_id,
+                "x".join([str(x) for x in size]),
+            )
         else:
-            return 'thumb_user_%s/%s/%s/%s' % (
-                client_base, pre, str(iid), user_id)
+            return "thumb_user_%s/%s/%s/%s" % (client_base, pre, str(iid), user_id)
 
     def setThumb(self, r, client_base, user_id, iid, obj, size=()):
         """
@@ -581,9 +607,9 @@ class WebGatewayCache (object):
         k = self._thumbKey(r, client_base, user_id, iid, size)
         r = self._thumb_cache.get(k)
         if r is None:
-            logger.debug('  fail: %s' % k)
+            logger.debug("  fail: %s" % k)
         else:
-            logger.debug('cached: %s' % k)
+            logger.debug("cached: %s" % k)
         return r
 
     def clearThumb(self, r, client_base, user_id, iid, size=None):
@@ -620,38 +646,46 @@ class WebGatewayCache (object):
         iid = img.getId()
         pre = str(iid)[:-4]
         if len(pre) == 0:
-            pre = '0'
+            pre = "0"
         if r:
             r = r.GET
-            c = FN_REGEX.sub('-', r.get('c', ''))
-            m = r.get('m', '')
-            p = r.get('p', '')
+            c = FN_REGEX.sub("-", r.get("c", ""))
+            m = r.get("m", "")
+            p = r.get("p", "")
             if p and not isinstance(
-                    omero.gateway.ImageWrapper.PROJECTIONS.get(p, -1),
-                    omero.constants.projection.ProjectionType
-                    ):  # pragma: nocover
-                p = ''
-            q = r.get('q', '')
-            region = r.get('region', '')
-            tile = r.get('tile', '')
-            rv = 'img_%s/%s/%s/{0}-c%s-m%s-q%s-r%s-t%s' % (
-                client_base, pre, str(iid), c, m, q, region, tile)
+                omero.gateway.ImageWrapper.PROJECTIONS.get(p, -1),
+                omero.constants.projection.ProjectionType,
+            ):  # pragma: nocover
+                p = ""
+            q = r.get("q", "")
+            region = r.get("region", "")
+            tile = r.get("tile", "")
+            rv = "img_%s/%s/%s/{0}-c%s-m%s-q%s-r%s-t%s" % (
+                client_base,
+                pre,
+                str(iid),
+                c,
+                m,
+                q,
+                region,
+                tile,
+            )
             if p:
-                logger.debug('rv: {0} {1}'.format(rv, type(rv)))
-                logger.debug('p: {0} {1}'.format(str(p), type(p)))
-                logger.debug('t: {0} {1}'.format(str(t), type(t)))
-                pt = '%s-%s' % (p, str(t))
+                logger.debug("rv: {0} {1}".format(rv, type(rv)))
+                logger.debug("p: {0} {1}".format(str(p), type(p)))
+                logger.debug("t: {0} {1}".format(str(t), type(t)))
+                pt = "%s-%s" % (p, str(t))
                 return rv.format(pt)
             else:
-                logger.debug('rv: {0} {1}'.format(rv, type(rv)))
-                logger.debug('z: {0} {1}'.format(str(z), type(z)))
-                logger.debug('t: {0} {1}'.format(str(t), type(t)))
-                zt = '%sx%s' % (str(z), str(t))
+                logger.debug("rv: {0} {1}".format(rv, type(rv)))
+                logger.debug("z: {0} {1}".format(str(z), type(z)))
+                logger.debug("t: {0} {1}".format(str(t), type(t)))
+                zt = "%sx%s" % (str(z), str(t))
                 return rv.format(zt)
         else:
-            return 'img_%s/%s/%s' % (client_base, pre, str(iid))
+            return "img_%s/%s/%s" % (client_base, pre, str(iid))
 
-    def setImage(self, r, client_base, img, z, t, obj, ctx=''):
+    def setImage(self, r, client_base, img, z, t, obj, ctx=""):
         """
         Puts image data into cache.
 
@@ -668,7 +702,7 @@ class WebGatewayCache (object):
         self._cache_set(self._img_cache, k, obj)
         return True
 
-    def getImage(self, r, client_base, img, z, t, ctx=''):
+    def getImage(self, r, client_base, img, z, t, ctx=""):
         """
         Gets image data from cache.
 
@@ -684,9 +718,9 @@ class WebGatewayCache (object):
         k = self._imageKey(r, client_base, img, z, t) + ctx
         r = self._img_cache.get(k)
         if r is None:
-            logger.debug('  fail: %s' % k)
+            logger.debug("  fail: %s" % k)
         else:
-            logger.debug('cached: %s' % k)
+            logger.debug("cached: %s" % k)
         return r
 
     def clearImage(self, r, client_base, user_id, img, skipJson=False):
@@ -717,30 +751,30 @@ class WebGatewayCache (object):
 
     def setSplitChannelImage(self, r, client_base, img, z, t, obj):
         """ Calls L{setImage} with '-sc' context """
-        return self.setImage(r, client_base, img, z, t, obj, '-sc')
+        return self.setImage(r, client_base, img, z, t, obj, "-sc")
 
     def getSplitChannelImage(self, r, client_base, img, z, t):
         """
         Calls L{getImage} with '-sc' context
         @rtype:     String
         """
-        return self.getImage(r, client_base, img, z, t, '-sc')
+        return self.getImage(r, client_base, img, z, t, "-sc")
 
     def setOmeTiffImage(self, r, client_base, img, obj):
         """ Calls L{setImage} with '-ometiff' context """
-        return self.setImage(r, client_base, img, 0, 0, obj, '-ometiff')
+        return self.setImage(r, client_base, img, 0, 0, obj, "-ometiff")
 
     def getOmeTiffImage(self, r, client_base, img):
         """
         Calls L{getImage} with '-ometiff' context
         @rtype:     String
         """
-        return self.getImage(r, client_base, img, 0, 0, '-ometiff')
+        return self.getImage(r, client_base, img, 0, 0, "-ometiff")
 
     ##
     # hierarchies (json)
 
-    def _jsonKey(self, r, client_base, obj, ctx=''):
+    def _jsonKey(self, r, client_base, obj, ctx=""):
         """
         Creates a cache key for storing json data based on params above.
 
@@ -753,12 +787,11 @@ class WebGatewayCache (object):
         """
 
         if obj:
-            return 'json_%s/%s_%s/%s' % (client_base, obj.OMERO_CLASS, obj.id,
-                                         ctx)
+            return "json_%s/%s_%s/%s" % (client_base, obj.OMERO_CLASS, obj.id, ctx)
         else:
-            return 'json_%s/single/%s' % (client_base, ctx)
+            return "json_%s/single/%s" % (client_base, ctx)
 
-    def getJson(self, r, client_base, obj, ctx=''):
+    def getJson(self, r, client_base, obj, ctx=""):
         """
         Gets data from the json cache
 
@@ -771,12 +804,12 @@ class WebGatewayCache (object):
         k = self._jsonKey(r, client_base, obj, ctx)
         r = self._json_cache.get(k)
         if r is None:
-            logger.debug('  fail: %s' % k)
+            logger.debug("  fail: %s" % k)
         else:
-            logger.debug('cached: %s' % k)
+            logger.debug("cached: %s" % k)
         return r
 
-    def setJson(self, r, client_base, obj, data, ctx=''):
+    def setJson(self, r, client_base, obj, data, ctx=""):
         """
         Adds data to the json cache
 
@@ -791,7 +824,7 @@ class WebGatewayCache (object):
         self._cache_set(self._json_cache, k, data)
         return True
 
-    def clearJson(self, client_base, obj, ctx=''):
+    def clearJson(self, client_base, obj, ctx=""):
         """
         TODO: document
         WAS: Only handles Dataset obj, calling L{clearDatasetContents}
@@ -813,7 +846,7 @@ class WebGatewayCache (object):
         @param data:            Data to cache
         @rtype:                 True
         """
-        return self.setJson(r, client_base, ds, data, 'contents')
+        return self.setJson(r, client_base, ds, data, "contents")
 
     def getDatasetContents(self, r, client_base, ds):
         """
@@ -824,7 +857,7 @@ class WebGatewayCache (object):
         @param ds:              ObjectWrapper for cache key
         @rtype:                 String or None
         """
-        return self.getJson(r, client_base, ds, 'contents')
+        return self.getJson(r, client_base, ds, "contents")
 
     def clearDatasetContents(self, r, client_base, ds):
         """
@@ -836,7 +869,7 @@ class WebGatewayCache (object):
         @rtype:                 True
         """
 
-        k = self._jsonKey(r, client_base, ds, 'contents')
+        k = self._jsonKey(r, client_base, ds, "contents")
         self._cache_clear(self._json_cache, k)
         return True
 
@@ -844,7 +877,7 @@ class WebGatewayCache (object):
 webgateway_cache = WebGatewayCache(FileCache)
 
 
-class AutoLockFile ():
+class AutoLockFile:
     """
     Class extends file to facilitate creation and deletion of lock file.
     """
@@ -853,8 +886,8 @@ class AutoLockFile ():
         """ creates a '.lock' file with the specified file name and mode """
         # FIXME: AutoLockFile previously extended file object
         # super(AutoLockFile, self).__init__(fn, mode)
-        self._lock = os.path.join(os.path.dirname(fn), '.lock')
-        open(self._lock, 'a').close()
+        self._lock = os.path.join(os.path.dirname(fn), ".lock")
+        open(self._lock, "a").close()
 
     def __del__(self):
         """ tries to delete the lock file """
@@ -873,7 +906,7 @@ class AutoLockFile ():
         # super(AutoLockFile, self).close()
 
 
-class WebGatewayTempFile (object):
+class WebGatewayTempFile(object):
     """
     Class for handling creation of temporary files
     """
@@ -893,25 +926,26 @@ class WebGatewayTempFile (object):
         try:
             os.makedirs(self._dir)
         except OSError:  # pragma: nocover
-            raise EnvironmentError("Cache directory '%s' does not exist and"
-                                   " could not be created'" % self._dir)
+            raise EnvironmentError(
+                "Cache directory '%s' does not exist and"
+                " could not be created'" % self._dir
+            )
 
     def _cleanup(self):
         """
         Tries to delete all the temp files that have expired their cache
         timeout.
-         """
+        """
         now = time.time()
         for f in os.listdir(self._dir):
             try:
-                ts = os.path.join(self._dir, f, '.timestamp')
+                ts = os.path.join(self._dir, f, ".timestamp")
                 if os.path.exists(ts):
                     ft = float(open(ts).read()) + TMPDIR_TIME
                 else:
                     ft = float(f) + TMPDIR_TIME
                 if ft < now:
-                    shutil.rmtree(os.path.join(self._dir, f),
-                                  ignore_errors=True)
+                    shutil.rmtree(os.path.join(self._dir, f), ignore_errors=True)
             except ValueError:
                 continue
 
@@ -935,16 +969,16 @@ class WebGatewayTempFile (object):
                 stamp = str(time.time())
                 dn = os.path.join(self._dir, stamp)
             key = stamp
-        key = key.replace('/', '_')
+        key = key.replace("/", "_")
         try:
-            key = key.decode('utf8').encode('ascii', 'ignore')
+            key = key.decode("utf8").encode("ascii", "ignore")
         except AttributeError:
             # python3
             pass
         dn = os.path.join(self._dir, key)
         if not os.path.isdir(dn):
             os.makedirs(dn)
-        open(os.path.join(dn, '.timestamp'), 'w').write(stamp)
+        open(os.path.join(dn, ".timestamp"), "w").write(stamp)
         return dn, key
 
     def abort(self, fn):
@@ -969,9 +1003,9 @@ class WebGatewayTempFile (object):
         if not self._dir:
             return None, None, None
         dn, stamp = self.newdir(key)
-        name = name.replace('/', '_').replace('#', '_')
+        name = name.replace("/", "_").replace("#", "_")
         try:
-            name = name.decode('utf8').encode('ascii', 'ignore')
+            name = name.decode("utf8").encode("ascii", "ignore")
         except AttributeError:
             # python3
             pass
@@ -983,25 +1017,25 @@ class WebGatewayTempFile (object):
             if fext:
                 if len(fext) <= 16:
                     fname, fext2 = os.path.splitext(fname)
-                    if len(fext+fext2) <= 16:
+                    if len(fext + fext2) <= 16:
                         fext = fext2 + fext
                     else:
                         fname += fext2
                 else:
                     fname = name
-                    fext = ''
-            name = fname[:-len(name)+255] + fext
+                    fext = ""
+            name = fname[: -len(name) + 255] + fext
         fn = os.path.join(dn, name)
         rn = os.path.join(stamp, name)
-        lf = os.path.join(dn, '.lock')
+        lf = os.path.join(dn, ".lock")
         cnt = 30
         fsize = 0
         while os.path.exists(lf) and cnt > 0:
             time.sleep(1)
             t = os.stat(fn)[stat.ST_SIZE]
-            if (t == fsize):
+            if t == fsize:
                 cnt -= 1
-                logger.debug('countdown %d' % cnt)
+                logger.debug("countdown %d" % cnt)
             else:
                 fsize = t
                 cnt = 30
@@ -1009,7 +1043,7 @@ class WebGatewayTempFile (object):
             return None, None, None
         if os.path.exists(fn):
             return fn, rn, True
-        return fn, rn, AutoLockFile(fn, 'wb')
+        return fn, rn, AutoLockFile(fn, "wb")
 
 
 webgateway_tempfile = WebGatewayTempFile()

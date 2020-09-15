@@ -82,6 +82,7 @@ def ago(value):
 
     def plurals(val):
         return val != 1 and "s" or ""
+
     hours, remainder = divmod(ago.seconds, 3600)
     mins, secs = divmod(remainder, 60)
     if ago.days >= 365:
@@ -113,7 +114,7 @@ def truncateafter(value, arg):
         return value  # Fail silently.
     if not isinstance(value, basestring):
         value = str(value)
-    if (len(value) > length):
+    if len(value) > length:
         return value[:length] + "..."
     else:
         return value
@@ -131,8 +132,8 @@ def truncatebefor(value, arg):
         return value  # Fail silently.
     if not isinstance(value, basestring):
         value = str(value)
-    if (len(value) > length):
-        return "..."+value[len(value)-length:]
+    if len(value) > length:
+        return "..." + value[len(value) - length :]
     else:
         return value
 
@@ -143,7 +144,7 @@ def shortening(value, arg):
         length = int(arg)
     except ValueError:  # invalid literal for int()
         return value  # Fail silently.
-    chunk = length//2-3
+    chunk = length // 2 - 3
 
     if not isinstance(value, basestring):
         value = str(value)
@@ -151,7 +152,7 @@ def shortening(value, arg):
         if len(value) < length:
             return value
         else:
-            return value[:chunk]+"..."+value[length-chunk:]
+            return value[:chunk] + "..." + value[length - chunk :]
     except Exception:
         logger.error(traceback.format_exc())
         return value
@@ -222,13 +223,13 @@ def lengthunit(value):
     """
 
     if value == 0:
-        return u'\u00B5m'
+        return "\u00B5m"
     elif value < 0.001:
-        return u"\u212B"
+        return "\u212B"
     elif value < 0.01:
-        return u"nm"
+        return "nm"
     elif value < 1000:
-        return u'\u00B5m'
+        return "\u00B5m"
     elif value < 1000 * 100:
         return "mm"
     elif value < 1000 * 100 * 10:
@@ -249,34 +250,33 @@ def timeformat(value):
     from django.utils.encoding import force_text
 
     if value is None:
-        return ''
+        return ""
     try:
         value = Decimal(force_text(value))
     except UnicodeEncodeError:
-        return u''
+        return ""
     except InvalidOperation:
         try:
             value = Decimal(force_text(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
-            return u'%s s' % str(value)
+            return "%s s" % str(value)
     # Formatting shows integer values for all, so we round() for accuracy
     if value == 0:
-        return u'%d\u00A0s' % value
+        return "%d\u00A0s" % value
     if value < Decimal("0.001"):
-        return u'%d\u00A0\u00B5s' % (round(value * 1000 * 1000))
+        return "%d\u00A0\u00B5s" % (round(value * 1000 * 1000))
     elif value < 1:
-        return u'%d\u00A0ms' % (round(value * 1000))
+        return "%d\u00A0ms" % (round(value * 1000))
     elif round(value) < 60:
         # Round and format seconds to one decimal place
         value = round(value * 10) / 10
-        return u'%0.1f\u00A0s' % value
+        return "%0.1f\u00A0s" % value
     elif round(value) < 60 * 60:
-        value = round(value)        # Avoids '1min 60s'
-        return u'%d\u00A0min\u00A0%d\u00A0s' % (value / 60, value % 60)
+        value = round(value)  # Avoids '1min 60s'
+        return "%d\u00A0min\u00A0%d\u00A0s" % (value / 60, value % 60)
     else:
-        value = round(value)        # Avoids '1h 60min'
-        return u'%d\u00A0h\u00A0%d\u00A0min' % (value / 3600,
-                                                round((value % 3600)/60))
+        value = round(value)  # Avoids '1h 60min'
+        return "%d\u00A0h\u00A0%d\u00A0min" % (value / 3600, round((value % 3600) / 60))
 
 
 # taken from https://code.djangoproject.com/ticket/17419
@@ -287,6 +287,6 @@ def json_dumps(value):
 
 # https://stackoverflow.com/questions/2415865/
 # iterating-through-two-lists-in-django-templates
-@register.filter(name='zip')
+@register.filter(name="zip")
 def zip_lists(a, b):
     return zip(a, b)
