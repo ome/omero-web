@@ -12,8 +12,8 @@
    - Fix display of disk usage for very small percentages ([#211](https://github.com/ome/omero-web/pull/211))
 
 - API changes:
-   - @login_required(doConnectionCleanup=False) will close conn unless streaming ([#191](https://github.com/ome/omero-web/pull/191))
-   - Return 404 for imgData if image not found ([#209](https://github.com/ome/omero-web/pull/209))
+   - @login_required(doConnectionCleanup=False) will close connection unless streaming ([#191](https://github.com/ome/omero-web/pull/191))
+   - Return 404 for webgateway/imgData/ID if image not found ([#209](https://github.com/ome/omero-web/pull/209))
 
 - Other:
    - Handle missing config for 'scripts to ignore' ([#195](https://github.com/ome/omero-web/pull/195))
