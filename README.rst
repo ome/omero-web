@@ -1,5 +1,11 @@
 OMERO.web
 =========
+.. image:: https://travis-ci.org/ome/omero-web.svg?branch=master
+    :target: https://travis-ci.org/ome/omero-web
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
 
 Introduction
 ------------
