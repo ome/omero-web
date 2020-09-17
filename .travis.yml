@@ -19,7 +19,7 @@ script:
   - python setup.py sdist
   - pip install dist/omero-web*gz
   - python -c "import omeroweb.version as owv; print(owv.omeroweb_version)"
-  - tox
+  - tox -e travis
 
 deploy:
   provider: pypi
