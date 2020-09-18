@@ -10,7 +10,7 @@ services:
   - docker
 
 before_install:
-  - pip install -U pip
+  - pip install -U pip tox
   - pip install https://github.com/ome/zeroc-ice-py-manylinux/releases/download/0.2.0/zeroc_ice-3.6.5-cp36-cp36m-manylinux2010_x86_64.whl
   # https://github.com/ome/openmicroscopy/blob/v5.5.1/Dockerfile#L32
   - python -c "import Ice; print(Ice.stringVersion())"
@@ -19,8 +19,7 @@ script:
   - python setup.py sdist
   - pip install dist/omero-web*gz
   - python -c "import omeroweb.version as owv; print(owv.omeroweb_version)"
-  - docker build -t test .
-  - docker run --rm -ti test
+  - tox -e travis
 
 deploy:
   provider: pypi
