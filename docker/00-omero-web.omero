@@ -1,0 +1,7 @@
+config drop default
+
+config set omero.web.application_server.host 0.0.0.0
+config set omero.web.server_list '[["omero", 4064, "omero"]]'
+config set omero.web.secure true
+
+externalconfig --fromenv --glob '/opt/omero/web/config/*.yaml'
