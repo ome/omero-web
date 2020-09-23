@@ -71,7 +71,6 @@ RUN /opt/omero/web/venv3/bin/python -m pip list
 COPY docker/entrypoint.sh /usr/local/bin/
 COPY \
     docker/50-config.sh \
-    docker/60-default-web-config.sh \
     docker/98-cleanprevious.sh \
     docker/99-run.sh /startup/
 COPY docker/bin-omero.sh /opt/omero/web/OMERO.web/bin/omero
