@@ -84,3 +84,21 @@ ENV OMERODIR=/opt/omero/web/OMERO.web/
 
 VOLUME ["/opt/omero/web/OMERO.web/var"]
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+############################################################
+# To use this as the output image run
+# Adds whitenoise so you can easily test the image using:
+# docker build --target=runtimetest -t omero-web:runtimetest
+# docker run -it --rm -p 4080:4080 -e OMEROHOST=omero.example.org omero-web:runtimetest
+
+FROM production as runtimetest
+
+USER root
+RUN /opt/omero/web/venv3/bin/pip install \
+        'whitenoise<6' && \
+    echo "config append -- omero.web.middleware '{\"index\": 0, \"class\": \"whitenoise.middleware.WhiteNoiseMiddleware\"}'" > /opt/omero/web/config/01-whitenoise.omero
+USER omero-web
+
+############################################################
+# Make production the default output image
+FROM production
