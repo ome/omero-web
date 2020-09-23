@@ -9,22 +9,32 @@ python:
 services:
   - docker
 
-before_install:
-  - pip install -U pip tox
-  - pip install https://github.com/ome/zeroc-ice-py-manylinux/releases/download/0.2.0/zeroc_ice-3.6.5-cp36-cp36m-manylinux2010_x86_64.whl
-  # https://github.com/ome/openmicroscopy/blob/v5.5.1/Dockerfile#L32
-  - python -c "import Ice; print(Ice.stringVersion())"
-
-script:
-  - python setup.py sdist
-  - pip install dist/omero-web*gz
-  - python -c "import omeroweb.version as owv; print(owv.omeroweb_version)"
-  - tox -e travis
-
-deploy:
-  provider: pypi
-  user: $PYPI_USER
-  password: $PYPI_PASSWORD
-  distributions: sdist bdist_wheel
-  on:
-    tags: true
+jobs:
+  include:
+    - name: python36
+      install:
+        - pip install -U pip tox
+        - pip install https://github.com/ome/zeroc-ice-ubuntu1804/releases/download/0.3.0/zeroc_ice-3.6.5-cp36-cp36m-linux_x86_64.whl
+        # https://github.com/ome/openmicroscopy/blob/v5.5.1/Dockerfile#L32
+        - python -c "import Ice; print(Ice.stringVersion())"
+      script:
+        - python setup.py sdist
+        - pip install dist/omero-web*gz
+        - python -c "import omeroweb.version as owv; print(owv.omeroweb_version)"
+        - tox -e travis
+    - name: docker
+      install: skip
+      script:
+        - docker build .
+    - stage: deploy
+      python: "3.6"
+      if: tag IS present
+      script: skip
+      skip_cleanup: true
+      deploy:
+        provider: pypi
+        user: $PYPI_USER
+        password: $PYPI_PASSWORD
+        distributions: sdist bdist_wheel
+        on:
+          tags: true
