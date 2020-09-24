@@ -151,10 +151,13 @@ def get_long_or_default(request, name, default):
 
 def get_list(request, name, post=False):
     if post:
-        val = request.POST.getlist(name)
+        values = request.POST.getlist(name)
     else:
-        val = request.GET.getlist(name)
-    return [i for i in val if i != ""]
+        values = request.GET.getlist(name)
+    # Support e.g. 'image'
+    if len(values) == 1 and "," in values[0]:
+        values = values[0].split(",")
+    return [i for i in values if i != ""]
 
 
 def get_longs(request, name):
@@ -1120,14 +1123,10 @@ def api_parent_links(request, conn=None, **kwargs):
     parent_types = {"image": "dataset", "dataset": "project", "plate": "screen"}
     parents = []
     for child_type, parent_type in parent_types.items():
-        ids = get_list(request, child_type)
-        if len(ids) == 0:
-            continue
+        child_ids = get_list(request, child_type)
         # support for ?image=1,2
-        child_ids = []
-        for id in ids:
-            for i in id.split(","):
-                child_ids.append(i)
+        if len(child_ids) == 0:
+            continue
 
         link_type, result = get_object_links(
             conn, parent_type, None, child_type, child_ids
@@ -1444,9 +1443,9 @@ def load_chgrp_groups(request, conn=None, **kwargs):
     groups = {}
     owners = {}
     for dtype in ("Project", "Dataset", "Image", "Screen", "Plate"):
-        oids = request.GET.get(dtype, None)
-        if oids is not None:
-            for o in conn.getObjects(dtype, oids.split(",")):
+        oids = get_list(request, dtype)
+        if len(oids) > 0:
+            for o in conn.getObjects(dtype, oids):
                 ownerIds.append(o.getDetails().owner.id.val)
                 currentGroups.add(o.getDetails().group.id.val)
     ownerIds = list(set(ownerIds))
@@ -4072,7 +4071,7 @@ def script_ui(request, scriptId, conn=None, **kwargs):
         # if we've not found a match, check whether we have "Well" selected
         if len(IDsParam["default"]) == 0 and request.GET.get("Well", None) is not None:
             if "Image" in Data_TypeParam["options"]:
-                wellIds = [long(j) for j in request.GET.get("Well", None).split(",")]
+                wellIds = [long(j) for j in get_list(request, "Well")]
                 wellIdx = 0
                 try:
                     wellIdx = int(request.GET.get("Index", 0))
@@ -4116,23 +4115,22 @@ def figure_script(request, scriptName, conn=None, **kwargs):
     Show a UI for running figure scripts
     """
 
-    imageIds = request.GET.get("Image", None)  # comma - delimited list
-    datasetIds = request.GET.get("Dataset", None)
-    wellIds = request.GET.get("Well", None)
+    imageIds = get_list(request, "Image")  # comma - delimited list
+    datasetIds = get_list(request, "Dataset")
+    wellIds = get_list(request, "Well")
 
-    if wellIds is not None:
-        wellIds = [long(i) for i in wellIds.split(",")]
+    if len(wellIds) > 0:
+        wellIds = [long(i) for i in wellIds]
         wells = conn.getObjects("Well", wellIds)
         wellIdx = getIntOrDefault(request, "Index", 0)
-        imageIds = [str(w.getImage(wellIdx).getId()) for w in wells]
-        imageIds = ",".join(imageIds)
-    if imageIds is None and datasetIds is None:
+        imageIds = [w.getImage(wellIdx).getId() for w in wells]
+    if len(imageIds) == 0 and len(datasetIds) == 0:
         return HttpResponse(
             "Need to specify /?Image=1,2 or /?Dataset=1,2 or /?Well=1,2"
         )
 
     def validateIds(dtype, ids):
-        ints = [int(oid) for oid in ids.split(",")]
+        ints = [int(oid) for oid in ids]
         validObjs = {}
         for obj in conn.getObjects(dtype, ints):
             validObjs[obj.id] = obj
@@ -4278,9 +4276,9 @@ def fileset_check(request, action, conn=None, **kwargs):
     """
     dtypeIds = {}
     for dtype in ("Image", "Dataset", "Project"):
-        ids = request.GET.get(dtype, None)
-        if ids is not None:
-            dtypeIds[dtype] = [int(i) for i in ids.split(",")]
+        ids = get_list(request, dtype)
+        if len(ids) > 0:
+            dtypeIds[dtype] = [int(i) for i in ids]
     splitFilesets = conn.getContainerService().getImagesBySplitFilesets(
         dtypeIds, None, conn.SERVICE_OPTS
     )
@@ -4501,9 +4499,9 @@ def chgrpDryRun(request, conn=None, **kwargs):
     targetObjects = {}
     dtypes = ["Project", "Dataset", "Image", "Screen", "Plate", "Fileset"]
     for dtype in dtypes:
-        oids = request.POST.get(dtype, None)
-        if oids is not None:
-            obj_ids = [int(oid) for oid in oids.split(",")]
+        oids = get_list(request, dtype, post=True)
+        if len(oids) > 0:
+            obj_ids = [int(oid) for oid in oids]
             targetObjects[dtype] = obj_ids
 
     handle = conn.chgrpDryRun(targetObjects, group_id)
@@ -4528,9 +4526,9 @@ def chgrp(request, conn=None, **kwargs):
 
     def getObjectOwnerId(r):
         for t in ["Dataset", "Image", "Plate"]:
-            ids = r.POST.get(t, None)
-            if ids is not None:
-                for o in list(conn.getObjects(t, ids.split(","))):
+            ids = get_list(r, t, post=True)
+            if len(ids) > 0:
+                for o in list(conn.getObjects(t, ids)):
                     return o.getDetails().owner.id.val
 
     group = conn.getObject("ExperimenterGroup", group_id)
@@ -4556,9 +4554,9 @@ def chgrp(request, conn=None, **kwargs):
     dtypes = ["Project", "Dataset", "Image", "Screen", "Plate"]
     for dtype in dtypes:
         # Get all requested objects of this type
-        oids = request.POST.get(dtype, None)
-        if oids is not None:
-            obj_ids = [int(oid) for oid in oids.split(",")]
+        oids = get_list(request, dtype, post=True)
+        if len(oids) > 0:
+            obj_ids = [int(oid) for oid in oids]
             # TODO Doesn't the filesets only apply to images?
             # if 'filesets' are specified, make sure we move ALL Fileset Images
             fsIds = get_list(request, "fileset", post=True)
@@ -4589,22 +4587,11 @@ def chgrp(request, conn=None, **kwargs):
     # Update contains a list of images/containers that need to be
     # updated.
 
-    project_ids = request.POST.get("Project", [])
-    dataset_ids = request.POST.get("Dataset", [])
-    image_ids = request.POST.get("Image", [])
-    screen_ids = request.POST.get("Screen", [])
-    plate_ids = request.POST.get("Plate", [])
-
-    if project_ids:
-        project_ids = [long(x) for x in project_ids.split(",")]
-    if dataset_ids:
-        dataset_ids = [long(x) for x in dataset_ids.split(",")]
-    if image_ids:
-        image_ids = [long(x) for x in image_ids.split(",")]
-    if screen_ids:
-        screen_ids = [long(x) for x in screen_ids.split(",")]
-    if plate_ids:
-        plate_ids = [long(x) for x in plate_ids.split(",")]
+    project_ids = [long(x) for x in get_list(request, "Project", post=True)]
+    dataset_ids = [long(x) for x in get_list(request, "Dataset", post=True)]
+    image_ids = [long(x) for x in get_list(request, "Image", post=True)]
+    screen_ids = [long(x) for x in get_list(request, "Screen", post=True)]
+    plate_ids = [long(x) for x in get_list(request, "Plate", post=True)]
 
     # TODO Change this user_id to be an experimenter_id in the request as it
     # is possible that a user is chgrping data from another user so it is
@@ -4700,10 +4687,6 @@ def script_run(request, scriptId, conn=None, **kwargs):
                 values = get_list(request, key, post=True)
                 if len(values) == 0:
                     continue
-                if len(values) == 1:  # process comma-separated list
-                    if len(values[0]) == 0:
-                        continue
-                    values = values[0].split(",")
 
                 # try to determine 'type' of values in our list
                 listClass = omero.rtypes.RStringI
