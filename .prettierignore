@@ -1,0 +1,4 @@
+# Ignore vendored code
+**/3rdparty
+# HTML files are actually Django templates which can't be formatted
+*.html
