@@ -149,8 +149,11 @@ def get_long_or_default(request, name, default):
     return val
 
 
-def get_list(request, name):
-    val = request.GET.getlist(name)
+def get_list(request, name, post=False):
+    if post:
+        val = request.POST.getlist(name)
+    else:
+        val = request.GET.getlist(name)
     return [i for i in val if i != ""]
 
 
@@ -1117,7 +1120,7 @@ def api_parent_links(request, conn=None, **kwargs):
     parent_types = {"image": "dataset", "dataset": "project", "plate": "screen"}
     parents = []
     for child_type, parent_type in parent_types.items():
-        ids = request.GET.getlist(child_type)
+        ids = get_list(request, child_type)
         if len(ids) == 0:
             continue
         # support for ?image=1,2
@@ -1535,8 +1538,8 @@ def load_searching(request, form=None, conn=None, **kwargs):
             query_search = r.get("advanced_search")
         template = "webclient/search/search_details.html"
 
-        onlyTypes = r.getlist("datatype")
-        fields = r.getlist("field")
+        onlyTypes = get_list(r, "datatype")
+        fields = get_list(r, "field")
         searchGroup = r.get("searchGroup", None)
         ownedBy = r.get("ownedBy", None)
 
@@ -1923,11 +1926,8 @@ def load_metadata_acquisition(
                 channel["label"] = ch.getLabel()
                 color = ch.getColor()
                 channel["color"] = color is not None and color.getHtml() or None
-                planeInfo = (
-                    manager.image
-                    and manager.image.getPrimaryPixels().copyPlaneInfo(
-                        theC=theC, theZ=0
-                    )
+                planeInfo = manager.image and manager.image.getPrimaryPixels().copyPlaneInfo(
+                    theC=theC, theZ=0
                 )
                 plane_info = []
 
@@ -2121,43 +2121,48 @@ def getObjects(request, conn=None):
     These objects are required by the form superclass to populate hidden
     fields, so we know what we're annotating on submission
     """
-    r = request.GET or request.POST
+    post = False
+    if not request.GET:
+        post = True
+    r = request
     images = (
-        len(r.getlist("image")) > 0
-        and list(conn.getObjects("Image", r.getlist("image")))
+        len(get_list(r, "image", post)) > 0
+        and list(conn.getObjects("Image", get_list(r, "image", post)))
         or list()
     )
     datasets = (
-        len(r.getlist("dataset")) > 0
-        and list(conn.getObjects("Dataset", r.getlist("dataset")))
+        len(get_list(r, "dataset", post)) > 0
+        and list(conn.getObjects("Dataset", get_list(r, "dataset", post)))
         or list()
     )
     projects = (
-        len(r.getlist("project")) > 0
-        and list(conn.getObjects("Project", r.getlist("project")))
+        len(get_list(r, "project", post)) > 0
+        and list(conn.getObjects("Project", get_list(r, "project", post)))
         or list()
     )
     screens = (
-        len(r.getlist("screen")) > 0
-        and list(conn.getObjects("Screen", r.getlist("screen")))
+        len(get_list(r, "screen", post)) > 0
+        and list(conn.getObjects("Screen", get_list(r, "screen", post)))
         or list()
     )
     plates = (
-        len(r.getlist("plate")) > 0
-        and list(conn.getObjects("Plate", r.getlist("plate")))
+        len(get_list(r, "plate", post)) > 0
+        and list(conn.getObjects("Plate", get_list(r, "plate", post)))
         or list()
     )
     acquisitions = (
-        len(r.getlist("acquisition")) > 0
-        and list(conn.getObjects("PlateAcquisition", r.getlist("acquisition")))
+        len(get_list(r, "acquisition", post)) > 0
+        and list(conn.getObjects("PlateAcquisition", get_list(r, "acquisition", post)))
         or list()
     )
     shares = (
-        len(r.getlist("share")) > 0 and [conn.getShare(r.getlist("share")[0])] or list()
+        len(get_list(r, "share", post)) > 0
+        and [conn.getShare(get_list(r, "share", post)[0])]
+        or list()
     )
     wells = (
-        len(r.getlist("well")) > 0
-        and list(conn.getObjects("Well", r.getlist("well")))
+        len(get_list(r, "well", post)) > 0
+        and list(conn.getObjects("Well", get_list(r, "well", post)))
         or list()
     )
     return {
@@ -2176,16 +2181,19 @@ def getIds(request):
     """
     Used by forms to indicate the currently selected objects prepared above
     """
-    r = request.GET or request.POST
+    r = request
+    post = False
+    if not r.GET:
+        post = True
     selected = {
-        "images": r.getlist("image"),
-        "datasets": r.getlist("dataset"),
-        "projects": r.getlist("project"),
-        "screens": r.getlist("screen"),
-        "plates": r.getlist("plate"),
-        "acquisitions": r.getlist("acquisition"),
-        "wells": r.getlist("well"),
-        "shares": r.getlist("share"),
+        "images": get_list(r, "image", post),
+        "datasets": get_list(r, "dataset", post),
+        "projects": get_list(r, "project", post),
+        "screens": get_list(r, "screen", post),
+        "plates": get_list(r, "plate", post),
+        "acquisitions": get_list(r, "acquisition", post),
+        "wells": get_list(r, "well", post),
+        "shares": get_list(r, "share", post),
     }
     return selected
 
@@ -2220,10 +2228,7 @@ def batch_annotate(request, conn=None, **kwargs):
     if len(groupIds) == 0:
         # No supported objects found.
         # If multiple tags / tagsets selected, return placeholder
-        if (
-            len(request.GET.getlist("tag")) > 0
-            or len(request.GET.getlist("tagset")) > 0
-        ):
+        if len(get_list(request, "tag")) > 0 or len(get_list(request, "tagset")) > 0:
             return HttpResponse("<h2>Can't batch annotate tags</h2>")
         else:
             return handlerInternalError(request, "No objects found")
@@ -2494,7 +2499,7 @@ def annotate_map(request, conn=None, **kwargs):
     data = request.POST.get("mapAnnotation")
     data = json.loads(data)
 
-    annIds = request.POST.getlist("annId")
+    annIds = get_list(request, "annId", post=True)
     ns = request.POST.get("ns", omero.constants.metadata.NSCLIENTMAPANNOTATION)
 
     # Create a new annotation
@@ -2850,7 +2855,7 @@ def manage_action_containers(
                         name,
                         description,
                         owner=owner,
-                        img_ids=request.POST.getlist("image", None),
+                        img_ids=get_list(request, "image", post=True),
                     )
                 else:
                     oid = conn.createContainer(
@@ -2871,7 +2876,9 @@ def manage_action_containers(
         experimenters = list(conn.getExperimenters())
         experimenters.sort(key=lambda x: x.getOmeName().lower())
         if o_type == "share":
-            img_ids = request.GET.getlist("image", request.POST.getlist("image"))
+            img_ids = get_list(request, "image")
+            if len(img_ids) == 0:
+                img_ids = get_list(request, "image", post=True)
             if request.method == "GET" and len(img_ids) == 0:
                 return HttpResponse("No images specified")
             images_to_share = list(conn.getObjects("Image", img_ids))
@@ -2902,7 +2909,7 @@ def manage_action_containers(
                     "experimenters": experimenters,
                     "images": images_to_share,
                     "enable": True,
-                    "selected": request.GET.getlist("image"),
+                    "selected": get_list(request, "image"),
                 }
                 form = BasketShareForm(initial=initial)
         template = "webclient/public/share_form.html"
@@ -3085,14 +3092,14 @@ def manage_action_containers(
     elif action == "deletemany":
         # Handles multi-delete from jsTree.
         object_ids = {
-            "Image": request.POST.getlist("image"),
-            "Dataset": request.POST.getlist("dataset"),
-            "Project": request.POST.getlist("project"),
-            "Annotation": request.POST.getlist("tag"),
-            "Screen": request.POST.getlist("screen"),
-            "Plate": request.POST.getlist("plate"),
-            "Well": request.POST.getlist("well"),
-            "PlateAcquisition": request.POST.getlist("acquisition"),
+            "Image": get_list(request, "image", post=True),
+            "Dataset": get_list(request, "dataset", post=True),
+            "Project": get_list(request, "project", post=True),
+            "Annotation": get_list(request, "tag", post=True),
+            "Screen": get_list(request, "screen", post=True),
+            "Plate": get_list(request, "plate", post=True),
+            "Well": get_list(request, "well", post=True),
+            "PlateAcquisition": get_list(request, "acquisition", post=True),
         }
         child = toBoolean(request.POST.get("child"))
         anns = toBoolean(request.POST.get("anns"))
@@ -4554,7 +4561,7 @@ def chgrp(request, conn=None, **kwargs):
             obj_ids = [int(oid) for oid in oids.split(",")]
             # TODO Doesn't the filesets only apply to images?
             # if 'filesets' are specified, make sure we move ALL Fileset Images
-            fsIds = request.POST.getlist("fileset")
+            fsIds = get_list(request, "fileset", post=True)
             if len(fsIds) > 0:
                 # If a dataset is being moved and there is a split fileset
                 # then those images need to go somewhere in the new
@@ -4690,7 +4697,7 @@ def script_run(request, scriptId, conn=None, **kwargs):
 
         if key in request.POST:
             if pclass == omero.rtypes.RListI:
-                values = request.POST.getlist(key)
+                values = get_list(request, key, post=True)
                 if len(values) == 0:
                     continue
                 if len(values) == 1:  # process comma-separated list
