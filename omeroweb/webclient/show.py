@@ -56,12 +56,21 @@ class Show(object):
     """
 
     # List of prefixes that are at the top level of the tree
-    TOP_LEVEL_PREFIXES = ('project', 'screen', 'tagset')
+    TOP_LEVEL_PREFIXES = ("project", "screen", "tagset")
 
     # List of supported object types
     SUPPORTED_OBJECT_TYPES = (
-        'project', 'dataset', 'image', 'screen', 'plate', 'tag',
-        'acquisition', 'run', 'well', 'tagset', 'roi'
+        "project",
+        "dataset",
+        "image",
+        "screen",
+        "plate",
+        "tag",
+        "acquisition",
+        "run",
+        "well",
+        "tagset",
+        "roi",
     )
 
     # Regular expression which declares the format for a "path" used either
@@ -69,13 +78,13 @@ class Show(object):
     # to this regex without corresponding unit tests in
     # "tests/unit/test_show.py".
     PATH_REGEX = re.compile(
-        r'(?P<object_type>\w+)\.?(?P<key>\w+)?[-=](?P<value>[^\|]*)\|?'
+        r"(?P<object_type>\w+)\.?(?P<key>\w+)?[-=](?P<value>[^\|]*)\|?"
     )
 
     # Regular expression for matching Well names
     WELL_REGEX = re.compile(
-        r'^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|'
-        r'(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$'
+        r"^(?:(?P<alpha_row>[a-zA-Z]+)(?P<digit_column>\d+))|"
+        r"(?:(?P<digit_row>\d+)(?P<alpha_column>[a-zA-Z]+))$"
     )
 
     def __init__(self, conn, request, menu):
@@ -112,11 +121,11 @@ class Show(object):
         self.request = request
         self.menu = menu
 
-        path = self.request.GET.get('path', '').split('|')[-1]
+        path = self.request.GET.get("path", "").split("|")[-1]
         self._add_if_supported(path)
 
-        show = self.request.GET.get('show', '')
-        for path in show.split('|'):
+        show = self.request.GET.get("show", "")
+        for path in show.split("|"):
             self._add_if_supported(path)
 
     def _add_if_supported(self, path):
@@ -124,17 +133,15 @@ class Show(object):
         m = self.PATH_REGEX.match(path)
         if m is None:
             return
-        object_type = m.group('object_type')
-        key = m.group('key')
-        value = m.group('value')
+        object_type = m.group("object_type")
+        key = m.group("key")
+        value = m.group("value")
         if key is None:
-            key = 'id'
+            key = "id"
         if object_type in self.SUPPORTED_OBJECT_TYPES:
             # 'run' is an alternative for 'acquisition'
-            object_type = object_type.replace('run', 'acquisition')
-            self._initially_select.append(
-                '%s.%s-%s' % (object_type, key, value)
-            )
+            object_type = object_type.replace("run", "acquisition")
+            self._initially_select.append("%s.%s-%s" % (object_type, key, value))
 
     def _load_tag(self, attributes):
         """
@@ -145,9 +152,7 @@ class Show(object):
         """
         # Tags have an "Annotation" suffix added to the object name so
         # need to be loaded differently.
-        return next(self.conn.getObjects(
-            "TagAnnotation", attributes=attributes
-        ))
+        return next(self.conn.getObjects("TagAnnotation", attributes=attributes))
 
     def get_well_row_column(self, well):
         """
@@ -165,13 +170,13 @@ class Show(object):
         # conditions are not met, signifying that the row and column
         # calculated needs to be reversed before returning.
         is_reversed = False
-        if m.group('alpha_row') is not None:
-            a = m.group('alpha_row').upper()
-            b = m.group('digit_column')
+        if m.group("alpha_row") is not None:
+            a = m.group("alpha_row").upper()
+            b = m.group("digit_column")
             is_reversed = True
         else:
-            a = m.group('alpha_column').upper()
-            b = m.group('digit_row')
+            a = m.group("alpha_column").upper()
+            b = m.group("digit_row")
 
         # Convert base26 column string to number.  Adapted from XlsxWriter:
         #   * https://github.com/jmcnamara/XlsxWriter
@@ -179,7 +184,7 @@ class Show(object):
         n = 0
         column = 0
         for character in reversed(a):
-            column += (ord(character) - ord('A') + 1) * (26 ** n)
+            column += (ord(character) - ord("A") + 1) * (26 ** n)
             n += 1
 
         # Convert 1-index to zero-index
@@ -197,56 +202,57 @@ class Show(object):
         @param attributes Set of attributes to filter on.
         @type attributes L{dict}
         """
-        if 'id' in attributes:
-            return self.conn.getObject('Well', attributes=attributes)
-        if 'name' in attributes:
-            row, column = self.get_well_row_column(attributes['name'])
-            path = self.request.GET.get('path', '')
+        if "id" in attributes:
+            return self.conn.getObject("Well", attributes=attributes)
+        if "name" in attributes:
+            row, column = self.get_well_row_column(attributes["name"])
+            path = self.request.GET.get("path", "")
             for m in self.PATH_REGEX.finditer(path):
-                object_type = m.group('object_type')
+                object_type = m.group("object_type")
                 # May have 'run' here rather than 'acquisition' because
                 # the path will not have been validated and replaced.
-                if object_type not in ('plate', 'run', 'acquisition'):
+                if object_type not in ("plate", "run", "acquisition"):
                     continue
                 # 'run' is an alternative for 'acquisition'
-                object_type = object_type.replace('run', 'acquisition')
+                object_type = object_type.replace("run", "acquisition")
 
                 # Try and load the potential parent first
-                key = m.group('key')
-                value = m.group('value')
+                key = m.group("key")
+                value = m.group("value")
                 if key is None:
-                    key = 'id'
-                if key == 'id':
+                    key = "id"
+                if key == "id":
                     value = int(value)
                 parent_attributes = {key: value}
-                parent, = self.conn.getObjects(
+                (parent,) = self.conn.getObjects(
                     object_type, attributes=parent_attributes
                 )
 
                 # Now use the parent to try and locate the Well
                 query_service = self.conn.getQueryService()
                 params = omero.sys.ParametersI()
-                params.map['row'] = rint(row)
-                params.map['column'] = rint(column)
+                params.map["row"] = rint(row)
+                params.map["column"] = rint(column)
                 params.addId(parent.id)
-                if object_type == 'plate':
-                    db_row, = query_service.projection(
-                        'select w.id from Well as w '
-                        'where w.row = :row and w.column = :column '
-                        'and w.plate.id = :id', params, self.conn.SERVICE_OPTS
+                if object_type == "plate":
+                    (db_row,) = query_service.projection(
+                        "select w.id from Well as w "
+                        "where w.row = :row and w.column = :column "
+                        "and w.plate.id = :id",
+                        params,
+                        self.conn.SERVICE_OPTS,
                     )
-                if object_type == 'acquisition':
-                    db_row, = query_service.projection(
-                        'select distinct w.id from Well as w '
-                        'join w.wellSamples as ws '
-                        'where w.row = :row and w.column = :column '
-                        'and ws.plateAcquisition.id = :id',
-                        params, self.conn.SERVICE_OPTS
+                if object_type == "acquisition":
+                    (db_row,) = query_service.projection(
+                        "select distinct w.id from Well as w "
+                        "join w.wellSamples as ws "
+                        "where w.row = :row and w.column = :column "
+                        "and ws.plateAcquisition.id = :id",
+                        params,
+                        self.conn.SERVICE_OPTS,
                     )
-                well_id, = db_row
-                return self.conn.getObject(
-                    'Well', well_id.val
-                )
+                (well_id,) = db_row
+                return self.conn.getObject("Well", well_id.val)
 
     def _load_first_selected(self, first_obj, attributes):
         """
@@ -266,9 +272,7 @@ class Show(object):
             first_selected = self._load_well(attributes)
         else:
             # All other objects can be loaded by type and attributes.
-            first_selected, = self.conn.getObjects(
-                first_obj, attributes=attributes
-            )
+            (first_selected,) = self.conn.getObjects(first_obj, attributes=attributes)
 
         if first_obj == "well":
             # Wells aren't in the tree, so we need to look up the parent
@@ -286,7 +290,7 @@ class Show(object):
                 # PlateAcquisition from the parent Plate.
                 plate = first_selected.getParent()
                 try:
-                    parent_node, = plate.listPlateAcquisitions()
+                    (parent_node,) = plate.listPlateAcquisitions()
                     parent_type = "acquisition"
                 except ValueError:
                     # No PlateAcquisition for this well, use Plate instead
@@ -296,7 +300,7 @@ class Show(object):
             # in the tree.
             self._initially_open = [
                 "%s-%s" % (parent_type, parent_node.getId()),
-                "%s-%s" % (first_obj, first_selected.getId())
+                "%s-%s" % (first_obj, first_selected.getId()),
             ]
             first_selected = parent_node
         else:
@@ -306,15 +310,14 @@ class Show(object):
                 first_selected = first_selected.getImage()
 
             # Tree hierarchy open to first selected object.
-            self._initially_open = [
-                '%s-%s' % (first_obj, first_selected.getId())
-            ]
+            self._initially_open = ["%s-%s" % (first_obj, first_selected.getId())]
         # support for multiple objects selected by ID,
         # E.g. show=image-1|image-2
-        if 'id' in attributes.keys() and len(self._initially_select) > 1:
+        if "id" in attributes.keys() and len(self._initially_select) > 1:
             # 'image.id-1' -> 'image-1'
             self._initially_select = [
-                i.replace(".id", "") for i in self._initially_select]
+                i.replace(".id", "") for i in self._initially_select
+            ]
         else:
             # Only select a single object
             self._initially_select = self._initially_open[:]
@@ -330,23 +333,24 @@ class Show(object):
         m = self.PATH_REGEX.match(self._initially_select[0])
         if m is None:
             return None
-        first_obj = m.group('object_type')
+        first_obj = m.group("object_type")
         # if we're showing a tag, make sure we're on the tags page...
         if first_obj in ["tag", "tagset"] and self.menu != "usertags":
             # redirect to usertags/?show=tag-123
             raise IncorrectMenuError(
-                reverse(viewname="load_template", args=['usertags']) +
-                "?show=" + self._initially_select[0].replace(".id", "")
+                reverse(viewname="load_template", args=["usertags"])
+                + "?show="
+                + self._initially_select[0].replace(".id", "")
             )
         first_selected = None
         try:
-            key = m.group('key')
-            value = m.group('value')
-            if key == 'id':
+            key = m.group("key")
+            value = m.group("value")
+            if key == "id":
                 value = int(value)
             attributes = {key: value}
             # Set context to 'cross-group'
-            self.conn.SERVICE_OPTS.setOmeroGroup('-1')
+            self.conn.SERVICE_OPTS.setOmeroGroup("-1")
             first_selected = self._load_first_selected(first_obj, attributes)
         except Exception:
             pass
@@ -358,7 +362,7 @@ class Show(object):
                     # We want to start again at 'Well' to _load_first_selected
                     # with well, so we get 'acquisition' in ancestors.
                     if p.OMERO_CLASS == "Well":
-                        self._initially_select = ['well.id-%s' % p.getId()]
+                        self._initially_select = ["well.id-%s" % p.getId()]
                         return self._find_first_selected()
                     if first_obj == "tag":
                         # Parents of tags must be tagset (no OMERO_CLASS)
@@ -369,7 +373,7 @@ class Show(object):
                         )
                     self._initially_open_owner = p.details.owner.id.val
                 m = self.PATH_REGEX.match(self._initially_open[0])
-                if m.group('object_type') == 'image':
+                if m.group("object_type") == "image":
                     self._initially_open.insert(0, "orphaned-0")
         return first_selected
 
@@ -427,12 +431,12 @@ def get_image_ids(conn, datasetId=None, groupId=-1, ownerId=None):
     so = deepcopy(conn.SERVICE_OPTS)
     so.setOmeroGroup(groupId)
     if datasetId is not None:
-        p.add('did', rlong(datasetId))
+        p.add("did", rlong(datasetId))
         q = """select image.id from Image image
             join image.datasetLinks dlink where dlink.parent.id = :did
             order by lower(image.name), image.id"""
     else:
-        p.add('ownerId', rlong(ownerId))
+        p.add("ownerId", rlong(ownerId))
         q = """select image.id from Image image where
             image.details.owner.id = :ownerId and
             not exists (
@@ -464,11 +468,21 @@ def get_image_roi_id_for_shape(conn, shape_id):
     return (None, None)
 
 
-def paths_to_object(conn, experimenter_id=None, project_id=None,
-                    dataset_id=None, image_id=None, screen_id=None,
-                    plate_id=None, acquisition_id=None, well_id=None,
-                    group_id=None, page_size=None, roi_id=None,
-                    shape_id=None):
+def paths_to_object(
+    conn,
+    experimenter_id=None,
+    project_id=None,
+    dataset_id=None,
+    image_id=None,
+    screen_id=None,
+    plate_id=None,
+    acquisition_id=None,
+    well_id=None,
+    group_id=None,
+    page_size=None,
+    roi_id=None,
+    shape_id=None,
+):
     """
     Retrieves the parents of an object (E.g. P/D/I for image) as a list
     of paths.
@@ -497,35 +511,35 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
 
     lowest_type = None
     if experimenter_id is not None:
-        params.add('eid', rlong(experimenter_id))
-        lowest_type = 'experimenter'
+        params.add("eid", rlong(experimenter_id))
+        lowest_type = "experimenter"
     if screen_id is not None:
-        params.add('sid', rlong(screen_id))
-        lowest_type = 'screen'
+        params.add("sid", rlong(screen_id))
+        lowest_type = "screen"
     if plate_id is not None:
-        params.add('plid', rlong(plate_id))
-        lowest_type = 'plate'
+        params.add("plid", rlong(plate_id))
+        lowest_type = "plate"
     if acquisition_id is not None:
-        params.add('aid', rlong(acquisition_id))
-        lowest_type = 'acquisition'
+        params.add("aid", rlong(acquisition_id))
+        lowest_type = "acquisition"
     if well_id is not None:
-        params.add('wid', rlong(well_id))
-        lowest_type = 'well'
+        params.add("wid", rlong(well_id))
+        lowest_type = "well"
     if project_id is not None:
-        params.add('pid', rlong(project_id))
-        lowest_type = 'project'
+        params.add("pid", rlong(project_id))
+        lowest_type = "project"
     if dataset_id is not None:
-        params.add('did', rlong(dataset_id))
-        lowest_type = 'dataset'
+        params.add("did", rlong(dataset_id))
+        lowest_type = "dataset"
     if roi_id is not None:
-        roi = conn.getObject('Roi', roi_id)
+        roi = conn.getObject("Roi", roi_id)
         if roi is not None:
             image_id = roi.image.id
     if shape_id is not None:
         image_id, roi_id = get_image_roi_id_for_shape(conn, shape_id)
     if image_id is not None:
-        params.add('iid', rlong(image_id))
-        lowest_type = 'image'
+        params.add("iid", rlong(image_id))
+        lowest_type = "image"
     # If none of these parameters are set then there is nothing to find
     if lowest_type is None:
         return []
@@ -540,8 +554,8 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
     # of special casing each type, but it will be less readable and
     # maintainable than these
 
-    if lowest_type == 'image':
-        q = '''
+    if lowest_type == "image":
+        q = """
             select coalesce(powner.id, downer.id, iowner.id),
                    pdlink.parent.id,
                    dilink.parent.id,
@@ -556,41 +570,34 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
             left outer join dilink.parent.projectLinks pdlink
             left outer join pdlink.parent.details.owner powner
             where image.id = :iid
-            '''
+            """
         where_clause = []
         if dataset_id is not None:
-            where_clause.append('dilink.parent.id = :did')
+            where_clause.append("dilink.parent.id = :did")
         if project_id is not None:
-            where_clause.append('pdlink.parent.id = :pid')
+            where_clause.append("pdlink.parent.id = :pid")
         if experimenter_id is not None:
-            where_clause.append(
-                'coalesce(powner.id, downer.id, iowner.id) = :eid')
+            where_clause.append("coalesce(powner.id, downer.id, iowner.id) = :eid")
         if len(where_clause) > 0:
-            q += ' and ' + ' and '.join(where_clause)
+            q += " and " + " and ".join(where_clause)
 
-        q += '''
+        q += """
              order by coalesce(powner.id, downer.id, iowner.id),
                       pdlink.parent.id,
                       dilink.parent.id,
                       image.id
-             '''
+             """
 
         for e in qs.projection(q, params, service_opts):
             path = []
             imageId = e[4].val
 
             # Experimenter is always found
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
 
             # If it is experimenter->project->dataset->image
             if e[1] is not None:
-                path.append({
-                    'type': 'project',
-                    'id': e[1].val
-                })
+                path.append({"type": "project", "id": e[1].val})
 
             # If it is experimenter->dataset->image or
             # experimenter->project->dataset->image
@@ -598,17 +605,17 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                 imgCount = e[3].val
                 datasetId = e[2].val
                 ds = {
-                    'type': 'dataset',
-                    'id': datasetId,
-                    'childCount': imgCount,
+                    "type": "dataset",
+                    "id": datasetId,
+                    "childCount": imgCount,
                 }
                 if imgCount > page_size:
                     # Need to know which page image is on
                     iids = get_image_ids(conn, datasetId)
                     index = iids.index(imageId)
                     page = (index // page_size) + 1  # 1-based index
-                    ds['childIndex'] = index
-                    ds['childPage'] = page
+                    ds["childIndex"] = index
+                    ds["childPage"] = page
                 path.append(ds)
 
             # If it is orphaned->image
@@ -616,27 +623,26 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
             if e[2] is None:
                 # Check if image is in Well
                 paths_to_img = paths_to_well_image(
-                    conn, params,
-                    well_id=well_id, image_id=image_id,
+                    conn,
+                    params,
+                    well_id=well_id,
+                    image_id=image_id,
                     acquisition_id=acquisition_id,
                     plate_id=plate_id,
                     screen_id=screen_id,
                     experimenter_id=experimenter_id,
-                    orphanedImage=True)
+                    orphanedImage=True,
+                )
                 if len(paths_to_img) == 0:
-                    orph = {
-                        'type': 'orphaned',
-                        'id': e[0].val
-                    }
-                    iids = get_image_ids(conn, groupId=e[5].val,
-                                         ownerId=e[0].val)
+                    orph = {"type": "orphaned", "id": e[0].val}
+                    iids = get_image_ids(conn, groupId=e[5].val, ownerId=e[0].val)
                     if len(iids) > page_size:
                         try:
                             index = iids.index(imageId)
                             page = (index // page_size) + 1  # 1-based index
-                            orph['childCount'] = len(iids)
-                            orph['childIndex'] = index
-                            orph['childPage'] = page
+                            orph["childCount"] = len(iids)
+                            orph["childIndex"] = index
+                            orph["childPage"] = page
                         except ValueError:
                             # If image is in Well, it won't be in orphaned list
                             pass
@@ -646,26 +652,17 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
                 paths = paths_to_img
             else:
                 # Image always present
-                path.append({
-                    'type': 'image',
-                    'id': imageId
-                })
+                path.append({"type": "image", "id": imageId})
                 paths.append(path)
         # Any roi/shape info to paths
         for path in paths:
             if roi_id is not None:
-                path.append({
-                    'type': 'roi',
-                    'id': roi_id
-                })
+                path.append({"type": "roi", "id": roi_id})
             if shape_id is not None:
-                path.append({
-                    'type': 'shape',
-                    'id': shape_id
-                })
+                path.append({"type": "shape", "id": shape_id})
 
-    elif lowest_type == 'dataset':
-        q = '''
+    elif lowest_type == "dataset":
+        q = """
             select coalesce(powner.id, downer.id),
                    pdlink.parent.id,
                    dataset.id
@@ -674,60 +671,45 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
             left outer join dataset.projectLinks pdlink
             left outer join pdlink.parent.details.owner powner
             where dataset.id = :did
-            '''
+            """
         where_clause = []
         if project_id is not None:
-            where_clause.append('pdlink.parent.id = :pid')
+            where_clause.append("pdlink.parent.id = :pid")
         if experimenter_id is not None:
-            where_clause.append('coalesce(powner.id, downer.id) = :eid')
+            where_clause.append("coalesce(powner.id, downer.id) = :eid")
         if len(where_clause) > 0:
-            q += ' and ' + ' and '.join(where_clause)
+            q += " and " + " and ".join(where_clause)
 
         for e in qs.projection(q, params, service_opts):
             path = []
 
             # Experimenter is always found
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
 
             # If it is experimenter->project->dataset
             if e[1] is not None:
-                path.append({
-                    'type': 'project',
-                    'id': e[1].val
-                })
+                path.append({"type": "project", "id": e[1].val})
 
             # Dataset always present
-            path.append({
-                'type': 'dataset',
-                'id': e[2].val
-            })
+            path.append({"type": "dataset", "id": e[2].val})
 
             paths.append(path)
 
-    elif lowest_type == 'project':
-        q = '''
+    elif lowest_type == "project":
+        q = """
             select project.details.owner.id,
                    project.id
             from Project project
             where project.id = :pid
-            '''
+            """
 
         for e in qs.projection(q, params, service_opts):
             path = []
 
             # Always experimenter->project
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
 
-            path.append({
-                'type': 'project',
-                'id': e[1].val
-            })
+            path.append({"type": "project", "id": e[1].val})
 
             paths.append(path)
 
@@ -735,20 +717,23 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
     # restricted by a particular WellSample id
     # May not have acquisition (load plate from well)
     # We don't need to load the wellsample (not in tree)
-    elif lowest_type == 'well':
+    elif lowest_type == "well":
 
-        paths_to_img = paths_to_well_image(conn, params,
-                                           well_id=well_id,
-                                           image_id=image_id,
-                                           acquisition_id=acquisition_id,
-                                           plate_id=plate_id,
-                                           screen_id=screen_id,
-                                           experimenter_id=experimenter_id)
+        paths_to_img = paths_to_well_image(
+            conn,
+            params,
+            well_id=well_id,
+            image_id=image_id,
+            acquisition_id=acquisition_id,
+            plate_id=plate_id,
+            screen_id=screen_id,
+            experimenter_id=experimenter_id,
+        )
         if len(paths_to_img) > 0:
             paths.extend(paths_to_img)
 
-    elif lowest_type == 'acquisition':
-        q = '''
+    elif lowest_type == "acquisition":
+        q = """
             select coalesce(sowner.id, plowner.id, aowner.id),
                    slink.parent.id,
                    plate.id,
@@ -760,52 +745,39 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
             left outer join plate.screenLinks slink
             left outer join slink.parent.details.owner sowner
             where acquisition.id = :aid
-            '''
+            """
         where_clause = []
         if plate_id is not None:
-            where_clause.append('plate.id = :plid')
+            where_clause.append("plate.id = :plid")
         if screen_id is not None:
-            where_clause.append('slink.parent.id = :sid')
+            where_clause.append("slink.parent.id = :sid")
         if experimenter_id is not None:
-            where_clause.append(
-                'coalesce(sowner.id, plowner.id, aowner.id) = :eid')
+            where_clause.append("coalesce(sowner.id, plowner.id, aowner.id) = :eid")
         if len(where_clause) > 0:
-            q += ' and ' + ' and '.join(where_clause)
+            q += " and " + " and ".join(where_clause)
 
         for e in qs.projection(q, params, service_opts):
             path = []
 
             # Experimenter is always found
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
 
             # If it is experimenter->screen->plate->acquisition
             if e[1] is not None:
-                path.append({
-                    'type': 'screen',
-                    'id': e[1].val
-                })
+                path.append({"type": "screen", "id": e[1].val})
 
             # If it is experimenter->plate->acquisition or
             # experimenter->screen->plate->acquisition
             if e[2] is not None:
-                path.append({
-                    'type': 'plate',
-                    'id': e[2].val
-                })
+                path.append({"type": "plate", "id": e[2].val})
 
             # Acquisition always present
-            path.append({
-                'type': 'acquisition',
-                'id': e[3].val
-            })
+            path.append({"type": "acquisition", "id": e[3].val})
 
             paths.append(path)
 
-    elif lowest_type == 'plate':
-        q = '''
+    elif lowest_type == "plate":
+        q = """
             select coalesce(sowner.id, plowner.id),
                    splink.parent.id,
                    plate.id
@@ -814,85 +786,74 @@ def paths_to_object(conn, experimenter_id=None, project_id=None,
             left outer join plate.screenLinks splink
             left outer join splink.parent.details.owner plowner
             where plate.id = :plid
-            '''
+            """
         where_clause = []
         if screen_id is not None:
-            where_clause.append('splink.parent.id = :sid')
+            where_clause.append("splink.parent.id = :sid")
         if experimenter_id is not None:
-            where_clause.append('coalesce(sowner.id, plowner.id) = :eid')
+            where_clause.append("coalesce(sowner.id, plowner.id) = :eid")
         if len(where_clause) > 0:
-            q += ' and ' + ' and '.join(where_clause)
+            q += " and " + " and ".join(where_clause)
 
         for e in qs.projection(q, params, service_opts):
             path = []
 
             # Experimenter is always found
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
 
             # If it is experimenter->screen->plate
             if e[1] is not None:
-                path.append({
-                    'type': 'screen',
-                    'id': e[1].val
-                })
+                path.append({"type": "screen", "id": e[1].val})
 
             # Plate always present
-            path.append({
-                'type': 'plate',
-                'id': e[2].val
-            })
+            path.append({"type": "plate", "id": e[2].val})
 
             paths.append(path)
 
-    elif lowest_type == 'screen':
-        q = '''
+    elif lowest_type == "screen":
+        q = """
             select screen.details.owner.id,
                    screen.id
             from Screen screen
             where screen.id = :sid
-            '''
+            """
 
         for e in qs.projection(q, params, service_opts):
             path = []
 
             # Always experimenter->screen
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
 
-            path.append({
-                'type': 'screen',
-                'id': e[1].val
-            })
+            path.append({"type": "screen", "id": e[1].val})
 
             paths.append(path)
 
-    elif lowest_type == 'experimenter':
+    elif lowest_type == "experimenter":
         path = []
 
         # No query required here as this is the highest level container
-        path.append({
-            'type': 'experimenter',
-            'id': experimenter_id
-        })
+        path.append({"type": "experimenter", "id": experimenter_id})
 
         paths.append(path)
 
     return paths
 
 
-def paths_to_well_image(conn, params, well_id=None, image_id=None,
-                        acquisition_id=None,
-                        plate_id=None, screen_id=None, experimenter_id=None,
-                        orphanedImage=False):
+def paths_to_well_image(
+    conn,
+    params,
+    well_id=None,
+    image_id=None,
+    acquisition_id=None,
+    plate_id=None,
+    screen_id=None,
+    experimenter_id=None,
+    orphanedImage=False,
+):
 
     qs = conn.getQueryService()
     service_opts = deepcopy(conn.SERVICE_OPTS)
-    q = '''
+    q = """
         select coalesce(sowner.id, plowner.id, aowner.id, wsowner.id),
                slink.parent.id,
                plate.id,
@@ -908,72 +869,52 @@ def paths_to_well_image(conn, params, well_id=None, image_id=None,
         join plate.details.owner plowner
         left outer join plate.screenLinks slink
         left outer join slink.parent.details.owner sowner
-        '''
+        """
     where_clause = []
     if well_id is not None:
-        where_clause.append('wellsample.well.id = :wid')
+        where_clause.append("wellsample.well.id = :wid")
     if image_id is not None:
-        where_clause.append('wellsample.image.id = :iid')
+        where_clause.append("wellsample.image.id = :iid")
     if acquisition_id is not None:
-        where_clause.append('acquisition.id = :aid')
+        where_clause.append("acquisition.id = :aid")
     if plate_id is not None:
-        where_clause.append('plate.id = :plid')
+        where_clause.append("plate.id = :plid")
     if screen_id is not None:
-        where_clause.append('slink.parent.id = :sid')
+        where_clause.append("slink.parent.id = :sid")
     if experimenter_id is not None:
         where_clause.append(
-            'coalesce(sowner.id, plowner.id, aoener.id, wowner.id) = :eid')
+            "coalesce(sowner.id, plowner.id, aoener.id, wowner.id) = :eid"
+        )
     if len(where_clause) > 0:
-        q += 'where ' + ' and '.join(where_clause)
+        q += "where " + " and ".join(where_clause)
 
     paths = []
     for e in qs.projection(q, params, service_opts):
         path = []
 
         # Experimenter is always found
-        path.append({
-            'type': 'experimenter',
-            'id': e[0].val
-        })
+        path.append({"type": "experimenter", "id": e[0].val})
 
         # If it is experimenter->screen->plate->acquisition->wellsample
         if e[1] is not None:
-            path.append({
-                'type': 'screen',
-                'id': e[1].val
-            })
+            path.append({"type": "screen", "id": e[1].val})
 
         # Plate should always present
-        path.append({
-            'type': 'plate',
-            'id': e[2].val
-        })
+        path.append({"type": "plate", "id": e[2].val})
 
         # Acquisition not present if plate created via API (not imported)
         if e[3] is not None:
-            path.append({
-                'type': 'acquisition',
-                'id': e[3].val
-            })
+            path.append({"type": "acquisition", "id": e[3].val})
 
         # Include Well if path is to image
         if e[4] is not None and orphanedImage:
-            path.append({
-                'type': 'well',
-                'id': e[4].val
-            })
+            path.append({"type": "well", "id": e[4].val})
 
         # Include WellSampe if path is to image
         if e[5] is not None and orphanedImage:
-            path.append({
-                'type': 'wellsample',
-                'id': e[5].val
-            })
+            path.append({"type": "wellsample", "id": e[5].val})
         if image_id is not None:
-            path.append({
-                'type': 'image',
-                'id': image_id
-            })
+            path.append({"type": "image", "id": image_id})
 
         paths.append(path)
     return paths
@@ -990,19 +931,16 @@ def paths_to_tag(conn, experimenter_id=None, tagset_id=None, tag_id=None):
     where_clause = []
 
     if experimenter_id is not None:
-        params.add('eid', rlong(experimenter_id))
-        where_clause.append(
-            'coalesce(tsowner.id, towner.id) = :eid')
+        params.add("eid", rlong(experimenter_id))
+        where_clause.append("coalesce(tsowner.id, towner.id) = :eid")
 
     if tag_id is not None:
-        params.add('tid', rlong(tag_id))
-        where_clause.append(
-            'ttlink.child.id = :tid')
+        params.add("tid", rlong(tag_id))
+        where_clause.append("ttlink.child.id = :tid")
 
     if tagset_id is not None:
-        params.add('tsid', rlong(tagset_id))
-        where_clause.append(
-            'tagset.id = :tsid')
+        params.add("tsid", rlong(tagset_id))
+        where_clause.append("tagset.id = :tsid")
 
     if tag_id is None and tagset_id is None:
         return []
@@ -1012,7 +950,7 @@ def paths_to_tag(conn, experimenter_id=None, tagset_id=None, tag_id=None):
 
     # Look for tag in a tagset...
     if tag_id is not None:
-        q = '''
+        q = """
             select coalesce(tsowner.id, towner.id),
                    tagset.id,
                    ttlink.child.id
@@ -1021,24 +959,17 @@ def paths_to_tag(conn, experimenter_id=None, tagset_id=None, tag_id=None):
             left outer join tagset.annotationLinks ttlink
             left outer join ttlink.child.details.owner towner
             where %s
-        ''' % ' and '.join(where_clause)
+        """ % " and ".join(
+            where_clause
+        )
 
         tagsets = qs.projection(q, params, service_opts)
         for e in tagsets:
             path = []
             # Experimenter is always found
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
-            path.append({
-                'type': 'tagset',
-                'id': e[1].val
-            })
-            path.append({
-                'type': 'tag',
-                'id': e[2].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
+            path.append({"type": "tagset", "id": e[1].val})
+            path.append({"type": "tag", "id": e[2].val})
             paths.append(path)
 
     # If we haven't found tag in tagset, just look for tags with matching IDs
@@ -1048,42 +979,35 @@ def paths_to_tag(conn, experimenter_id=None, tagset_id=None, tag_id=None):
 
         if experimenter_id is not None:
             # params.add('eid', rlong(experimenter_id))
-            where_clause.append(
-                'coalesce(tsowner.id, towner.id) = :eid')
+            where_clause.append("coalesce(tsowner.id, towner.id) = :eid")
 
         if tag_id is not None:
             # params.add('tid', rlong(tag_id))
-            where_clause.append(
-                'tag.id = :tid')
+            where_clause.append("tag.id = :tid")
 
         elif tagset_id is not None:
             # params.add('tsid', rlong(tagset_id))
-            where_clause.append(
-                'tag.id = :tsid')
+            where_clause.append("tag.id = :tsid")
 
-        q = '''
+        q = """
             select towner.id, tag.id
             from TagAnnotation tag
             left outer join tag.details.owner towner
             where %s
-        ''' % ' and '.join(where_clause)
+        """ % " and ".join(
+            where_clause
+        )
 
         tagsets = qs.projection(q, params, service_opts)
         for e in tagsets:
             path = []
             # Experimenter is always found
-            path.append({
-                'type': 'experimenter',
-                'id': e[0].val
-            })
+            path.append({"type": "experimenter", "id": e[0].val})
             if tag_id is not None:
-                t = 'tag'
+                t = "tag"
             else:
-                t = 'tagset'
-            path.append({
-                'type': t,
-                'id': e[1].val
-            })
+                t = "tagset"
+            path.append({"type": t, "id": e[1].val})
             paths.append(path)
 
     return paths

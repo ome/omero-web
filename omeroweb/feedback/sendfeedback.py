@@ -28,6 +28,7 @@ import platform
 import traceback
 import logging
 from urllib.parse import urlencode
+
 try:
     # python2
     from urllib2 import urlopen, Request, HTTPError, URLError
@@ -56,8 +57,7 @@ class SendFeedback(object):
     def __init__(self, feedback_url):
         self.url = urljoin(feedback_url, "/qa/initial/")
 
-    def send_feedback(self, error=None, comment=None, email=None,
-                      user_agent=""):
+    def send_feedback(self, error=None, comment=None, email=None, user_agent=""):
         try:
             p = {
                 "app_name": settings.FEEDBACK_APP,
@@ -65,26 +65,26 @@ class SendFeedback(object):
                 "extra": "",
                 "error": (error or ""),
                 "email": (email or ""),
-                "comment": comment
-                }
+                "comment": comment,
+            }
             try:
-                p['python_classpath'] = sys.path
+                p["python_classpath"] = sys.path
             except Exception:
                 pass
             try:
-                p['python_version'] = platform.python_version()
+                p["python_version"] = platform.python_version()
             except Exception:
                 pass
             try:
-                p['os_name'] = platform.platform()
+                p["os_name"] = platform.platform()
             except Exception:
                 pass
             try:
-                p['os_arch'] = platform.machine()
+                p["os_arch"] = platform.machine()
             except Exception:
                 pass
             try:
-                p['os_version'] = platform.release()
+                p["os_version"] = platform.release()
             except Exception:
                 pass
             data = urlencode(p)
@@ -92,7 +92,8 @@ class SendFeedback(object):
             headers = {
                 "Content-type": "application/x-www-form-urlencoded",
                 "Accept": "text/plain",
-                "User-Agent": user_agent}
+                "User-Agent": user_agent,
+            }
             request = Request(self.url, data, headers)
             response = None
             try:
@@ -100,18 +101,14 @@ class SendFeedback(object):
                 if response.code == 200:
                     logger.info(response.read())
                 else:
-                    logger.error(
-                        "Feedback server error: %s" % response.reason)
-                    raise Exception(
-                        "Feedback server error: %s" % response.reason)
+                    logger.error("Feedback server error: %s" % response.reason)
+                    raise Exception("Feedback server error: %s" % response.reason)
             except HTTPError as e:
                 logger.error(traceback.format_exc())
-                raise Exception(
-                    "Feedback server error: %s" % e.code)
+                raise Exception("Feedback server error: %s" % e.code)
             except URLError as e:
                 logger.error(traceback.format_exc())
-                raise Exception(
-                    "Feedback server error: %s" % e.reason)
+                raise Exception("Feedback server error: %s" % e.reason)
             finally:
                 if response:
                     response.close()

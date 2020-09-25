@@ -60,9 +60,11 @@ from omeroweb.webgateway.templatetags.common_filters import (
 
 try:
     import hashlib
+
     hash_sha1 = hashlib.sha1
 except Exception:
     import sha
+
     hash_sha1 = sha.new
 
 logger = logging.getLogger(__name__)
@@ -75,7 +77,8 @@ except ImportError:
     except Exception:
         logger.error(
             "You need to install the Python Imaging Library. Get it at"
-            " http://www.pythonware.com/products/pil/")
+            " http://www.pythonware.com/products/pil/"
+        )
         logger.error(traceback.format_exc())
 
 
@@ -93,7 +96,6 @@ def defaultThumbnail(size=(120, 120)):
 
 
 class OmeroWebGateway(omero.gateway.BlitzGateway):
-
     def __init__(self, *args, **kwargs):
         """
         Create the connection wrapper. Does not attempt to connect at this
@@ -143,8 +145,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         if self.getEventContext().shareId is not None:
-            if (self.getEventContext().shareId != self._shareId and
-                    self._shareId > 0):
+            if self.getEventContext().shareId != self._shareId and self._shareId > 0:
                 self._shareId = self.getEventContext().shareId
         return self._shareId
 
@@ -175,7 +176,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
             self.c.sf.setSecurityContext(ExperimenterGroupI(gid, False))
             self.getAdminService().setDefaultGroup(
-                self.getUser()._obj, ExperimenterGroupI(gid, False))
+                self.getUser()._obj, ExperimenterGroupI(gid, False)
+            )
             self._ctx = self.getAdminService().getEventContext()
             return True
         except omero.SecurityViolation:
@@ -190,13 +192,18 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         ** Deprecated ** Use :meth:`BlitzGateway.getClientSettings`.
         """
         warnings.warn(
-            "Deprecated. Use BlitzGateway.getClientSettings()",
-            DeprecationWarning)
-        name = (self.getConfigService().getConfigValue(
-                "omero.client.ui.tree.orphans.name") or "Orphaned image")
-        description = (self.getConfigService().getConfigValue(
-                       "omero.client.ui.tree.orphans.description") or
-                       "This is a virtual container with orphaned images.")
+            "Deprecated. Use BlitzGateway.getClientSettings()", DeprecationWarning
+        )
+        name = (
+            self.getConfigService().getConfigValue("omero.client.ui.tree.orphans.name")
+            or "Orphaned image"
+        )
+        description = (
+            self.getConfigService().getConfigValue(
+                "omero.client.ui.tree.orphans.description"
+            )
+            or "This is a virtual container with orphaned images."
+        )
         return name, description
 
     def getDropdownMenuSettings(self):
@@ -204,23 +211,33 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         ** Deprecated ** Use :meth:`BlitzGateway.getClientSettings`.
         """
         warnings.warn(
-            "Deprecated. Use BlitzGateway.getClientSettings()",
-            DeprecationWarning)
+            "Deprecated. Use BlitzGateway.getClientSettings()", DeprecationWarning
+        )
         dropdown_menu = dict()
-        if toBoolean(self.getConfigService().getConfigValue(
-                     "omero.client.ui.menu.dropdown.leaders.enabled")):
+        if toBoolean(
+            self.getConfigService().getConfigValue(
+                "omero.client.ui.menu.dropdown.leaders.enabled"
+            )
+        ):
             dropdown_menu["leaders"] = self.getConfigService().getConfigValue(
-                "omero.client.ui.menu.dropdown.leaders")
-        if toBoolean(self.getConfigService().getConfigValue(
-                "omero.client.ui.menu.dropdown.colleagues.enabled")):
-            dropdown_menu["colleagues"] = \
-                self.getConfigService().getConfigValue(
-                    "omero.client.ui.menu.dropdown.colleagues")
-        if toBoolean(self.getConfigService().getConfigValue(
-                "omero.client.ui.menu.dropdown.everyone.enabled")):
-            dropdown_menu["everyone"] = \
-                self.getConfigService().getConfigValue(
-                    "omero.client.ui.menu.dropdown.everyone")
+                "omero.client.ui.menu.dropdown.leaders"
+            )
+        if toBoolean(
+            self.getConfigService().getConfigValue(
+                "omero.client.ui.menu.dropdown.colleagues.enabled"
+            )
+        ):
+            dropdown_menu["colleagues"] = self.getConfigService().getConfigValue(
+                "omero.client.ui.menu.dropdown.colleagues"
+            )
+        if toBoolean(
+            self.getConfigService().getConfigValue(
+                "omero.client.ui.menu.dropdown.everyone.enabled"
+            )
+        ):
+            dropdown_menu["everyone"] = self.getConfigService().getConfigValue(
+                "omero.client.ui.menu.dropdown.everyone"
+            )
         return dropdown_menu
 
     def chgrpDryRun(self, targetObjects, group_id):
@@ -253,7 +270,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         configmap = super(OmeroWebGateway, self).getClientSettings()
         localcfg = settings.CONFIG_XML
         for key in localcfg.keys():
-            if key.startswith('omero.client.'):
+            if key.startswith("omero.client."):
                 configmap[key] = localcfg[key]
         return configmap
 
@@ -279,12 +296,15 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         p = omero.sys.Parameters()
         p.map = {}
         p.map["default_names"] = rlist(
-            [rstring("user"), rstring("system"), rstring("guest")])
+            [rstring("user"), rstring("system"), rstring("guest")]
+        )
         f = omero.sys.Filter()
         f.limit = rint(1)
         p.theFilter = f
-        sql = ("select g from ExperimenterGroup as g "
-               "where g.name not in (:default_names)")
+        sql = (
+            "select g from ExperimenterGroup as g "
+            "where g.name not in (:default_names)"
+        )
         if len(q.findAllByQuery(sql, p, self.SERVICE_OPTS)) > 0:
             return False
         return True
@@ -388,9 +408,9 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         q = self.getQueryService()
         p = omero.sys.Parameters()
         p.map = {}
-        p.map['pname'] = rstring(str(plate_name))
-        p.map['row'] = rint(int(row))
-        p.map['column'] = rint(int(column))
+        p.map["pname"] = rstring(str(plate_name))
+        p.map["row"] = rint(int(row))
+        p.map["column"] = rint(int(column))
 
         sql = """select well from Well as well
               left outer join fetch well.plate as pt
@@ -412,12 +432,14 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         params = omero.sys.ParametersI()
         params.orphan()
         params.map = {}
-        params.map['ns'] = rstring(omero.constants.metadata.NSINSIGHTTAGSET)
+        params.map["ns"] = rstring(omero.constants.metadata.NSINSIGHTTAGSET)
 
-        sql = ("select tg from TagAnnotation tg"
-               " where ((ns=:ns)"
-               "or (not exists ( select aal from AnnotationAnnotationLink"
-               " as aal where aal.child=tg.id))) ")
+        sql = (
+            "select tg from TagAnnotation tg"
+            " where ((ns=:ns)"
+            "or (not exists ( select aal from AnnotationAnnotationLink"
+            " as aal where aal.child=tg.id))) "
+        )
         if eid is not None:
             params.map["eid"] = rlong(int(eid))
             sql += " and tg.details.owner.id = :eid"
@@ -443,7 +465,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         params = omero.sys.ParametersI()
         params.orphan()
         params.map = {}
-        params.map['ns'] = rstring(omero.constants.metadata.NSINSIGHTTAGSET)
+        params.map["ns"] = rstring(omero.constants.metadata.NSINSIGHTTAGSET)
         if eid is not None:
             params.map["eid"] = rlong(int(eid))
 
@@ -465,16 +487,17 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         tags = []
         owners = dict()
         for element in q.projection(sql, params, self.SERVICE_OPTS):
-            tag_id, description, text, ns, owner, first, last = map(
-                unwrap, element)
-            tags.append([
-                tag_id,
-                description,
-                text,
-                owner,
-                # if tagset, list to be filled in later, otherwise 0
-                [] if ns == omero.constants.metadata.NSINSIGHTTAGSET else 0,
-            ])
+            tag_id, description, text, ns, owner, first, last = map(unwrap, element)
+            tags.append(
+                [
+                    tag_id,
+                    description,
+                    text,
+                    owner,
+                    # if tagset, list to be filled in later, otherwise 0
+                    [] if ns == omero.constants.metadata.NSINSIGHTTAGSET else 0,
+                ]
+            )
             owners[owner] = "%s %s" % (first, last)
 
         ids = [tag[0] for tag in tags]
@@ -525,27 +548,33 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         return unwrap(q.projection(sql, params, self.SERVICE_OPTS)[0][0])
 
     def countOrphans(self, obj_type, eid=None):
-        links = {'Dataset': ('ProjectDatasetLink', DatasetWrapper),
-                 'Image': ('DatasetImageLink', ImageWrapper),
-                 'Plate': ('ScreenPlateLink', PlateWrapper)}
+        links = {
+            "Dataset": ("ProjectDatasetLink", DatasetWrapper),
+            "Image": ("DatasetImageLink", ImageWrapper),
+            "Plate": ("ScreenPlateLink", PlateWrapper),
+        }
 
         if obj_type not in links:
             raise TypeError(
                 "'%s' is not valid object type. Must use one of %s"
-                % (obj_type, links.keys()))
+                % (obj_type, links.keys())
+            )
 
         q = self.getQueryService()
         p = omero.sys.Parameters()
         p.map = {}
 
-        links = {'Dataset': ('ProjectDatasetLink', DatasetWrapper),
-                 'Image': ('DatasetImageLink', ImageWrapper),
-                 'Plate': ('ScreenPlateLink', PlateWrapper)}
+        links = {
+            "Dataset": ("ProjectDatasetLink", DatasetWrapper),
+            "Image": ("DatasetImageLink", ImageWrapper),
+            "Plate": ("ScreenPlateLink", PlateWrapper),
+        }
 
         if obj_type not in links:
             raise TypeError(
                 "'%s' is not valid object type. Must use one of %s"
-                % (obj_type, links.keys()))
+                % (obj_type, links.keys())
+            )
 
         q = self.getQueryService()
         p = omero.sys.Parameters()
@@ -559,17 +588,20 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             eidFilter = ""
             eidWsFilter = ""
 
-        sql = ("select count(obj.id) from %s as obj "
-               "join obj.details.creationEvent "
-               "join obj.details.owner join obj.details.group "
-               "where %s"
-               "not exists (select obl from %s as obl where "
-               "obl.child=obj.id)"
-               % (obj_type, eidFilter, links[obj_type][0]))
-        if obj_type == 'Image':
-            sql += ("and not exists ( "
-                    "select ws from WellSample as ws "
-                    "where ws.image=obj.id %s)" % eidWsFilter)
+        sql = (
+            "select count(obj.id) from %s as obj "
+            "join obj.details.creationEvent "
+            "join obj.details.owner join obj.details.group "
+            "where %s"
+            "not exists (select obl from %s as obl where "
+            "obl.child=obj.id)" % (obj_type, eidFilter, links[obj_type][0])
+        )
+        if obj_type == "Image":
+            sql += (
+                "and not exists ( "
+                "select ws from WellSample as ws "
+                "where ws.image=obj.id %s)" % eidWsFilter
+            )
 
         rslt = q.projection(sql, p, self.SERVICE_OPTS)
         if len(rslt) > 0:
@@ -577,8 +609,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 return rslt[0][0].val
         return 0
 
-    def listImagesInDataset(self, oid, eid=None, page=None,
-                            load_pixels=False):
+    def listImagesInDataset(self, oid, eid=None, page=None, load_pixels=False):
         """
         List Images in the given Dataset.
         Optinally filter by experimenter 'eid'
@@ -593,32 +624,37 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         warnings.warn(
             "Deprecated as of OMERO 5.4.0. "
             "Use getObjects('Image', opts={'dataset': id})",
-            DeprecationWarning)
+            DeprecationWarning,
+        )
 
         q = self.getQueryService()
         p = omero.sys.ParametersI()
         p.map["oid"] = rlong(int(oid))
         if page is not None:
-            p.page(((int(page)-1)*settings.PAGE), settings.PAGE)
+            p.page(((int(page) - 1) * settings.PAGE), settings.PAGE)
         if load_pixels:
-            pixels = ("join fetch im.pixels as pix"
-                      " left outer join fetch pix.thumbnails ")
+            pixels = (
+                "join fetch im.pixels as pix" " left outer join fetch pix.thumbnails "
+            )
         else:
             pixels = ""
-        sql = ("select im from Image im "
-               "join fetch im.details.creationEvent "
-               "join fetch im.details.owner join fetch im.details.group "
-               "left outer join fetch im.datasetLinks dil "
-               "left outer join fetch dil.parent d %s"
-               "where d.id = :oid" % pixels)
+        sql = (
+            "select im from Image im "
+            "join fetch im.details.creationEvent "
+            "join fetch im.details.owner join fetch im.details.group "
+            "left outer join fetch im.datasetLinks dil "
+            "left outer join fetch dil.parent d %s"
+            "where d.id = :oid" % pixels
+        )
         if eid is not None:
             p.map["eid"] = rlong(int(eid))
             sql += " and im.details.owner.id=:eid"
         sql += " order by lower(im.name), im.id"
 
         for e in q.findAllByQuery(sql, p, self.SERVICE_OPTS):
-            kwargs = {'link': omero.gateway.BlitzObjectWrapper(
-                self, e.copyDatasetLinks()[0])}
+            kwargs = {
+                "link": omero.gateway.BlitzObjectWrapper(self, e.copyDatasetLinks()[0])
+            }
             yield ImageWrapper(self, e, None, **kwargs)
 
     def createDataset(self, name, description=None, img_ids=None, owner=None):
@@ -626,8 +662,9 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         Creates a Dataset and adds images if img_ids is specified.
         Returns the new Dataset ID.
         """
-        dsid = self.createContainer("dataset", name,
-                                    description=description, owner=owner)
+        dsid = self.createContainer(
+            "dataset", name, description=description, owner=owner
+        )
         if img_ids is not None:
             iids = [int(i) for i in img_ids]
             links = []
@@ -642,8 +679,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
     def createProject(self, name, description=None):
         """ Creates new Project and returns ID """
         warnings.warn(
-            "Deprecated as of OMERO 5.4.0. Use createContainer()",
-            DeprecationWarning)
+            "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
+        )
         pr = omero.model.ProjectI()
         pr.name = rstring(str(name))
         if description is not None and description != "":
@@ -653,8 +690,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
     def createScreen(self, name, description=None):
         """ Creates new Screen and returns ID """
         warnings.warn(
-            "Deprecated as of OMERO 5.4.0. Use createContainer()",
-            DeprecationWarning)
+            "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
+        )
         sc = omero.model.ScreenI()
         sc.name = rstring(str(name))
         if description is not None and description != "":
@@ -664,8 +701,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
     def createTag(self, name, description=None):
         """ Creates new Tag and returns ID """
         warnings.warn(
-            "Deprecated as of OMERO 5.4.0. Use createContainer()",
-            DeprecationWarning)
+            "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
+        )
         tag = omero.model.TagAnnotationI()
         tag.textValue = rstring(str(name))
         if description is not None and description != "":
@@ -675,8 +712,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
     def createTagset(self, name, description=None):
         """ Creates new Tag Set and returns ID """
         warnings.warn(
-            "Deprecated as of OMERO 5.4.0. Use createContainer()",
-            DeprecationWarning)
+            "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
+        )
         tag = omero.model.TagAnnotationI()
         tag.textValue = rstring(str(name))
         tag.ns = rstring(omero.constants.metadata.NSINSIGHTTAGSET)
@@ -731,8 +768,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         f = omero.sys.Filter()
         f.limit = rint(1)
         p.theFilter = f
-        sql = "select tg from TagAnnotation tg " \
-              "where tg.textValue=:text"
+        sql = "select tg from TagAnnotation tg " "where tg.textValue=:text"
         if desc is not None:
             sql += " and tg.description=:desc"
         sql += " and tg.ns is null order by tg.textValue"
@@ -793,12 +829,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         try:
             if oid is None:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None,
-                    None, None).get(self.getEventContext().userId, [])
+                    "Experimenter", [self.getEventContext().userId], None, None, None
+                ).get(self.getEventContext().userId, [])
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None,
-                    None).get(int(oid), [])
+                    "Experimenter", [int(oid)], None, None, None
+                ).get(int(oid), [])
             if len(ann) > 0:
                 return True
             else:
@@ -825,12 +861,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         try:
             if oid is None:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None,
-                    None, None).get(self.getEventContext().userId, [])
+                    "Experimenter", [self.getEventContext().userId], None, None, None
+                ).get(self.getEventContext().userId, [])
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None,
-                    None).get(int(oid), [])
+                    "Experimenter", [int(oid)], None, None, None
+                ).get(int(oid), [])
             if len(ann) > 0:
                 ann = ann[0]
                 store = self.createRawFileStore()
@@ -866,12 +902,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         try:
             if oid is None:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None,
-                    None, None).get(self.getEventContext().userId, [])[0]
+                    "Experimenter", [self.getEventContext().userId], None, None, None
+                ).get(self.getEventContext().userId, [])[0]
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None,
-                    None).get(int(oid), [])[0]
+                    "Experimenter", [int(oid)], None, None, None
+                ).get(int(oid), [])[0]
             store = self.createRawFileStore()
             try:
                 store.setFileId(ann.file.id.val)
@@ -894,12 +930,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         try:
             if oid is None:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None,
-                    None, None).get(self.getEventContext().userId, [])[0]
+                    "Experimenter", [self.getEventContext().userId], None, None, None
+                ).get(self.getEventContext().userId, [])[0]
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None,
-                    None).get(int(oid), [])[0]
+                    "Experimenter", [int(oid)], None, None, None
+                ).get(int(oid), [])[0]
         except Exception:
             logger.error(traceback.format_exc())
             raise IOError("Photo does not exist.")
@@ -909,8 +945,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             # there should be only one ExperimenterAnnotationLink
             # but if there is more then one all of them should be deleted.
             linkIds = [link.id.val for link in links]
-            self.deleteObjects(
-                "ExperimenterAnnotationLink", linkIds, wait=True)
+            self.deleteObjects("ExperimenterAnnotationLink", linkIds, wait=True)
             # No error handling?
             self.deleteObject(ann)
 
@@ -935,12 +970,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         try:
             if oid is None:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None,
-                    None, None).get(self.getEventContext().userId, [])[0]
+                    "Experimenter", [self.getEventContext().userId], None, None, None
+                ).get(self.getEventContext().userId, [])[0]
             else:
                 ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None,
-                    None).get(int(oid), [])[0]
+                    "Experimenter", [int(oid)], None, None, None
+                ).get(int(oid), [])[0]
             store = self.createRawFileStore()
             try:
                 store.setFileId(ann.file.id.val)
@@ -962,8 +997,8 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 imdata = BytesIO()
                 region.save(imdata, format=im.format)
                 self.uploadMyUserPhoto(
-                    ann.file.name.val, ann.file.mimetype.val,
-                    imdata.getvalue())
+                    ann.file.name.val, ann.file.mimetype.val, imdata.getvalue()
+                )
 
     def getExperimenterDefaultPhoto(self):
         """
@@ -991,8 +1026,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         @rtype          String
         """
         query_serv = self.getQueryService()
-        return query_serv.findByString(
-            "Format", "value", format).getValue().val
+        return query_serv.findByString("Format", "value", format).getValue().val
 
     ################################################
     #   Counters
@@ -1013,8 +1047,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         @rtype              L{(Long, Long)}
         """
         container = self.getContainerService()
-        return container.getCollectionCount(
-            parent, child, ids, None, self.SERVICE_OPTS)
+        return container.getCollectionCount(parent, child, ids, None, self.SERVICE_OPTS)
 
     ################################################
     #   Validators
@@ -1100,12 +1133,24 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
         admin_serv = self.getAdminService()
         admin_serv.changePasswordWithOldPassword(
-            rstring(str(old_password)), rstring(str(password)))
+            rstring(str(old_password)), rstring(str(password))
+        )
 
-    def createExperimenter(self, omeName, firstName, lastName, email, isAdmin,
-                           isActive, defaultGroupId, otherGroupIds, password,
-                           privileges=None,
-                           middleName=None, institution=None):
+    def createExperimenter(
+        self,
+        omeName,
+        firstName,
+        lastName,
+        email,
+        isAdmin,
+        isActive,
+        defaultGroupId,
+        otherGroupIds,
+        password,
+        privileges=None,
+        middleName=None,
+        institution=None,
+    ):
         """
         Create and return a new user in the given groups with password.
         @param omeName A new username.
@@ -1138,13 +1183,16 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         experimenter = ExperimenterI()
         experimenter.omeName = rstring(str(omeName))
         experimenter.firstName = rstring(str(firstName))
-        experimenter.middleName = (middleName is not None and
-                                   rstring(str(middleName)) or None)
+        experimenter.middleName = (
+            middleName is not None and rstring(str(middleName)) or None
+        )
         experimenter.lastName = rstring(str(lastName))
         experimenter.email = rstring(str(email))
-        experimenter.institution = ((institution != "" and
-                                     institution is not None) and
-                                    rstring(str(institution)) or None)
+        experimenter.institution = (
+            (institution != "" and institution is not None)
+            and rstring(str(institution))
+            or None
+        )
         experimenter.ldap = rbool(False)
 
         admin_serv = self.getAdminService()
@@ -1177,24 +1225,36 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 privilege.setValue(rstring(p))
                 admin_privileges.append(privilege)
             exp_id = admin_serv.createRestrictedSystemUserWithPassword(
-                experimenter, admin_privileges, rstring(password))
+                experimenter, admin_privileges, rstring(password)
+            )
             exp = ExperimenterI(exp_id, False)
 
-            if 'ModifyGroupMembership' in self.getCurrentAdminPrivileges():
+            if "ModifyGroupMembership" in self.getCurrentAdminPrivileges():
                 admin_serv.addGroups(exp, listOfGroups)
                 admin_serv.setDefaultGroup(exp, defaultGroup)
 
         else:
             # This will handle empty listOfGroups
             exp = admin_serv.createExperimenterWithPassword(
-                experimenter, rstring(password), defaultGroup,
-                listOfGroups)
+                experimenter, rstring(password), defaultGroup, listOfGroups
+            )
 
         return exp
 
-    def updateExperimenter(self, experimenter, omeName, firstName, lastName,
-                           email, isAdmin, isActive, defaultGroup,
-                           otherGroups, middleName=None, institution=None):
+    def updateExperimenter(
+        self,
+        experimenter,
+        omeName,
+        firstName,
+        lastName,
+        email,
+        isAdmin,
+        isActive,
+        defaultGroup,
+        otherGroups,
+        middleName=None,
+        institution=None,
+    ):
         """
         Update an existing user including groups user is a member of.
         Password cannot be changed by calling that method.
@@ -1225,13 +1285,14 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         up_exp = experimenter._obj
         up_exp.omeName = rstring(str(omeName))
         up_exp.firstName = rstring(str(firstName))
-        up_exp.middleName = (middleName is not None and
-                             rstring(str(middleName)) or None)
+        up_exp.middleName = middleName is not None and rstring(str(middleName)) or None
         up_exp.lastName = rstring(str(lastName))
         up_exp.email = rstring(str(email))
         up_exp.institution = (
-            (institution != "" and institution is not None) and
-            rstring(str(institution)) or None)
+            (institution != "" and institution is not None)
+            and rstring(str(institution))
+            or None
+        )
 
         # old list of groups
         old_groups = list()
@@ -1248,15 +1309,13 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         # system group
         if isAdmin:
-            g = self.getObject("ExperimenterGroup",
-                               attributes={'name': 'system'})
+            g = self.getObject("ExperimenterGroup", attributes={"name": "system"})
             if defaultGroup.id != g.id:
                 new_groups.append(g._obj)
 
         # user group
         if isActive:
-            g = self.getObject("ExperimenterGroup",
-                               attributes={'name': 'user'})
+            g = self.getObject("ExperimenterGroup", attributes={"name": "user"})
             new_groups.append(g._obj)
 
         # rest of groups
@@ -1286,7 +1345,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         admin_serv = self.getAdminService()
         admin_serv.updateExperimenter(up_exp)
-        can_mod = 'ModifyGroupMembership' in self.getCurrentAdminPrivileges()
+        can_mod = "ModifyGroupMembership" in self.getCurrentAdminPrivileges()
         if len(addGroups) > 0 and can_mod:
             admin_serv.addGroups(up_exp, addGroups)
         admin_serv.setDefaultGroup(up_exp, defaultGroup._obj)
@@ -1304,37 +1363,39 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         @param experimenter_form    Submitted instance of ExperimenterForm
         """
         privileges = []
-        role = experimenter_form.cleaned_data['role']
+        role = experimenter_form.cleaned_data["role"]
         # If Role element is disabled, we don't update privileges
-        if role == '':
+        if role == "":
             return None
         # If user is Admin, we give them ALL privileges!
-        if role == 'administrator':
-            for p in self.getEnumerationEntries('AdminPrivilege'):
+        if role == "administrator":
+            for p in self.getEnumerationEntries("AdminPrivilege"):
                 privileges.append(p.getValue())
-        elif role == 'restricted_administrator':
+        elif role == "restricted_administrator":
             # Otherwise, restrict to 'checked' privileges on form
-            form_privileges = ['Chgrp',
-                               'Chown',
-                               'ModifyGroup',
-                               'ModifyGroupMembership',
-                               'ModifyUser',
-                               'Sudo']
+            form_privileges = [
+                "Chgrp",
+                "Chown",
+                "ModifyGroup",
+                "ModifyGroupMembership",
+                "ModifyUser",
+                "Sudo",
+            ]
             for p in form_privileges:
                 if experimenter_form.cleaned_data[p]:
                     privileges.append(p)
             # 'Delete', 'Write' and 'Script' checkboxes update several roles
-            if experimenter_form.cleaned_data['Delete']:
-                privileges.append('DeleteFile')
-                privileges.append('DeleteManagedRepo')
-                privileges.append('DeleteOwned')
-            if experimenter_form.cleaned_data['Write']:
-                privileges.append('WriteFile')
-                privileges.append('WriteManagedRepo')
-                privileges.append('WriteOwned')
-            if experimenter_form.cleaned_data['Script']:
-                privileges.append('WriteScriptRepo')
-                privileges.append('DeleteScriptRepo')
+            if experimenter_form.cleaned_data["Delete"]:
+                privileges.append("DeleteFile")
+                privileges.append("DeleteManagedRepo")
+                privileges.append("DeleteOwned")
+            if experimenter_form.cleaned_data["Write"]:
+                privileges.append("WriteFile")
+                privileges.append("WriteManagedRepo")
+                privileges.append("WriteOwned")
+            if experimenter_form.cleaned_data["Script"]:
+                privileges.append("WriteScriptRepo")
+                privileges.append("DeleteScriptRepo")
         return privileges
 
     def get_privileges_for_form(self, privileges):
@@ -1350,24 +1411,21 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         script_perms = []
 
         for privilege in privileges:
-            if privilege in ('DeleteOwned', 'DeleteFile', 'DeleteManagedRepo'):
+            if privilege in ("DeleteOwned", "DeleteFile", "DeleteManagedRepo"):
                 delete_perms.append(privilege)
-            elif privilege in ('WriteOwned', 'WriteFile', 'WriteManagedRepo'):
+            elif privilege in ("WriteOwned", "WriteFile", "WriteManagedRepo"):
                 write_perms.append(privilege)
-            elif privilege in ('WriteScriptRepo', 'DeleteScriptRepo'):
+            elif privilege in ("WriteScriptRepo", "DeleteScriptRepo"):
                 script_perms.append(privilege)
             else:
                 enabled.append(privilege)
         # if ALL the Delete/Write permissions are found, Delete/Write is True
-        if set(delete_perms) == \
-                set(('DeleteOwned', 'DeleteFile', 'DeleteManagedRepo')):
-            enabled.append('Delete')
-        if set(write_perms) == \
-                set(('WriteOwned', 'WriteFile', 'WriteManagedRepo')):
-            enabled.append('Write')
-        if set(script_perms) == \
-                set(('WriteScriptRepo', 'DeleteScriptRepo')):
-            enabled.append('Script')
+        if set(delete_perms) == set(("DeleteOwned", "DeleteFile", "DeleteManagedRepo")):
+            enabled.append("Delete")
+        if set(write_perms) == set(("WriteOwned", "WriteFile", "WriteManagedRepo")):
+            enabled.append("Write")
+        if set(script_perms) == set(("WriteScriptRepo", "DeleteScriptRepo")):
+            enabled.append("Script")
         return enabled
 
     def setMembersOfGroup(self, group, new_members):
@@ -1385,8 +1443,9 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         # Make sure we've loaded experimenters
-        group = self.getObject("ExperimenterGroup", group.id,
-                               opts={'load_experimenters': True})
+        group = self.getObject(
+            "ExperimenterGroup", group.id, opts={"load_experimenters": True}
+        )
 
         experimenters = list(self.getObjects("Experimenter"))
 
@@ -1427,8 +1486,11 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             admin_serv.addGroups(e._obj, [group._obj])
         for e in to_remove:
             # Experimenter needs to stay in at least 1 non-user group
-            gs = [link.parent.id for link in e.copyGroupExperimenterMap()
-                  if link.parent.id.val != userGid]
+            gs = [
+                link.parent.id
+                for link in e.copyGroupExperimenterMap()
+                if link.parent.id.val != userGid
+            ]
             if len(gs) == 1:
                 failures.append(ExperimenterWrapper(self, e._obj))
                 continue
@@ -1498,8 +1560,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         new_gr = ExperimenterGroupI()
         new_gr.name = rstring(str(name))
         new_gr.description = (
-            (description != "" and description is not None) and
-            rstring(str(description)) or None)
+            (description != "" and description is not None)
+            and rstring(str(description))
+            or None
+        )
         new_gr.ldap = rbool(False)
         new_gr.details.permissions = permissions
 
@@ -1525,8 +1589,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         up_gr = group._obj
         up_gr.name = rstring(str(name))
         up_gr.description = (
-            (description != "" and description is not None) and
-            rstring(str(description)) or None)
+            (description != "" and description is not None)
+            and rstring(str(description))
+            or None
+        )
 
         msgs = []
         admin_serv = self.getAdminService()
@@ -1538,8 +1604,16 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 msgs.append(err)
         return msgs
 
-    def updateMyAccount(self, experimenter, firstName, lastName, email,
-                        defaultGroupId, middleName=None, institution=None):
+    def updateMyAccount(
+        self,
+        experimenter,
+        firstName,
+        lastName,
+        email,
+        defaultGroupId,
+        middleName=None,
+        institution=None,
+    ):
         """
         Allows a user to update his/her own information and set the default
         group for a given user.
@@ -1564,18 +1638,18 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         up_exp = experimenter._obj
         up_exp.firstName = rstring(str(firstName))
-        up_exp.middleName = (middleName is not None and
-                             rstring(str(middleName)) or None)
+        up_exp.middleName = middleName is not None and rstring(str(middleName)) or None
         up_exp.lastName = rstring(str(lastName))
         up_exp.email = rstring(str(email))
         up_exp.institution = (
-            (institution != "" and institution is not None) and
-            rstring(str(institution)) or None)
+            (institution != "" and institution is not None)
+            and rstring(str(institution))
+            or None
+        )
 
         admin_serv = self.getAdminService()
         admin_serv.updateSelf(up_exp)
-        defaultGroup = self.getObject(
-            "ExperimenterGroup", int(defaultGroupId))._obj
+        defaultGroup = self.getObject("ExperimenterGroup", int(defaultGroupId))._obj
         admin_serv.setDefaultGroup(up_exp, defaultGroup)
         self.changeActiveGroup(defaultGroup.id)
 
@@ -1585,11 +1659,11 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         if not specified.
         """
         group_id = int(group_id)
-        exp_id = (exp_id is not None and int(exp_id) or
-                  self.getEventContext().userId)
+        exp_id = exp_id is not None and int(exp_id) or self.getEventContext().userId
         admin_serv = self.getAdminService()
         admin_serv.setDefaultGroup(
-            ExperimenterI(exp_id, False), ExperimenterGroupI(group_id, False))
+            ExperimenterI(exp_id, False), ExperimenterGroupI(group_id, False)
+        )
 
     def updatePermissions(self, group, permissions):
         """
@@ -1604,8 +1678,9 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         perms = str(permissions)
         logger.debug("Chmod of group ID: %s to %s" % (group.id, perms))
-        command = Chmod2(targetObjects={'ExperimenterGroup': [group.id]},
-                         permissions=perms)
+        command = Chmod2(
+            targetObjects={"ExperimenterGroup": [group.id]}, permissions=perms
+        )
         cb = None
         message = None
         try:
@@ -1734,8 +1809,10 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         clienthash = hash.hexdigest()
 
         if serverhash != clienthash:
-            msg = ("SHA-1 checksums do not match in file upload: client has"
-                   " %s but server has %s" % (clienthash, serverhash))
+            msg = (
+                "SHA-1 checksums do not match in file upload: client has"
+                " %s but server has %s" % (clienthash, serverhash)
+            )
             logger.error(msg)
             raise Exception(msg)
 
@@ -1830,7 +1907,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
                 except omero.ValidationException:
                     # If Object deleted, simply return placeholder
                     # ID used to generate placeholder thumbnail
-                    obj = {'id': e.id.val}
+                    obj = {"id": e.id.val}
                 yield obj
 
     def getComments(self, share_id):
@@ -1897,31 +1974,34 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         sh_type = sh.getContentSize(share_id) > 0 and "share" or "discussion"
         subject = "OMERO.%s %s" % (sh_type, share_id)
         body = "%s added new comment.\n\n%s\n\n%s URL: %s\n" % (
-            self.getUser().getFullName(), str(comment), sh_type.title(), host)
+            self.getUser().getFullName(),
+            str(comment),
+            sh_type.title(),
+            host,
+        )
         sh.notifyMembersOfShare(int(share_id), subject, body, False)
         return CommentAnnotationWrapper(self, new_cm)
 
     def removeImage(self, share_id, image_id):
         sh = self.getShareService()
-        self.SERVICE_OPTS.setOmeroGroup('-1')
+        self.SERVICE_OPTS.setOmeroGroup("-1")
         img = self.getObject("Image", image_id)
         sh.removeObject(int(share_id), img._obj)
 
-    def createShare(self, host, images, message, members, enable,
-                    expiration=None):
+    def createShare(self, host, images, message, members, enable, expiration=None):
         sh = self.getShareService()
         items = [i._obj for i in images]
         ms = [m._obj for m in members]
-        sid = sh.createShare(
-            message, rtime(expiration), items, ms, [], enable)
+        sid = sh.createShare(message, rtime(expiration), items, ms, [], enable)
         sh_type = len(images) > 0 and "share" or "discussion"
         body = "%s\n\n%s URL: %s\n" % (message, sh_type.title(), host)
         subject = "OMERO.%s %s" % (sh_type, sid)
         sh.notifyMembersOfShare(sid, subject, body, False)
         return sid
 
-    def updateShareOrDiscussion(self, host, share_id, message, add_members,
-                                rm_members, enable, expiration=None):
+    def updateShareOrDiscussion(
+        self, host, share_id, message, add_members, rm_members, enable, expiration=None
+    ):
         share_id = int(share_id)
         sh = self.getShareService()
         sh.setDescription(share_id, message)
@@ -1931,8 +2011,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         if len(add_members) > 0:
             sh.addUsers(share_id, add_members)
             share = self.getShare(share_id)
-            body = "%s\n\n%s URL: %s\n" % (
-                share.message, sh_type.title(), host)
+            body = "%s\n\n%s URL: %s\n" % (share.message, sh_type.title(), host)
             subject = "OMERO.%s %s" % (sh_type, share_id)
             sh.notifyMembersOfShare(share_id, subject, body, False)
         if len(rm_members) > 0:
@@ -1961,7 +2040,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         p = omero.sys.ParametersI()
         p.exp(eid)
         if page is not None:
-            p.page(((int(page)-1)*settings.PAGE), settings.PAGE)
+            p.page(((int(page) - 1) * settings.PAGE), settings.PAGE)
         else:
             p.page(None, 100)
 
@@ -1972,30 +2051,35 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         if otype is not None and otype in ("Image", "Dataset", "Project"):
             otype = otype.title()
             for e in tm.getByPeriod(
-                    [otype], rtime(int(start)), rtime(int(end)), p, True,
-                    self.SERVICE_OPTS)[otype]:
+                [otype], rtime(int(start)), rtime(int(end)), p, True, self.SERVICE_OPTS
+            )[otype]:
                 wrapper = KNOWN_WRAPPERS.get(otype.title(), None)
                 im_list.append(wrapper(self, e))
         else:
             res = tm.getByPeriod(
-                ['Image', 'Dataset', 'Project'], rtime(int(start)),
-                rtime(int(end)), p, True, self.SERVICE_OPTS)
+                ["Image", "Dataset", "Project"],
+                rtime(int(start)),
+                rtime(int(end)),
+                p,
+                True,
+                self.SERVICE_OPTS,
+            )
             try:
-                for e in res['Image']:
+                for e in res["Image"]:
                     im_list.append(ImageWrapper(self, e))
             except Exception:
                 pass
             try:
-                for e in res['Dataset']:
+                for e in res["Dataset"]:
                     ds_list.append(DatasetWrapper(self, e))
             except Exception:
                 pass
             try:
-                for e in res['Project']:
+                for e in res["Project"]:
                     pr_list.append(ProjectWrapper(self, e))
             except Exception:
                 pass
-        return {'project': pr_list, 'dataset': ds_list, 'image': im_list}
+        return {"project": pr_list, "dataset": ds_list, "image": im_list}
 
     def countDataByPeriod(self, start, end, eid, otype=None):
         """
@@ -2018,23 +2102,27 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         f.ownerId = rlong(eid)
         # f.groupId = rlong(self.getEventContext().groupId)
         p.theFilter = f
-        if otype == 'image':
+        if otype == "image":
             return tm.countByPeriod(
-                ['Image'], rtime(int(start)), rtime(int(end)), p,
-                self.SERVICE_OPTS)['Image']
-        elif otype == 'dataset':
+                ["Image"], rtime(int(start)), rtime(int(end)), p, self.SERVICE_OPTS
+            )["Image"]
+        elif otype == "dataset":
             return tm.countByPeriod(
-                ['Dataset'], rtime(int(start)), rtime(int(end)), p,
-                self.SERVICE_OPTS)['Dataset']
-        elif otype == 'project':
+                ["Dataset"], rtime(int(start)), rtime(int(end)), p, self.SERVICE_OPTS
+            )["Dataset"]
+        elif otype == "project":
             return tm.countByPeriod(
-                ['Project'], rtime(int(start)), rtime(int(end)), p,
-                self.SERVICE_OPTS)['Project']
+                ["Project"], rtime(int(start)), rtime(int(end)), p, self.SERVICE_OPTS
+            )["Project"]
         else:
             c = tm.countByPeriod(
-                ['Image', 'Dataset', 'Project'], rtime(int(start)),
-                rtime(int(end)), p, self.SERVICE_OPTS)
-            return c['Image']+c['Dataset']+c['Project']
+                ["Image", "Dataset", "Project"],
+                rtime(int(start)),
+                rtime(int(end)),
+                p,
+                self.SERVICE_OPTS,
+            )
+            return c["Image"] + c["Dataset"] + c["Project"]
 
     def getEventsByPeriod(self, start, end, eid):
         """
@@ -2061,8 +2149,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         p.theFilter = f
         service_opts = self.createServiceOptsDict()
         service_opts.setOmeroGroup(str(f.groupId.val))
-        return tm.getEventLogsByPeriod(rtime(start), rtime(end), p,
-                                       service_opts)
+        return tm.getEventLogsByPeriod(rtime(start), rtime(end), p, service_opts)
         # yield EventLogWrapper(self, e)
 
     def regroupFilesets(self, dsIds, fsIds):
@@ -2119,24 +2206,22 @@ class OmeroWebSafeCallWrapper(OmeroGatewaySafeCallWrapper):  # pragma: no cover
         if e.__class__ is Ice.ObjectNotExistException:
             # Restored proxy object re-creation logic from the pre-#5835
             # version of # _safeCallWrap() from omero.gateway. (See #6365)
-            logger.warn('Attempting to re-create proxy and re-call method.')
+            logger.warn("Attempting to re-create proxy and re-call method.")
             try:
-                self.proxyObjectWrapper._obj = \
-                    self.proxyObjectWrapper._create_func()
+                self.proxyObjectWrapper._obj = self.proxyObjectWrapper._create_func()
                 func = getattr(self.proxyObjectWrapper._obj, self.attr)
                 return func(*args, **kwargs)
             except Exception as e:
                 self.debug(e.__class__.__name__, args, kwargs)
                 raise
         else:
-            super(OmeroWebSafeCallWrapper, self).handle_exception(
-                e, *args, **kwargs)
+            super(OmeroWebSafeCallWrapper, self).handle_exception(e, *args, **kwargs)
 
 
 omero.gateway.SafeCallWrapper = OmeroWebSafeCallWrapper
 
 
-class OmeroWebObjectWrapper (object):
+class OmeroWebObjectWrapper(object):
 
     annotation_counter = None
 
@@ -2159,7 +2244,10 @@ class OmeroWebObjectWrapper (object):
             container = self._conn.getContainerService()
             m = container.getCollectionCount(
                 self._obj.__class__.__name__,
-                type(self._obj).ANNOTATIONLINKS, [self._oid], None)
+                type(self._obj).ANNOTATIONLINKS,
+                [self._oid],
+                None,
+            )
             if m[self._oid] > 0:
                 self.annotation_counter = m[self._oid]
                 return self.annotation_counter
@@ -2169,17 +2257,17 @@ class OmeroWebObjectWrapper (object):
     def getPermissions(self):
         p = None
         if self.details.getPermissions() is None:
-            return 'unknown'
+            return "unknown"
         else:
             p = self.details.getPermissions()
         if p.isGroupWrite():
-            flag = 'Read-Write'
+            flag = "Read-Write"
         elif p.isGroupAnnotate():
-            flag = 'Read-Annotate'
+            flag = "Read-Annotate"
         elif p.isGroupRead():
-            flag = 'Read-Only'
+            flag = "Read-Only"
         elif p.isUserRead():
-            flag = 'Private'
+            flag = "Private"
         else:
             flag = p
         return flag
@@ -2198,7 +2286,7 @@ class OmeroWebObjectWrapper (object):
             elif length >= 30:
                 splited = []
                 for v in range(0, len(self.name), 30):
-                    splited.append(self.name[v:v+30]+"\n")
+                    splited.append(self.name[v : v + 30] + "\n")
                 return "".join(splited)
         except Exception:
             logger.info(traceback.format_exc())
@@ -2235,19 +2323,29 @@ class OmeroWebObjectWrapper (object):
         parent_type = self.OMERO_CLASS
         userid = self._conn.getUserId()
 
-        ratingAnns = list(self._conn.getAnnotationLinks(
-            parent_type, parent_ids=[self.id], ns=rating_ns))
+        ratingAnns = list(
+            self._conn.getAnnotationLinks(
+                parent_type, parent_ids=[self.id], ns=rating_ns
+            )
+        )
         # filter for links I own
-        ratingAnns = [r for r in ratingAnns
-                      if r.getDetails().owner.id.val == userid]
+        ratingAnns = [r for r in ratingAnns if r.getDetails().owner.id.val == userid]
         ratingLink = ratingAnns and ratingAnns[0] or None
 
         def getLinkCount(annId):
             linkCount = 0
-            for parentType in ["Project", "Dataset", "Image", "Screen",
-                               "Plate", "PlateAcquisition", "Well"]:
-                annLinks = list(self._conn.getAnnotationLinks(
-                    parentType, ann_ids=[annId]))
+            for parentType in [
+                "Project",
+                "Dataset",
+                "Image",
+                "Screen",
+                "Plate",
+                "PlateAcquisition",
+                "Well",
+            ]:
+                annLinks = list(
+                    self._conn.getAnnotationLinks(parentType, ann_ids=[annId])
+                )
                 linkCount += len(annLinks)
             return linkCount
 
@@ -2257,10 +2355,10 @@ class OmeroWebObjectWrapper (object):
             ratingAnn = omero.model.LongAnnotationI()
             ratingAnn.setLongValue(rlong(value))
             ratingAnn.setNs(rstring(rating_ns))
-            self._conn.SERVICE_OPTS.setOmeroGroup(
-                self.getDetails().group.id.val)
+            self._conn.SERVICE_OPTS.setOmeroGroup(self.getDetails().group.id.val)
             ratingAnn = self._conn.getUpdateService().saveAndReturnObject(
-                ratingAnn, self._conn.SERVICE_OPTS)
+                ratingAnn, self._conn.SERVICE_OPTS
+            )
             self.linkAnnotation(AnnotationWrapper(self._conn, ratingAnn))
 
         if ratingLink is not None:
@@ -2281,8 +2379,7 @@ class OmeroWebObjectWrapper (object):
             addRating(rating)
 
 
-class ExperimenterWrapper(OmeroWebObjectWrapper,
-                          omero.gateway.ExperimenterWrapper):
+class ExperimenterWrapper(OmeroWebObjectWrapper, omero.gateway.ExperimenterWrapper):
     """
     omero_model_ExperimenterI class wrapper overwrite
     omero.gateway.ExperimenterWrapper and extend OmeroWebObjectWrapper.
@@ -2292,11 +2389,11 @@ class ExperimenterWrapper(OmeroWebObjectWrapper,
 
     def __prepare__(self, **kwargs):
         super(ExperimenterWrapper, self).__prepare__(**kwargs)
-        if 'ldapUser' in kwargs:
-            self.annotation_counter = kwargs['ldapUser']
+        if "ldapUser" in kwargs:
+            self.annotation_counter = kwargs["ldapUser"]
 
     def isEditable(self):
-        return self.omeName.lower() != 'guest'
+        return self.omeName.lower() != "guest"
 
     def isLdapUser(self):
         """
@@ -2319,8 +2416,7 @@ class ExperimenterWrapper(OmeroWebObjectWrapper,
             return ExperimenterGroupWrapper(self._conn, geMap[0].parent)
         return None
 
-    def getOtherGroups(self, excluded_names=("user", "guest"),
-                       excluded_ids=list()):
+    def getOtherGroups(self, excluded_names=("user", "guest"), excluded_ids=list()):
         for gem in self.copyGroupExperimenterMap():
             if gem is None:
                 continue
@@ -2336,8 +2432,9 @@ class ExperimenterWrapper(OmeroWebObjectWrapper,
 omero.gateway.ExperimenterWrapper = ExperimenterWrapper
 
 
-class ExperimenterGroupWrapper(OmeroWebObjectWrapper,
-                               omero.gateway.ExperimenterGroupWrapper):
+class ExperimenterGroupWrapper(
+    OmeroWebObjectWrapper, omero.gateway.ExperimenterGroupWrapper
+):
     """
     omero_model_ExperimenterGroupI class wrapper overwrite
     omero.gateway.ExperimenterGroupWrapper
@@ -2345,7 +2442,7 @@ class ExperimenterGroupWrapper(OmeroWebObjectWrapper,
     """
 
     def isEditable(self):
-        return self.name.lower() not in ('guest', 'user')
+        return self.name.lower() not in ("guest", "user")
 
     def loadLeadersAndMembers(self):
         """
@@ -2361,8 +2458,11 @@ class ExperimenterGroupWrapper(OmeroWebObjectWrapper,
         self.colleagues.sort(key=lambda x: x.getLastName().lower())
         # Only show 'All Members' option if configured, and we're not in a
         # private group
-        if (self.details.permissions.isGroupRead() or self._conn.isAdmin() or
-                self.isOwner()):
+        if (
+            self.details.permissions.isGroupRead()
+            or self._conn.isAdmin()
+            or self.isOwner()
+        ):
             self.all = True
 
     def getOwners(self):
@@ -2373,8 +2473,7 @@ class ExperimenterGroupWrapper(OmeroWebObjectWrapper,
                 yield ExperimenterWrapper(self._conn, gem.child)
 
     def getOwnersNames(self):
-        warnings.warn("getOwnersNames() deprecated in 5.7.0",
-                      DeprecationWarning)
+        warnings.warn("getOwnersNames() deprecated in 5.7.0", DeprecationWarning)
         owners = list()
         for e in self.getOwners():
             owners.append(e.getFullName())
@@ -2420,8 +2519,8 @@ class ProjectWrapper(OmeroWebObjectWrapper, omero.gateway.ProjectWrapper):
 
     def __prepare__(self, **kwargs):
         super(ProjectWrapper, self).__prepare__(**kwargs)
-        if 'annotation_counter' in kwargs:
-            self.annotation_counter = kwargs['annotation_counter']
+        if "annotation_counter" in kwargs:
+            self.annotation_counter = kwargs["annotation_counter"]
 
 
 omero.gateway.ProjectWrapper = ProjectWrapper
@@ -2437,17 +2536,16 @@ class DatasetWrapper(OmeroWebObjectWrapper, omero.gateway.DatasetWrapper):
 
     def __prepare__(self, **kwargs):
         super(DatasetWrapper, self).__prepare__(**kwargs)
-        if 'annotation_counter' in kwargs:
-            self.annotation_counter = kwargs['annotation_counter']
-        if 'link' in kwargs:
-            self.link = 'link' in kwargs and kwargs['link'] or None
+        if "annotation_counter" in kwargs:
+            self.annotation_counter = kwargs["annotation_counter"]
+        if "link" in kwargs:
+            self.link = "link" in kwargs and kwargs["link"] or None
 
 
 omero.gateway.DatasetWrapper = DatasetWrapper
 
 
-class ImageWrapper (OmeroWebObjectWrapper,
-                    omero.gateway.ImageWrapper):
+class ImageWrapper(OmeroWebObjectWrapper, omero.gateway.ImageWrapper):
     """
     omero_model_ImageI class wrapper overwrite omero.gateway.ImageWrapper
     and extends OmeroWebObjectWrapper.
@@ -2457,10 +2555,10 @@ class ImageWrapper (OmeroWebObjectWrapper,
 
     def __prepare__(self, **kwargs):
         super(ImageWrapper, self).__prepare__(**kwargs)
-        if 'annotation_counter' in kwargs:
-            self.annotation_counter = kwargs['annotation_counter']
-        if 'link' in kwargs:
-            self.link = 'link' in kwargs and kwargs['link'] or None
+        if "annotation_counter" in kwargs:
+            self.annotation_counter = kwargs["annotation_counter"]
+        if "link" in kwargs:
+            self.link = "link" in kwargs and kwargs["link"] or None
 
     def getPixelSizeUnits(self):
         """
@@ -2572,7 +2670,7 @@ class ImageWrapper (OmeroWebObjectWrapper,
         try:
             return super(ImageWrapper, self).getChannels(*args, **kwargs)
         except Exception:
-            logger.error('Failed to load channels:', exc_info=True)
+            logger.error("Failed to load channels:", exc_info=True)
             return None
 
     def showOriginalFilePaths(self):
@@ -2622,10 +2720,10 @@ class PlateWrapper(OmeroWebObjectWrapper, omero.gateway.PlateWrapper):
 
     def __prepare__(self, **kwargs):
         super(PlateWrapper, self).__prepare__(**kwargs)
-        if 'annotation_counter' in kwargs:
-            self.annotation_counter = kwargs['annotation_counter']
-        if 'link' in kwargs:
-            self.link = 'link' in kwargs and kwargs['link'] or None
+        if "annotation_counter" in kwargs:
+            self.annotation_counter = kwargs["annotation_counter"]
+        if "link" in kwargs:
+            self.link = "link" in kwargs and kwargs["link"] or None
 
 
 omero.gateway.PlateWrapper = PlateWrapper
@@ -2641,17 +2739,18 @@ class WellWrapper(OmeroWebObjectWrapper, omero.gateway.WellWrapper):
 
     def __prepare__(self, **kwargs):
         super(WellWrapper, self).__prepare__(**kwargs)
-        if 'annotation_counter' in kwargs:
-            self.annotation_counter = kwargs['annotation_counter']
-        if 'link' in kwargs:
-            self.link = 'link' in kwargs and kwargs['link'] or None
+        if "annotation_counter" in kwargs:
+            self.annotation_counter = kwargs["annotation_counter"]
+        if "link" in kwargs:
+            self.link = "link" in kwargs and kwargs["link"] or None
 
 
 omero.gateway.WellWrapper = WellWrapper
 
 
-class PlateAcquisitionWrapper(OmeroWebObjectWrapper,
-                              omero.gateway.PlateAcquisitionWrapper):
+class PlateAcquisitionWrapper(
+    OmeroWebObjectWrapper, omero.gateway.PlateAcquisitionWrapper
+):
 
     """
     omero_model_PlateI class wrapper overwrite omero.gateway.PlateWrapper
@@ -2662,14 +2761,14 @@ class PlateAcquisitionWrapper(OmeroWebObjectWrapper,
 
     def __prepare__(self, **kwargs):
         super(PlateAcquisitionWrapper, self).__prepare__(**kwargs)
-        if 'annotation_counter' in kwargs:
-            self.annotation_counter = kwargs['annotation_counter']
+        if "annotation_counter" in kwargs:
+            self.annotation_counter = kwargs["annotation_counter"]
 
 
 omero.gateway.PlateAcquisitionWrapper = PlateAcquisitionWrapper
 
 
-class ScreenWrapper (OmeroWebObjectWrapper, omero.gateway.ScreenWrapper):
+class ScreenWrapper(OmeroWebObjectWrapper, omero.gateway.ScreenWrapper):
     """
     omero_model_ScreenI class wrapper overwrite omero.gateway.ScreenWrapper
     and extends OmeroWebObjectWrapper.
@@ -2679,14 +2778,14 @@ class ScreenWrapper (OmeroWebObjectWrapper, omero.gateway.ScreenWrapper):
 
     def __prepare__(self, **kwargs):
         super(ScreenWrapper, self).__prepare__(**kwargs)
-        if 'annotation_counter' in kwargs:
-            self.annotation_counter = kwargs['annotation_counter']
+        if "annotation_counter" in kwargs:
+            self.annotation_counter = kwargs["annotation_counter"]
 
 
 omero.gateway.ScreenWrapper = ScreenWrapper
 
 
-class EventLogWrapper (omero.gateway.BlitzObjectWrapper):
+class EventLogWrapper(omero.gateway.BlitzObjectWrapper):
     """
     omero_model_EventLogI class wrapper extends
     omero.gateway.BlitzObjectWrapper.
@@ -2695,7 +2794,7 @@ class EventLogWrapper (omero.gateway.BlitzObjectWrapper):
     LINK_CLASS = "EventLog"
 
 
-class ShareWrapper (omero.gateway.BlitzObjectWrapper):
+class ShareWrapper(omero.gateway.BlitzObjectWrapper):
     """
     omero_model_ShareI class wrapper extends BlitzObjectWrapper.
     """
@@ -2721,7 +2820,7 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
 
         # workaround for problem of year 2038
         try:
-            d = self.started+self.timeToLive
+            d = self.started + self.timeToLive
             if d > 2051222400000:
                 return datetime(2035, 1, 1, 0, 0, 0)
             return datetime.fromtimestamp(d / 1000)
@@ -2737,7 +2836,7 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
         @rtype:     datetime object
         """
 
-        return datetime.fromtimestamp(self.getStarted()/1000)
+        return datetime.fromtimestamp(self.getStarted() / 1000)
 
     def isExpired(self):
         """
@@ -2750,7 +2849,7 @@ class ShareWrapper (omero.gateway.BlitzObjectWrapper):
         # workaround for problem of year 2038
         now = time.time()
         try:
-            d = int(self.started+self.timeToLive)
+            d = int(self.started + self.timeToLive)
             if (d / 1000) > now:
                 return False
             return True

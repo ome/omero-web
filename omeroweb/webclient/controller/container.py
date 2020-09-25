@@ -61,10 +61,25 @@ class BaseContainer(BaseController):
 
     orphaned = False
 
-    def __init__(self, conn, project=None, dataset=None, image=None,
-                 screen=None, plate=None, acquisition=None, well=None,
-                 tag=None, tagset=None, file=None, comment=None,
-                 annotation=None, index=None, orphaned=None, **kw):
+    def __init__(
+        self,
+        conn,
+        project=None,
+        dataset=None,
+        image=None,
+        screen=None,
+        plate=None,
+        acquisition=None,
+        well=None,
+        tag=None,
+        tagset=None,
+        file=None,
+        comment=None,
+        annotation=None,
+        index=None,
+        orphaned=None,
+        **kw
+    ):
         BaseController.__init__(self, conn)
         if project is not None:
             self.obj_type = "project"
@@ -88,12 +103,9 @@ class BaseContainer(BaseController):
             self.assertNotNone(self.plate._obj, plate, "Plate")
         if acquisition is not None:
             self.obj_type = "acquisition"
-            self.acquisition = self.conn.getObject(
-                "PlateAcquisition", acquisition)
-            self.assertNotNone(
-                self.acquisition, acquisition, "Plate Acquisition")
-            self.assertNotNone(
-                self.acquisition._obj, acquisition, "Plate Acquisition")
+            self.acquisition = self.conn.getObject("PlateAcquisition", acquisition)
+            self.assertNotNone(self.acquisition, acquisition, "Plate Acquisition")
+            self.assertNotNone(self.acquisition._obj, acquisition, "Plate Acquisition")
         if image is not None:
             self.obj_type = "image"
             self.image = self.conn.getObject("Image", image)
@@ -140,8 +152,8 @@ class BaseContainer(BaseController):
         if obj is None:
             raise AttributeError(
                 "We are sorry, but that %s (id:%s) does not exist, or if it"
-                " does, you have no permission to see it."
-                % (obj_name, obj_id))
+                " does, you have no permission to see it." % (obj_name, obj_id)
+            )
 
     def _get_object(self):
         """
@@ -202,8 +214,7 @@ class BaseContainer(BaseController):
         if self.plate is not None:
             return self.plate.getNumberOfFields()
         elif self.acquisition:
-            p = self.conn.getObject(
-                "Plate", self.acquisition._obj.plate.id.val)
+            p = self.conn.getObject("Plate", self.acquisition._obj.plate.id.val)
             return p.getNumberOfFields(self.acquisition.getId())
 
     def getPlateId(self):
@@ -232,8 +243,7 @@ class BaseContainer(BaseController):
         """
         can = True
         try:
-            limit = request.session['server_settings'][
-                'download_as']['max_size']
+            limit = request.session["server_settings"]["download_as"]["max_size"]
         except Exception:
             limit = 144000000
         if self.image:
@@ -242,12 +252,11 @@ class BaseContainer(BaseController):
             if sizex is None or sizey is None or (sizex * sizey) > limit:
                 can = False
         elif objDict is not None:
-            if 'image' in objDict:
-                for i in objDict['image']:
+            if "image" in objDict:
+                for i in objDict["image"]:
                     sizex = i.getSizeX()
                     sizey = i.getSizeY()
-                    if sizex is None or sizey is None or\
-                            (sizex * sizey) > limit:
+                    if sizex is None or sizey is None or (sizex * sizey) > limit:
                         can = False
         return can
 
@@ -259,14 +268,17 @@ class BaseContainer(BaseController):
         if objDict is not None:
             for key in objDict:
                 for o in objDict[key]:
-                    if hasattr(o, 'canDownload'):
+                    if hasattr(o, "canDownload"):
                         if not o.canDownload():
                             return False
             return True
         # As used in metadata_general panel
         else:
-            return self.image.canDownload() or \
-                self.well.canDownload() or self.plate.canDownload()
+            return (
+                self.image.canDownload()
+                or self.well.canDownload()
+                or self.plate.canDownload()
+            )
 
     def list_scripts(self):
         """
@@ -299,46 +311,56 @@ class BaseContainer(BaseController):
         # id is used in url and is mapped to full script path by
         # views.figure_script()
         splitView = {
-            'id': 'SplitView',
-            'name': 'Split View Figure',
-            'enabled': False,
-            'tooltip': ("Create a figure of images, splitting their channels"
-                        " into separate views")}
+            "id": "SplitView",
+            "name": "Split View Figure",
+            "enabled": False,
+            "tooltip": (
+                "Create a figure of images, splitting their channels"
+                " into separate views"
+            ),
+        }
         # Split View Figure is enabled if we have at least one image with
         # SizeC > 1
         if image:
-            splitView['enabled'] = (
-                image.getSizeC() and image.getSizeC() > 1
-                and 'Split_View_Figure.py' in availableScripts)
+            splitView["enabled"] = (
+                image.getSizeC()
+                and image.getSizeC() > 1
+                and "Split_View_Figure.py" in availableScripts
+            )
         elif objDict is not None:
-            if 'image' in objDict:
-                for i in objDict['image']:
+            if "image" in objDict:
+                for i in objDict["image"]:
                     if i.getSizeC() > 1:
-                        splitView['enabled'] = 'Split_View_Figure.py' in \
-                            availableScripts
+                        splitView["enabled"] = (
+                            "Split_View_Figure.py" in availableScripts
+                        )
                         break
         thumbnailFig = {
-            'id': 'Thumbnail',
-            'name': 'Thumbnail Figure',
-            'enabled': False,
-            'tooltip': ("Export a figure of thumbnails, optionally sorted by"
-                        " tag")}
+            "id": "Thumbnail",
+            "name": "Thumbnail Figure",
+            "enabled": False,
+            "tooltip": ("Export a figure of thumbnails, optionally sorted by" " tag"),
+        }
         # Thumbnail figure is enabled if we have Datasets or Images selected
         if self.image or self.dataset or self.well:
-            thumbnailFig['enabled'] = 'Thumbnail_Figure.py' in availableScripts
+            thumbnailFig["enabled"] = "Thumbnail_Figure.py" in availableScripts
         elif objDict is not None:
-            if 'image' in objDict or 'dataset' in objDict:
-                thumbnailFig['enabled'] = 'Thumbnail_Figure.py' in \
-                    availableScripts
+            if "image" in objDict or "dataset" in objDict:
+                thumbnailFig["enabled"] = "Thumbnail_Figure.py" in availableScripts
 
         makeMovie = {
-            'id': 'MakeMovie',
-            'name': 'Make Movie',
-            'enabled': False,
-            'tooltip': "Create a movie of the image"}
-        if (image and image.getSizeT() and image.getSizeZ() and
-                (image.getSizeT() > 1 or image.getSizeZ() > 1)):
-            makeMovie['enabled'] = 'Make_Movie.py' in availableScripts
+            "id": "MakeMovie",
+            "name": "Make Movie",
+            "enabled": False,
+            "tooltip": "Create a movie of the image",
+        }
+        if (
+            image
+            and image.getSizeT()
+            and image.getSizeZ()
+            and (image.getSizeT() > 1 or image.getSizeZ() > 1)
+        ):
+            makeMovie["enabled"] = "Make_Movie.py" in availableScripts
 
         figureScripts.append(splitView)
         figureScripts.append(thumbnailFig)
@@ -360,10 +382,14 @@ class BaseContainer(BaseController):
             if p is not None:
                 comp_obj = p
             for ann in comp_obj.listAnnotations():
-                if (hasattr(ann._obj, "file") and
-                        ann.ns == omero.constants.namespaces.NSCOMPANIONFILE):
-                    if (ann.getFileName() !=
-                            omero.constants.annotation.file.ORIGINALMETADATA):
+                if (
+                    hasattr(ann._obj, "file")
+                    and ann.ns == omero.constants.namespaces.NSCOMPANIONFILE
+                ):
+                    if (
+                        ann.getFileName()
+                        != omero.constants.annotation.file.ORIGINALMETADATA
+                    ):
                         self.companion_files.append(ann)
 
     def channelMetadata(self, noRE=False):
@@ -384,7 +410,7 @@ class BaseContainer(BaseController):
 
     def loadTagsRecursive(self, eid=None, offset=None, limit=1000):
         if eid is not None:
-            if eid == -1:       # Load data for all users
+            if eid == -1:  # Load data for all users
                 if self.canUseOthersAnns():
                     eid = None
                 else:
@@ -393,8 +419,9 @@ class BaseContainer(BaseController):
                 self.experimenter = self.conn.getObject("Experimenter", eid)
         else:
             eid = self.conn.getEventContext().userId
-        self.tags_recursive, self.tags_recursive_owners = \
-            self.conn.listTagsRecursive(eid, offset, limit)
+        self.tags_recursive, self.tags_recursive_owners = self.conn.listTagsRecursive(
+            eid, offset, limit
+        )
 
     def getTagCount(self, eid=None):
         return self.conn.getTagCount(eid)
@@ -420,11 +447,12 @@ class BaseContainer(BaseController):
         self.orphans = self.conn.countOrphans("Image", eid)
 
         self.containers = {
-            'projects': pr_list,
-            'datasets': ds_list,
-            'screens': sc_list,
-            'plates': pl_list}
-        self.c_size = len(pr_list)+len(ds_list)+len(sc_list)+len(pl_list)
+            "projects": pr_list,
+            "datasets": ds_list,
+            "screens": sc_list,
+            "plates": pl_list,
+        }
+        self.c_size = len(pr_list) + len(ds_list) + len(sc_list) + len(pl_list)
 
     def canUseOthersAnns(self):
         """
@@ -446,16 +474,18 @@ class BaseContainer(BaseController):
         perms = str(group.getDetails().getPermissions())
         if perms in ("rwrw--", "rwra--"):
             return True
-        if (perms == "rwr---" and (self.conn.isAdmin() or
-                                   self.conn.isLeader(group.id))):
+        if perms == "rwr---" and (self.conn.isAdmin() or self.conn.isLeader(group.id)):
             return True
         return False
 
     def getFilesByObject(self, parent_type=None, parent_ids=None):
-        eid = ((not self.canUseOthersAnns()) and
-               self.conn.getEventContext().userId or None)
-        ns = [omero.constants.namespaces.NSCOMPANIONFILE,
-              omero.constants.namespaces.NSEXPERIMENTERPHOTO]
+        eid = (
+            (not self.canUseOthersAnns()) and self.conn.getEventContext().userId or None
+        )
+        ns = [
+            omero.constants.namespaces.NSCOMPANIONFILE,
+            omero.constants.namespaces.NSEXPERIMENTERPHOTO,
+        ]
 
         def sort_file_anns(file_ann_gen):
             file_anns = list(file_ann_gen)
@@ -466,35 +496,47 @@ class BaseContainer(BaseController):
             return file_anns
 
         if self.image is not None:
-            return sort_file_anns(self.image.listOrphanedAnnotations(
-                eid=eid, ns=ns, anntype='File'))
+            return sort_file_anns(
+                self.image.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
+            )
         elif self.dataset is not None:
-            return sort_file_anns(self.dataset.listOrphanedAnnotations(
-                eid=eid, ns=ns, anntype='File'))
+            return sort_file_anns(
+                self.dataset.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
+            )
         elif self.project is not None:
-            return sort_file_anns(self.project.listOrphanedAnnotations(
-                eid=eid, ns=ns, anntype='File'))
+            return sort_file_anns(
+                self.project.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
+            )
         elif self.well is not None:
             return sort_file_anns(
-                self.well.getWellSample().image().listOrphanedAnnotations(
-                    eid=eid, ns=ns, anntype='File'))
+                self.well.getWellSample()
+                .image()
+                .listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
+            )
         elif self.plate is not None:
-            return sort_file_anns(self.plate.listOrphanedAnnotations(
-                eid=eid, ns=ns, anntype='File'))
+            return sort_file_anns(
+                self.plate.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
+            )
         elif self.screen is not None:
-            return sort_file_anns(self.screen.listOrphanedAnnotations(
-                eid=eid, ns=ns, anntype='File'))
+            return sort_file_anns(
+                self.screen.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
+            )
         elif self.acquisition is not None:
-            return sort_file_anns(self.acquisition.listOrphanedAnnotations(
-                eid=eid, ns=ns, anntype='File'))
+            return sort_file_anns(
+                self.acquisition.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
+            )
         elif parent_type and parent_ids:
             parent_type = parent_type.title()
             if parent_type == "Acquisition":
                 parent_type = "PlateAcquisition"
-            return sort_file_anns(self.conn.listOrphanedAnnotations(
-                parent_type, parent_ids, eid=eid, ns=ns, anntype='File'))
+            return sort_file_anns(
+                self.conn.listOrphanedAnnotations(
+                    parent_type, parent_ids, eid=eid, ns=ns, anntype="File"
+                )
+            )
         else:
             return sort_file_anns(self.conn.listFileAnnotations(eid=eid))
+
     ####################################################################
     # Creation
 
@@ -510,8 +552,7 @@ class BaseContainer(BaseController):
 
     def createTag(self, name, description=None, owner=None):
         tId = self.conn.createContainer("tag", name, description, owner=owner)
-        if (self.tag and
-                self.tag.getNs() == omero.constants.metadata.NSINSIGHTTAGSET):
+        if self.tag and self.tag.getNs() == omero.constants.metadata.NSINSIGHTTAGSET:
             ctx = self.conn.SERVICE_OPTS.copy()
             if owner is not None:
                 ctx.setOmeroUser(owner)
@@ -536,10 +577,10 @@ class BaseContainer(BaseController):
             if len(oids[k]) > 0:
                 for obj in oids[k]:
                     if isinstance(obj._obj, omero.model.PlateAcquisitionI):
-                        t = 'PlateAcquisition'
+                        t = "PlateAcquisition"
                     else:
                         t = k.lower().title()
-                    l_ann = getattr(omero.model, t+"AnnotationLinkI")()
+                    l_ann = getattr(omero.model, t + "AnnotationLinkI")()
                     l_ann.setParent(obj._obj)
                     l_ann.setChild(ann._obj)
                     new_links.append(l_ann)
@@ -548,8 +589,7 @@ class BaseContainer(BaseController):
             self.conn.saveArray(new_links)
         return ann.getId()
 
-    def createTagAnnotations(self, tag, desc, oids, well_index=0,
-                             tag_group_id=None):
+    def createTagAnnotations(self, tag, desc, oids, well_index=0, tag_group_id=None):
         """
         Creates a new tag (with description) OR uses existing tag with the
         specified name if found.
@@ -572,8 +612,7 @@ class BaseContainer(BaseController):
             if tag_group_id:  # Put new tag in given tag set
                 tag_group = None
                 try:
-                    tag_group = self.conn.getObject(
-                        'TagAnnotation', tag_group_id)
+                    tag_group = self.conn.getObject("TagAnnotation", tag_group_id)
                 except Exception:
                     pass
                 if tag_group is not None:
@@ -588,13 +627,13 @@ class BaseContainer(BaseController):
             if len(oids[k]) > 0:
                 for ob in oids[k]:
                     if isinstance(ob._obj, omero.model.PlateAcquisitionI):
-                        t = 'PlateAcquisition'
+                        t = "PlateAcquisition"
                         obj = ob
                     else:
                         t = k.lower().title()
                         obj = ob
                     parent_objs.append(obj)
-                    l_ann = getattr(omero.model, t+"AnnotationLinkI")()
+                    l_ann = getattr(omero.model, t + "AnnotationLinkI")()
                     l_ann.setParent(obj._obj)
                     l_ann.setChild(ann._obj)
                     new_links.append(l_ann)
@@ -633,16 +672,17 @@ class BaseContainer(BaseController):
             if len(oids[k]) > 0:
                 for obj in oids[k]:
                     if isinstance(obj._obj, omero.model.PlateAcquisitionI):
-                        t = 'PlateAcquisition'
+                        t = "PlateAcquisition"
                     else:
                         t = k.lower().title()
-                    l_ann = getattr(omero.model, t+"AnnotationLinkI")()
+                    l_ann = getattr(omero.model, t + "AnnotationLinkI")()
                     l_ann.setParent(obj._obj)
                     l_ann.setChild(fa._obj)
                     new_links.append(l_ann)
         if len(new_links) > 0:
             new_links = self.conn.getUpdateService().saveAndReturnArray(
-                new_links, self.conn.SERVICE_OPTS)
+                new_links, self.conn.SERVICE_OPTS
+            )
         return fa.getId()
 
     def createAnnotationsLinks(self, atype, tids, oids):
@@ -663,8 +703,8 @@ class BaseContainer(BaseController):
         parent_objs = []
         for k in oids:
             if len(oids[k]) > 0:
-                if k.lower() == 'acquisition':
-                    parent_type = 'PlateAcquisition'
+                if k.lower() == "acquisition":
+                    parent_type = "PlateAcquisition"
                 else:
                     parent_type = k.lower().title()
                 parent_ids = [o.id for o in oids[k]]
@@ -673,18 +713,16 @@ class BaseContainer(BaseController):
                 params.theFilter = omero.sys.Filter()
                 params.theFilter.ownerId = rlong(self.conn.getUserId())
                 links = self.conn.getAnnotationLinks(
-                    parent_type, parent_ids=parent_ids, ann_ids=tids,
-                    params=params)
-                pcLinks = [(link.parent.id.val, link.child.id.val)
-                           for link in links]
+                    parent_type, parent_ids=parent_ids, ann_ids=tids, params=params
+                )
+                pcLinks = [(link.parent.id.val, link.child.id.val) for link in links]
                 # Create link between each object and annotation
                 for obj in self.conn.getObjects(parent_type, parent_ids):
                     parent_objs.append(obj)
                     for a in annotations:
                         if (obj.id, a.id) in pcLinks:
-                            continue    # link already exists
-                        l_ann = getattr(
-                            omero.model, parent_type+"AnnotationLinkI")()
+                            continue  # link already exists
+                        l_ann = getattr(omero.model, parent_type + "AnnotationLinkI")()
                         l_ann.setParent(obj._obj)
                         l_ann.setChild(a._obj)
                         new_links.append(l_ann)
@@ -693,13 +731,16 @@ class BaseContainer(BaseController):
         try:
             # will fail if any of the links already exist
             saved_links = self.conn.getUpdateService().saveAndReturnArray(
-                new_links, self.conn.SERVICE_OPTS)
+                new_links, self.conn.SERVICE_OPTS
+            )
         except omero.ValidationException:
             for link in new_links:
                 try:
                     saved_links.append(
                         self.conn.getUpdateService().saveAndReturnObject(
-                            link, self.conn.SERVICE_OPTS))
+                            link, self.conn.SERVICE_OPTS
+                        )
+                    )
                 except Exception:
                     failed += 1
 
@@ -718,7 +759,7 @@ class BaseContainer(BaseController):
 
     def updateName(self, o_type, name):
         obj = getattr(self, o_type)._obj
-        if o_type not in ('tag', 'tagset'):
+        if o_type not in ("tag", "tagset"):
             obj.name = rstring(str(name))
         else:
             obj.textValue = rstring(str(name))
@@ -782,16 +823,21 @@ class BaseContainer(BaseController):
         toDelete = []
         notFound = []
         for p in parents:
-            parent = p.split('-')
+            parent = p.split("-")
             dtype = str(parent[0])
             parentId = int(parent[1])
             if dtype == "acquisition":
                 dtype = "PlateAcquisition"
             if self.tag:
                 for al in self.tag.getParentLinks(dtype, [parentId]):
-                    if (al is not None and al.canDelete() and (
-                            tag_owner_id is None or
-                            unwrap(al.details.owner.id) == tag_owner_id)):
+                    if (
+                        al is not None
+                        and al.canDelete()
+                        and (
+                            tag_owner_id is None
+                            or unwrap(al.details.owner.id) == tag_owner_id
+                        )
+                    ):
                         toDelete.append(al._obj)
             elif self.file:
                 for al in self.file.getParentLinks(dtype, [parentId]):
@@ -804,17 +850,17 @@ class BaseContainer(BaseController):
                     if al is not None and al.canDelete():
                         toDelete.append(al._obj)
             elif self.dataset is not None:
-                if dtype == 'project':
+                if dtype == "project":
                     for pdl in self.dataset.getParentLinks([parentId]):
                         if pdl is not None:
                             toDelete.append(pdl._obj)
             elif self.plate is not None:
-                if dtype == 'screen':
+                if dtype == "screen":
                     for spl in self.plate.getParentLinks([parentId]):
                         if spl is not None:
                             toDelete.append(spl._obj)
             elif self.image is not None:
-                if dtype == 'dataset':
+                if dtype == "dataset":
                     for dil in self.image.getParentLinks([parentId]):
                         if dil is not None:
                             toDelete.append(dil._obj)
@@ -823,8 +869,8 @@ class BaseContainer(BaseController):
         # Need to group objects by class then batch delete
         linksByType = {}
         for obj in toDelete:
-            objType = obj.__class__.__name__.rstrip('I')
-            if (objType not in linksByType):
+            objType = obj.__class__.__name__.rstrip("I")
+            if objType not in linksByType:
                 linksByType[objType] = []
             linksByType[objType].append(obj.id.val)
         for linkType, ids in linksByType.items():
@@ -838,35 +884,38 @@ class BaseContainer(BaseController):
     def deleteItem(self, child=False, anns=False):
         handle = None
         if self.image:
-            handle = self.conn.deleteObjects(
-                "Image", [self.image.id], deleteAnns=anns)
+            handle = self.conn.deleteObjects("Image", [self.image.id], deleteAnns=anns)
         elif self.dataset:
             handle = self.conn.deleteObjects(
-                "Dataset", [self.dataset.id], deleteChildren=child,
-                deleteAnns=anns)
+                "Dataset", [self.dataset.id], deleteChildren=child, deleteAnns=anns
+            )
         elif self.project:
             handle = self.conn.deleteObjects(
-                "Project", [self.project.id], deleteChildren=child,
-                deleteAnns=anns)
+                "Project", [self.project.id], deleteChildren=child, deleteAnns=anns
+            )
         elif self.screen:
             handle = self.conn.deleteObjects(
-                "Screen", [self.screen.id], deleteChildren=child,
-                deleteAnns=anns)
+                "Screen", [self.screen.id], deleteChildren=child, deleteAnns=anns
+            )
         elif self.plate:
             handle = self.conn.deleteObjects(
-                "Plate", [self.plate.id], deleteChildren=True,
-                deleteAnns=anns)
+                "Plate", [self.plate.id], deleteChildren=True, deleteAnns=anns
+            )
         elif self.comment:
             handle = self.conn.deleteObjects(
-                "Annotation", [self.comment.id], deleteAnns=anns)
+                "Annotation", [self.comment.id], deleteAnns=anns
+            )
         elif self.tag:
             handle = self.conn.deleteObjects(
-                "Annotation", [self.tag.id], deleteAnns=anns)
+                "Annotation", [self.tag.id], deleteAnns=anns
+            )
         elif self.file:
             handle = self.conn.deleteObjects(
-                "Annotation", [self.file.id], deleteAnns=anns)
+                "Annotation", [self.file.id], deleteAnns=anns
+            )
         return handle
 
     def deleteObjects(self, otype, ids, child=False, anns=False):
         return self.conn.deleteObjects(
-            otype, ids, deleteChildren=child, deleteAnns=anns)
+            otype, ids, deleteChildren=child, deleteAnns=anns
+        )

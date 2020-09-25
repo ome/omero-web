@@ -32,8 +32,8 @@ from django.core.urlresolvers import reverse
 
 from omero.testlib import ITest
 
-standard_library.install_aliases() # noqa
-from urllib.parse import urlencode # noqa
+standard_library.install_aliases()  # noqa
+from urllib.parse import urlencode  # noqa
 
 
 class IWebTest(ITest):
@@ -49,14 +49,14 @@ class IWebTest(ITest):
         cls.django_clients = []
         ome_name = cls.ctx.userName
         cls.django_client = cls.new_django_client(ome_name, ome_name)
-        rootpass = cls.root.ic.getProperties().getProperty('omero.rootpass')
+        rootpass = cls.root.ic.getProperties().getProperty("omero.rootpass")
         cls.django_root_client = cls.new_django_client("root", rootpass)
 
     @classmethod
     def teardown_class(cls):
-        logout_url = reverse('weblogout')
+        logout_url = reverse("weblogout")
         for client in cls.django_clients:
-            data = {'csrfmiddlewaretoken': client.cookies['csrftoken'].value}
+            data = {"csrfmiddlewaretoken": client.cookies["csrftoken"].value}
             response = client.post(logout_url, data=data)
             assert response.status_code == 302
         super(IWebTest, cls).teardown_class()
@@ -64,17 +64,17 @@ class IWebTest(ITest):
     @classmethod
     def new_django_client(cls, name, password):
         django_client = Client(enforce_csrf_checks=True)
-        login_url = reverse('weblogin')
+        login_url = reverse("weblogin")
 
         response = django_client.get(login_url)
         assert response.status_code == 200
-        csrf_token = django_client.cookies['csrftoken'].value
+        csrf_token = django_client.cookies["csrftoken"].value
 
         data = {
-            'server': 1,
-            'username': name,
-            'password': password,
-            'csrfmiddlewaretoken': csrf_token
+            "server": 1,
+            "username": name,
+            "password": password,
+            "csrfmiddlewaretoken": csrf_token,
         }
         response = django_client.post(login_url, data)
         assert response.status_code == 302
@@ -84,11 +84,11 @@ class IWebTest(ITest):
     @classmethod
     def new_django_client_from_session_id(cls, session_id):
         django_client = Client(enforce_csrf_checks=True)
-        index_url = reverse('webindex')
+        index_url = reverse("webindex")
 
         data = {
-            'server': 1,
-            'bsession': session_id,
+            "server": 1,
+            "bsession": session_id,
         }
         response = django_client.get(index_url, data)
         assert response.status_code == 200
@@ -102,27 +102,40 @@ class IWebTest(ITest):
         warnings.warn(
             "This method is deprecated as of OMERO 5.5.0. Use"
             " omero.test_lib.import_fake_file",
-            DeprecationWarning)
+            DeprecationWarning,
+        )
         images = self.import_fake_file(
-            client=client, pixelType="int16", sizeX=20, sizeY=20, sizeZ=5,
-            sizeT=6)
+            client=client, pixelType="int16", sizeX=20, sizeY=20, sizeZ=5, sizeT=6
+        )
         return images[0]
 
 
 # Helpers
-def _response(django_client, request_url, method, data=None, status_code=200,
-              content_type=MULTIPART_CONTENT, **extra):
-    response = getattr(django_client, method)(request_url,
-                                              data=data,
-                                              content_type=content_type,
-                                              **extra)
+def _response(
+    django_client,
+    request_url,
+    method,
+    data=None,
+    status_code=200,
+    content_type=MULTIPART_CONTENT,
+    **extra
+):
+    response = getattr(django_client, method)(
+        request_url, data=data, content_type=content_type, **extra
+    )
     assert response.status_code == status_code, response
     return response
 
 
-def csrf_response(django_client, request_url, method, data=None,
-                  status_code=200, content_type=MULTIPART_CONTENT,
-                  test_csrf_required=True):
+def csrf_response(
+    django_client,
+    request_url,
+    method,
+    data=None,
+    status_code=200,
+    content_type=MULTIPART_CONTENT,
+    test_csrf_required=True,
+):
     """
     Helper for testing post/put/delete with and without CSRF.
 
@@ -138,20 +151,37 @@ def csrf_response(django_client, request_url, method, data=None,
     """
     # First check that this would fail with 403 without CSRF token
     if test_csrf_required:
-        _response(django_client, request_url, method=method, data=data,
-                  status_code=403, content_type=content_type)
+        _response(
+            django_client,
+            request_url,
+            method=method,
+            data=data,
+            status_code=403,
+            content_type=content_type,
+        )
 
     # Should work as expected with CSRF token
-    csrf_token = django_client.cookies['csrftoken'].value
-    extra = {'HTTP_X_CSRFTOKEN': csrf_token}
-    return _response(django_client, request_url, method=method, data=data,
-                     status_code=status_code, content_type=content_type,
-                     **extra)
+    csrf_token = django_client.cookies["csrftoken"].value
+    extra = {"HTTP_X_CSRFTOKEN": csrf_token}
+    return _response(
+        django_client,
+        request_url,
+        method=method,
+        data=data,
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
 
 
 # POST
-def post(django_client, request_url, data=None, status_code=200,
-         content_type=MULTIPART_CONTENT):
+def post(
+    django_client,
+    request_url,
+    data=None,
+    status_code=200,
+    content_type=MULTIPART_CONTENT,
+):
     """
     Performs a POST request, and returns the response.
 
@@ -162,8 +192,14 @@ def post(django_client, request_url, data=None, status_code=200,
     :param content_type:
 
     """
-    return csrf_response(django_client, request_url, "post", data=data,
-                         status_code=status_code, content_type=content_type)
+    return csrf_response(
+        django_client,
+        request_url,
+        "post",
+        data=data,
+        status_code=status_code,
+        content_type=content_type,
+    )
 
 
 def post_json(django_client, request_url, data=None, status_code=200):
@@ -176,72 +212,109 @@ def post_json(django_client, request_url, data=None, status_code=200):
     :param status_code:     Verify that the response has this status
 
     """
-    rsp = post(django_client, request_url, json.dumps(data),
-               status_code=status_code, content_type='application/json')
-    assert rsp.get('Content-Type') == 'application/json'
+    rsp = post(
+        django_client,
+        request_url,
+        json.dumps(data),
+        status_code=status_code,
+        content_type="application/json",
+    )
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
-def _post_response(django_client, request_url, data, status_code=403,
-                   content_type=MULTIPART_CONTENT, **extra):
+def _post_response(
+    django_client,
+    request_url,
+    data,
+    status_code=403,
+    content_type=MULTIPART_CONTENT,
+    **extra
+):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use post_json",
-        DeprecationWarning)
-    return _response(django_client, request_url, method='post', data=data,
-                     status_code=status_code, content_type=content_type,
-                     **extra)
+        "This method is deprecated as of OMERO 5.4.0. Use post_json", DeprecationWarning
+    )
+    return _response(
+        django_client,
+        request_url,
+        method="post",
+        data=data,
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
 
 
-def _post_response_json(django_client, request_url, data, status_code=403,
-                        content_type=MULTIPART_CONTENT, **extra):
+def _post_response_json(
+    django_client,
+    request_url,
+    data,
+    status_code=403,
+    content_type=MULTIPART_CONTENT,
+    **extra
+):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use post_json",
-        DeprecationWarning)
-    rsp = _response(django_client, request_url, method='post', data=data,
-                    status_code=status_code, content_type=content_type,
-                    **extra)
-    assert rsp.get('Content-Type') == 'application/json'
+        "This method is deprecated as of OMERO 5.4.0. Use post_json", DeprecationWarning
+    )
+    rsp = _response(
+        django_client,
+        request_url,
+        method="post",
+        data=data,
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
-def _csrf_post_response(django_client, request_url, data, status_code=200,
-                        content_type=MULTIPART_CONTENT):
+def _csrf_post_response(
+    django_client, request_url, data, status_code=200, content_type=MULTIPART_CONTENT
+):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use post_json",
-        DeprecationWarning)
-    csrf_token = django_client.cookies['csrftoken'].value
-    extra = {'HTTP_X_CSRFTOKEN': csrf_token}
-    return _post_response(django_client, request_url, data=data,
-                          status_code=status_code, content_type=content_type,
-                          **extra)
+        "This method is deprecated as of OMERO 5.4.0. Use post_json", DeprecationWarning
+    )
+    csrf_token = django_client.cookies["csrftoken"].value
+    extra = {"HTTP_X_CSRFTOKEN": csrf_token}
+    return _post_response(
+        django_client,
+        request_url,
+        data=data,
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
 
 
-def _csrf_post_response_json(django_client, request_url,
-                             query_string, status_code=200):
+def _csrf_post_response_json(django_client, request_url, query_string, status_code=200):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use post_json",
-        DeprecationWarning)
-    rsp = _csrf_post_response(django_client, request_url,
-                              query_string, status_code)
-    assert rsp.get('Content-Type') == 'application/json'
+        "This method is deprecated as of OMERO 5.4.0. Use post_json", DeprecationWarning
+    )
+    rsp = _csrf_post_response(django_client, request_url, query_string, status_code)
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
 # POST json encoded as a string
-def _csrf_post_json(django_client, request_url, data,
-                    status_code=200, content_type='application/json'):
+def _csrf_post_json(
+    django_client, request_url, data, status_code=200, content_type="application/json"
+):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use post_json",
-        DeprecationWarning)
-    csrf_token = django_client.cookies['csrftoken'].value
-    extra = {'HTTP_X_CSRFTOKEN': csrf_token}
-    rsp = django_client.post(request_url, json.dumps(data),
-                             status_code=status_code,
-                             content_type=content_type,
-                             **extra)
+        "This method is deprecated as of OMERO 5.4.0. Use post_json", DeprecationWarning
+    )
+    csrf_token = django_client.cookies["csrftoken"].value
+    extra = {"HTTP_X_CSRFTOKEN": csrf_token}
+    rsp = django_client.post(
+        request_url,
+        json.dumps(data),
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
     print(rsp)
     assert rsp.status_code == status_code
-    assert rsp.get('Content-Type') == 'application/json'
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
@@ -255,39 +328,62 @@ def put_json(django_client, request_url, data=None, status_code=200):
     :param status_code:     Verify that the response has this status
 
     """
-    rsp = csrf_response(django_client, request_url, 'put', json.dumps(data),
-                        status_code=status_code,
-                        content_type='application/json')
-    assert rsp.get('Content-Type') == 'application/json'
+    rsp = csrf_response(
+        django_client,
+        request_url,
+        "put",
+        json.dumps(data),
+        status_code=status_code,
+        content_type="application/json",
+    )
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
 # PUT json encoded as a string
-def _csrf_put_json(django_client, request_url, data,
-                   status_code=200, content_type='application/json'):
+def _csrf_put_json(
+    django_client, request_url, data, status_code=200, content_type="application/json"
+):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use put_json",
-        DeprecationWarning)
-    csrf_token = django_client.cookies['csrftoken'].value
-    extra = {'HTTP_X_CSRFTOKEN': csrf_token}
-    rsp = django_client.put(request_url, json.dumps(data),
-                            status_code=status_code, content_type=content_type,
-                            **extra)
+        "This method is deprecated as of OMERO 5.4.0. Use put_json", DeprecationWarning
+    )
+    csrf_token = django_client.cookies["csrftoken"].value
+    extra = {"HTTP_X_CSRFTOKEN": csrf_token}
+    rsp = django_client.put(
+        request_url,
+        json.dumps(data),
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
     print(rsp)
     assert rsp.status_code == status_code
-    assert rsp.get('Content-Type') == 'application/json'
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
 # DELETE
-def _delete_response(django_client, request_url, data, status_code=403,
-                     content_type=MULTIPART_CONTENT, **extra):
+def _delete_response(
+    django_client,
+    request_url,
+    data,
+    status_code=403,
+    content_type=MULTIPART_CONTENT,
+    **extra
+):
     warnings.warn(
         "This method is deprecated as of OMERO 5.4.0. Use delete_json",
-        DeprecationWarning)
-    return _response(django_client, request_url, method='delete', data=data,
-                     status_code=status_code, content_type=content_type,
-                     **extra)
+        DeprecationWarning,
+    )
+    return _response(
+        django_client,
+        request_url,
+        method="delete",
+        data=data,
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
 
 
 def delete_json(django_client, request_url, data=None, status_code=200):
@@ -300,32 +396,44 @@ def delete_json(django_client, request_url, data=None, status_code=200):
     :param status_code:     Verify that the response has this status
 
     """
-    rsp = csrf_response(django_client, request_url, 'delete', json.dumps(data),
-                        status_code=status_code,
-                        content_type='application/json')
-    assert rsp.get('Content-Type') == 'application/json'
+    rsp = csrf_response(
+        django_client,
+        request_url,
+        "delete",
+        json.dumps(data),
+        status_code=status_code,
+        content_type="application/json",
+    )
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
-def _csrf_delete_response(django_client, request_url, data, status_code=200,
-                          content_type=MULTIPART_CONTENT):
+def _csrf_delete_response(
+    django_client, request_url, data, status_code=200, content_type=MULTIPART_CONTENT
+):
     warnings.warn(
         "This method is deprecated as of OMERO 5.4.0. Use delete_json",
-        DeprecationWarning)
-    csrf_token = django_client.cookies['csrftoken'].value
-    extra = {'HTTP_X_CSRFTOKEN': csrf_token}
-    return _delete_response(django_client, request_url, data=data,
-                            status_code=status_code, content_type=content_type,
-                            **extra)
+        DeprecationWarning,
+    )
+    csrf_token = django_client.cookies["csrftoken"].value
+    extra = {"HTTP_X_CSRFTOKEN": csrf_token}
+    return _delete_response(
+        django_client,
+        request_url,
+        data=data,
+        status_code=status_code,
+        content_type=content_type,
+        **extra,
+    )
 
 
-def _csrf_delete_response_json(django_client, request_url,
-                               data, status_code=200):
+def _csrf_delete_response_json(django_client, request_url, data, status_code=200):
     warnings.warn(
         "This method is deprecated as of OMERO 5.4.0. Use delete_json",
-        DeprecationWarning)
+        DeprecationWarning,
+    )
     rsp = _csrf_delete_response(django_client, request_url, data, status_code)
-    assert rsp.get('Content-Type') == 'application/json'
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
@@ -346,17 +454,15 @@ def get(django_client, request_url, data=None, status_code=200, csrf=False):
         else:
             # avoid mutating dict we're passed
             data = data.copy()
-        csrf_token = django_client.cookies['csrftoken'].value
-        data['csrfmiddlewaretoken'] = csrf_token
+        csrf_token = django_client.cookies["csrftoken"].value
+        data["csrfmiddlewaretoken"] = csrf_token
     if data is not None:
         query_string = urlencode(list(data.items()), doseq=True)
-        request_url = '%s?%s' % (request_url, query_string)
-    return _response(django_client, request_url, 'get',
-                     status_code=status_code)
+        request_url = "%s?%s" % (request_url, query_string)
+    return _response(django_client, request_url, "get", status_code=status_code)
 
 
-def get_json(django_client, request_url, data=None, status_code=200,
-             csrf=False):
+def get_json(django_client, request_url, data=None, status_code=200, csrf=False):
     """
     Performs a GET request and returns the JSON response as a dict.
 
@@ -368,36 +474,33 @@ def get_json(django_client, request_url, data=None, status_code=200,
 
     """
     rsp = get(django_client, request_url, data, status_code, csrf)
-    assert rsp.get('Content-Type') == 'application/json'
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
 
 
 def _get_response(django_client, request_url, query_string, status_code=405):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use get",
-        DeprecationWarning)
+        "This method is deprecated as of OMERO 5.4.0. Use get", DeprecationWarning
+    )
     query_string = urlencode(list(query_string.items()), doseq=True)
-    response = django_client.get('%s?%s' % (request_url, query_string))
+    response = django_client.get("%s?%s" % (request_url, query_string))
     assert response.status_code == status_code
     return response
 
 
-def _csrf_get_response(django_client, request_url, query_string,
-                       status_code=200):
+def _csrf_get_response(django_client, request_url, query_string, status_code=200):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use get",
-        DeprecationWarning)
-    csrf_token = django_client.cookies['csrftoken'].value
-    query_string['csrfmiddlewaretoken'] = csrf_token
-    return _get_response(django_client, request_url, query_string,
-                         status_code)
+        "This method is deprecated as of OMERO 5.4.0. Use get", DeprecationWarning
+    )
+    csrf_token = django_client.cookies["csrftoken"].value
+    query_string["csrfmiddlewaretoken"] = csrf_token
+    return _get_response(django_client, request_url, query_string, status_code)
 
 
-def _get_response_json(django_client, request_url,
-                       query_string, status_code=200):
+def _get_response_json(django_client, request_url, query_string, status_code=200):
     warnings.warn(
-        "This method is deprecated as of OMERO 5.4.0. Use get_json",
-        DeprecationWarning)
+        "This method is deprecated as of OMERO 5.4.0. Use get_json", DeprecationWarning
+    )
     rsp = _get_response(django_client, request_url, query_string, status_code)
-    assert rsp.get('Content-Type') == 'application/json'
+    assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)

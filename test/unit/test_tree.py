@@ -24,12 +24,15 @@ Simple unit tests for the "tree" module.
 import pytest
 
 from omero.rtypes import rlong, rstring, rtime
-from omeroweb.webclient.tree import _marshal_plate_acquisition, \
-    _marshal_dataset, _marshal_plate, parse_permissions_css
+from omeroweb.webclient.tree import (
+    _marshal_plate_acquisition,
+    _marshal_dataset,
+    _marshal_plate,
+    parse_permissions_css,
+)
 
 
 class MockConnection(object):
-
     def getUserId(self):
         return 1
 
@@ -37,29 +40,29 @@ class MockConnection(object):
         return False
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def mock_conn():
     return MockConnection()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def owner_permissions():
     return {
-        'canEdit': True,
-        'canAnnotate': True,
-        'canLink': True,
-        'canDelete': True,
-        'canChgrp': True,
+        "canEdit": True,
+        "canAnnotate": True,
+        "canLink": True,
+        "canDelete": True,
+        "canChgrp": True,
     }
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def start_time():
     # 2014-05-08 10:37:02 UTC; server timestamps contain ms
     return rtime(1399545422 * 1000)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def end_time():
     # 2014-05-08 10:38:30 UTC; server timestamps contain ms
     return rtime(1399545510 * 1000)
@@ -78,99 +81,68 @@ class TestTree(object):
     """
 
     def test_marshal_plate_acquisition_no_name_no_start_no_end(
-            self, mock_conn, owner_permissions):
-        row = [
-            rlong(1),
-            None,
-            rlong(1),
-            owner_permissions,
-            None,
-            None
-        ]
+        self, mock_conn, owner_permissions
+    ):
+        row = [rlong(1), None, rlong(1), owner_permissions, None, None]
         expected = {
-            'id': 1,
-            'ownerId': 1,
-            'name': 'Run 1',
-            'permsCss':
-                'canEdit canAnnotate canLink canDelete canChgrp isOwned'
+            "id": 1,
+            "ownerId": 1,
+            "name": "Run 1",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp isOwned",
         }
 
         marshaled = _marshal_plate_acquisition(mock_conn, row)
         assert marshaled == expected
 
     def test_marshal_plate_acquisition_name_no_start_no_end(
-            self, mock_conn, owner_permissions):
-        row = [
-            rlong(1),
-            rstring('name'),
-            rlong(1),
-            owner_permissions,
-            None,
-            None
-        ]
+        self, mock_conn, owner_permissions
+    ):
+        row = [rlong(1), rstring("name"), rlong(1), owner_permissions, None, None]
         expected = {
-            'id': 1,
-            'ownerId': 1,
-            'name': 'name',
-            'permsCss':
-                'canEdit canAnnotate canLink canDelete canChgrp isOwned'
+            "id": 1,
+            "ownerId": 1,
+            "name": "name",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp isOwned",
         }
 
         marshaled = _marshal_plate_acquisition(mock_conn, row)
         assert marshaled == expected
 
     def test_marshal_plate_acquisition_no_name_start_end(
-            self, mock_conn, owner_permissions, start_time, end_time):
-        row = [
-            rlong(1),
-            None,
-            rlong(1),
-            owner_permissions,
-            start_time,
-            end_time
-        ]
+        self, mock_conn, owner_permissions, start_time, end_time
+    ):
+        row = [rlong(1), None, rlong(1), owner_permissions, start_time, end_time]
         expected = {
-            'id': 1,
-            'ownerId': 1,
-            'name': '2014-05-08 10:37:02 - 2014-05-08 10:38:30',
-            'permsCss':
-                'canEdit canAnnotate canLink canDelete canChgrp isOwned'
+            "id": 1,
+            "ownerId": 1,
+            "name": "2014-05-08 10:37:02 - 2014-05-08 10:38:30",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp isOwned",
         }
 
         marshaled = _marshal_plate_acquisition(mock_conn, row)
         assert marshaled == expected
 
-    def test_marshal_plate_acquisition_not_owner(
-            self, mock_conn, owner_permissions):
-        row = [
-            rlong(1),
-            None,
-            rlong(2),
-            owner_permissions,
-            None,
-            None
-        ]
+    def test_marshal_plate_acquisition_not_owner(self, mock_conn, owner_permissions):
+        row = [rlong(1), None, rlong(2), owner_permissions, None, None]
         expected = {
-            'id': 1,
-            'ownerId': 2,
-            'name': 'Run 1',
-            'permsCss': 'canEdit canAnnotate canLink canDelete canChgrp'
+            "id": 1,
+            "ownerId": 2,
+            "name": "Run 1",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp",
         }
 
         marshaled = _marshal_plate_acquisition(mock_conn, row)
         assert marshaled == expected
 
-    def test_parse_permissions_css(
-            self, mock_conn):
-        restrictions = ('canEdit', 'canAnnotate', 'canLink', 'canDelete',
-                        'canChgrp')
+    def test_parse_permissions_css(self, mock_conn):
+        restrictions = ("canEdit", "canAnnotate", "canLink", "canDelete", "canChgrp")
         # Iterate through every combination of the restrictions' flags,
         # checking each with and without expected canChgrp
-        for i in range(2**len(restrictions)):
+        for i in range(2 ** len(restrictions)):
             expected = []
-            permissions_dict = {'perm': '------'}
+            permissions_dict = {"perm": "------"}
             for j in range(len(restrictions)):
-                if i & 2**j != 0:
+                if i & 2 ** j != 0:
                     expected.append(restrictions[j])
                     permissions_dict[restrictions[j]] = True
                 else:
@@ -178,96 +150,66 @@ class TestTree(object):
             expected.sort()
             owner_id = mock_conn.getUserId()
             # Test with different owner_ids, which means canChgrp is False
-            received = parse_permissions_css(permissions_dict,
-                                             owner_id+1,
-                                             mock_conn)
-            received = list(filter(None, received.split(' ')))
+            received = parse_permissions_css(permissions_dict, owner_id + 1, mock_conn)
+            received = list(filter(None, received.split(" ")))
             received.sort()
             assert expected == received
             # Test with matching owner_ids, which means
             # isOwned and canChgrp is True
-            expected.append('isOwned')
+            expected.append("isOwned")
             expected.sort()
-            received = parse_permissions_css(permissions_dict,
-                                             owner_id,
-                                             mock_conn)
-            received = list(filter(None, received.split(' ')))
+            received = parse_permissions_css(permissions_dict, owner_id, mock_conn)
+            received = list(filter(None, received.split(" ")))
             received.sort()
             assert expected == received
 
     def test_marshal_dataset(self, mock_conn, owner_permissions):
-        row = [
-            rlong(1),
-            rstring('name'),
-            rlong(1),
-            owner_permissions,
-            rlong(1)
-        ]
+        row = [rlong(1), rstring("name"), rlong(1), owner_permissions, rlong(1)]
         expected = {
-            'id': 1,
-            'ownerId': 1,
-            'name': 'name',
-            'permsCss':
-                'canEdit canAnnotate canLink canDelete canChgrp isOwned',
-            'childCount': 1
+            "id": 1,
+            "ownerId": 1,
+            "name": "name",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp isOwned",
+            "childCount": 1,
         }
 
         marshaled = _marshal_dataset(mock_conn, row)
         assert marshaled == expected
 
     def test_marshal_dataset_not_owner(self, mock_conn, owner_permissions):
-        row = [
-            rlong(1),
-            rstring('name'),
-            rlong(2),
-            owner_permissions,
-            rlong(1)
-        ]
+        row = [rlong(1), rstring("name"), rlong(2), owner_permissions, rlong(1)]
         expected = {
-            'id': 1,
-            'ownerId': 2,
-            'name': 'name',
-            'permsCss': 'canEdit canAnnotate canLink canDelete canChgrp',
-            'childCount': 1
+            "id": 1,
+            "ownerId": 2,
+            "name": "name",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp",
+            "childCount": 1,
         }
 
         marshaled = _marshal_dataset(mock_conn, row)
         assert marshaled == expected
 
     def test_marshal_plate(self, mock_conn, owner_permissions):
-        row = [
-            rlong(1),
-            rstring('name'),
-            rlong(1),
-            owner_permissions,
-            2
-        ]
+        row = [rlong(1), rstring("name"), rlong(1), owner_permissions, 2]
         expected = {
-            'id': 1,
-            'ownerId': 1,
-            'name': 'name',
-            'permsCss':
-                'canEdit canAnnotate canLink canDelete canChgrp isOwned',
-                'childCount': 2
+            "id": 1,
+            "ownerId": 1,
+            "name": "name",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp isOwned",
+            "childCount": 2,
         }
 
         marshaled = _marshal_plate(mock_conn, row)
         assert marshaled == expected
 
     def test_marshal_plate_not_owner(self, mock_conn, owner_permissions):
-        row = [
-            rlong(1),
-            rstring('name'),
-            rlong(2),
-            owner_permissions,
-            2
-        ]
+        row = [rlong(1), rstring("name"), rlong(2), owner_permissions, 2]
         expected = {
-            'id': 1,
-            'ownerId': 2,
-            'name': 'name',
-            'permsCss': 'canEdit canAnnotate canLink canDelete canChgrp',
-            'childCount': 2
+            "id": 1,
+            "ownerId": 2,
+            "name": "name",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp",
+            "childCount": 2,
         }
 
         marshaled = _marshal_plate(mock_conn, row)

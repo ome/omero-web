@@ -35,8 +35,8 @@ def reverse_with_params(*args, **kwargs):
     Adds query string to django.core.urlresolvers.reverse
     """
 
-    url = ''
-    qs = kwargs.pop('query_string', {})
+    url = ""
+    qs = kwargs.pop("query_string", {})
     try:
         url = reverse(*args, **kwargs)
     except NoReverseMatch:
@@ -44,10 +44,9 @@ def reverse_with_params(*args, **kwargs):
     if qs:
         if not isinstance(qs, basestring):
             qs = urlencode(qs)
-        url += '?' + qs
+        url += "?" + qs
     return url
 
 
 def sort_properties_to_tuple(input_list, index="index", element="class"):
-    return tuple(e[element] for e in sorted(
-                 input_list, key=lambda k: k[index]))
+    return tuple(e[element] for e in sorted(input_list, key=lambda k: k[index]))

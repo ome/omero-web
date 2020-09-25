@@ -35,67 +35,95 @@ QUERY_STRING = " %s" % string.printable
 
 
 def call_load_settings(request, conn):
-    context = {'ome': {}}
+    context = {"ome": {}}
     render_response().load_settings(request, context, conn)
     return context
 
 
 class TestRenderResponse(object):
-
     def setup_method(self, method):
         # prepare session
-        self.r = RequestFactory().get('/rand')
+        self.r = RequestFactory().get("/rand")
 
     @override_settings()
     def test_load_settings_defaults(self):
         context = call_load_settings(self.r, None)
         defaults = [
             {
-                'link': u'/webclient/',
-                'attrs': {u'title': u'Browse Data via Projects, Tags etc'},
-                'label': u'Data'
-            }, {
-                'link': u'/webclient/history/',
-                'attrs': {u'title': u'History'},
-                'label': u'History'
-            }, {
-                'link': u'https://help.openmicroscopy.org/',
-                'attrs': {
-                    u'target': u'new',
-                    u'title': u'Open OMERO user guide in a new tab'
+                "link": "/webclient/",
+                "attrs": {"title": "Browse Data via Projects, Tags etc"},
+                "label": "Data",
+            },
+            {
+                "link": "/webclient/history/",
+                "attrs": {"title": "History"},
+                "label": "History",
+            },
+            {
+                "link": "https://help.openmicroscopy.org/",
+                "attrs": {
+                    "target": "new",
+                    "title": "Open OMERO user guide in a new tab",
                 },
-                'label': u'Help'
-            }]
-        assert context['ome']['top_links'] == defaults
+                "label": "Help",
+            },
+        ]
+        assert context["ome"]["top_links"] == defaults
 
-    @pytest.mark.parametrize('top_links', [
-        [['Data1', 'webindex', {"title": "Some text"}], ["/webclient/"]],
-        [['Data2', {"viewname": 'webindex'}, {"title": "Some text"}],
-            ["/webclient/"]],
-        [['Data3', {"viewname": "load_template", "args": ["userdata"]},
-            {}], ["/webclient/userdata/"]],
-        [['Data4', {"viewname": "load_template", "args": ["userdata"],
-                    "query_string": {"experimenter": -1}}, {}],
-            ["/webclient/userdata/?experimenter=-1"]],
-        [['Data5', {"viewname": "load_template", "args": ["userdata"],
-                    "query_string": {"test": QUERY_STRING}}, {}],
-            ["/webclient/userdata/?%s" % urlencode({'test': QUERY_STRING})]],
-        [['History', 'history', {"title": "History"}],
-            ["/webclient/history/"]],
-        [['HELP', 'https://help.openmicroscopy.org', {"title": "Help"}],
-            ["https://help.openmicroscopy.org"]],
-        [["", "", {}], [""]],
-        [["", None, {}], [None]],
-        [["Foo", "bar", {}], ["bar"]],
-        [['Foo', {"viewname": "foo"}, {}], [""]],
-        [["Foo", {"viewname": "load_template", "args": ["bar"]}, {}], [""]],
-        ])
+    @pytest.mark.parametrize(
+        "top_links",
+        [
+            [["Data1", "webindex", {"title": "Some text"}], ["/webclient/"]],
+            [
+                ["Data2", {"viewname": "webindex"}, {"title": "Some text"}],
+                ["/webclient/"],
+            ],
+            [
+                ["Data3", {"viewname": "load_template", "args": ["userdata"]}, {}],
+                ["/webclient/userdata/"],
+            ],
+            [
+                [
+                    "Data4",
+                    {
+                        "viewname": "load_template",
+                        "args": ["userdata"],
+                        "query_string": {"experimenter": -1},
+                    },
+                    {},
+                ],
+                ["/webclient/userdata/?experimenter=-1"],
+            ],
+            [
+                [
+                    "Data5",
+                    {
+                        "viewname": "load_template",
+                        "args": ["userdata"],
+                        "query_string": {"test": QUERY_STRING},
+                    },
+                    {},
+                ],
+                ["/webclient/userdata/?%s" % urlencode({"test": QUERY_STRING})],
+            ],
+            [["History", "history", {"title": "History"}], ["/webclient/history/"]],
+            [
+                ["HELP", "https://help.openmicroscopy.org", {"title": "Help"}],
+                ["https://help.openmicroscopy.org"],
+            ],
+            [["", "", {}], [""]],
+            [["", None, {}], [None]],
+            [["Foo", "bar", {}], ["bar"]],
+            [["Foo", {"viewname": "foo"}, {}], [""]],
+            [["Foo", {"viewname": "load_template", "args": ["bar"]}, {}], [""]],
+        ],
+    )
     def test_load_settings(self, top_links):
         @override_settings(TOP_LINKS=[top_links[0]])
         def _test_load_settings():
             return call_load_settings(self.r, None)
 
         context = _test_load_settings()
-        assert context['ome']['top_links'][0]['label'] == top_links[0][0]
-        assert context['ome']['top_links'][0]['link'] == top_links[1][0]
-        assert context['ome']['top_links'][0]['attrs'] == top_links[0][2]
+        assert context["ome"]["top_links"][0]["label"] == top_links[0][0]
+        assert context["ome"]["top_links"][0]["link"] == top_links[1][0]
+        assert context["ome"]["top_links"][0]["attrs"] == top_links[0][2]

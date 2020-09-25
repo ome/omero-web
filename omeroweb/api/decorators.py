@@ -28,10 +28,12 @@ import traceback
 from django.http import JsonResponse
 from functools import update_wrapper
 from . import api_settings
-from .api_exceptions import BadRequestError, \
-    CreatedObject, \
-    MethodNotSupportedError, \
-    NotFoundError
+from .api_exceptions import (
+    BadRequestError,
+    CreatedObject,
+    MethodNotSupportedError,
+    NotFoundError,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -42,8 +44,7 @@ class login_required(omeroweb.decorators.login_required):
 
     def on_not_logged_in(self, request, url, error=None):
         """Used for json api methods."""
-        return JsonResponse({'message': 'Not logged in'},
-                            status=403)
+        return JsonResponse({"message": "Not logged in"}, status=403)
 
 
 class json_response(object):
@@ -62,7 +63,7 @@ class json_response(object):
     def create_response(self, response, status=200):
         """Create the Json response and set global headers."""
         response = JsonResponse(response, status=status)
-        response['X-OMERO-ApiVersion'] = api_settings.API_VERSION
+        response["X-OMERO-ApiVersion"] = api_settings.API_VERSION
         return response
 
     def handle_success(self, rv):
@@ -89,7 +90,7 @@ class json_response(object):
             status = ex.status
         if isinstance(ex, BadRequestError):
             status = ex.status
-            trace = ex.stacktrace   # Might be None
+            trace = ex.stacktrace  # Might be None
         elif isinstance(ex, omero.SecurityViolation):
             status = 403
         elif isinstance(ex, omero.ApiUsageException):
@@ -113,12 +114,14 @@ class json_response(object):
         handles success or exception, returning a
         JsonResponse
         """
+
         def wrapped(request, *args, **kwargs):
-            logger.debug('json_response')
+            logger.debug("json_response")
             try:
                 rv = f(request, *args, **kwargs)
                 return self.handle_success(rv)
             except Exception as ex:
                 trace = traceback.format_exc()
                 return self.handle_error(ex, trace)
+
         return update_wrapper(wrapped, f)
