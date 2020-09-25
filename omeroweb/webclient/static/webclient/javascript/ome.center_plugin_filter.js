@@ -171,7 +171,7 @@ MapAnnFilter.prototype.isImageVisible = function(iid) {
 
 MapAnnFilter.prototype.loadAnnotations = function(callback) {
 
-    var query = "image=" + this.image_ids.join("&image=");
+    var query = "image=" + this.image_ids.join(",");
     var url = WEBCLIENT.URLS.webindex + 'api/annotations/?type=map&' + query;
     $.getJSON(url, function(data){
         // map imageId to... {key: {'values':{'imageId': 'val1, val2'}, 'type': 'number'}

@@ -473,7 +473,7 @@ $(document).ready(function() {
                 //     // No images to filter
                 //     return;
                 // }
-                var query = "image=" + iids.join("&image=");
+                var query = "image=" + iids.join(",");
                 $.getJSON("{% url 'api_annotations' %}?type=tag&" + query, function(data){
                     // map imageId to rating... rdata = {'iid': hide?}
                     usedTags = data.annotations.reduce(function(prev, t){
@@ -557,7 +557,7 @@ $(document).ready(function() {
                 // No images to filter
                 return;
             }
-            var query = "image=" + iids.join("&image=");
+            var query = "image=" + iids.join(",");
             $.getJSON("{% url 'api_annotations' %}?type=rating&" + query, function(data){
                 // map imageId to rating... rdata = {'iid': hide?}
                 var rdata = data.annotations.reduce(function(prev, r){
@@ -598,7 +598,7 @@ $(document).ready(function() {
                 // No images to filter
                 return;
             }
-            var query = "image=" + iids.join("&image=");
+            var query = "image=" + iids.join(",");
             // get ratings...
             $.getJSON("{% url 'api_annotations' %}?type=rating&" + query, function(data){
                 // map imageId to rating... rdata = {'iid': show?}
