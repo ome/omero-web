@@ -1537,8 +1537,8 @@ def load_searching(request, form=None, conn=None, **kwargs):
             query_search = r.get("advanced_search")
         template = "webclient/search/search_details.html"
 
-        onlyTypes = get_list(r, "datatype")
-        fields = get_list(r, "field")
+        onlyTypes = get_list(request, "datatype")
+        fields = get_list(request, "field")
         searchGroup = r.get("searchGroup", None)
         ownedBy = r.get("ownedBy", None)
 
@@ -1925,8 +1925,11 @@ def load_metadata_acquisition(
                 channel["label"] = ch.getLabel()
                 color = ch.getColor()
                 channel["color"] = color is not None and color.getHtml() or None
-                planeInfo = manager.image and manager.image.getPrimaryPixels().copyPlaneInfo(
-                    theC=theC, theZ=0
+                planeInfo = (
+                    manager.image
+                    and manager.image.getPrimaryPixels().copyPlaneInfo(
+                        theC=theC, theZ=0
+                    )
                 )
                 plane_info = []
 
