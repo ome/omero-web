@@ -234,6 +234,9 @@ class BaseContainer(BaseController):
         """
         Get the annotion counts for the given objects
         """
+        keys = [k for k in objDict.keys() if objDict[k]]
+        if len(keys) > 1:
+            return None
         return self.conn.getAnnotationCounts(objDict)
 
     def canExportAsJpg(self, request, objDict=None):
