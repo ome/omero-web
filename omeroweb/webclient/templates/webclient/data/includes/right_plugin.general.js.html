@@ -60,13 +60,13 @@ $(function () {
             var query = Object.keys(typeIds).map(dtype => {
                 return dtype + '=' + typeIds[dtype].join(',');
             }).join('&');
-            var url = '{% url 'batch_annotate' %}' + "?" + query;
             if (well_index) {
                 query += "&index=" + well_index;
             }
+            var url = '{% url 'batch_annotate' %}' + "?" + query;
             // Load right hand panel...
             $.ajax({
-                url: query,
+                url,
                 dataType: "html",
                 // Need to check that the selected objects haven't changed during AJAX call...
                 success: function(data) {

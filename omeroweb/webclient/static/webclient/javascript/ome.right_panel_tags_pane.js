@@ -120,18 +120,7 @@ var TagPane = function TagPane($element, opts) {
             }
 
             // create request ?image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
-            let typeIds = objects.reduce(function (prev, s) {
-                let dtype = s.split('-')[0];
-                let objId = s.split('-')[1];
-                if (!prev[dtype]) {
-                    prev[dtype] = [];
-                }
-                prev[dtype].push(objId);
-                return prev;
-            }, {});
-            var request = Object.keys(typeIds).map(dtype => {
-                return dtype + '=' + typeIds[dtype].join(',');
-            }).join('&');
+            var request = OME.buildQueryStringForObjects(objects);
 
             var annsUrl = WEBCLIENT.URLS.webindex + "api/annotations/?type=tag&" + request
             // set high limit on number of results (default is 200)

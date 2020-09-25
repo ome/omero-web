@@ -24,10 +24,8 @@ var RatingsPane = function RatingsPane($element, opts) {
         canAnnotate = opts.canAnnotate,
         self = this;
 
-    var request = objects.map(function(o){
-        return o.replace("-", "=");
-    });
-    request = request.join("&");
+    // create request ?image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
+    var request = OME.buildQueryStringForObjects(objects);
 
     var tmplText = $('#ratings_template').html();
     var ratingsTempl = _.template(tmplText);

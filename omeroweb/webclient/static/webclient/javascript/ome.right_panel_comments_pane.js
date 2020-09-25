@@ -88,10 +88,8 @@ var CommentsPane = function CommentsPane($element, opts) {
                 $comments_container.html("Loading comments...");
             }
 
-            var request = objects.map(function(o){
-                return o.replace("-", "=");
-            });
-            request = request.join("&");
+            // create request ?image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
+            var request = OME.buildQueryStringForObjects(objects);
 
             $.getJSON(WEBCLIENT.URLS.webindex + "api/annotations/?type=comment&" + request, function(data){
 
