@@ -45,13 +45,22 @@ $(function () {
         }
         if (selected.length > 1) {
             // handle batch annotation...
-            var productListQuery = new Array();
-            var well_index;
-            for (var i=0; i<selected.length; i++) {
-                productListQuery[i] = selected[i]["id"].replace("-","=");
-                well_index = well_index || selected[i]["index"];
-            }
-            var query = '{% url 'batch_annotate' %}'+"?"+productListQuery.join("&");
+            // dict of {'type': ids}
+            let well_index;
+            let typeIds = selected.reduce(function (prev, s) {
+                well_index = well_index || s.index;
+                let dtype = s.id.split('-')[0];
+                let objId = s.id.split('-')[1];
+                if (!prev[dtype]) {
+                    prev[dtype] = [];
+                }
+                prev[dtype].push(objId);
+                return prev;
+            }, {});
+            var query = Object.keys(typeIds).map(dtype => {
+                return dtype + '=' + typeIds[dtype].join(',');
+            }).join('&');
+            var url = '{% url 'batch_annotate' %}' + "?" + query;
             if (well_index) {
                 query += "&index=" + well_index;
             }
