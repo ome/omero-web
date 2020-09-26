@@ -19,7 +19,7 @@
 
 """Handles all 'api' urls."""
 
-from django.urls import re_path
+from django.urls import re_path, path
 from omeroweb.api import views
 from omeroweb.webgateway.views import LoginView
 from . import api_settings
@@ -28,7 +28,7 @@ import re
 versions = '|'.join([re.escape(v)
                     for v in api_settings.API_VERSIONS])
 
-api_versions = re_path(r'^$', views.api_versions, name='api_versions')
+api_versions = path(r'', views.api_versions, name='api_versions')
 
 api_base = re_path(r'^v(?P<api_version>%s)/$' % versions,
                views.api_base,
