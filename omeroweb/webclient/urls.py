@@ -216,7 +216,7 @@ urlpatterns = [
     path(r'annotate_rating/',
         views.annotate_rating,
         name="annotate_rating"),
-    path(r'^annotate_comment/',
+    path(r'annotate_comment/',
         views.annotate_comment,
         name="annotate_comment"),
     path(r'annotate_file/', views.annotate_file, name="annotate_file"),
@@ -235,7 +235,7 @@ urlpatterns = [
         views.omero_table,
         name="omero_table"),
 
-    path(r'^avatar/<int:oid>/', views.avatar, name="avatar"),
+    path(r'avatar/<int:oid>/', views.avatar, name="avatar"),
 
 
     # scripting service urls
@@ -263,10 +263,10 @@ urlpatterns = [
 
     # ome_tiff_script: generate OME-TIFF and attach to image (use script
     # service). Must be POST
-    path(r'^ome_tiff_script/<int:imageId>/',
+    path(r'ome_tiff_script/<int:imageId>/',
         views.ome_tiff_script,
         name='ome_tiff_script'),
-    path(r'^ome_tiff_info/<int:imageId>/',
+    path(r'ome_tiff_info/<int:imageId>/',
         views.ome_tiff_info,
         name='ome_tiff_info'),
 
