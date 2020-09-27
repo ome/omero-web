@@ -184,7 +184,7 @@ def handler500(request):
     return render(request, template, context, status=500)
 
 
-def handler404(request):
+def handler404(request, exception):
     logger.warning(
         'Not Found: %s' % request.path,
         extra={
