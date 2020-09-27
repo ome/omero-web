@@ -3,7 +3,7 @@
 #
 # webgateway/views.py - django application view handling functions
 #
-# Copyright (c) 2007-2015 Glencoe Software, Inc. All rights reserved.
+# Copyright (c) 2007-2020 Glencoe Software, Inc. All rights reserved.
 #
 # This software is distributed under the terms described by the LICENCE file
 # you can find at the root of the distribution bundle, which states you are
@@ -23,8 +23,10 @@ import omero.clients
 from past.builtins import unicode
 
 from django.http import HttpResponse, HttpResponseBadRequest, \
-    HttpResponseServerError, JsonResponse
-from django.http import HttpResponseRedirect, HttpResponseNotAllowed, Http404
+    HttpResponseServerError, JsonResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseNotAllowed, \
+    Http404, StreamingHttpResponse, HttpResponseNotFound
+
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
@@ -41,7 +43,7 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.views.generic import View
 from django.shortcuts import render
 from omeroweb.webadmin.forms import LoginForm
-from omeroweb.decorators import get_client_ip
+from omeroweb.decorators import get_client_ip, is_public_user
 from omeroweb.webadmin.webadmin_utils import upgradeCheck
 
 try:
@@ -49,7 +51,6 @@ try:
 except Exception:
     from md5 import md5
 
-from io import StringIO
 from io import BytesIO
 import tempfile
 
@@ -1488,7 +1489,11 @@ def imageData_json(request, conn=None, _internal=False, **kwargs):
     key = kwargs.get('key', None)
     image = conn.getObject("Image", iid)
     if image is None:
-        return HttpJavascriptResponseServerError('""')
+        if is_public_user(request):
+            # 403 - Should try logging in
+            return HttpResponseForbidden()
+        else:
+            return HttpResponseNotFound(f'Image:{iid} not found')
     if request.GET.get('getDefaults') == 'true':
         image.resetDefaults(save=False)
     rv = imageMarshal(image, key=key, request=request)
@@ -2439,8 +2444,7 @@ def download_as(request, iid=None, conn=None, **kwargs):
                 zipName = "%s.zip" % zipName
 
             # return the zip or single file
-            rsp = ConnCleaningHttpResponse(FileWrapper(temp))
-            rsp.conn = conn
+            rsp = StreamingHttpResponse(FileWrapper(temp))
             rsp['Content-Length'] = temp.tell()
             rsp['Content-Disposition'] = 'attachment; filename=%s' % zipName
             temp.seek(0)
@@ -2469,11 +2473,9 @@ def archived_files(request, iid=None, conn=None, **kwargs):
     wellIds = request.GET.getlist('well')
     if iid is None:
         if len(imgIds) == 0 and len(wellIds) == 0:
-            rsp = ConnCleaningHttpResponse(StringIO(
+            return HttpResponseServerError(
                 "No images or wells specified in request."
-                " Use ?image=123 or ?well=123"), status=400)
-            rsp.conn = conn
-            return rsp
+                " Use ?image=123 or ?well=123")
     else:
         imgIds = [iid]
 
@@ -2493,17 +2495,13 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         message = 'Cannot download archived file because Images not ' \
             'found (ids: %s)' % (imgIds)
         logger.debug(message)
-        rsp = ConnCleaningHttpResponse(StringIO(message), status=404)
-        rsp.conn = conn
-        return rsp
+        return HttpResponseServerError(message)
 
     # Test permissions on images and weels
     for ob in (wells):
         if hasattr(ob, 'canDownload'):
             if not ob.canDownload():
-                rsp = ConnCleaningHttpResponse(status=404)
-                rsp.conn = conn
-                return rsp
+                return HttpResponseNotFound()
 
     for ob in (images):
         well = None
@@ -2512,15 +2510,12 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         except Exception:
             if hasattr(ob, 'canDownload'):
                 if not ob.canDownload():
-                    rsp = ConnCleaningHttpResponse(status=404)
-                    rsp.conn = conn
+                    return HttpResponseNotFound()
         else:
             if well and isinstance(well, omero.gateway.WellWrapper):
                 if hasattr(well, 'canDownload'):
                     if not well.canDownload():
-                        rsp = ConnCleaningHttpResponse(status=404)
-                        rsp.conn = conn
-                        return rsp
+                        return HttpResponseNotFound()
 
     # make list of all files, removing duplicates
     fileMap = {}
@@ -2533,9 +2528,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
         message = 'Tried downloading archived files from image with no' \
             ' files archived.'
         logger.debug(message)
-        rsp = ConnCleaningHttpResponse(message, status=404)
-        rsp.conn = conn
-        return rsp
+        return HttpResponseServerError(message)
 
     if len(files) == 1:
         orig_file = files[0]
@@ -2554,9 +2547,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
                            total_size,
                            settings.MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE))
             logger.warn(message)
-            rsp = ConnCleaningHttpResponse(StringIO(message), status=403)
-            rsp.conn = conn
-            return rsp
+            return HttpResponseForbidden(message)
 
         temp = tempfile.NamedTemporaryFile(suffix='.archive')
         zipName = request.GET.get('zipname', image.getName())
@@ -2576,9 +2567,7 @@ def archived_files(request, iid=None, conn=None, **kwargs):
             temp.close()
             message = 'Cannot download file (id:%s)' % (iid)
             logger.error(message, exc_info=True)
-            rsp = ConnCleaningHttpResponse(StringIO(message), status=500)
-            rsp.conn = conn
-            return rsp
+            return HttpResponseServerError(message)
 
     rsp['Content-Type'] = 'application/force-download'
     return rsp
@@ -2807,7 +2796,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 annotations = login_required()(jsonp(_bulk_file_annotations))
 
 
-def _table_query(request, fileid, conn=None, query=None, **kwargs):
+def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     """
     Query a table specified by fileid
     Returns a dictionary with query result if successful, error information
@@ -2819,8 +2808,15 @@ def _table_query(request, fileid, conn=None, query=None, **kwargs):
                         if will be run as (word==number), e.g. "(Well==7)".
                         This is supported to allow more readable query strings.
     @param fileid:      Numeric identifier of file containing the table
+    @param query:       The table query. If None, use request.GET.get('query')
+                        E.g. '*' to return all rows.
+                        If in the form 'colname-1', query will be (colname==1)
+    @param lazy:        If True, instead of returning a 'rows' list,
+                        'lazy_rows' will be a generator.
+                        Each gen.next() will return a list of row data
+                        AND 'table' returned MUST be closed.
     @param conn:        L{omero.gateway.BlitzGateway}
-    @param **kwargs:    unused
+    @param **kwargs:    offset, limit
     @return:            A dictionary with key 'error' with an error message
                         or with key 'data' containing a dictionary with keys
                         'columns' (an array of column names) and 'rows'
@@ -2866,13 +2862,35 @@ def _table_query(request, fileid, conn=None, query=None, **kwargs):
             except Exception:
                 return dict(error='Error executing query: %s' % query)
 
-        return {
+        def row_generator(table, h):
+            if query == '*':
+                # hits are all consecutive rows - can load them in batches
+                idx = 0
+                batch = 1000
+                while(idx < len(h)):
+                    batch = min(batch, len(h) - idx)
+                    row_data = [[] for r in range(batch)]
+                    for col in table.read(
+                            range(len(cols)), h[idx], h[idx] + batch).columns:
+                        for r in range(batch):
+                            row_data[r].append(col.values[r])
+                    idx += batch
+                    # yield a list of rows
+                    yield row_data
+            else:
+                for hit in h:
+                    row_vals = [
+                        col.values[0] for col in
+                        table.read(range(len(cols)), hit, hit+1).columns]
+                    # yield a list of rows, with only a single row
+                    yield [row_vals]
+
+        row_gen = row_generator(t, hits)
+
+        rsp_data = {
             'data': {
                 'column_types': [col.__class__.__name__ for col in cols],
                 'columns': [col.name for col in cols],
-                'rows': [[col.values[0] for col in t.read(
-                         range(len(cols)), hit, hit+1).columns]
-                         for hit in hits]
             },
             'meta': {
                 'rowCount': rows,
@@ -2881,8 +2899,21 @@ def _table_query(request, fileid, conn=None, query=None, **kwargs):
                 'offset': offset,
             }
         }
+
+        if not lazy:
+            row_data = []
+            # Use the generator to add all rows in batches
+            for rows in list(row_gen):
+                row_data.extend(rows)
+            rsp_data['data']['rows'] = row_data
+        else:
+            rsp_data['data']['lazy_rows'] = row_gen
+            rsp_data['table'] = t
+
+        return rsp_data
     finally:
-        t.close()
+        if not lazy:
+            t.close()
 
 
 table_query = login_required()(jsonp(_table_query))

@@ -1,3 +1,24 @@
+5.8.0 (September 2020)
+----------------------
+
+- webclient:
+   - Disable large zip file creation for data download ([#197](https://github.com/ome/omero-web/pull/197))
+   - Fix 'Move to Group' when data owner not in origin group ([#212](https://github.com/ome/omero-web/pull/212))
+   - History results page supports browse to data ([#206](https://github.com/ome/omero-web/pull/206))
+   - Fix shortening of Companion file names ([#198](https://github.com/ome/omero-web/pull/198))
+   - Fix pagination in history page and omero_table ([#203](https://github.com/ome/omero-web/pull/203))
+   - Link ownership matches child owner ([#199](https://github.com/ome/omero-web/pull/199))
+   - Improve download of OMERO.table as csv performance ([#192](https://github.com/ome/omero-web/pull/192))
+   - Fix display of disk usage for very small percentages ([#211](https://github.com/ome/omero-web/pull/211))
+
+- API changes:
+   - @login_required(doConnectionCleanup=False) will close connection unless streaming ([#191](https://github.com/ome/omero-web/pull/191))
+   - Return 404 for webgateway/imgData/ID if image not found ([#209](https://github.com/ome/omero-web/pull/209))
+
+- Other:
+   - Handle missing config for 'scripts to ignore' ([#195](https://github.com/ome/omero-web/pull/195))
+   - Cap pytest-xdist to avoid psutil Travis failures ([#201](https://github.com/ome/omero-web/pull/201))
+
 5.7.1 (July 2020)
 -----------------
 

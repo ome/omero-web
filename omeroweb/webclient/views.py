@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2008-2016 University of Dundee & Open Microscopy Environment.
+# Copyright (C) 2008-2020 University of Dundee & Open Microscopy Environment.
 # All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,6 @@ import warnings
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
 
-from io import StringIO
 from time import time
 
 from omeroweb.version import omeroweb_buildyear as build_year
@@ -90,14 +89,22 @@ from omeroweb.webclient.decorators import login_required
 from omeroweb.webclient.decorators import render_response
 from omeroweb.webclient.show import Show, IncorrectMenuError, \
     paths_to_object, paths_to_tag
-from omeroweb.decorators import ConnCleaningHttpResponse, parse_url
+from omeroweb.decorators import ConnCleaningHttpResponse, parse_url, \
+    TableClosingHttpResponse
 from omeroweb.webgateway.util import getIntOrDefault
 
-from omero.model import ProjectI, DatasetI, ImageI, \
-    ScreenI, PlateI, \
-    ProjectDatasetLinkI, DatasetImageLinkI, \
+from omero.model import AnnotationAnnotationLinkI, \
+    DatasetI, \
+    DatasetImageLinkI, \
+    ExperimenterI, \
+    ImageI, \
     OriginalFileI, \
-    ScreenPlateLinkI, AnnotationAnnotationLinkI, TagAnnotationI
+    PlateI, \
+    ProjectI, \
+    ProjectDatasetLinkI, \
+    ScreenI, \
+    ScreenPlateLinkI, \
+    TagAnnotationI
 from omero import ApiUsageException, ServerError, CmdError
 from omeroweb.webgateway.views import LoginView
 
@@ -908,6 +915,18 @@ def create_link(parent_type, parent_id, child_type, child_id):
     return None
 
 
+def get_objects_owners(conn, child_type, child_ids):
+    """
+    Returns a dict of child_id: owner_id
+    """
+    if child_type == 'tag':
+        child_type = 'Annotation'
+    owners = {}
+    for obj in conn.getObjects(child_type, child_ids):
+        owners[obj.id] = obj.details.owner.id.val
+    return owners
+
+
 @login_required()
 def api_links(request, conn=None, **kwargs):
     """
@@ -946,16 +965,24 @@ def _api_links_POST(conn, json_data, **kwargs):
     # e.g. {"dataset":{"10":{"image":[1,2,3]}}}
 
     linksToSave = []
+    write_owned = 'WriteOwned' in conn.getCurrentAdminPrivileges()
+    user_id = conn.getUserId()
     for parent_type, parents in json_data.items():
-        if parent_type == "orphaned":
+        if parent_type in ("orphaned", "experimenter"):
             continue
         for parent_id, children in parents.items():
             for child_type, child_ids in children.items():
+                # batch look-up owners of all child objects
+                child_owners = get_objects_owners(conn, child_type, child_ids)
                 for child_id in child_ids:
                     parent_id = int(parent_id)
                     link = create_link(parent_type, parent_id,
                                        child_type, child_id)
                     if link and link != 'orphan':
+                        # link owner should match child owner
+                        if write_owned and child_owners[child_id] != user_id:
+                            link.details.owner = ExperimenterI(
+                                child_owners[child_id], False)
                         linksToSave.append(link)
 
     if len(linksToSave) > 0:
@@ -1395,7 +1422,9 @@ def load_chgrp_groups(request, conn=None, **kwargs):
     # if all the Objects are in a single group, exclude it from the target
     # groups
     if len(currentGroups) == 1:
-        targetGroupIds.remove(currentGroups.pop())
+        curr_grp = currentGroups.pop()
+        if curr_grp in targetGroupIds:
+            targetGroupIds.remove(curr_grp)
 
     def getPerms(group):
         p = group.getDetails().permissions
@@ -2956,10 +2985,8 @@ def get_original_file(request, fileId, download=False, conn=None, **kwargs):
 
     orig_file = conn.getObject("OriginalFile", fileId)
     if orig_file is None:
-        rsp = ConnCleaningHttpResponse(StringIO(
-            "Original File does not exist (id:%s)." % (fileId)), status=404)
-        rsp.conn = conn
-        return rsp
+        return handlerInternalError(
+            request, "Original File does not exist (id:%s)." % (fileId))
 
     rsp = ConnCleaningHttpResponse(
         orig_file.getFileInChunks(buf=settings.CHUNK_SIZE))
@@ -2977,11 +3004,12 @@ def get_original_file(request, fileId, download=False, conn=None, **kwargs):
     return rsp
 
 
-@login_required()
+@login_required(doConnectionCleanup=False)
 @render_response()
 def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     """
-    Download OMERO.table as CSV or show as HTML table
+    Download OMERO.table as CSV (streaming response) or return as HTML or json
+
     @param file_id:     OriginalFile ID
     @param mtype:       None for html table or 'csv' or 'json'
     @param conn:        BlitzGateway connection
@@ -2997,21 +3025,44 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     if orig_file is None:
         raise Http404("OriginalFile %s not found" % file_id)
 
-    context = webgateway_views._table_query(request, file_id, conn=conn,
-                                            query=query, offset=offset,
-                                            limit=limit)
+    lazy = mtype == 'csv'
+    context = webgateway_views._table_query(
+            request, file_id, conn=conn, query=query, offset=offset,
+            limit=limit, lazy=lazy)
 
     if context.get('error') or not context.get('data'):
         return JsonResponse(context)
+
+    # OR, return as csv or html
+    if mtype == 'csv':
+        table_data = context.get('data')
+
+        def csv_gen():
+            csv_cols = ",".join(table_data.get('columns'))
+            yield csv_cols
+            for rows in table_data.get('lazy_rows'):
+                yield ('\n' + '\n'.join([",".join([str(d) for d in row])
+                       for row in rows]))
+
+        downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
+        downloadName = downloadName + ".csv"
+
+        rsp = TableClosingHttpResponse(csv_gen(), content_type='text/csv')
+        rsp.conn = conn
+        rsp.table = context.get('table')
+        rsp['Content-Type'] = 'application/force-download'
+        # rsp['Content-Length'] = ann.getFileSize()
+        rsp['Content-Disposition'] = ('attachment; filename=%s' % downloadName)
+        return rsp
 
     context['data']['name'] = orig_file.name
     context['data']['path'] = orig_file.path
     context['data']['id'] = file_id
     context['meta']['query'] = query
 
-    # if we're on an exact page:
-    if offset == 0 or float(offset)/limit == offset/limit:
-        context['meta']['page'] = (offset/limit) + 1 if offset > 0 else 1
+    # check if offset matches an integer page number:
+    if offset == 0 or offset/limit == offset//limit:
+        context['meta']['page'] = (offset//limit) + 1 if offset > 0 else 1
 
     # pagination links
     url = reverse('omero_table', args=[file_id])
@@ -3025,21 +3076,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
         context['meta']['prev'] = url + '&offset=%s' % (max(0, offset - limit))
 
     # by default, return context as JSON data
-    # OR, return as csv or html
-    if mtype == 'csv':
-        table_data = context.get('data')
-        csv_rows = [",".join(table_data.get('columns'))]
-        for row in table_data.get('rows'):
-            csv_rows.append(",".join([str(r).replace(',', '.') for r in row]))
-        csv_data = '\n'.join(csv_rows)
-        rsp = HttpResponse(csv_data, content_type='text/csv')
-        rsp['Content-Type'] = 'application/force-download'
-        rsp['Content-Length'] = len(csv_data)
-        downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
-        downloadName = downloadName + ".csv"
-        rsp['Content-Disposition'] = 'attachment; filename=%s' % downloadName
-        return rsp
-    elif mtype is None:
+    if mtype is None:
         context['template'] = 'webclient/annotations/omero_table.html'
         col_types = context['data']['column_types']
         if 'ImageColumn' in col_types:
@@ -3073,10 +3110,8 @@ def download_annotation(request, annId, conn=None, **kwargs):
     """ Returns the file annotation as an http response for download """
     ann = conn.getObject("FileAnnotation", annId)
     if ann is None:
-        rsp = ConnCleaningHttpResponse(StringIO(
-            "FileAnnotation does not exist (id:%s)." % (annId)), status=404)
-        rsp.conn = conn
-        return rsp
+        return handlerInternalError(
+            request, "FileAnnotation does not exist (id:%s)." % (annId))
 
     rsp = ConnCleaningHttpResponse(
         ann.getFileInChunks(buf=settings.CHUNK_SIZE))

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (C) 2011-2013 University of Dundee & Open Microscopy Environment.
+# Copyright (C) 2011-2020 University of Dundee & Open Microscopy Environment.
 # All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -25,8 +25,9 @@ Decorators for use with OMERO.web applications.
 
 import logging
 import traceback
-from django.http import Http404, HttpResponse, HttpResponseRedirect, \
+from django.http import Http404, HttpResponseRedirect, \
     JsonResponse
+from django.http.response import HttpResponseBase
 from django.shortcuts import render
 from django.http import HttpResponseForbidden, StreamingHttpResponse
 
@@ -39,6 +40,7 @@ from django.core.cache import cache
 from omeroweb.utils import reverse_with_params
 from omeroweb.connector import Connector
 from omero.gateway.utils import propertiesToDict
+from omero import ApiUsageException
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +77,17 @@ def get_client_ip(request):
     return ip
 
 
+def is_public_user(request):
+    """
+    Is the session connector created for public user?
+
+    Returns None if no connector found
+    """
+    connector = request.session.get('connector')
+    if connector is not None:
+        return connector.is_public
+
+
 class ConnCleaningHttpResponse(StreamingHttpResponse):
     """Extension of L{HttpResponse} which closes the OMERO connection."""
 
@@ -88,12 +101,32 @@ class ConnCleaningHttpResponse(StreamingHttpResponse):
             logger.error('Failed to clean up connection.', exc_info=True)
 
 
+class TableClosingHttpResponse(ConnCleaningHttpResponse):
+    """Extension of L{HttpResponse} which closes the OMERO connection."""
+
+    def close(self):
+        try:
+            if self.table is not None:
+                self.table.close()
+        except Exception:
+            logger.error('Failed to close OMERO.table.', exc_info=True)
+        # Now call super to close conn
+        super(TableClosingHttpResponse, self).close()
+
+
 class login_required(object):
     """
     OMERO.web specific extension of the Django login_required() decorator,
     https://docs.djangoproject.com/en/dev/topics/auth/, which is responsible
     for ensuring a valid L{omero.gateway.BlitzGateway} connection. Is
     configurable by various options.
+
+    doConnectionCleanup:
+        Used to indicate methods that may return ConnCleaningHttpResponse.
+        If True (default), then returning a ConnCleaningHttpResponse will
+        raise an Exception since cleanup is intended to be immediate; if
+        False, connection cleanup will be skipped ONLY when a
+        ConnCleaningHttpResponse is returned.
     """
 
     def __init__(self, useragent='OMERO.web', isAdmin=False,
@@ -484,13 +517,24 @@ class login_required(object):
 
                     # kwargs['error'] = request.GET.get('error')
                     kwargs['url'] = url
+            retval = None
             try:
                 retval = f(request, *args, **kwargs)
             finally:
                 # If f() raised Exception, e.g. Http404() we must still cleanup
+                delayConnectionCleanup = isinstance(
+                    retval, ConnCleaningHttpResponse
+                )
+                if doConnectionCleanup and delayConnectionCleanup:
+                    raise ApiUsageException(
+                        "Methods that return a"
+                        " ConnCleaningHttpResponse must be marked with"
+                        " @login_required(doConnectionCleanup=False)"
+                    )
+                doConnectionCleanup = not delayConnectionCleanup
+                logger.debug(
+                    'Doing connection cleanup? %s' % doConnectionCleanup)
                 try:
-                    logger.debug(
-                        'Doing connection cleanup? %s' % doConnectionCleanup)
                     if doConnectionCleanup:
                         if conn is not None and conn.c is not None:
                             conn.close(hard=False)
@@ -538,7 +582,7 @@ class render_response(object):
             context = f(request, *args, **kwargs)
 
             # if we happen to have a Response, return it
-            if isinstance(context, HttpResponse):
+            if isinstance(context, HttpResponseBase):
                 return context
 
             # get template from view dict. Can be overridden from the **kwargs

@@ -42,7 +42,7 @@ class BaseController(object):
 
     def doPaging(self, page, page_size, total_size, limit=PAGE):
         total = list()
-        t = (total_size/limit) + (total_size % limit > 0 and 1 or 0)
+        t = (total_size//limit) + (total_size % limit > 0 and 1 or 0)
         if total_size > (limit * 10):
             if page > 10:
                 total.append(-1)
