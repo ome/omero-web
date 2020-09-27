@@ -31,10 +31,10 @@ from omero_marshal import get_encoder
 logger = logging.getLogger(__name__)
 
 # OMERO.insight point list regular expression
-INSIGHT_POINT_LIST_RE = re.compile(r'points\[([^\]]+)\]')
+INSIGHT_POINT_LIST_RE = re.compile(r"points\[([^\]]+)\]")
 
 # OME model point list regular expression
-OME_MODEL_POINT_LIST_RE = re.compile(r'([\d.]+),([\d.]+)')
+OME_MODEL_POINT_LIST_RE = re.compile(r"([\d.]+),([\d.]+)")
 
 
 def eventContextMarshal(event_context):
@@ -46,17 +46,29 @@ def eventContextMarshal(event_context):
     """
 
     ctx = {}
-    for a in ['shareId', 'sessionId', 'sessionUuid', 'userId', 'userName',
-              'sudoerId', 'sudoerName', 'groupId',
-              'groupName', 'isAdmin', 'eventId', 'eventType',
-              'memberOfGroups', 'leaderOfGroups',
-              'adminPrivileges']:
-        if (hasattr(event_context, a)):
+    for a in [
+        "shareId",
+        "sessionId",
+        "sessionUuid",
+        "userId",
+        "userName",
+        "sudoerId",
+        "sudoerName",
+        "groupId",
+        "groupName",
+        "isAdmin",
+        "eventId",
+        "eventType",
+        "memberOfGroups",
+        "leaderOfGroups",
+        "adminPrivileges",
+    ]:
+        if hasattr(event_context, a):
             ctx[a] = unwrap(getattr(event_context, a))
 
     perms = event_context.groupPermissions
     encoder = get_encoder(perms.__class__)
-    ctx['groupPermissions'] = encoder.encode(perms)
+    ctx["groupPermissions"] = encoder.encode(perms)
 
     return ctx
 
@@ -69,22 +81,26 @@ def channelMarshal(channel):
     @return:            Dict
     """
 
-    chan = {'emissionWave': channel.getEmissionWave(),
-            'label': channel.getLabel(),
-            'color': channel.getColor().getHtml(),
-            # 'reverseIntensity' is deprecated. Use 'inverted'
-            'inverted': channel.isInverted(),
-            'reverseIntensity': channel.isInverted(),
-            'family': unwrap(channel.getFamily()),
-            'coefficient': unwrap(channel.getCoefficient()),
-            'window': {'min': channel.getWindowMin(),
-                       'max': channel.getWindowMax(),
-                       'start': channel.getWindowStart(),
-                       'end': channel.getWindowEnd()},
-            'active': channel.isActive()}
+    chan = {
+        "emissionWave": channel.getEmissionWave(),
+        "label": channel.getLabel(),
+        "color": channel.getColor().getHtml(),
+        # 'reverseIntensity' is deprecated. Use 'inverted'
+        "inverted": channel.isInverted(),
+        "reverseIntensity": channel.isInverted(),
+        "family": unwrap(channel.getFamily()),
+        "coefficient": unwrap(channel.getCoefficient()),
+        "window": {
+            "min": channel.getWindowMin(),
+            "max": channel.getWindowMax(),
+            "start": channel.getWindowStart(),
+            "end": channel.getWindowEnd(),
+        },
+        "active": channel.isActive(),
+    }
     lut = channel.getLut()
     if lut and len(lut) > 0:
-        chan['lut'] = lut
+        chan["lut"] = lut
     return chan
 
 
@@ -109,8 +125,8 @@ def imageMarshal(image, key=None, request=None):
         # -- Tue Sep  6 10:48:47 BST 2011 (See #6660)
         parents = image.listParents()
         if parents is not None:
-            datasets = [p for p in parents if p.OMERO_CLASS == 'Dataset']
-            well_smpls = [p for p in parents if p.OMERO_CLASS == 'WellSample']
+            datasets = [p for p in parents if p.OMERO_CLASS == "Dataset"]
+            well_smpls = [p for p in parents if p.OMERO_CLASS == "WellSample"]
             if len(datasets) == 1:
                 ds = datasets[0]
             if len(well_smpls) == 1:
@@ -119,137 +135,140 @@ def imageMarshal(image, key=None, request=None):
     except omero.SecurityViolation as e:
         # We're in a share so the Image's parent Dataset cannot be loaded
         # or some other permissions related issue has tripped us up.
-        logger.warn('Security violation while retrieving Dataset when '
-                    'marshaling image metadata: %s' % e.message)
+        logger.warn(
+            "Security violation while retrieving Dataset when "
+            "marshaling image metadata: %s" % e.message
+        )
 
     rv = {
-        'id': image.id,
-        'meta': {
-            'imageName': image.name or '',
-            'imageDescription': image.description or '',
-            'imageAuthor': image.getAuthor(),
-            'projectName': pr and pr.name or 'Multiple',
-            'projectId': pr and pr.id or None,
-            'projectDescription': pr and pr.description or '',
-            'datasetName': ds and ds.name or 'Multiple',
-            'datasetId': ds and ds.id or None,
-            'datasetDescription': ds and ds.description or '',
-            'wellSampleId': wellsample and wellsample.id or '',
-            'wellId': well and well.id.val or '',
-            'imageTimestamp': time.mktime(
-                image.getDate().timetuple()),
-            'imageId': image.id,
-            'pixelsType': image.getPixelsType(),
-            },
-        'perms': {
-            'canAnnotate': image.canAnnotate(),
-            'canEdit': image.canEdit(),
-            'canDelete': image.canDelete(),
-            'canLink': image.canLink()
-            }
-        }
+        "id": image.id,
+        "meta": {
+            "imageName": image.name or "",
+            "imageDescription": image.description or "",
+            "imageAuthor": image.getAuthor(),
+            "projectName": pr and pr.name or "Multiple",
+            "projectId": pr and pr.id or None,
+            "projectDescription": pr and pr.description or "",
+            "datasetName": ds and ds.name or "Multiple",
+            "datasetId": ds and ds.id or None,
+            "datasetDescription": ds and ds.description or "",
+            "wellSampleId": wellsample and wellsample.id or "",
+            "wellId": well and well.id.val or "",
+            "imageTimestamp": time.mktime(image.getDate().timetuple()),
+            "imageId": image.id,
+            "pixelsType": image.getPixelsType(),
+        },
+        "perms": {
+            "canAnnotate": image.canAnnotate(),
+            "canEdit": image.canEdit(),
+            "canDelete": image.canDelete(),
+            "canLink": image.canLink(),
+        },
+    }
     try:
         reOK = image._prepareRenderingEngine()
         if not reOK:
-            logger.debug(
-                "Failed to prepare Rendering Engine for imageMarshal")
+            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
             return rv
     except omero.ConcurrencyException as ce:
         backOff = ce.backOff
-        rv = {
-            'ConcurrencyException': {
-                'backOff': backOff
-            }
-        }
+        rv = {"ConcurrencyException": {"backOff": backOff}}
         return rv
-    except Exception as ex:   # Handle everything else.
-        rv['Exception'] = ex.message
+    except Exception as ex:  # Handle everything else.
+        rv["Exception"] = ex.message
         logger.error(traceback.format_exc())
-        return rv       # Return what we have already, in case it's useful
+        return rv  # Return what we have already, in case it's useful
 
     # big images
     levels = image._re.getResolutionLevels()
     tiles = levels > 1
-    rv['tiles'] = tiles
+    rv["tiles"] = tiles
     if tiles:
         width, height = image._re.getTileSize()
         zoomLevelScaling = image.getZoomLevelScaling()
 
-        rv.update({'tile_size': {'width': width,
-                                 'height': height},
-                   'levels': levels})
+        rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
         if zoomLevelScaling is not None:
-            rv['zoomLevelScaling'] = zoomLevelScaling
+            rv["zoomLevelScaling"] = zoomLevelScaling
 
     nominalMagnification = (
-        image.getObjectiveSettings() is not None and
-        image.getObjectiveSettings().getObjective().getNominalMagnification()
-        or None)
+        image.getObjectiveSettings() is not None
+        and image.getObjectiveSettings().getObjective().getNominalMagnification()
+        or None
+    )
 
     try:
-        server_settings = request.session.get('server_settings', {}) \
-                                         .get('viewer', {})
+        server_settings = request.session.get("server_settings", {}).get("viewer", {})
     except Exception:
         server_settings = {}
-    init_zoom = server_settings.get('initial_zoom_level', 0)
+    init_zoom = server_settings.get("initial_zoom_level", 0)
     if init_zoom < 0:
         init_zoom = levels + init_zoom
 
-    interpolate = server_settings.get('interpolate_pixels', True)
+    interpolate = server_settings.get("interpolate_pixels", True)
 
     try:
+
         def pixel_size_in_microns(method):
             try:
-                size = method('MICROMETER')
+                size = method("MICROMETER")
                 return size.getValue() if size else None
             except Exception:
                 logger.debug(
-                    'Unable to convert physical pixel size to microns',
-                    exc_info=True
+                    "Unable to convert physical pixel size to microns", exc_info=True
                 )
                 return None
 
-        rv.update({
-            'interpolate': interpolate,
-            'size': {'width': image.getSizeX(),
-                     'height': image.getSizeY(),
-                     'z': image.getSizeZ(),
-                     't': image.getSizeT(),
-                     'c': image.getSizeC()},
-            'pixel_size': {'x': pixel_size_in_microns(image.getPixelSizeX),
-                           'y': pixel_size_in_microns(image.getPixelSizeY),
-                           'z': pixel_size_in_microns(image.getPixelSizeZ)},
-            })
+        rv.update(
+            {
+                "interpolate": interpolate,
+                "size": {
+                    "width": image.getSizeX(),
+                    "height": image.getSizeY(),
+                    "z": image.getSizeZ(),
+                    "t": image.getSizeT(),
+                    "c": image.getSizeC(),
+                },
+                "pixel_size": {
+                    "x": pixel_size_in_microns(image.getPixelSizeX),
+                    "y": pixel_size_in_microns(image.getPixelSizeY),
+                    "z": pixel_size_in_microns(image.getPixelSizeZ),
+                },
+            }
+        )
         if init_zoom is not None:
-            rv['init_zoom'] = init_zoom
+            rv["init_zoom"] = init_zoom
         if nominalMagnification is not None:
-            rv.update({'nominalMagnification': nominalMagnification})
+            rv.update({"nominalMagnification": nominalMagnification})
         try:
-            rv['pixel_range'] = image.getPixelRange()
-            rv['channels'] = [channelMarshal(x) for x in image.getChannels()]
-            rv['split_channel'] = image.splitChannelDims()
-            rv['rdefs'] = {'model': (image.isGreyscaleRenderingModel() and
-                                     'greyscale' or 'color'),
-                           'projection': image.getProjection(),
-                           'defaultZ': image._re.getDefaultZ(),
-                           'defaultT': image._re.getDefaultT(),
-                           'invertAxis': image.isInvertedAxis()}
+            rv["pixel_range"] = image.getPixelRange()
+            rv["channels"] = [channelMarshal(x) for x in image.getChannels()]
+            rv["split_channel"] = image.splitChannelDims()
+            rv["rdefs"] = {
+                "model": (image.isGreyscaleRenderingModel() and "greyscale" or "color"),
+                "projection": image.getProjection(),
+                "defaultZ": image._re.getDefaultZ(),
+                "defaultT": image._re.getDefaultT(),
+                "invertAxis": image.isInvertedAxis(),
+            }
         except TypeError:
             # Will happen if an image has bad or missing pixel data
-            logger.error('imageMarshal', exc_info=True)
-            rv['pixel_range'] = (0, 0)
-            rv['channels'] = ()
-            rv['split_channel'] = ()
-            rv['rdefs'] = {'model': 'color',
-                           'projection': image.getProjection(),
-                           'defaultZ': 0,
-                           'defaultT': 0,
-                           'invertAxis': image.isInvertedAxis()}
+            logger.error("imageMarshal", exc_info=True)
+            rv["pixel_range"] = (0, 0)
+            rv["channels"] = ()
+            rv["split_channel"] = ()
+            rv["rdefs"] = {
+                "model": "color",
+                "projection": image.getProjection(),
+                "defaultZ": 0,
+                "defaultT": 0,
+                "invertAxis": image.isInvertedAxis(),
+            }
     except AttributeError:
         rv = None
         raise
     if key is not None and rv is not None:
-        for k in key.split('.'):
+        for k in key.split("."):
             rv = rv.get(k, {})
         if rv == {}:
             rv = None
@@ -281,88 +300,90 @@ def shapeMarshal(shape):
             value = bytes_to_native_str(value)
         return value
 
-    rv['id'] = shape.getId().getValue()
-    set_if('theT', shape.getTheT())
-    set_if('theZ', shape.getTheZ())
+    rv["id"] = shape.getId().getValue()
+    set_if("theT", shape.getTheT())
+    set_if("theZ", shape.getTheZ())
     shape_type = type(shape)
     if shape_type == omero.model.RectangleI:
-        rv['type'] = 'Rectangle'
-        rv['x'] = shape.getX().getValue()
-        rv['y'] = shape.getY().getValue()
-        rv['width'] = shape.getWidth().getValue()
-        rv['height'] = shape.getHeight().getValue()
+        rv["type"] = "Rectangle"
+        rv["x"] = shape.getX().getValue()
+        rv["y"] = shape.getY().getValue()
+        rv["width"] = shape.getWidth().getValue()
+        rv["height"] = shape.getHeight().getValue()
     elif shape_type == omero.model.MaskI:
-        rv['type'] = 'Mask'
-        rv['x'] = shape.getX().getValue()
-        rv['y'] = shape.getY().getValue()
-        rv['width'] = shape.getWidth().getValue()
-        rv['height'] = shape.getHeight().getValue()
+        rv["type"] = "Mask"
+        rv["x"] = shape.getX().getValue()
+        rv["y"] = shape.getY().getValue()
+        rv["width"] = shape.getWidth().getValue()
+        rv["height"] = shape.getHeight().getValue()
         # TODO: support for mask
     elif shape_type == omero.model.EllipseI:
-        rv['type'] = 'Ellipse'
-        rv['x'] = shape.getX().getValue()
-        rv['y'] = shape.getY().getValue()
-        rv['radiusX'] = shape.getRadiusX().getValue()
-        rv['radiusY'] = shape.getRadiusY().getValue()
+        rv["type"] = "Ellipse"
+        rv["x"] = shape.getX().getValue()
+        rv["y"] = shape.getY().getValue()
+        rv["radiusX"] = shape.getRadiusX().getValue()
+        rv["radiusY"] = shape.getRadiusY().getValue()
     elif shape_type == omero.model.PolylineI:
-        rv['type'] = 'PolyLine'
+        rv["type"] = "PolyLine"
         points = decode(shape.getPoints())
-        rv['points'] = stringToSvg(points)
+        rv["points"] = stringToSvg(points)
     elif shape_type == omero.model.LineI:
-        rv['type'] = 'Line'
-        rv['x1'] = shape.getX1().getValue()
-        rv['x2'] = shape.getX2().getValue()
-        rv['y1'] = shape.getY1().getValue()
-        rv['y2'] = shape.getY2().getValue()
+        rv["type"] = "Line"
+        rv["x1"] = shape.getX1().getValue()
+        rv["x2"] = shape.getX2().getValue()
+        rv["y1"] = shape.getY1().getValue()
+        rv["y2"] = shape.getY2().getValue()
     elif shape_type == omero.model.PointI:
-        rv['type'] = 'Point'
-        rv['x'] = shape.getX().getValue()
-        rv['y'] = shape.getY().getValue()
+        rv["type"] = "Point"
+        rv["x"] = shape.getX().getValue()
+        rv["y"] = shape.getY().getValue()
     elif shape_type == omero.model.PolygonI:
-        rv['type'] = 'Polygon'
+        rv["type"] = "Polygon"
         # z = closed line
         points = decode(shape.getPoints())
-        rv['points'] = stringToSvg(points) + " z"
+        rv["points"] = stringToSvg(points) + " z"
     elif shape_type == omero.model.LabelI:
-        rv['type'] = 'Label'
-        rv['x'] = shape.getX().getValue()
-        rv['y'] = shape.getY().getValue()
+        rv["type"] = "Label"
+        rv["x"] = shape.getX().getValue()
+        rv["y"] = shape.getY().getValue()
     else:
         logger.debug("Shape type not supported: %s" % str(shape_type))
 
     text_value = unwrap(shape.getTextValue())
     if text_value is not None:
         # only populate json with font styles if we have some text
-        rv['textValue'] = text_value
+        rv["textValue"] = text_value
         # FIXME: units ignored for font size
         if shape.getFontSize() is not None:
-            set_if('fontSize', shape.getFontSize().getValue())
-        set_if('fontStyle', shape.getFontStyle())
-        set_if('fontFamily', shape.getFontFamily())
+            set_if("fontSize", shape.getFontSize().getValue())
+        set_if("fontStyle", shape.getFontStyle())
+        set_if("fontFamily", shape.getFontFamily())
 
     if shape.getTransform() is not None:
         transform = shape.getTransform()
-        tm = [unwrap(transform.a00),
-              unwrap(transform.a10),
-              unwrap(transform.a01),
-              unwrap(transform.a11),
-              unwrap(transform.a02),
-              unwrap(transform.a12)]
-        rv['transform'] = 'matrix(%s)' % (' '.join([str(t) for t in tm]))
+        tm = [
+            unwrap(transform.a00),
+            unwrap(transform.a10),
+            unwrap(transform.a01),
+            unwrap(transform.a11),
+            unwrap(transform.a02),
+            unwrap(transform.a12),
+        ]
+        rv["transform"] = "matrix(%s)" % (" ".join([str(t) for t in tm]))
     fill_color = unwrap(shape.getFillColor())
     if fill_color is not None:
-        rv['fillColor'], rv['fillAlpha'] = rgb_int2css(fill_color)
+        rv["fillColor"], rv["fillAlpha"] = rgb_int2css(fill_color)
     stroke_color = unwrap(shape.getStrokeColor())
     if stroke_color is not None:
-        rv['strokeColor'], rv['strokeAlpha'] = rgb_int2css(stroke_color)
+        rv["strokeColor"], rv["strokeAlpha"] = rgb_int2css(stroke_color)
     if shape.getStrokeWidth() is not None:
         # FIXME: units ignored for stroke width
-        set_if('strokeWidth', shape.getStrokeWidth().getValue())
-    if hasattr(shape, 'getMarkerStart') and shape.getMarkerStart() is not None:
+        set_if("strokeWidth", shape.getStrokeWidth().getValue())
+    if hasattr(shape, "getMarkerStart") and shape.getMarkerStart() is not None:
         # Handle string for python2 and bytes python3. TODO: lower level fix
-        rv['markerStart'] = decode(shape.getMarkerStart())
-    if hasattr(shape, 'getMarkerEnd') and shape.getMarkerEnd() is not None:
-        rv['markerEnd'] = decode(shape.getMarkerEnd())
+        rv["markerStart"] = decode(shape.getMarkerStart())
+    if hasattr(shape, "getMarkerEnd") and shape.getMarkerEnd() is not None:
+        rv["markerEnd"] = decode(shape.getMarkerEnd())
     return rv
 
 
@@ -382,7 +403,7 @@ def stringToSvg(string):
     if len(point_list) == 0:
         logger.error("Unrecognised ROI shape 'points' string: %r" % string)
         return ""
-    point_list = ' L '.join([' '.join(point) for point in point_list])
+    point_list = " L ".join([" ".join(point) for point in point_list])
     return "M %s" % point_list
 
 
@@ -423,76 +444,81 @@ def chgrpMarshal(conn, rsp):
     """
     rv = {}
     if isinstance(rsp, omero.cmd.ERR):
-        rsp_params = ", ".join(["%s: %s" % (k, v) for k, v in
-                               rsp.parameters.items()])
-        rv['error'] = rsp.message
-        rv['report'] = "%s %s" % (rsp.name, rsp_params)
+        rsp_params = ", ".join(["%s: %s" % (k, v) for k, v in rsp.parameters.items()])
+        rv["error"] = rsp.message
+        rv["report"] = "%s %s" % (rsp.name, rsp_params)
     else:
         included = rsp.responses[0].includedObjects
         deleted = rsp.responses[0].deletedObjects
 
         # Included: just simplify the key, e.g. -> Projects, Datasets etc
         includedObjects = {}
-        objKeys = ['ome.model.containers.Project',
-                   'ome.model.containers.Dataset',
-                   'ome.model.core.Image',
-                   'ome.model.screen.Screen',
-                   'ome.model.screen.Plate',
-                   'ome.model.screen.Well']
+        objKeys = [
+            "ome.model.containers.Project",
+            "ome.model.containers.Dataset",
+            "ome.model.core.Image",
+            "ome.model.screen.Screen",
+            "ome.model.screen.Plate",
+            "ome.model.screen.Well",
+        ]
         for k in objKeys:
             if k in included:
                 otype = k.split(".")[-1]
                 oids = included[k]
-                oids.sort()     # makes testing easier
-                includedObjects[otype + 's'] = oids
-        rv['includedObjects'] = includedObjects
+                oids.sort()  # makes testing easier
+                includedObjects[otype + "s"] = oids
+        rv["includedObjects"] = includedObjects
 
         # Annotation links - need to get info on linked objects
         tags = {}
         files = {}
         comments = 0
         others = 0
-        annotationLinks = ['ome.model.annotations.ProjectAnnotationLink',
-                           'ome.model.annotations.DatasetAnnotationLink',
-                           'ome.model.annotations.ImageAnnotationLink',
-                           'ome.model.annotations.ScreenAnnotationLink',
-                           'ome.model.annotations.PlateAnnotationLink',
-                           'ome.model.annotations.WellAnnotationLink']
+        annotationLinks = [
+            "ome.model.annotations.ProjectAnnotationLink",
+            "ome.model.annotations.DatasetAnnotationLink",
+            "ome.model.annotations.ImageAnnotationLink",
+            "ome.model.annotations.ScreenAnnotationLink",
+            "ome.model.annotations.PlateAnnotationLink",
+            "ome.model.annotations.WellAnnotationLink",
+        ]
         for link in annotationLinks:
             if link in deleted:
                 linkType = link.split(".")[-1]
                 params = omero.sys.ParametersI()
                 params.addIds(deleted[link])
-                query = ("select annLink from %s as annLink "
-                         "join fetch annLink.child as ann "
-                         "left outer join fetch ann.file "
-                         "where annLink.id in (:ids)" % linkType)
+                query = (
+                    "select annLink from %s as annLink "
+                    "join fetch annLink.child as ann "
+                    "left outer join fetch ann.file "
+                    "where annLink.id in (:ids)" % linkType
+                )
                 links = conn.getQueryService().findAllByQuery(
-                    query, params, conn.SERVICE_OPTS)
+                    query, params, conn.SERVICE_OPTS
+                )
                 for lnk in links:
                     ann = lnk.child
                     if isinstance(ann, omero.model.FileAnnotationI):
                         name = unwrap(ann.getFile().getName())
-                        files[ann.id.val] = {'id': ann.id.val,
-                                             'name': name}
+                        files[ann.id.val] = {"id": ann.id.val, "name": name}
                     elif isinstance(ann, omero.model.TagAnnotationI):
                         name = unwrap(ann.getTextValue())
-                        tags[ann.id.val] = {'id': ann.id.val,
-                                            'name': name}
+                        tags[ann.id.val] = {"id": ann.id.val, "name": name}
                     elif isinstance(ann, omero.model.CommentAnnotationI):
                         comments += 1
                     else:
                         others += 1
         # sort tags & comments
         tags = list(tags.values())
-        tags.sort(key=lambda x: x['name'])
+        tags.sort(key=lambda x: x["name"])
         files = list(files.values())
-        files.sort(key=lambda x: x['name'])
-        rv['unlinkedDetails'] = {'Tags': tags,
-                                 'Files': files,
-                                 'Comments': comments,
-                                 'Others': others
-                                 }
+        files.sort(key=lambda x: x["name"])
+        rv["unlinkedDetails"] = {
+            "Tags": tags,
+            "Files": files,
+            "Comments": comments,
+            "Others": others,
+        }
 
         # Container links - only report these if we are moving the *parent*,
         # E.g. DatasetImageLinks are only reported if we are moving the Dataset
@@ -500,35 +526,40 @@ def chgrpMarshal(conn, rsp):
         # expect the link to be broken (can ignore)
         objects = {}
         containerLinks = {
-            'ome.model.containers.ProjectDatasetLink': 'Datasets',
-            'ome.model.containers.DatasetImageLink': 'Images',
-            'ome.model.screen.ScreenPlateLink': 'Screens'}
+            "ome.model.containers.ProjectDatasetLink": "Datasets",
+            "ome.model.containers.DatasetImageLink": "Images",
+            "ome.model.screen.ScreenPlateLink": "Screens",
+        }
         for link, ch in containerLinks.items():
             if link in deleted:
                 linkType = link.split(".")[-1]
                 params = omero.sys.ParametersI()
                 params.addIds(deleted[link])
-                query = ("select conLink from %s as conLink "
-                         "join fetch conLink.child as ann "
-                         "where conLink.id in (:ids)" % linkType)
+                query = (
+                    "select conLink from %s as conLink "
+                    "join fetch conLink.child as ann "
+                    "where conLink.id in (:ids)" % linkType
+                )
                 links = conn.getQueryService().findAllByQuery(
-                    query, params, conn.SERVICE_OPTS)
+                    query, params, conn.SERVICE_OPTS
+                )
                 for lnk in links:
                     child = lnk.child
-                    if (ch not in includedObjects or
-                            child.id.val not in includedObjects[ch]):
+                    if (
+                        ch not in includedObjects
+                        or child.id.val not in includedObjects[ch]
+                    ):
                         name = unwrap(child.getName())
                         # Put objects in a dictionary to avoid duplicates
                         if ch not in objects:
                             objects[ch] = {}
                         # E.g. objects['Dataset']['1'] = {}
-                        objects[ch][child.id.val] = {'id': child.id.val,
-                                                     'name': name}
+                        objects[ch][child.id.val] = {"id": child.id.val, "name": name}
         # sort objects
         for otype, objs in objects.items():
             objs = list(objs.values())
-            objs.sort(key=lambda x: x['name'])
+            objs.sort(key=lambda x: x["name"])
             # E.g. 'Dataset' objects in 'Datasets'
-            rv['unlinkedDetails'][otype] = objs
+            rv["unlinkedDetails"][otype] = objs
 
     return rv

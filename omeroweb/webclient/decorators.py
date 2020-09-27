@@ -45,8 +45,13 @@ class login_required(omeroweb.decorators.login_required):
     webclient specific extension of the OMERO.web login_required() decorator.
     """
 
-    def __init__(self, ignore_login_fail=False, setGroupContext=False,
-                 login_redirect=None, **kwargs):
+    def __init__(
+        self,
+        ignore_login_fail=False,
+        setGroupContext=False,
+        login_redirect=None,
+        **kwargs
+    ):
         """
         Initialises the decorator.
         """
@@ -60,12 +65,10 @@ class login_required(omeroweb.decorators.login_required):
         super(login_required, self).on_logged_in(request, conn)
         self.prepare_session(request)
         if self.setGroupContext:
-            if request.session.get('active_group'):
-                conn.SERVICE_OPTS.setOmeroGroup(
-                    request.session.get('active_group'))
+            if request.session.get("active_group"):
+                conn.SERVICE_OPTS.setOmeroGroup(request.session.get("active_group"))
             else:
-                conn.SERVICE_OPTS.setOmeroGroup(
-                    conn.getEventContext().groupId)
+                conn.SERVICE_OPTS.setOmeroGroup(conn.getEventContext().groupId)
 
     def on_not_logged_in(self, request, url, error=None):
         """
@@ -79,17 +82,16 @@ class login_required(omeroweb.decorators.login_required):
                 url = reverse(self.login_redirect)
             except Exception:
                 pass
-        return super(
-            login_required, self).on_not_logged_in(request, url, error)
+        return super(login_required, self).on_not_logged_in(request, url, error)
 
     def prepare_session(self, request):
         """Prepares various session variables."""
         changes = False
-        if request.session.get('callback') is None:
-            request.session['callback'] = dict()
+        if request.session.get("callback") is None:
+            request.session["callback"] = dict()
             changes = True
-        if request.session.get('shares') is None:
-            request.session['shares'] = dict()
+        if request.session.get("shares") is None:
+            request.session["shares"] = dict()
             changes = True
         if changes:
             request.session.modified = True
@@ -115,47 +117,58 @@ class render_response(omeroweb.decorators.render_response):
         """
 
         # we expect @login_required to pass us 'conn', but just in case...
-        if 'conn' not in kwargs:
+        if "conn" not in kwargs:
             return
-        conn = kwargs['conn']
+        conn = kwargs["conn"]
 
         # omero constants
-        context['omero'] = {'constants': {
-            'NSCOMPANIONFILE': constants.namespaces.NSCOMPANIONFILE,
-            'ORIGINALMETADATA': constants.annotation.file.ORIGINALMETADATA,
-            'NSCLIENTMAPANNOTATION': constants.metadata.NSCLIENTMAPANNOTATION
-        }}
+        context["omero"] = {
+            "constants": {
+                "NSCOMPANIONFILE": constants.namespaces.NSCOMPANIONFILE,
+                "ORIGINALMETADATA": constants.annotation.file.ORIGINALMETADATA,
+                "NSCLIENTMAPANNOTATION": constants.metadata.NSCLIENTMAPANNOTATION,
+            }
+        }
 
-        context.setdefault('ome', {})   # don't overwrite existing ome
+        context.setdefault("ome", {})  # don't overwrite existing ome
         public_user = omeroweb.decorators.is_public_user(request)
         if public_user is not None:
-            context['ome']['is_public_user'] = public_user
-        context['ome']['eventContext'] = eventContextMarshal(
-            conn.getEventContext())
-        context['ome']['user'] = conn.getUser
-        context['ome']['user_id'] = request.session.get('user_id',
-                                                        conn.getUserId())
-        context['ome']['group_id'] = request.session.get('group_id', None)
-        context['ome']['active_group'] = request.session.get(
-            'active_group', conn.getEventContext().groupId)
-        context['global_search_form'] = GlobalSearchForm()
-        context['ome']['can_create'] = request.session.get('can_create', True)
+            context["ome"]["is_public_user"] = public_user
+        context["ome"]["eventContext"] = eventContextMarshal(conn.getEventContext())
+        context["ome"]["user"] = conn.getUser
+        context["ome"]["user_id"] = request.session.get("user_id", conn.getUserId())
+        context["ome"]["group_id"] = request.session.get("group_id", None)
+        context["ome"]["active_group"] = request.session.get(
+            "active_group", conn.getEventContext().groupId
+        )
+        context["global_search_form"] = GlobalSearchForm()
+        context["ome"]["can_create"] = request.session.get("can_create", True)
         # UI server preferences
-        if request.session.get('server_settings'):
-            context['ome']['email'] = request.session.get(
-                'server_settings').get('email', False)
-            if request.session.get('server_settings').get('ui'):
+        if request.session.get("server_settings"):
+            context["ome"]["email"] = request.session.get("server_settings").get(
+                "email", False
+            )
+            if request.session.get("server_settings").get("ui"):
                 # don't overwrite existing ui
-                context.setdefault('ui', {'tree': {}})
-                context['ui']['orphans'] = \
-                    request.session.get('server_settings').get('ui', {}) \
-                    .get('tree', {}).get('orphans')
-                context['ui']['dropdown_menu'] = \
-                    request.session.get('server_settings').get('ui', {}) \
-                    .get('menu', {}).get('dropdown')
-                context['ui']['tree']['type_order'] = \
-                    request.session.get('server_settings').get('ui', {}) \
-                    .get('tree', {}).get('type_order')
+                context.setdefault("ui", {"tree": {}})
+                context["ui"]["orphans"] = (
+                    request.session.get("server_settings")
+                    .get("ui", {})
+                    .get("tree", {})
+                    .get("orphans")
+                )
+                context["ui"]["dropdown_menu"] = (
+                    request.session.get("server_settings")
+                    .get("ui", {})
+                    .get("menu", {})
+                    .get("dropdown")
+                )
+                context["ui"]["tree"]["type_order"] = (
+                    request.session.get("server_settings")
+                    .get("ui", {})
+                    .get("tree", {})
+                    .get("type_order")
+                )
 
         self.load_settings(request, context, conn)
 
@@ -164,7 +177,7 @@ class render_response(omeroweb.decorators.render_response):
         # Process various settings and add to the template context dict
         ping_interval = settings.PING_INTERVAL
         if ping_interval > 0:
-            context['ping_interval'] = ping_interval
+            context["ping_interval"] = ping_interval
 
         top_links = settings.TOP_LINKS
         links = []
@@ -186,17 +199,17 @@ class render_response(omeroweb.decorators.render_response):
                     link["link"] = link_id
             # simply add optional attrs dict
             if len(tl) > 2:
-                link['attrs'] = tl[2]
+                link["attrs"] = tl[2]
             links.append(link)
-        context['ome']['top_links'] = links
+        context["ome"]["top_links"] = links
 
         if settings.TOP_LOGO:
-            context['ome']['logo_src'] = settings.TOP_LOGO
+            context["ome"]["logo_src"] = settings.TOP_LOGO
         if settings.TOP_LOGO_LINK:
-            context['ome']['logo_href'] = settings.TOP_LOGO_LINK
+            context["ome"]["logo_href"] = settings.TOP_LOGO_LINK
 
         metadata_panes = settings.METADATA_PANES
-        context['ome']['metadata_panes'] = metadata_panes
+        context["ome"]["metadata_panes"] = metadata_panes
 
         right_plugins = settings.RIGHT_PLUGINS
         r_plugins = []
@@ -204,9 +217,10 @@ class render_response(omeroweb.decorators.render_response):
             label = rt[0]
             include = rt[1]
             plugin_id = rt[2]
-            r_plugins.append({
-                "label": label, "include": include, "plugin_id": plugin_id})
-        context['ome']['right_plugins'] = r_plugins
+            r_plugins.append(
+                {"label": label, "include": include, "plugin_id": plugin_id}
+            )
+        context["ome"]["right_plugins"] = r_plugins
 
         center_plugins = settings.CENTER_PLUGINS
         c_plugins = []
@@ -214,8 +228,9 @@ class render_response(omeroweb.decorators.render_response):
             label = cp[0]
             include = cp[1]
             plugin_id = cp[2]
-            c_plugins.append({
-                "label": label, "include": include, "plugin_id": plugin_id})
-        context['ome']['center_plugins'] = c_plugins
+            c_plugins.append(
+                {"label": label, "include": include, "plugin_id": plugin_id}
+            )
+        context["ome"]["center_plugins"] = c_plugins
 
-        context['ome']['user_dropdown'] = settings.USER_DROPDOWN
+        context["ome"]["user_dropdown"] = settings.USER_DROPDOWN

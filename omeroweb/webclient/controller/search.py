@@ -51,37 +51,53 @@ class BaseSearch(BaseController):
     def __init__(self, conn, **kw):
         BaseController.__init__(self, conn)
 
-    def search(self, query, onlyTypes, fields, searchGroup, ownedBy,
-               useAcquisitionDate, date=None, rawQuery=False):
+    def search(
+        self,
+        query,
+        onlyTypes,
+        fields,
+        searchGroup,
+        ownedBy,
+        useAcquisitionDate,
+        date=None,
+        rawQuery=False,
+    ):
         # If rawQuery, the raw lucene query is used in search.byFullText()
         # and fields is ignored.
         # If fields contains 'annotation', we really want to search files too
         # docs.openmicroscopy.org/latest/omero/developers/Modules/Search.html
         fields = set(fields)
         if "annotation" in fields or "file" in fields:
-            fields = fields.union(("file.name", "file.path", "file.format",
-                                   "file.contents"))
-            fields.discard("file")      # Not supported
+            fields = fields.union(
+                ("file.name", "file.path", "file.format", "file.contents")
+            )
+            fields.discard("file")  # Not supported
         fields = list(fields)
 
-        if 'plates' in onlyTypes:
-            onlyTypes.append('plateacquisitions')
+        if "plates" in onlyTypes:
+            onlyTypes.append("plateacquisitions")
         created = None
         self.moreResults = False
         batchSize = 500
         if len(onlyTypes) == 1:
             batchSize = 1000
         if date is not None:
-            p = str(date).split('_')
+            p = str(date).split("_")
             if len(p) > 1:
                 try:
-                    d1 = getDateTime(p[0]+" 00:00:00")
-                    d2 = getDateTime(p[1]+" 23:59:59")
+                    d1 = getDateTime(p[0] + " 00:00:00")
+                    d2 = getDateTime(p[1] + " 23:59:59")
 
-                    created = [rtime(long(time.mktime(d1.timetuple()) + 1e-6 *
-                                          d1.microsecond) * 1000),
-                               rtime(long(time.mktime(d2.timetuple()) + 1e-6 *
-                                          d2.microsecond) * 1000)]
+                    created = [
+                        rtime(
+                            long(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond)
+                            * 1000
+                        ),
+                        rtime(
+                            long(time.mktime(d2.timetuple()) + 1e-6 * d2.microsecond)
+                            * 1000
+                        ),
+                    ]
                 except ValueError:
                     # User entered an invalid date format - Ignore
                     pass
@@ -93,17 +109,19 @@ class BaseSearch(BaseController):
             """ E.g. searchType is 'images' """
             objType = searchType[0:-1]  # remove 's'
 
-            obj_list = list(self.conn.searchObjects(
-                [objType],
-                query,
-                created,
-                fields=fields,
-                batchSize=batchSize,
-                searchGroup=searchGroup,
-                ownedBy=ownedBy,
-                useAcquisitionDate=useAcquisitionDate,
-                rawQuery=rawQuery),
-                )
+            obj_list = list(
+                self.conn.searchObjects(
+                    [objType],
+                    query,
+                    created,
+                    fields=fields,
+                    batchSize=batchSize,
+                    searchGroup=searchGroup,
+                    ownedBy=ownedBy,
+                    useAcquisitionDate=useAcquisitionDate,
+                    rawQuery=rawQuery,
+                ),
+            )
             return obj_list
 
         self.containers = {}
@@ -114,15 +132,23 @@ class BaseSearch(BaseController):
         try:
             for dt in onlyTypes:
                 dt = str(dt)
-                if dt in ['projects', 'datasets', 'images', 'screens',
-                          'plateacquisitions', 'plates', 'wells']:
+                if dt in [
+                    "projects",
+                    "datasets",
+                    "images",
+                    "screens",
+                    "plateacquisitions",
+                    "plates",
+                    "wells",
+                ]:
                     self.containers[dt] = doSearch(dt)
                     if dt == "wells":
                         for well in self.containers[dt]:
-                            well.name = "%s - %s" %\
-                                        (well.listParents()[0].name,
-                                         well.getWellPos())
-                    if dt == 'images':
+                            well.name = "%s - %s" % (
+                                well.listParents()[0].name,
+                                well.getWellPos(),
+                            )
+                    if dt == "images":
                         self.iids = [i.id for i in self.containers[dt]]
                     # If we get a full page of results, we know there are more
                     if len(self.containers[dt]) == batchSize:
@@ -135,11 +161,13 @@ class BaseSearch(BaseController):
                 if "TooManyClauses" in x.message:
                     self.searchError = (
                         "Please try to narrow down your query. The wildcard"
-                        " matched too many terms.")
+                        " matched too many terms."
+                    )
                 elif ":" in query:
                     self.searchError = (
                         "There was an error parsing your query."
                         " Colons ':' are reserved for searches of"
-                        " key-value annotations in the form: 'key:value'.")
+                        " key-value annotations in the form: 'key:value'."
+                    )
 
         self.c_size = resultCount

@@ -24,14 +24,12 @@ from django.http import HttpResponse, HttpResponseServerError
 
 class HttpJavascriptResponse(HttpResponse):
     def __init__(self, content):
-        HttpResponse.__init__(self, content,
-                              content_type="application/javascript")
+        HttpResponse.__init__(self, content, content_type="application/javascript")
 
 
 class HttpJavascriptResponseServerError(HttpResponseServerError):
     def __init__(self, content):
-        HttpResponseServerError.__init__(
-            self, content, content_type="text/javascript")
+        HttpResponseServerError.__init__(self, content, content_type="text/javascript")
 
 
 class HttpJPEGResponse(HttpResponse):

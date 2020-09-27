@@ -35,21 +35,21 @@ def normalize_objects(objects):
     groups = {}
     objs = []
     for o in objects:
-        exp = o['omero:details']['owner']
-        experimenters[exp['@id']] = exp
-        o['omero:details']['owner'] = {'@id': exp['@id']}
-        grp = o['omero:details']['group']
-        groups[grp['@id']] = grp
-        o['omero:details']['group'] = {'@id': grp['@id']}
+        exp = o["omero:details"]["owner"]
+        experimenters[exp["@id"]] = exp
+        o["omero:details"]["owner"] = {"@id": exp["@id"]}
+        grp = o["omero:details"]["group"]
+        groups[grp["@id"]] = grp
+        o["omero:details"]["group"] = {"@id": grp["@id"]}
         objs.append(o)
     experimenters = list(experimenters.values())
     groups = list(groups.values())
-    return objs, {'experimenters': experimenters, 'experimenterGroups': groups}
+    return objs, {"experimenters": experimenters, "experimenterGroups": groups}
 
 
 def marshal_objects(objects, extras=None, normalize=False):
     """
-    Marshal a list of OMERO.model objects using omero_marshal.
+    Marshal ßa list of OMERO.model objects using omero_marshal.
 
     @param extras:      A dict of id:dict to add extra data to each object
     @param normalize:   If true, normalize groups & owners into separate lists
@@ -63,7 +63,7 @@ def marshal_objects(objects, extras=None, normalize=False):
         marshalled.append(m)
 
     if not normalize:
-        return {'data': marshalled}
+        return {"data": marshalled}
     data, extra_objs = normalize_objects(marshalled)
-    extra_objs['data'] = data
+    extra_objs["data"] = data
     return extra_objs

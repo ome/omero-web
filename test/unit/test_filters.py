@@ -34,16 +34,16 @@ class TestFilters(object):
     def test_ago(self):
 
         now = datetime.now()
-        assert ago(now - timedelta(seconds=15)) == 'less than a minute'
-        assert ago(now - timedelta(minutes=15)) == '15 minutes'
-        assert ago(now - timedelta(minutes=75)) == '1 hour'
-        assert ago(now - timedelta(hours=15)) == '15 hours'
-        assert ago(now - timedelta(hours=36)) == '1 day'
-        assert ago(now - timedelta(days=1)) == '1 day'
-        assert ago(now - timedelta(days=5, hours=12)) == '5 days'
-        assert ago(now - timedelta(days=24)) == '24 days'
-        assert ago(now - timedelta(days=29)) == '29 days'
-        assert ago(now - timedelta(weeks=2)) == '14 days'
-        assert ago(now - timedelta(weeks=5)) == '1 month'
-        assert ago(now - timedelta(weeks=260)) == '4 years'
-        assert ago(now + timedelta(seconds=15)) == 'Future times not supported'
+        assert ago(now - timedelta(seconds=15)) == "less than a minute"
+        assert ago(now - timedelta(minutes=15)) == "15 minutes"
+        assert ago(now - timedelta(minutes=75)) == "1 hour"
+        assert ago(now - timedelta(hours=15)) == "15 hours"
+        assert ago(now - timedelta(hours=36)) == "1 day"
+        assert ago(now - timedelta(days=1)) == "1 day"
+        assert ago(now - timedelta(days=5, hours=12)) == "5 days"
+        assert ago(now - timedelta(days=24)) == "24 days"
+        assert ago(now - timedelta(days=29)) == "29 days"
+        assert ago(now - timedelta(weeks=2)) == "14 days"
+        assert ago(now - timedelta(weeks=5)) == "1 month"
+        assert ago(now - timedelta(weeks=260)) == "4 years"
+        assert ago(now + timedelta(seconds=15)) == "Future times not supported"

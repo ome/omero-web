@@ -52,17 +52,25 @@ def redirect_urlpatterns():
     """
     if settings.INDEX_TEMPLATE is None:
         return [
-            re_path(r'^$', never_cache(
-                RedirectView.as_view(url=reverse_lazy('webindex'),
-                                     permanent=True)),
-                name="index")
+            re_path(
+                r"^$",
+                never_cache(
+                    RedirectView.as_view(url=reverse_lazy("webindex"), permanent=True)
+                ),
+                name="index",
+            )
         ]
     else:
         return [
-            re_path(r'^$', never_cache(
-                RedirectView.as_view(url=reverse_lazy('webindex_custom'),
-                                     permanent=True)),
-                name="index"),
+            re_path(
+                r"^$",
+                never_cache(
+                    RedirectView.as_view(
+                        url=reverse_lazy("webindex_custom"), permanent=True
+                    )
+                ),
+                name="index",
+            ),
         ]
 
 
@@ -79,10 +87,10 @@ for app in settings.ADDITIONAL_APPS:
 
     # Depending on how we added the app to INSTALLED_APPS in settings.py,
     # include the urls the same way
-    if 'omeroweb.%s' % app in settings.INSTALLED_APPS:
-        urlmodule = 'omeroweb.%s.urls' % app
+    if "omeroweb.%s" % app in settings.INSTALLED_APPS:
+        urlmodule = "omeroweb.%s.urls" % app
     else:
-        urlmodule = '%s.urls' % app
+        urlmodule = "%s.urls" % app
 
     # Try to import module.urls.py if it exists (not for corsheaders etc)
     urls_found = pkgutil.find_loader(urlmodule)
@@ -91,34 +99,34 @@ for app in settings.ADDITIONAL_APPS:
             __import__(urlmodule)
             # https://stackoverflow.com/questions/7580220/django-urls-how-to-map-root-to-app
             if label == settings.OMEROWEB_ROOT_APPLICATION:
-                regex = r'^'
+                regex = r"^"
             else:
-                regex = '^(?i)%s/' % label
+                regex = "^(?i)%s/" % label
             urlpatterns.append(re_path(regex, include(urlmodule)))
         except ImportError:
-            print("""Failed to import %s
+            print(
+                """Failed to import %s
 Please check if the app is installed and the versions of the app and
 OMERO.web are compatible
-            """ % urlmodule)
+            """
+                % urlmodule
+            )
             raise
     else:
-        logger.debug('Module not found: %s' % urlmodule)
+        logger.debug("Module not found: %s" % urlmodule)
 
 urlpatterns += [
-    path(r'favicon\.ico',
-        lambda request: redirect('%swebgateway/img/ome.ico'
-                                 % settings.STATIC_URL)),
-    re_path(r'^(?i)webgateway/', include('omeroweb.webgateway.urls')),
-    re_path(r'^(?i)webadmin/', include('omeroweb.webadmin.urls')),
-    re_path(r'^(?i)webclient/', include('omeroweb.webclient.urls')),
-
-    re_path(r'^(?i)url/', include('omeroweb.webredirect.urls')),
-    re_path(r'^(?i)feedback/', include('omeroweb.feedback.urls')),
-
-    re_path(r'^(?i)api/', include('omeroweb.api.urls')),
-
-    path(r'index/', webclient_views.custom_index,
-        name="webindex_custom"),
+    path(
+        r"favicon\.ico",
+        lambda request: redirect("%swebgateway/img/ome.ico" % settings.STATIC_URL),
+    ),
+    re_path(r"^(?i)webgateway/", include("omeroweb.webgateway.urls")),
+    re_path(r"^(?i)webadmin/", include("omeroweb.webadmin.urls")),
+    re_path(r"^(?i)webclient/", include("omeroweb.webclient.urls")),
+    re_path(r"^(?i)url/", include("omeroweb.webredirect.urls")),
+    re_path(r"^(?i)feedback/", include("omeroweb.feedback.urls")),
+    re_path(r"^(?i)api/", include("omeroweb.api.urls")),
+    path(r"index/", webclient_views.custom_index, name="webindex_custom"),
 ]
 
 urlpatterns += redirect_urlpatterns()

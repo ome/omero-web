@@ -28,7 +28,6 @@ from django.forms.fields import FileField, CharField
 
 
 class NonASCIIForm(forms.Form):
-
     def __init__(self, *args, **kwargs):
         super(NonASCIIForm, self).__init__(*args, **kwargs)
 
@@ -50,22 +49,26 @@ class NonASCIIForm(forms.Form):
             # Each widget type knows how to retrieve its own data, because
             # some widgets split data over several HTML fields.
             value = field.widget.value_from_datadict(
-                self.data, self.files, self.add_prefix(name))
+                self.data, self.files, self.add_prefix(name)
+            )
             try:
                 if isinstance(field, FileField):
                     initial = self.initial.get(name, field.initial)
                     value = field.clean(value, initial)
                 elif isinstance(field, CharField):
-                    if (value is not None and
-                            isinstance(value, basestring) and len(value) > 0):
+                    if (
+                        value is not None
+                        and isinstance(value, basestring)
+                        and len(value) > 0
+                    ):
                         value = str(smart_str(value))
                     else:
                         value = field.clean(value)
                 else:
                     value = field.clean(value)
                 self.cleaned_data[name] = value
-                if hasattr(self, 'clean_%s' % name):
-                    value = getattr(self, 'clean_%s' % name)()
+                if hasattr(self, "clean_%s" % name):
+                    value = getattr(self, "clean_%s" % name)()
                     self.cleaned_data[name] = value
             except ValidationError as e:
                 self._errors[name] = self.error_class(e.messages)
@@ -74,7 +77,6 @@ class NonASCIIForm(forms.Form):
         try:
             self.cleaned_data = self.clean()
         except ValidationError as e:
-            self._errors[forms.Form.NON_FIELD_ERRORS] = \
-                self.error_class(e.messages)
+            self._errors[forms.Form.NON_FIELD_ERRORS] = self.error_class(e.messages)
         if self._errors:
-            delattr(self, 'cleaned_data')
+            delattr(self, "cleaned_data")

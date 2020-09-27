@@ -27,5 +27,5 @@ from django.urls import path
 from omeroweb.webredirect import views
 
 urlpatterns = [
-    path(r'', views.index, name='webredirect'),
+    path(r"", views.index, name="webredirect"),
 ]
