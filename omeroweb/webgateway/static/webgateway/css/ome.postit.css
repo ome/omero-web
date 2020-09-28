@@ -10,32 +10,31 @@
  * jason@glencoesoftware.com.
  */
 
-.postit { 
+.postit {
   position: absolute;
   display: none;
   top: 0px;
-  background-color: #FF0;
+  background-color: #ff0;
   z-index: 10;
   border: 1px solid;
   overflow: hidden;
   _width: 25%;
 }
 
-
-.postit h1 { 
+.postit h1 {
   margin: 0px;
   padding: 0px 2em;
-  background-color: #EE0;
+  background-color: #ee0;
   height: 1.5em;
-  font-size: 1.0em;
+  font-size: 1em;
   font-weight: bold;
   text-align: center;
   cursor: -moz-grab;
   cursor: pointer, auto;
 }
 
-.postit h2 { 
-  font-size: 1.0em;
+.postit h2 {
+  font-size: 1em;
   font-style: italic;
   text-align: center;
   text-decoration: underline;
@@ -49,8 +48,8 @@
 }
 */
 
-.postit ul { 
-/*
+.postit ul {
+  /*
     font-family: Courier New, monospace;
 */
   list-style-type: none;
@@ -58,7 +57,7 @@
   padding: 0px 0.5em;
 }
 
-.postit.collapsed { 
+.postit.collapsed {
   height: 1.5em !important;
   border-bottom-style: dashed;
   min-height: 0px !important;
@@ -73,7 +72,7 @@
   overflow: hidden;
 }
 
-.postit-close-btn { 
+.postit-close-btn {
   position: absolute;
   right: 0px;
   top: 0px;
@@ -87,7 +86,7 @@
 
 .postit-resize-bar {
   height: 8px;
-  background-color: #EDEDED;
+  background-color: #ededed;
   font-size: 1px;
 }
 
@@ -103,19 +102,19 @@
   cursor: se-resize;
 }
 
-.postit-toggle-btn { 
+.postit-toggle-btn {
   position: absolute;
   left: 0px;
   top: 0px;
-  background: url('../img/white_arrow_up.gif') no-repeat center;
+  background: url("../img/white_arrow_up.gif") no-repeat center;
   background-position: center center;
   width: 1.5em;
   height: 1.5em;
   cursor: pointer;
 }
 
-.postit.collapsed .postit-toggle-btn { 
-  background: url('../img/white_arrow_down.gif') no-repeat center;
+.postit.collapsed .postit-toggle-btn {
+  background: url("../img/white_arrow_down.gif") no-repeat center;
 }
 
 .postit table {

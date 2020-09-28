@@ -15,7 +15,7 @@
 /***********************************/
 /* Horizontal Slider generic rules */
 
-.hslider .slider-line { 
+.hslider .slider-line {
   cursor: pointer;
   font-size: 1px;
   border: 1px solid;
@@ -30,7 +30,8 @@
   /*  height: expression(document.getElementById('__slider__id__').clientHeight - 30);  */
 }
 
-.hslider .slider-btn-down, .hslider .slider-btn-playdown { 
+.hslider .slider-btn-down,
+.hslider .slider-btn-playdown {
   display: block;
   cursor: pointer;
   position: absolute;
@@ -39,16 +40,17 @@
   width: 18px;
   height: 18px;
   top: 1px;
-  background: url('../img/blue_arrow_right.gif') no-repeat center;
+  background: url("../img/blue_arrow_right.gif") no-repeat center;
   border: solid #ddd 1px;
 }
 
 .hslider .slider-btn-playdown {
   right: 0px;
-  background: url('../img/blue_play_right.gif') no-repeat center;
+  background: url("../img/blue_play_right.gif") no-repeat center;
 }
 
-.hslider .slider-btn-up, .hslider .slider-btn-playup { 
+.hslider .slider-btn-up,
+.hslider .slider-btn-playup {
   display: block;
   cursor: pointer;
   position: absolute;
@@ -57,23 +59,23 @@
   width: 18px;
   height: 18px;
   top: 1px;
-  background: url('../img/blue_arrow_left.gif') no-repeat center;
+  background: url("../img/blue_arrow_left.gif") no-repeat center;
   border: solid #ddd 1px;
 }
 
 .hslider .slider-btn-playup {
   left: 0px;
-  background: url('../img/blue_play_left.gif') no-repeat center;
+  background: url("../img/blue_play_left.gif") no-repeat center;
 }
 
 .hslider .onplay {
-  background: url('../img/blue_square.gif') no-repeat center;
+  background: url("../img/blue_square.gif") no-repeat center;
 }
 
 /*********************************/
 /* Vertical Slider generic rules */
 
-.vslider .slider-line { 
+.vslider .slider-line {
   cursor: pointer;
   font-size: 1px;
   border: 1px solid;
@@ -87,7 +89,8 @@
   /*  height: expression(document.getElementById('__slider__id__').clientHeight - 30);  */
 }
 
-.vslider .slider-btn-down, .vslider .slider-btn-playdown { 
+.vslider .slider-btn-down,
+.vslider .slider-btn-playdown {
   position: absolute;
   cursor: pointer;
   display: block;
@@ -96,16 +99,17 @@
   width: 18px;
   height: 18px;
   text-align: center;
-  background: url('../img/blue_arrow_down.gif') no-repeat center;
+  background: url("../img/blue_arrow_down.gif") no-repeat center;
   border: solid #ddd 1px;
 }
 
 .vslider .slider-btn-playdown {
   bottom: 0px;
-  background: url('../img/blue_play_down.gif') no-repeat center;
+  background: url("../img/blue_play_down.gif") no-repeat center;
 }
 
-.vslider .slider-btn-up, .vslider .slider-btn-playup { 
+.vslider .slider-btn-up,
+.vslider .slider-btn-playup {
   position: absolute;
   cursor: pointer;
   display: block;
@@ -114,23 +118,23 @@
   height: 18px;
   right: 0px;
   text-align: center;
-  background: url('../img/blue_arrow_up.gif') no-repeat center;
+  background: url("../img/blue_arrow_up.gif") no-repeat center;
   border: solid #ddd 1px;
 }
 
 .vslider .slider-btn-playup {
   top: 0px;
-  background: url('../img/blue_play_up.gif') no-repeat center;
+  background: url("../img/blue_play_up.gif") no-repeat center;
 }
 
 .vslider .onplay {
-  background: url('../img/blue_square.gif') no-repeat center;
+  background: url("../img/blue_square.gif") no-repeat center;
 }
 
 /***********/
 /* Generic */
 
-.slider-handle { 
+.slider-handle {
   position: absolute;
   display: block;
   border: 1px solid;
@@ -139,6 +143,6 @@
   font-size: 1px;
 }
 
-.slider-handle.disabled { 
-  background: #CCC;
+.slider-handle.disabled {
+  background: #ccc;
 }

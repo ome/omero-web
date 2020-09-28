@@ -1,7 +1,8 @@
-.standard_form ol, ul {
-    display: inline-block;
+.standard_form ol,
+ul {
+  display: inline-block;
 }
 
 .standard_form li label {
-    display:inline;
+  display: inline;
 }

@@ -26,8 +26,7 @@ div.weblitz-viewport-tiles img {
  padding: 0;
  position: absolute;
 }*/
-  
-  
+
 .weblitz-viewport-vp {
   position: absolute;
   display: block;
@@ -42,12 +41,12 @@ div.weblitz-viewport-tiles img {
   left: 15px;
 }
 
-.weblitz-viewport-top { 
+.weblitz-viewport-top {
   position: relative;
   height: 100%;
 }
 
-.weblitz-viewport-bot { 
+.weblitz-viewport-bot {
   position: relative;
   left: 15px;
   height: 15px;
@@ -56,7 +55,7 @@ div.weblitz-viewport-tiles img {
 .weblitz-viewport-scalebar {
   display: none;
   font-size: 12px;
-  font-color:#000;
+  font-color: #000;
   text-align: center;
   border: 1px solid #000;
   background: rgba(255, 255, 255, 0.7);
@@ -70,7 +69,7 @@ div.weblitz-viewport-tiles img {
 
 .weblitz-viewport-msg {
   display: none;
-  color: #F30;
+  color: #f30;
   font-weight: bold;
   position: absolute;
   top: 0.5em;
@@ -86,11 +85,11 @@ div.weblitz-viewport-tiles img {
 
 /* Customizing the jquery-plugin-viewportImage classes */
 
-.image-viewer { 
+.image-viewer {
   position: relative;
 }
 
-.vslider { 
+.vslider {
   position: absolute;
   width: 13px;
   height: 100%;
@@ -99,7 +98,7 @@ div.weblitz-viewport-tiles img {
   left: 1px;
 }
 
-.hslider { 
+.hslider {
   position: relative;
   height: 13px;
   /*bottom: -3px;*/
@@ -107,16 +106,16 @@ div.weblitz-viewport-tiles img {
   font-size: 0.1em;
 }
 
-.slider-line { 
+.slider-line {
   /* width: 100%; */
-  background: #FFF;
+  background: #fff;
   font-size: 0.1em;
 }
 
-.slider-handle { 
-  background: #184A89;
+.slider-handle {
+  background: #184a89;
   font-size: 0.1em;
-  left: -1px; 
+  left: -1px;
   top: -1px;
 }
 
@@ -138,7 +137,9 @@ div.weblitz-viewport-tiles img {
   z-index: 19;
 }
 
-.wb_zoomIn, .wb_zoom11, .wb_zoomOut {
+.wb_zoomIn,
+.wb_zoom11,
+.wb_zoomOut {
   position: absolute;
   z-index: 10;
   left: 10px;
@@ -174,22 +175,21 @@ div.weblitz-viewport-tiles img {
 
 /* from http://phrogz.net/tmp/canvas_image_zoom.html */
 .pixelated {
-  image-rendering:optimizeSpeed;             /* Legal fallback */
-  image-rendering:-moz-crisp-edges;          /* Firefox        */
-  image-rendering:-o-crisp-edges;            /* Opera          */
-  image-rendering:-webkit-optimize-contrast; /* Safari         */
-  image-rendering:optimize-contrast;         /* CSS3 Proposed  */
-  image-rendering:crisp-edges;               /* CSS4 Proposed  */
-  image-rendering:pixelated;                 /* CSS4 Proposed  */
-  -ms-interpolation-mode:nearest-neighbor;   /* IE8+           */
+  image-rendering: optimizeSpeed; /* Legal fallback */
+  image-rendering: -moz-crisp-edges; /* Firefox        */
+  image-rendering: -o-crisp-edges; /* Opera          */
+  image-rendering: -webkit-optimize-contrast; /* Safari         */
+  image-rendering: optimize-contrast; /* CSS3 Proposed  */
+  image-rendering: crisp-edges; /* CSS4 Proposed  */
+  image-rendering: pixelated; /* CSS4 Proposed  */
+  -ms-interpolation-mode: nearest-neighbor; /* IE8+           */
 }
 
 .lutBackground {
-  background-image: url('../img/luts_10.png');
+  background-image: url("../img/luts_10.png");
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
-button>.lutBackground {
+button > .lutBackground {
   opacity: 0.3;
 }
-

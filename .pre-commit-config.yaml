@@ -10,11 +10,11 @@ repos:
     hooks:
       - id: flake8
         args: [
-          # default black line length is 88
-          --max-line-length=88,
-          # Conflicts with black: E203 whitespace before ':'
-          --extend-ignore=E203,
-        ]
+            # default black line length is 88
+            --max-line-length=88,
+            # Conflicts with black: E203 whitespace before ':'
+            --extend-ignore=E203,
+          ]
   - repo: https://github.com/prettier/prettier
     rev: 2.1.2
     hooks:

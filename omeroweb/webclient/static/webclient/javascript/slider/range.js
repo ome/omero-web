@@ -29,128 +29,133 @@
 | Created 2002-10-14 | All changes are in the log above. | Updated 2006-05-28 |
 \----------------------------------------------------------------------------*/
 
-
 function Range() {
-	this._value = 0;
-	this._minimum = 0;
-	this._maximum = 100;
-	this._extent = 0;
+  this._value = 0;
+  this._minimum = 0;
+  this._maximum = 100;
+  this._extent = 0;
 
-	this._isChanging = false;
+  this._isChanging = false;
 }
 
 Range.prototype.round = function (v) {
-   var dec = 0;
-   v=parseFloat(v)
-   a=Math.abs(v)
-   if (a == 0)             { return 0;}
-   else if (a < 0.0000001) { dec = 10;}
-   else if (a < 0.000001)  { dec = 9;}
-   else if (a < 0.00001)   { dec = 8;}
-   else if (a < 0.0001)    { dec = 7;}
-   else if (a < 0.001)     { dec = 6;}
-   else if (a < 0.01)      { dec = 5;}
-   else if (a < 0.1)       { dec = 4;}
-   else if (a < 1.0)       { dec = 3;}
-   else if (a < 10.0)      { dec = 2;}
-   else if (a < 100.0)     { dec = 1;}
-   return Math.round(v*Math.pow(10,dec))/Math.pow(10,dec);
+  var dec = 0;
+  v = parseFloat(v);
+  a = Math.abs(v);
+  if (a == 0) {
+    return 0;
+  } else if (a < 0.0000001) {
+    dec = 10;
+  } else if (a < 0.000001) {
+    dec = 9;
+  } else if (a < 0.00001) {
+    dec = 8;
+  } else if (a < 0.0001) {
+    dec = 7;
+  } else if (a < 0.001) {
+    dec = 6;
+  } else if (a < 0.01) {
+    dec = 5;
+  } else if (a < 0.1) {
+    dec = 4;
+  } else if (a < 1.0) {
+    dec = 3;
+  } else if (a < 10.0) {
+    dec = 2;
+  } else if (a < 100.0) {
+    dec = 1;
+  }
+  return Math.round(v * Math.pow(10, dec)) / Math.pow(10, dec);
 };
 
 Range.prototype.setValue = function (value) {
-	//value = Math.round(parseFloat(value));
-        value = this.round(value)
-	if (isNaN(value)) return;
-	if (this._value != value) {
-		if (value + this._extent > this._maximum)
-			this._value = this._maximum - this._extent;
-		else if (value < this._minimum)
-			this._value = this._minimum;
-		else
-			this._value = value;
-		if (!this._isChanging && typeof this.onchange == "function")
-			 this.onchange();
-	}
+  //value = Math.round(parseFloat(value));
+  value = this.round(value);
+  if (isNaN(value)) return;
+  if (this._value != value) {
+    if (value + this._extent > this._maximum)
+      this._value = this._maximum - this._extent;
+    else if (value < this._minimum) this._value = this._minimum;
+    else this._value = value;
+    if (!this._isChanging && typeof this.onchange == "function")
+      this.onchange();
+  }
 };
 
 Range.prototype.getValue = function () {
-	return this._value;
+  return this._value;
 };
 
 Range.prototype.setExtent = function (extent) {
-	if (this._extent != extent) {
-		if (extent < 0)
-			this._extent = 0;
-		else if (this._value + extent > this._maximum)
-			this._extent = this._maximum - this._value;
-		else
-			this._extent = extent;
-		if (!this._isChanging && typeof this.onchange == "function")
-			this.onchange();
-	}
+  if (this._extent != extent) {
+    if (extent < 0) this._extent = 0;
+    else if (this._value + extent > this._maximum)
+      this._extent = this._maximum - this._value;
+    else this._extent = extent;
+    if (!this._isChanging && typeof this.onchange == "function")
+      this.onchange();
+  }
 };
 
 Range.prototype.getExtent = function () {
-	return this._extent;
+  return this._extent;
 };
 
 Range.prototype.setMinMax = function (min, max) {
-   this.setMinimum(min);
-   this.setMaximum(max);
+  this.setMinimum(min);
+  this.setMaximum(max);
 };
 
 Range.prototype.setMinimum = function (minimum) {
-	if (this._minimum != minimum) {
-		var oldIsChanging = this._isChanging;
-		this._isChanging = true;
+  if (this._minimum != minimum) {
+    var oldIsChanging = this._isChanging;
+    this._isChanging = true;
 
-		this._minimum = minimum;
+    this._minimum = minimum;
 
-		if (minimum > this._value)
-			this.setValue(minimum);
-		if (minimum > this._maximum) {
-			this._extent = 0;
-			this.setMaximum(minimum);
-			this.setValue(minimum)
-		}
-		if (minimum + this._extent > this._maximum)
-			this._extent = this._maximum - this._minimum;
+    if (minimum > this._value) this.setValue(minimum);
+    if (minimum > this._maximum) {
+      this._extent = 0;
+      this.setMaximum(minimum);
+      this.setValue(minimum);
+    }
+    if (minimum + this._extent > this._maximum)
+      this._extent = this._maximum - this._minimum;
 
-		this._isChanging = oldIsChanging;
-		if (!this._isChanging && typeof this.onchange == "function")
-			this.onchange();
-	}
+    this._isChanging = oldIsChanging;
+    if (!this._isChanging && typeof this.onchange == "function")
+      this.onchange();
+  }
 };
 
 Range.prototype.getMinimum = function () {
-	return this._minimum;
+  return this._minimum;
 };
 
 Range.prototype.setMaximum = function (maximum) {
-	if (this._maximum != maximum) {
-		var oldIsChanging = this._isChanging;
-		this._isChanging = true;
+  if (this._maximum != maximum) {
+    var oldIsChanging = this._isChanging;
+    this._isChanging = true;
 
-		this._maximum = maximum;
+    this._maximum = maximum;
 
-		if (maximum < this._value)
-			this.setValue(maximum - this._extent);
-		if (maximum < this._minimum) {
-			this._extent = 0;
-			this.setMinimum(maximum);
-			this.setValue(this._maximum);
-		}
-		if (maximum < this._minimum + this._extent)
-			this._extent = this._maximum - this._minimum;
-		if (maximum < this._value + this._extent)
-			this._extent = this._maximum - this._value;
+    if (maximum < this._value) this.setValue(maximum - this._extent);
+    if (maximum < this._minimum) {
+      this._extent = 0;
+      this.setMinimum(maximum);
+      this.setValue(this._maximum);
+    }
+    if (maximum < this._minimum + this._extent)
+      this._extent = this._maximum - this._minimum;
+    if (maximum < this._value + this._extent)
+      this._extent = this._maximum - this._value;
 
-		this._isChanging = oldIsChanging;
-		if (!this._isChanging && typeof this.onchange == "function")
-			this.onchange();
-	}
+    this._isChanging = oldIsChanging;
+    if (!this._isChanging && typeof this.onchange == "function")
+      this.onchange();
+  }
 };
 
 Range.prototype.getMaximum = function () {
-	return this._maximum;
+  return this._maximum;
 };

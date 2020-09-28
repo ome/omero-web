@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 2014 University of Dundee & Open Microscopy Environment.
   All rights reserved.
@@ -17,56 +16,56 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-        .usageBy.selected {
-            border: solid red 1px;
-        }
-        .legendLabel {
-            font-size: 16px;
-            padding: 2px;
-        }
+.usageBy.selected {
+  border: solid red 1px;
+}
+.legendLabel {
+  font-size: 16px;
+  padding: 2px;
+}
 
-        #progressbar .ui-progressbar-value {
-            background-color: #e94237;
-            margin: 0px;
-        }
-        #progressbar {
-            border: 1px solid #aaaaaa;
-            position: relative;
-            border-radius: 3px;
-        }
-        .progress-label {
-            position: absolute;
-            left: 50%;
-            top: 4px;
-            font-weight: bold;
-            text-shadow: 1px 1px 0 #fff;
-            color: black;
-            font-size: 12px;
-        }
-        .pieLabel {
-            font-size:10pt;
-            text-align:center;
-            color:white;
-        }
-        .summary {
-            padding: 10px 0;
-        }
-        .summary h3 {
-            padding: 2px 0;
-        }
-        .diskUsageStatus {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-        .usageBy {
-          border-radius: 3px !important;
-          margin-left: 6px !important;
-          font-size: 95% !important;
-        }
+#progressbar .ui-progressbar-value {
+  background-color: #e94237;
+  margin: 0px;
+}
+#progressbar {
+  border: 1px solid #aaaaaa;
+  position: relative;
+  border-radius: 3px;
+}
+.progress-label {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #fff;
+  color: black;
+  font-size: 12px;
+}
+.pieLabel {
+  font-size: 10pt;
+  text-align: center;
+  color: white;
+}
+.summary {
+  padding: 10px 0;
+}
+.summary h3 {
+  padding: 2px 0;
+}
+.diskUsageStatus {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.usageBy {
+  border-radius: 3px !important;
+  margin-left: 6px !important;
+  font-size: 95% !important;
+}
 
-        .hlabel {
-          float:left;
-          position:relative;
-          top:7px;
-        }
+.hlabel {
+  float: left;
+  position: relative;
+  top: 7px;
+}

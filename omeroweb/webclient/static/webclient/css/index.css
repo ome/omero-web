@@ -16,24 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- 
- 
- 
- 
- 
- 
- /* Commented out by Dom for several reasons:
+
+/* Commented out by Dom for several reasons:
  
  a) Big, Medium, Small tags shouldn't exist. They should just be tags, and that's it
  b) All generic styles (like tags) will be applied globally, so tags are consistent in the interface.
  
  */
- 
- 
- 
- 
- 
- /*
+
+/*
  a.smalltag, a.middletag, a.bigtag {
     font-size: 1.1em;
 	font-family: 'HelveticaNeue-Medium';

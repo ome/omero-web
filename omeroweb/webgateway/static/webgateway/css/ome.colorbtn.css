@@ -21,39 +21,39 @@
 }*/
 
 .picker {
-	background: url('../img/colorpicker_16.png') center center no-repeat;
-	border-width: 0;
-	width: 18px;
-	height: 18px;
-	border-radius: 3px;
-	margin-left: 5px;
+  background: url("../img/colorpicker_16.png") center center no-repeat;
+  border-width: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  margin-left: 5px;
 }
 
 .lutpicker {
-	height: 300px;
-	overflow: scroll;
+  height: 300px;
+  overflow: scroll;
 }
 .lutpicker input {
-	display: none;
+  display: none;
 }
 .lutpicker label {
-	font-size: 12px;
-	font-weight: normal;
-	width: 100%;
-	display: block;
+  font-size: 12px;
+  font-weight: normal;
+  width: 100%;
+  display: block;
 }
 .lutpicker label:hover {
-	background-color: #ddddff;
+  background-color: #ddddff;
 }
 .lutpicker label span {
-	display: inline-block;
-	width: 50px;
-	margin: 4px;
+  display: inline-block;
+  width: 50px;
+  margin: 4px;
 }
 .lutpicker input {
-	width: 10px;
+  width: 10px;
 }
 #invert {
-	display: block;
-	float: left;
+  display: block;
+  float: left;
 }

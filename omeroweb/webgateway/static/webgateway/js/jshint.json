@@ -38,81 +38,77 @@ More info:
 - JSLintMate:     http://rondevera.github.com/jslintmate/
 */
 
-
 {
   /*** Globals ***/
   // To ignore any custom global variables, enable the `predef` option and list
   // your variables within it.
 
-  "predef": [
-    "jQuery"
-  ],
-
+  "predef": ["jQuery"],
 
   /*** Enforcing options ***/
   // Set these to `true` to enforce, or `false` to relax.
-  "bitwise":      true,
-  "curly":        true,
-  "eqeqeq":       false,
-  "forin":        false,
-  "immed":        true,
-  "latedef":      false,
-  "newcap":       true,
-  "noarg":        true,
-  "noempty":      true,
-  "nonew":        true,
-  "plusplus":     false,
-  "regexp":       false,
-  "undef":        true,
-  "strict":       false,
-  "trailing":     true,
+  "bitwise": true,
+  "curly": true,
+  "eqeqeq": false,
+  "forin": false,
+  "immed": true,
+  "latedef": false,
+  "newcap": true,
+  "noarg": true,
+  "noempty": true,
+  "nonew": true,
+  "plusplus": false,
+  "regexp": false,
+  "undef": true,
+  "strict": false,
+  "trailing": true,
 
   /*** Relaxing options ***/
   // Set these to `true` to relax, or `false` to enforce.
-  "asi":          false,
-  "boss":         true,
-  "debug":        false,
-  "eqnull":       true,
-  "es5":          true,
-  "esnext":       true,
-  "evil":         true,
-  "expr":         true,
-  "funcscope":    false,
+  "asi": false,
+  "boss": true,
+  "debug": false,
+  "eqnull": true,
+  "es5": true,
+  "esnext": true,
+  "evil": true,
+  "expr": true,
+  "funcscope": false,
   "globalstrict": false,
-  "iterator":     false,
-  "lastsemic":    false,
-  "laxbreak":     false,
-  "laxcomma":     false,
-  "loopfunc":     true,
-  "multistr":     false,
-  "onecase":      false,
-  "proto":        false,
-  "regexdash":    false,
-  "scripturl":    false,
-  "shadow":       true,
-  "smarttabs":    true,
-  "sub":          true,         // don't enforce dot notation
-  "supernew":     false,
-  "validthis":    true,
+  "iterator": false,
+  "lastsemic": false,
+  "laxbreak": false,
+  "laxcomma": false,
+  "loopfunc": true,
+  "multistr": false,
+  "onecase": false,
+  "proto": false,
+  "regexdash": false,
+  "scripturl": false,
+  "shadow": true,
+  "smarttabs": true,
+  "sub": true, // don't enforce dot notation
+  "supernew": false,
+  "validthis": true,
 
   /*** Environments ***/
   // Set each environment that you're using to `true`.
-  "browser":      true,
-  "couch":        false,
-  "devel":        false,
-  "dojo":         false,
-  "jquery":       true,
-  "mootools":     false,
-  "node":         false,
-  "nonstandard":  false,
-  "prototypejs":  false,
-  "rhino":        false,
-  "wsh":          false,
+  "browser": true,
+  "couch": false,
+  "devel": false,
+  "dojo": false,
+  "jquery": true,
+  "mootools": false,
+  "node": false,
+  "nonstandard": false,
+  "prototypejs": false,
+  "rhino": false,
+  "wsh": false,
 
   /*** Legacy from JSLint ***/
   // Set these to `true` to enforce, or `false` to relax.
-  "nomen":        false,
-  "onevar":       false,
-  "passfail":     false,
-  "white":        false
+  "nomen": false,
+  "onevar": false,
+  "passfail": false,
+  "white": false
 }
