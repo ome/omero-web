@@ -105,18 +105,12 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
 
             // convert objects to json data
             ajaxdata = {"type": "map"};
-            for (var i=0; i < objects.length; i++) {
-                var o = objects[i].split(/-(.+)/);
-                if (typeof ajaxdata[o[0]] !== 'undefined') {
-                    ajaxdata[o[0]].push(o[1]);
-                } else {
-                    ajaxdata[o[0]] = [o[1]];
-                }
-            }
+            // create request ?image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
+            var request = OME.buildQueryStringForObjects(objects);
 
             $.ajax({
                 dataType: "json",
-                url: this.apiAnnotationUrl(opts.url),
+                url: this.apiAnnotationUrl(opts.url) + '?' + request,
                 data: ajaxdata,
                 traditional: true,
                 success: function(data){
