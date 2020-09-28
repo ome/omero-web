@@ -50,22 +50,22 @@ class TestRenderResponse(object):
         context = call_load_settings(self.r, None)
         defaults = [
             {
-                "link": u"/webclient/",
-                "attrs": {u"title": u"Browse Data via Projects, Tags etc"},
-                "label": u"Data",
+                "link": "/webclient/",
+                "attrs": {"title": "Browse Data via Projects, Tags etc"},
+                "label": "Data",
             },
             {
-                "link": u"/webclient/history/",
-                "attrs": {u"title": u"History"},
-                "label": u"History",
+                "link": "/webclient/history/",
+                "attrs": {"title": "History"},
+                "label": "History",
             },
             {
-                "link": u"https://help.openmicroscopy.org/",
+                "link": "https://help.openmicroscopy.org/",
                 "attrs": {
-                    u"target": u"new",
-                    u"title": u"Open OMERO user guide in a new tab",
+                    "target": "new",
+                    "title": "Open OMERO user guide in a new tab",
                 },
-                "label": u"Help",
+                "label": "Help",
             },
         ]
         assert context["ome"]["top_links"] == defaults

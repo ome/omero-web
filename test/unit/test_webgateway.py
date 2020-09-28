@@ -34,7 +34,7 @@ class TestHelperObjects(object):
     def testOmeroType(self):
         omero_type = omero.gateway.omero_type
         assert isinstance(omero_type("rstring"), omero.RString)
-        assert isinstance(omero_type(u"rstring"), omero.RString)
+        assert isinstance(omero_type("rstring"), omero.RString)
         assert isinstance(omero_type(1), omero.RInt)
         # FIXME: python3
         # assert isinstance(omero_type(1), omero.RLong)

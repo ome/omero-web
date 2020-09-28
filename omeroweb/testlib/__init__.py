@@ -170,7 +170,7 @@ def csrf_response(
         data=data,
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
 
 
@@ -241,7 +241,7 @@ def _post_response(
         data=data,
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
 
 
@@ -263,7 +263,7 @@ def _post_response_json(
         data=data,
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
     assert rsp.get("Content-Type") == "application/json"
     return json.loads(rsp.content)
@@ -283,7 +283,7 @@ def _csrf_post_response(
         data=data,
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
 
 
@@ -310,7 +310,7 @@ def _csrf_post_json(
         json.dumps(data),
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
     print(rsp)
     assert rsp.status_code == status_code
@@ -354,7 +354,7 @@ def _csrf_put_json(
         json.dumps(data),
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
     print(rsp)
     assert rsp.status_code == status_code
@@ -382,7 +382,7 @@ def _delete_response(
         data=data,
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
 
 
@@ -423,7 +423,7 @@ def _csrf_delete_response(
         data=data,
         status_code=status_code,
         content_type=content_type,
-        **extra
+        **extra,
     )
 
 

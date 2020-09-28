@@ -86,7 +86,7 @@ class MetadataQuerySetIterator(object):
 
     def __iter__(self):
         if self.empty_label is not None:
-            yield (u"", self.empty_label)
+            yield ("", self.empty_label)
         for obj in self.queryset:
             yield (obj.value, smart_text(obj.value))
 
@@ -133,7 +133,7 @@ class AnnotationQuerySetIterator(object):
 
     def __iter__(self):
         if self.empty_label is not None:
-            yield (u"", self.empty_label)
+            yield ("", self.empty_label)
         for obj in self.queryset:
             textValue = None
             if isinstance(obj._obj, FileAnnotationI):
@@ -211,10 +211,9 @@ class AnnotationModelMultipleChoiceField(AnnotationModelChoiceField):
 
     hidden_widget = MultipleHiddenInput
     default_error_messages = {
-        "list": _(u"Enter a list of values."),
+        "list": _("Enter a list of values."),
         "invalid_choice": _(
-            u"Select a valid choice. That choice is not one"
-            u" of the available choices."
+            "Select a valid choice. That choice is not one" " of the available choices."
         ),
     }
 
@@ -238,7 +237,7 @@ class AnnotationModelMultipleChoiceField(AnnotationModelChoiceField):
             initial=initial,
             help_text=help_text,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def clean(self, value):
@@ -274,7 +273,7 @@ class ObjectQuerySetIterator(object):
 
     def __iter__(self):
         if self.empty_label is not None:
-            yield (u"", self.empty_label)
+            yield ("", self.empty_label)
         for obj in self.queryset:
             if hasattr(obj.id, "val"):
                 yield (obj.id.val, smart_text(obj.id.val))
@@ -326,10 +325,9 @@ class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
 
     hidden_widget = MultipleHiddenInput
     default_error_messages = {
-        "list": _(u"Enter a list of values."),
+        "list": _("Enter a list of values."),
         "invalid_choice": _(
-            u"Select a valid choice. That choice is not one"
-            u" of the available choices."
+            "Select a valid choice. That choice is not one" " of the available choices."
         ),
     }
 
@@ -353,7 +351,7 @@ class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
             initial=initial,
             help_text=help_text,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def clean(self, value):

@@ -64,7 +64,7 @@ class GroupQuerySetIterator(object):
 
     def __iter__(self):
         if self.empty_label is not None:
-            yield (u"", self.empty_label)
+            yield ("", self.empty_label)
         for obj in self.queryset:
             if hasattr(obj.name, "val"):
                 name = obj.name.val
@@ -131,10 +131,9 @@ class GroupModelMultipleChoiceField(GroupModelChoiceField):
 
     hidden_widget = MultipleHiddenInput
     default_error_messages = {
-        "list": _(u"Enter a list of values."),
+        "list": _("Enter a list of values."),
         "invalid_choice": _(
-            u"Select a valid choice. That choice is not one"
-            " of the available choices."
+            "Select a valid choice. That choice is not one" " of the available choices."
         ),
     }
 
@@ -158,7 +157,7 @@ class GroupModelMultipleChoiceField(GroupModelChoiceField):
             initial=initial,
             help_text=help_text,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def to_python(self, value):
@@ -198,7 +197,7 @@ class ExperimenterQuerySetIterator(object):
 
         self.rendered_set = []
         if self.empty_label is not None:
-            self.rendered_set.append((u"", self.empty_label))
+            self.rendered_set.append(("", self.empty_label))
 
         # queryset may be a list of Experimenters 'exp_list' OR may be
         # (("Leaders", exp_list), ("Members", exp_list))
@@ -333,10 +332,9 @@ class ExperimenterModelMultipleChoiceField(ExperimenterModelChoiceField):
 
     hidden_widget = MultipleHiddenInput
     default_error_messages = {
-        "list": _(u"Enter a list of values."),
+        "list": _("Enter a list of values."),
         "invalid_choice": _(
-            u"Select a valid choice. That choice is not one"
-            " of the available choices."
+            "Select a valid choice. That choice is not one" " of the available choices."
         ),
     }
 
@@ -360,7 +358,7 @@ class ExperimenterModelMultipleChoiceField(ExperimenterModelChoiceField):
             initial=initial,
             help_text=help_text,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def to_python(self, value):

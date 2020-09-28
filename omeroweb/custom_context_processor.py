@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 def url_suffix(request):
-    suffix = u"?_%s" % omero_version
+    suffix = "?_%s" % omero_version
     return {"url_suffix": suffix}
 
 

@@ -123,19 +123,19 @@ class ExperimenterForm(NonASCIIForm):
             self.fields["default_group"] = GroupModelChoiceField(
                 queryset=kwargs["initial"]["my_groups"],
                 initial=kwargs["initial"]["default_group"],
-                empty_label=u"",
+                empty_label="",
                 required=False,
             )
         except Exception:
             try:
                 self.fields["default_group"] = GroupModelChoiceField(
                     queryset=kwargs["initial"]["my_groups"],
-                    empty_label=u"",
+                    empty_label="",
                     required=False,
                 )
             except Exception:
                 self.fields["default_group"] = GroupModelChoiceField(
-                    queryset=list(), empty_label=u"", required=False
+                    queryset=list(), empty_label="", required=False
                 )
 
         # 'Role' is disabled if experimenter is 'admin' or self,

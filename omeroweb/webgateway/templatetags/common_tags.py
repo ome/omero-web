@@ -78,9 +78,9 @@ class PluralNode(template.Node):
 
     def render(self, context):
         if self.quantity.resolve(context) == 1:
-            return u"%s" % self.single.resolve(context)
+            return "%s" % self.single.resolve(context)
         else:
-            return u"%s" % self.plural.resolve(context)
+            return "%s" % self.plural.resolve(context)
 
 
 @register.tag(name="plural")
@@ -110,7 +110,7 @@ class TemplateTokenNode(template.Node):
 
     def render(self, context):
         timestamp = time.time()
-        return u"%s-%s-%s" % (
+        return "%s-%s-%s" % (
             self.component.resolve(context),
             self.cid.resolve(context),
             timestamp,

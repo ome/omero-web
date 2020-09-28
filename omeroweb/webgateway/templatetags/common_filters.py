@@ -223,13 +223,13 @@ def lengthunit(value):
     """
 
     if value == 0:
-        return u"\u00B5m"
+        return "\u00B5m"
     elif value < 0.001:
-        return u"\u212B"
+        return "\u212B"
     elif value < 0.01:
-        return u"nm"
+        return "nm"
     elif value < 1000:
-        return u"\u00B5m"
+        return "\u00B5m"
     elif value < 1000 * 100:
         return "mm"
     elif value < 1000 * 100 * 10:
@@ -254,32 +254,29 @@ def timeformat(value):
     try:
         value = Decimal(force_text(value))
     except UnicodeEncodeError:
-        return u""
+        return ""
     except InvalidOperation:
         try:
             value = Decimal(force_text(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
-            return u"%s s" % str(value)
+            return "%s s" % str(value)
     # Formatting shows integer values for all, so we round() for accuracy
     if value == 0:
-        return u"%d\u00A0s" % value
+        return "%d\u00A0s" % value
     if value < Decimal("0.001"):
-        return u"%d\u00A0\u00B5s" % (round(value * 1000 * 1000))
+        return "%d\u00A0\u00B5s" % (round(value * 1000 * 1000))
     elif value < 1:
-        return u"%d\u00A0ms" % (round(value * 1000))
+        return "%d\u00A0ms" % (round(value * 1000))
     elif round(value) < 60:
         # Round and format seconds to one decimal place
         value = round(value * 10) / 10
-        return u"%0.1f\u00A0s" % value
+        return "%0.1f\u00A0s" % value
     elif round(value) < 60 * 60:
         value = round(value)  # Avoids '1min 60s'
-        return u"%d\u00A0min\u00A0%d\u00A0s" % (value / 60, value % 60)
+        return "%d\u00A0min\u00A0%d\u00A0s" % (value / 60, value % 60)
     else:
         value = round(value)  # Avoids '1h 60min'
-        return u"%d\u00A0h\u00A0%d\u00A0min" % (
-            value / 3600,
-            round((value % 3600) / 60),
-        )
+        return "%d\u00A0h\u00A0%d\u00A0min" % (value / 3600, round((value % 3600) / 60))
 
 
 # taken from https://code.djangoproject.com/ticket/17419

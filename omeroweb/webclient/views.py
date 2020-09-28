@@ -3176,7 +3176,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     limit = get_long_or_default(request, "limit", settings.PAGE)
 
     # Check if file exists since _table_query() doesn't check
-    file_id = long(file_id)
+    file_id = int(file_id)
     orig_file = conn.getObject("OriginalFile", file_id)
     if orig_file is None:
         raise Http404("OriginalFile %s not found" % file_id)

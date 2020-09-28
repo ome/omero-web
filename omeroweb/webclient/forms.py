@@ -670,7 +670,7 @@ class MetadataChannelForm(forms.Form):
             if logicalCh.getIllumination() is not None:
                 self.fields["illumination"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["illuminations"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -684,7 +684,7 @@ class MetadataChannelForm(forms.Form):
             else:
                 self.fields["illumination"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["illuminations"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -709,7 +709,7 @@ class MetadataChannelForm(forms.Form):
             if logicalCh.contrastMethod is not None:
                 self.fields["contrastMethod"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["contrastMethods"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -724,7 +724,7 @@ class MetadataChannelForm(forms.Form):
             else:
                 self.fields["contrastMethod"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["contrastMethods"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -751,7 +751,7 @@ class MetadataChannelForm(forms.Form):
             if logicalCh.getMode() is not None:
                 self.fields["mode"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["modes"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -765,7 +765,7 @@ class MetadataChannelForm(forms.Form):
             else:
                 self.fields["mode"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["modes"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1179,7 +1179,7 @@ class MetadataMicroscopeForm(forms.Form):
             if kwargs["initial"]["microscope"].getMicroscopeType() is not None:
                 self.fields["type"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["microscopeTypes"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1193,7 +1193,7 @@ class MetadataMicroscopeForm(forms.Form):
             else:
                 self.fields["type"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["microscopeTypes"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1525,7 +1525,7 @@ class MetadataObjectiveForm(forms.Form):
             if kwargs["initial"]["objective"].getImmersion() is not None:
                 self.fields["immersion"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["immersions"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1541,7 +1541,7 @@ class MetadataObjectiveForm(forms.Form):
             else:
                 self.fields["immersion"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["immersions"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1568,7 +1568,7 @@ class MetadataObjectiveForm(forms.Form):
             if kwargs["initial"]["objective"].getCorrection() is not None:
                 self.fields["correction"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["corrections"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1584,7 +1584,7 @@ class MetadataObjectiveForm(forms.Form):
             else:
                 self.fields["correction"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["corrections"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1766,7 +1766,7 @@ class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
             if kwargs["initial"]["objectiveSettings"].getMedium() is not None:
                 self.fields["medium"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["mediums"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -1782,7 +1782,7 @@ class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
             else:
                 self.fields["medium"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["mediums"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -2081,7 +2081,7 @@ class MetadataFilterForm(forms.Form):
             if kwargs["initial"]["filter"].getFilterType() is not None:
                 self.fields["type"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["types"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -2095,7 +2095,7 @@ class MetadataFilterForm(forms.Form):
             else:
                 self.fields["type"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["types"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -2498,7 +2498,7 @@ class MetadataDetectorForm(forms.Form):
             if detector.getDetectorType() is not None:
                 self.fields["type"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["types"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(detector.id, "type", options=True)
@@ -2510,7 +2510,7 @@ class MetadataDetectorForm(forms.Form):
             else:
                 self.fields["type"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["types"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(detector.id, "type", options=True)
@@ -2785,7 +2785,7 @@ class MetadataDetectorForm(forms.Form):
             if detSet is not None:
                 self.fields["binning"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["binnings"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(detSet.id, "type", options=True)
@@ -2797,7 +2797,7 @@ class MetadataDetectorForm(forms.Form):
             else:
                 self.fields["binning"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["binnings"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(detSet.id, "type", options=True)
@@ -3036,7 +3036,7 @@ class MetadataLightSourceForm(forms.Form):
             if lightSource.getLightSourceType() is not None:
                 self.fields["lstype"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["lstypes"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -3051,7 +3051,7 @@ class MetadataLightSourceForm(forms.Form):
             else:
                 self.fields["lstype"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["lstypes"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -3101,7 +3101,7 @@ class MetadataLightSourceForm(forms.Form):
             if lightSource.getLaserMedium() is not None:
                 self.fields["lmedium"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["mediums"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -3116,7 +3116,7 @@ class MetadataLightSourceForm(forms.Form):
             else:
                 self.fields["lmedium"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["mediums"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -3276,7 +3276,7 @@ class MetadataLightSourceForm(forms.Form):
             if lightSource.pulse is not None:
                 self.fields["pulse"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["pulses"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
@@ -3290,7 +3290,7 @@ class MetadataLightSourceForm(forms.Form):
             else:
                 self.fields["pulse"] = MetadataModelChoiceField(
                     queryset=kwargs["initial"]["pulses"],
-                    empty_label=u"Not set",
+                    empty_label="Not set",
                     widget=forms.Select(
                         attrs={
                             "onchange": save_metadata(
