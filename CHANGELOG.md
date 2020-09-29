@@ -9,7 +9,7 @@
 
 - Add more details to README for release process ([#220](https://github.com/ome/omero-web/pull/220))
 - Run tox in travis instead of Docker ([#219](https://github.com/ome/omero-web/pull/219))
-- Add support for pre-commit hook ([#218](https://github.com/ome/omero-web/pull/218))
+- Run black autoformatter, add pre-commit hook ([#218](https://github.com/ome/omero-web/pull/218))
 
 5.8.0 (September 2020)
 ----------------------
