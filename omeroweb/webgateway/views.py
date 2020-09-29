@@ -1558,7 +1558,7 @@ def imageData_json(request, conn=None, _internal=False, **kwargs):
             # 403 - Should try logging in
             return HttpResponseForbidden()
         else:
-            return HttpResponseNotFound(f"Image:{iid} not found")
+            return HttpResponseNotFound("Image:%s not found" % iid)
     if request.GET.get("getDefaults") == "true":
         image.resetDefaults(save=False)
     rv = imageMarshal(image, key=key, request=request)
