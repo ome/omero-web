@@ -1,3 +1,70 @@
+5.8.1 (September 2020)
+----------------------
+
+## Bug fixes
+
+- Restore Python 3.5 compatibility ([#228](https://github.com/ome/omero-web/pull/228))
+
+## Other updates
+
+- Add more details to README for release process ([#220](https://github.com/ome/omero-web/pull/220))
+- Run tox in travis instead of Docker ([#219](https://github.com/ome/omero-web/pull/219))
+- Run black autoformatter, add pre-commit hook ([#218](https://github.com/ome/omero-web/pull/218))
+
+5.8.0 (September 2020)
+----------------------
+
+- webclient:
+   - Disable large zip file creation for data download ([#197](https://github.com/ome/omero-web/pull/197))
+   - Fix 'Move to Group' when data owner not in origin group ([#212](https://github.com/ome/omero-web/pull/212))
+   - History results page supports browse to data ([#206](https://github.com/ome/omero-web/pull/206))
+   - Fix shortening of Companion file names ([#198](https://github.com/ome/omero-web/pull/198))
+   - Fix pagination in history page and omero_table ([#203](https://github.com/ome/omero-web/pull/203))
+   - Link ownership matches child owner ([#199](https://github.com/ome/omero-web/pull/199))
+   - Improve download of OMERO.table as csv performance ([#192](https://github.com/ome/omero-web/pull/192))
+   - Fix display of disk usage for very small percentages ([#211](https://github.com/ome/omero-web/pull/211))
+
+- API changes:
+   - @login_required(doConnectionCleanup=False) will close connection unless streaming ([#191](https://github.com/ome/omero-web/pull/191))
+   - Return 404 for webgateway/imgData/ID if image not found ([#209](https://github.com/ome/omero-web/pull/209))
+
+- Other:
+   - Handle missing config for 'scripts to ignore' ([#195](https://github.com/ome/omero-web/pull/195))
+   - Cap pytest-xdist to avoid psutil Travis failures ([#201](https://github.com/ome/omero-web/pull/201))
+
+5.7.1 (July 2020)
+-----------------
+
+- webgateway
+
+   - Always marshal tile metadata on presence of pyramid ([#193](https://github.com/ome/omero-web/pull/193))
+
+5.7.0 (July 2020)
+-----------------
+
+- webclient:
+   - Preserve whitespace and linebreaks in Comments ([#150](https://github.com/ome/omero-web/pull/150))
+   - Improve filtering Images by numerical Key-Value pairs ([#147](https://github.com/ome/omero-web/pull/147))
+   - Fix editing of 'Shares' in webclient ([#162](https://github.com/ome/omero-web/pull/162))
+   - Fix error when user logged-out and public user configured ([#154](https://github.com/ome/omero-web/pull/154))
+   - No longer ignore the default thumbnail size from the configuration ([#165](https://github.com/ome/omero-web/pull/165))
+   - Fix moving data in webclient tree in Python 3.5 ([#170](https://github.com/ome/omero-web/pull/170))
+   - Handle no 'callback' in request.session ([#186](https://github.com/ome/omero-web/pull/186))
+
+- API changes:
+   - Add ROI support to `paths_to_object` ([#159](https://github.com/ome/omero-web/pull/159))
+   - Add Shape support to `paths_to_object` ([#178](https://github.com/ome/omero-web/pull/178))
+   - Add JSON API support for Experimenters and Groups ([#148](https://github.com/ome/omero-web/pull/148))
+
+- Other:
+   - Fix `render_roi_thumbnail` for unset Z/T index ([#157](https://github.com/ome/omero-web/pull/157))
+   - `omero-web` now requires `omero-py 5.7.0`
+   - Add doc for APPLICATION_SERVER_HOST to settings ([#177](https://github.com/ome/omero-web/pull/177))
+   - Set sign_tags to True by default in .bumpversion.cfg ([#176](https://github.com/ome/omero-web/pull/176))
+   - Fix new flake8 warnings ([#174](https://github.com/ome/omero-web/pull/174))
+   - Add `omero-web-docker` to release process instructions ([#156](https://github.com/ome/omero-web/pull/156))
+
+
 5.6.3 (March 2020)
 ------------------
 

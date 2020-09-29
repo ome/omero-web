@@ -85,6 +85,7 @@
                     <th class="table_images">{% trans "Object" %}</th> 
                     <th class="table_desc">{% trans "Name" %}</th> 
                     <th class="table_date">{% trans "Date" %}</th> 
+                    <th>{% trans "Link" %}</th>
                 </tr> 
             </thead>
             <tbody>
@@ -97,7 +98,10 @@
                         <input type="checkbox" name="project" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>                    
+                    <td class="date">{{ c.getDate }}</td>
+                    <td><a href="{% url 'webindex' %}?show=project-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
+                        {% trans "Browse" %}
+                    </a></td>
                 </tr>
             {% endfor %}
             {% for c in i.screen %}
@@ -107,7 +111,10 @@
                         <input type="checkbox" name="screen" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>                    
+                    <td class="date">{{ c.getDate }}</td>
+                    <td><a href="{% url 'webindex' %}?show=screen-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
+                        {% trans "Browse" %}
+                    </a></td>
                 </tr>
             {% endfor %}
             {% for c in i.dataset %}
@@ -117,7 +124,10 @@
                         <input type="checkbox" name="dataset" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>                    
+                    <td class="date">{{ c.getDate }}</td>
+                    <td><a href="{% url 'webindex' %}?show=dataset-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
+                        {% trans "Browse" %}
+                    </a></td>
                 </tr>
             {% endfor %}
             {% for c in i.plate %}
@@ -127,7 +137,10 @@
                         <input type="checkbox" name="plate" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>                    
+                    <td class="date">{{ c.getDate }}</td>
+                    <td><a href="{% url 'webindex' %}?show=plate-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
+                        {% trans "Browse" %}
+                    </a></td>
                 </tr>
             {% endfor %}
             {% for c in i.image %}
@@ -139,7 +152,10 @@
                         <input type="checkbox" name="image" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>                    
+                    <td class="date">{{ c.getDate }}</td>
+                    <td><a href="{% url 'webindex' %}?show=image-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
+                        {% trans "Browse" %}
+                    </a></td>
                 </tr>
             {% endfor %}
             {% endfor %}

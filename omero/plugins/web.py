@@ -20,6 +20,7 @@ import re
 from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
+
 try:
     from omero_ext.path import path
 except ImportError:
@@ -32,11 +33,11 @@ from omero.install.python_warning import py27_only, PYTHON_WARNING
 
 HELP = "OMERO.web configuration/deployment tools"
 
-if platform.system() == 'Windows':
-    HELP += ("\n\n%s" % WINDOWS_WARNING)
+if platform.system() == "Windows":
+    HELP += "\n\n%s" % WINDOWS_WARNING
 
 if not py27_only():
-    HELP += ("\n\nERROR: %s" % PYTHON_WARNING)
+    HELP += "\n\nERROR: %s" % PYTHON_WARNING
 
 LONGHELP = """OMERO.web configuration/deployment tools
 
@@ -60,15 +61,18 @@ Example Nginx developer usage:
 
 """
 
-APACHE_MOD_WSGI_ERR = ("[ERROR] You are deploying OMERO.web using Apache and"
-                       " mod_wsgi. OMERO.web does not provide any management"
-                       " for the daemon process which communicates with"
-                       " Apache child processes using UNIX sockets to handle"
-                       " a request.")
+APACHE_MOD_WSGI_ERR = (
+    "[ERROR] You are deploying OMERO.web using Apache and"
+    " mod_wsgi. OMERO.web does not provide any management"
+    " for the daemon process which communicates with"
+    " Apache child processes using UNIX sockets to handle"
+    " a request."
+)
 
 
 def config_required(func):
     """Decorator validating Django dependencies and omeroweb/settings.py"""
+
     def import_django_settings(func):
         @windows_warning
         def wrapper(self, *args, **kwargs):
@@ -79,31 +83,37 @@ def config_required(func):
             except Exception:
                 self.ctx.die(681, "ERROR: Django not installed!")
             if django.VERSION < (1, 11) or django.VERSION >= (2, 0):
-                self.ctx.err("ERROR: Django version %s is not "
-                             "supported!" % django.get_version())
-            if not os.environ.get('OMERODIR'):
+                self.ctx.err(
+                    "ERROR: Django version %s is not "
+                    "supported!" % django.get_version()
+                )
+            if not os.environ.get("OMERODIR"):
                 self.ctx.die(101, "ERROR: OMERODIR not set")
             try:
                 import omeroweb.settings as settings
-                kwargs['settings'] = settings
+
+                kwargs["settings"] = settings
             except Exception as e:
                 self.ctx.die(682, e)
             return func(self, *args, **kwargs)
+
         return wrapper
+
     return wraps(func)(import_django_settings(func))
 
 
 def assert_config_argtype(func):
     """Decorator validating OMERO.web deployment dependencies"""
+
     def config_argtype(func):
         def wrapper(self, *args, **kwargs):
             argtype = args[0].type
-            settings = kwargs['settings']
+            settings = kwargs["settings"]
             mismatch = False
             if args[0].system:
-                self.ctx.die(683,
-                             "ERROR: --system is no longer supported, "
-                             "see --help")
+                self.ctx.die(
+                    683, "ERROR: --system is no longer supported, " "see --help"
+                )
             if settings.APPLICATION_SERVER in ("development",):
                 mismatch = True
             if settings.APPLICATION_SERVER in (settings.WSGITCP,):
@@ -113,16 +123,22 @@ def assert_config_argtype(func):
                     "nginx-location",
                 ):
                     mismatch = True
-            if (settings.APPLICATION_SERVER in (settings.WSGI,)):
+            if settings.APPLICATION_SERVER in (settings.WSGI,):
                 mismatch = True
             if mismatch:
-                self.ctx.die(680,
-                             ("ERROR: configuration mismatch. "
-                              "omero.web.application_server=%s cannot be "
-                              "used with 'omero web config %s'.") %
-                             (settings.APPLICATION_SERVER, argtype))
+                self.ctx.die(
+                    680,
+                    (
+                        "ERROR: configuration mismatch. "
+                        "omero.web.application_server=%s cannot be "
+                        "used with 'omero web config %s'."
+                    )
+                    % (settings.APPLICATION_SERVER, argtype),
+                )
             return func(self, *args, **kwargs)
+
         return wrapper
+
     return wraps(func)(config_argtype(func))
 
 
@@ -139,119 +155,138 @@ class WebControl(DiagnosticsControl):
         self._add_diagnostics(parser, sub)
 
         parser.add(sub, self.help, "Extended help")
-        start = parser.add(
-            sub, self.start, "Primary start for the OMERO.web server")
+        start = parser.add(sub, self.start, "Primary start for the OMERO.web server")
         parser.add(sub, self.stop, "Stop the OMERO.web server")
-        restart = parser.add(
-            sub, self.restart, "Restart the OMERO.web server")
+        restart = parser.add(sub, self.restart, "Restart the OMERO.web server")
         parser.add(sub, self.status, "Status for the OMERO.web server")
 
         for x in (start, restart):
             group = x.add_mutually_exclusive_group()
             group.add_argument(
-                "--keep-sessions", action="store_true",
-                help="Skip clean-up of expired sessions at startup")
+                "--keep-sessions",
+                action="store_true",
+                help="Skip clean-up of expired sessions at startup",
+            )
             group.add_argument(
-                "--no-wait", action="store_true",
-                help="Do not wait on expired sessions clean-up")
+                "--no-wait",
+                action="store_true",
+                help="Do not wait on expired sessions clean-up",
+            )
 
         for x in (start, restart):
             x.add_argument(
-                "--foreground", action="store_true",
-                help="Start OMERO.web in foreground mode (no daemon/service)")
-            x.add_argument(
-                "--workers", type=int, help=SUPPRESS)
-            x.add_argument(
-                "--worker-connections", type=int, help=SUPPRESS)
-            x.add_argument(
-                "--wsgi-args", type=str, help=SUPPRESS)
+                "--foreground",
+                action="store_true",
+                help="Start OMERO.web in foreground mode (no daemon/service)",
+            )
+            x.add_argument("--workers", type=int, help=SUPPRESS)
+            x.add_argument("--worker-connections", type=int, help=SUPPRESS)
+            x.add_argument("--wsgi-args", type=str, help=SUPPRESS)
 
         #
         # Advanced
         #
 
         config = parser.add(
-            sub, self.config,
+            sub,
+            self.config,
             "Output a config template for web server\n"
             "  nginx: Nginx system configuration for inclusion\n"
             "  nginx-development: Standalone user-run Nginx server\n"
-            "  nginx-location: Minimal location blocks (experts only)\n"
+            "  nginx-location: Minimal location blocks (experts only)\n",
         )
         config.add_argument("type", choices=self.config_choices)
         nginx_group = config.add_argument_group(
-            'Nginx arguments', 'Optional arguments for nginx templates.')
+            "Nginx arguments", "Optional arguments for nginx templates."
+        )
+        nginx_group.add_argument("--http", type=int, help="HTTP port for web server")
         nginx_group.add_argument(
-            "--http", type=int,
-            help="HTTP port for web server")
+            "--servername",
+            type=str,
+            default="$hostname",
+            help="Nginx virtual server name",
+        )
         nginx_group.add_argument(
-            "--servername", type=str, default='$hostname',
-            help="Nginx virtual server name")
-        nginx_group.add_argument(
-            "--max-body-size", type=str, default='0',
+            "--max-body-size",
+            type=str,
+            default="0",
             help="Maximum allowed size of the client request body."
-            "Default: 0 (disabled)")
-        nginx_group.add_argument(
-            "--system", action="store_true", help=SUPPRESS)
+            "Default: 0 (disabled)",
+        )
+        nginx_group.add_argument("--system", action="store_true", help=SUPPRESS)
 
         parser.add(
-            sub, self.syncmedia,
+            sub,
+            self.syncmedia,
             "Advanced use: Creates needed symlinks for static"
-            " media files (Performed automatically by 'start')")
+            " media files (Performed automatically by 'start')",
+        )
 
         clearsessions = parser.add(
-            sub, self.clearsessions,
+            sub,
+            self.clearsessions,
             "Advanced use: Can be run as a cron job or directly to clean "
             "out expired sessions.\n See "
             "https://docs.djangoproject.com/en/1.6/topics/http/sessions/"
-            "#clearing-the-session-store for more information.")
+            "#clearing-the-session-store for more information.",
+        )
         clearsessions.add_argument(
-            "--no-wait", action="store_true",
-            help="Do not wait on expired sessions clean-up")
+            "--no-wait",
+            action="store_true",
+            help="Do not wait on expired sessions clean-up",
+        )
 
         #
         # Developer
         #
 
         call = parser.add(
-            sub, self.call,
-            """Developer use: call appname "[executable] scriptname" args""")
+            sub,
+            self.call,
+            """Developer use: call appname "[executable] scriptname" args""",
+        )
         call.add_argument("appname")
         call.add_argument("scriptname")
         call.add_argument("arg", nargs="*")
 
         enableapp = parser.add(
-            sub, self.enableapp,
-            "Developer use: runs enable.py and then syncdb")
+            sub, self.enableapp, "Developer use: runs enable.py and then syncdb"
+        )
         enableapp.add_argument("appname", nargs="*")
 
         parser.add(
-            sub, self.gateway,
-            "Developer use: Loads the blitz gateway into a Python"
-            " interpreter")
+            sub,
+            self.gateway,
+            "Developer use: Loads the blitz gateway into a Python" " interpreter",
+        )
 
     @config_required
     def help(self, args, settings):
         """Return extended help"""
         try:
             CONFIG_TABLE_FMT = "    %-35.35s  %-8s  %r\n"
-            CONFIG_TABLE = CONFIG_TABLE_FMT % (
-                "Key", "Default?", "Current value")
+            CONFIG_TABLE = CONFIG_TABLE_FMT % ("Key", "Default?", "Current value")
 
             for key in sorted(settings.CUSTOM_SETTINGS_MAPPINGS):
-                global_name, default_value, mapping, desc, using_default = \
-                    settings.CUSTOM_SETTINGS_MAPPINGS[key]
+                (
+                    global_name,
+                    default_value,
+                    mapping,
+                    desc,
+                    using_default,
+                ) = settings.CUSTOM_SETTINGS_MAPPINGS[key]
                 global_value = getattr(settings, global_name, "(unset)")
-                CONFIG_TABLE += CONFIG_TABLE_FMT % (
-                    key, using_default, global_value)
+                CONFIG_TABLE += CONFIG_TABLE_FMT % (key, using_default, global_value)
         except Exception:
             CONFIG_TABLE = (
-                "INVALID OR LOCKED CONFIGURATION!"
-                " Cannot display default values")
+                "INVALID OR LOCKED CONFIGURATION!" " Cannot display default values"
+            )
 
         self.ctx.err(LONGHELP % CONFIG_TABLE)
 
     def _get_python_dir(self):
         import omeroweb
+
         return path(omeroweb.__file__).parent.parent
 
     def _get_fallback_dir(self):
@@ -264,7 +299,7 @@ class WebControl(DiagnosticsControl):
         server = args.type
         if args.http:
             port = args.http
-        elif server in ('nginx-development',):
+        elif server in ("nginx-development",):
             port = 8080
         else:
             port = 80
@@ -274,8 +309,10 @@ class WebControl(DiagnosticsControl):
         if settings.APPLICATION_SERVER in settings.WSGITCP:
             if settings.APPLICATION_SERVER_PORT == port:
                 self.ctx.die(
-                    678, "Port conflict: HTTP(%s) and"" wsgi(%s)."
-                    % (port, settings.APPLICATION_SERVER_PORT))
+                    678,
+                    "Port conflict: HTTP(%s) and"
+                    " wsgi(%s)." % (port, settings.APPLICATION_SERVER_PORT),
+                )
 
         d = {
             "ROOT": self.ctx.dir,
@@ -286,10 +323,11 @@ class WebControl(DiagnosticsControl):
             "NGINX_SERVER_EXTRA_CONFIG": "",
         }
         if settings.NGINX_SERVER_EXTRA_CONFIG:
-            d["NGINX_SERVER_EXTRA_CONFIG"] = '\n'.join(
-                ['# <<<<< omero.web.nginx_server_extra_config'] +
-                settings.NGINX_SERVER_EXTRA_CONFIG +
-                ['# omero.web.nginx_server_extra_config >>>>>'])
+            d["NGINX_SERVER_EXTRA_CONFIG"] = "\n".join(
+                ["# <<<<< omero.web.nginx_server_extra_config"]
+                + settings.NGINX_SERVER_EXTRA_CONFIG
+                + ["# omero.web.nginx_server_extra_config >>>>>"]
+            )
 
         if server in ("nginx", "nginx-development"):
             d["HTTPPORT"] = port
@@ -302,23 +340,24 @@ class WebControl(DiagnosticsControl):
 
         try:
             d["FORCE_SCRIPT_NAME"] = settings.FORCE_SCRIPT_NAME.rstrip("/")
-            prefix = re.sub(r'\W+', '', d["FORCE_SCRIPT_NAME"])
+            prefix = re.sub(r"\W+", "", d["FORCE_SCRIPT_NAME"])
             d["PREFIX_NAME"] = "_%s" % prefix
         except Exception:
             d["FORCE_SCRIPT_NAME"] = "/"
             d["PREFIX_NAME"] = ""
 
-        d["FASTCGI_EXTERNAL"] = '%s:%s' % (
-            settings.APPLICATION_SERVER_HOST, settings.APPLICATION_SERVER_PORT)
+        d["FASTCGI_EXTERNAL"] = "%s:%s" % (
+            settings.APPLICATION_SERVER_HOST,
+            settings.APPLICATION_SERVER_PORT,
+        )
 
         if settings.APPLICATION_SERVER not in settings.WSGI_TYPES:
-            self.ctx.die(679,
-                         "Web template configuration requires"
-                         "wsgi or wsgi-tcp.")
+            self.ctx.die(679, "Web template configuration requires" "wsgi or wsgi-tcp.")
 
         template_file = "%s.conf.template" % server
         c = bytes_to_native_str(
-            resource_string('omeroweb', 'templates/' + template_file))
+            resource_string("omeroweb", "templates/" + template_file)
+        )
         self.ctx.out(c % d)
 
     def syncmedia(self, args):
@@ -328,19 +367,22 @@ class WebControl(DiagnosticsControl):
     def enableapp(self, args, settings):
         location = self._get_python_dir() / "omeroweb"
         if not args.appname:
-            apps = [x.name for x in filter(
-                lambda x: x.isdir() and
-                (x / 'scripts' / 'enable.py').exists(),
-                location.listdir(unreadable_as_empty=True))]
-            iapps = map(lambda x: x.startswith('omeroweb.') and x[9:] or
-                        x, settings.INSTALLED_APPS)
+            apps = [
+                x.name
+                for x in filter(
+                    lambda x: x.isdir() and (x / "scripts" / "enable.py").exists(),
+                    location.listdir(unreadable_as_empty=True),
+                )
+            ]
+            iapps = map(
+                lambda x: x.startswith("omeroweb.") and x[9:] or x,
+                settings.INSTALLED_APPS,
+            )
             apps = filter(lambda x: x not in iapps, apps)
-            self.ctx.out('[enableapp] available apps:\n - ' +
-                         '\n - '.join(apps) + '\n')
+            self.ctx.out("[enableapp] available apps:\n - " + "\n - ".join(apps) + "\n")
         else:
             for app in args.appname:
-                args = [sys.executable, location / app / "scripts" /
-                        "enable.py"]
+                args = [sys.executable, location / app / "scripts" / "enable.py"]
                 rv = self.ctx.call(args, cwd=location)
                 if rv != 0:
                     self.ctx.die(121, "Failed to enable '%s'.\n" % app)
@@ -352,11 +394,15 @@ class WebControl(DiagnosticsControl):
 
     def gateway(self, args):
         location = self._get_python_dir() / "omeroweb"
-        args = [sys.executable, "-i", location /
-                "../omero/gateway/scripts/dbhelpers.py"]
+        args = [
+            sys.executable,
+            "-i",
+            location / "../omero/gateway/scripts/dbhelpers.py",
+        ]
         self.set_environ()
-        os.environ['DJANGO_SETTINGS_MODULE'] = \
-            os.environ.get('DJANGO_SETTINGS_MODULE', 'omeroweb.settings')
+        os.environ["DJANGO_SETTINGS_MODULE"] = os.environ.get(
+            "DJANGO_SETTINGS_MODULE", "omeroweb.settings"
+        )
         self.ctx.call(args, cwd=location)
 
     def call(self, args):
@@ -364,15 +410,14 @@ class WebControl(DiagnosticsControl):
             location = self._get_python_dir() / "omeroweb"
             cargs = []
             appname = args.appname
-            scriptname = args.scriptname.split(' ')
+            scriptname = args.scriptname.split(" ")
             if len(scriptname) > 1:
                 cargs.append(scriptname[0])
-                scriptname = ' '.join(scriptname[1:])
+                scriptname = " ".join(scriptname[1:])
             else:
                 scriptname = scriptname[0]
-            cargs.extend([location / appname / "scripts" / scriptname] +
-                         args.arg)
-            os.environ['DJANGO_SETTINGS_MODULE'] = 'omeroweb.settings'
+            cargs.extend([location / appname / "scripts" / scriptname] + args.arg)
+            os.environ["DJANGO_SETTINGS_MODULE"] = "omeroweb.settings"
             self.set_environ()
             self.ctx.call(cargs, cwd=location)
         except Exception:
@@ -390,8 +435,9 @@ class WebControl(DiagnosticsControl):
     @config_required
     def clearsessions(self, args, settings):
         """Clean out expired sessions."""
-        self.ctx.out("Clearing expired sessions. This may take some time... ",
-                     newline=False)
+        self.ctx.out(
+            "Clearing expired sessions. This may take some time... ", newline=False
+        )
         location = self._get_python_dir() / "omeroweb"
         cmd = [sys.executable, "manage.py", "clearsessions"]
         if not args.no_wait:
@@ -407,7 +453,7 @@ class WebControl(DiagnosticsControl):
         """Get Django Process ID"""
         pid = None
         if pid_path.exists():
-            with open(pid_path, 'r') as pid_file:
+            with open(pid_path, "r") as pid_file:
                 pid = int(pid_file.read().strip())
         return pid
 
@@ -418,9 +464,11 @@ class WebControl(DiagnosticsControl):
         try:
             os.kill(pid, 0)
         except OSError:
-            self.ctx.err("[ERROR] OMERO.web workers (PID %s) - no such "
-                         "process. Use `ps aux | grep %s` and kill stale "
-                         "processes by hand." % (pid, pid_path))
+            self.ctx.err(
+                "[ERROR] OMERO.web workers (PID %s) - no such "
+                "process. Use `ps aux | grep %s` and kill stale "
+                "processes by hand." % (pid, pid_path)
+            )
             return False
         return True
 
@@ -428,28 +476,36 @@ class WebControl(DiagnosticsControl):
     def _deprecated_args(self, args, settings):
         d_args = {}
         try:
-            d_args['wsgi_args'] = settings.WSGI_ARGS
+            d_args["wsgi_args"] = settings.WSGI_ARGS
         except Exception:
-            d_args['wsgi_args'] = args.wsgi_args or ""
+            d_args["wsgi_args"] = args.wsgi_args or ""
         if args.wsgi_args:
-            self.ctx.out(" `--wsgi-args` is deprecated and overwritten"
-                         " by `omero.web.wsgi_args`. ", newline=False)
+            self.ctx.out(
+                " `--wsgi-args` is deprecated and overwritten"
+                " by `omero.web.wsgi_args`. ",
+                newline=False,
+            )
         try:
-            d_args['workers'] = settings.WSGI_WORKERS
+            d_args["workers"] = settings.WSGI_WORKERS
         except Exception:
-            d_args['workers'] = args.workers
+            d_args["workers"] = args.workers
         if args.workers:
-            self.ctx.out(" `--workers` is deprecated and overwritten"
-                         " by `omero.web.wsgi_workers`. ", newline=False)
+            self.ctx.out(
+                " `--workers` is deprecated and overwritten"
+                " by `omero.web.wsgi_workers`. ",
+                newline=False,
+            )
         try:
-            d_args['worker_conn'] = settings.WSGI_WORKER_CONNECTIONS
+            d_args["worker_conn"] = settings.WSGI_WORKER_CONNECTIONS
         except Exception:
-            d_args['worker_conn'] = args.worker_connections
+            d_args["worker_conn"] = args.worker_connections
         if args.worker_connections:
-            self.ctx.out(" `--worker-connections` is deprecated and"
-                         " overwritten by"
-                         " `omero.web.wsgi_worker_connections`. ",
-                         newline=False)
+            self.ctx.out(
+                " `--worker-connections` is deprecated and"
+                " overwritten by"
+                " `omero.web.wsgi_worker_connections`. ",
+                newline=False,
+            )
         return d_args
 
     def _build_run_cmd(self, settings):
@@ -460,13 +516,14 @@ class WebControl(DiagnosticsControl):
         if settings.WSGI_WORKER_CLASS == "sync":
             cmd += " --threads %d" % settings.WSGI_THREADS
         elif settings.WSGI_WORKER_CLASS == "gevent":
-            cmd += " --worker-connections %d" % \
-                settings.WSGI_WORKER_CONNECTIONS
+            cmd += " --worker-connections %d" % settings.WSGI_WORKER_CONNECTIONS
             cmd += " --worker-class %s " % settings.WSGI_WORKER_CLASS
         else:
-            self.ctx.die(609,
-                         "[ERROR] Invalid omero.web.wsgi_worker_class %s" %
-                         settings.WSGI_WORKER_CLASS)
+            self.ctx.die(
+                609,
+                "[ERROR] Invalid omero.web.wsgi_worker_class %s"
+                % settings.WSGI_WORKER_CLASS,
+            )
 
         cmd += " --timeout %(timeout)d"
         cmd += " --max-requests %(maxrequests)d"
@@ -480,10 +537,12 @@ class WebControl(DiagnosticsControl):
         if not args.keep_sessions:
             self.clearsessions(args)
 
-        link = ("%s:%d" % (settings.APPLICATION_SERVER_HOST,
-                           settings.APPLICATION_SERVER_PORT))
+        link = "%s:%d" % (
+            settings.APPLICATION_SERVER_HOST,
+            settings.APPLICATION_SERVER_PORT,
+        )
         location = self._get_python_dir() / "omeroweb"
-        deploy = getattr(settings, 'APPLICATION_SERVER')
+        deploy = getattr(settings, "APPLICATION_SERVER")
 
         if deploy in (settings.WSGI,):
             self.ctx.die(609, APACHE_MOD_WSGI_ERR)
@@ -499,19 +558,24 @@ class WebControl(DiagnosticsControl):
                 pid_path.remove()
                 self.ctx.err("WARNING: Removed stale %s" % pid_path)
             else:
-                self.ctx.die(606,
-                             "[FAILED] OMERO.web already started. "
-                             "%s exists (PID: %s)! Use 'web stop or restart'"
-                             " first." % (pid_path, str(pid)))
+                self.ctx.die(
+                    606,
+                    "[FAILED] OMERO.web already started. "
+                    "%s exists (PID: %s)! Use 'web stop or restart'"
+                    " first." % (pid_path, str(pid)),
+                )
 
-        cache_backend = getattr(settings, 'CACHE_BACKEND', None)
+        cache_backend = getattr(settings, "CACHE_BACKEND", None)
         if cache_backend is not None and cache_backend.startswith("file:///"):
             cache_backend = cache_backend[7:]
-            if "Windows" != platform.system() \
-               and not os.access(cache_backend, os.R_OK | os.W_OK):
+            if "Windows" != platform.system() and not os.access(
+                cache_backend, os.R_OK | os.W_OK
+            ):
                 self.ctx.out("[FAILED]")
-                self.ctx.out("CACHE_BACKEND '%s' not writable or missing." %
-                             getattr(settings, 'CACHE_BACKEND'))
+                self.ctx.out(
+                    "CACHE_BACKEND '%s' not writable or missing."
+                    % getattr(settings, "CACHE_BACKEND")
+                )
                 return False
 
         if deploy == settings.WSGITCP:
@@ -519,12 +583,14 @@ class WebControl(DiagnosticsControl):
                 import gunicorn  # NOQA
             except ImportError:
                 self.ctx.err("[FAILED]")
-                self.ctx.die(690,
-                             "[ERROR] FastCGI support was removed in "
-                             "OMERO 5.2. Install Gunicorn and update "
-                             "config.")
+                self.ctx.die(
+                    690,
+                    "[ERROR] FastCGI support was removed in "
+                    "OMERO 5.2. Install Gunicorn and update "
+                    "config.",
+                )
             try:
-                os.environ['SCRIPT_NAME'] = settings.FORCE_SCRIPT_NAME
+                os.environ["SCRIPT_NAME"] = settings.FORCE_SCRIPT_NAME
             except Exception:
                 pass
 
@@ -533,16 +599,19 @@ class WebControl(DiagnosticsControl):
             d_args = self._deprecated_args(args, settings)
             cmd = self._build_run_cmd(settings)
 
-            runserver = (cmd % {
-                'daemon': daemon,
-                'base': self.ctx.dir,
-                'host': settings.APPLICATION_SERVER_HOST,
-                'port': settings.APPLICATION_SERVER_PORT,
-                'maxrequests': settings.APPLICATION_SERVER_MAX_REQUESTS,
-                'workers': d_args['workers'],
-                'timeout': settings.WSGI_TIMEOUT,
-                'wsgi_args': d_args['wsgi_args']
-            }).split()
+            runserver = (
+                cmd
+                % {
+                    "daemon": daemon,
+                    "base": self.ctx.dir,
+                    "host": settings.APPLICATION_SERVER_HOST,
+                    "port": settings.APPLICATION_SERVER_PORT,
+                    "maxrequests": settings.APPLICATION_SERVER_MAX_REQUESTS,
+                    "workers": d_args["workers"],
+                    "timeout": settings.WSGI_TIMEOUT,
+                    "wsgi_args": d_args["wsgi_args"],
+                }
+            ).split()
             if args.foreground:
                 rv = self.ctx.call(args=runserver, cwd=location)  # popen
                 pid_path = self._get_django_pid_path()
@@ -553,8 +622,14 @@ class WebControl(DiagnosticsControl):
             else:
                 rv = self.ctx.popen(args=runserver, cwd=location)  # popen
         else:
-            runserver = [sys.executable, "manage.py", "runserver", link,
-                         "--noreload", "--nothreading"]
+            runserver = [
+                sys.executable,
+                "manage.py",
+                "runserver",
+                link,
+                "--noreload",
+                "--nothreading",
+            ]
             rv = self.ctx.call(runserver, cwd=location)
         self.ctx.out("[OK]")
         return rv
@@ -563,12 +638,12 @@ class WebControl(DiagnosticsControl):
     def status(self, args, settings):
         self.ctx.out("OMERO.web status... ", newline=False)
 
-        deploy = getattr(settings, 'APPLICATION_SERVER')
-        cache_backend = getattr(settings, 'CACHE_BACKEND', None)
+        deploy = getattr(settings, "APPLICATION_SERVER")
+        cache_backend = getattr(settings, "CACHE_BACKEND", None)
         if cache_backend is not None:
-            cache_backend = ' (CACHE_BACKEND %s)' % cache_backend
+            cache_backend = " (CACHE_BACKEND %s)" % cache_backend
         else:
-            cache_backend = ''
+            cache_backend = ""
 
         if deploy in (settings.WSGITCP,):
             pid_path = self._get_django_pid_path()
@@ -583,18 +658,18 @@ class WebControl(DiagnosticsControl):
         elif deploy in (settings.WSGI,):
             self.ctx.err(APACHE_MOD_WSGI_ERR)
         elif deploy in (settings.DEVELOPMENT,):
-            self.ctx.err(
-                "DEVELOPMENT: You will have to kill processes by hand!")
+            self.ctx.err("DEVELOPMENT: You will have to kill processes by hand!")
         else:
             self.ctx.err(
                 "Invalid APPLICATION_SERVER "
-                "(omero.web.application_server = '%s')!" % deploy)
+                "(omero.web.application_server = '%s')!" % deploy
+            )
         return 0
 
     @config_required
     def stop(self, args, settings):
         self.ctx.out("Stopping OMERO.web... ", newline=False)
-        deploy = getattr(settings, 'APPLICATION_SERVER')
+        deploy = getattr(settings, "APPLICATION_SERVER")
         if deploy in (settings.WSGITCP,):
             pid_path = self._get_django_pid_path()
             pid = self._get_django_pid(pid_path)
@@ -602,10 +677,13 @@ class WebControl(DiagnosticsControl):
                 try:
                     if self._check_pid(pid, pid_path):
                         import signal
+
                         os.kill(pid, signal.SIGTERM)  # kill whole group
                         self.ctx.out("[OK]")
-                        self.ctx.out("OMERO.web %s workers (PID %d) killed." %
-                                     (deploy.replace("-tcp", "").upper(), pid))
+                        self.ctx.out(
+                            "OMERO.web %s workers (PID %d) killed."
+                            % (deploy.replace("-tcp", "").upper(), pid)
+                        )
                 finally:
                     if pid_path.exists():
                         pid_path.remove()
@@ -618,13 +696,13 @@ class WebControl(DiagnosticsControl):
             self.ctx.err(APACHE_MOD_WSGI_ERR)
             return False
         elif deploy in settings.DEVELOPMENT:
-            self.ctx.err(
-                "DEVELOPMENT: You will have to kill processes by hand!")
+            self.ctx.err("DEVELOPMENT: You will have to kill processes by hand!")
             return False
         else:
             self.ctx.err(
                 "Invalid APPLICATION_SERVER "
-                "(omero.web.application_server = '%s')!" % deploy)
+                "(omero.web.application_server = '%s')!" % deploy
+            )
             return False
 
     def restart(self, args):
@@ -634,10 +712,14 @@ class WebControl(DiagnosticsControl):
             return False
 
     def set_environ(self, ice_config=None):
-        os.environ['ICE_CONFIG'] = ice_config is None and \
-            str(self.ctx.dir / "etc" / "ice.config") or str(ice_config)
-        os.environ['PATH'] = str(os.environ.get('PATH', '.') + ':' +
-                                 self.ctx.dir / 'bin')
+        os.environ["ICE_CONFIG"] = (
+            ice_config is None
+            and str(self.ctx.dir / "etc" / "ice.config")
+            or str(ice_config)
+        )
+        os.environ["PATH"] = str(
+            os.environ.get("PATH", ".") + ":" + self.ctx.dir / "bin"
+        )
 
     def diagnostics(self, args):
         self._diagnostics_banner("web")
@@ -650,6 +732,7 @@ class WebControl(DiagnosticsControl):
                 self.ctx.out("OMERO.web not installed!")
         try:
             import django
+
             self.ctx.out("Django version: %s" % django.get_version())
         except Exception:
             self.ctx.err("Django not installed!")
