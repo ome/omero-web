@@ -4148,11 +4148,11 @@ def figure_script(request, scriptName, conn=None, **kwargs):
 
     context = {}
 
-    if imageIds is not None:
+    if len(imageIds) > 0:
         imageIds, validImages = validateIds("Image", imageIds)
         context["idString"] = ",".join([str(i) for i in imageIds])
         context["dtype"] = "Image"
-    if datasetIds is not None:
+    if len(datasetIds) > 0:
         datasetIds, validDatasets = validateIds("Dataset", datasetIds)
         context["idString"] = ",".join([str(i) for i in datasetIds])
         context["dtype"] = "Dataset"
