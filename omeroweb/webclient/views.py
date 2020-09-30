@@ -4207,7 +4207,7 @@ def figure_script(request, scriptName, conn=None, **kwargs):
         thumbSets = []  # multiple collections of images
         tags = []
         figureName = "Thumbnail_Figure"
-        if datasetIds is not None:
+        if len(datasetIds) > 0:
             for d in conn.getObjects("Dataset", datasetIds):
                 imgIds = [i.id for i in d.listChildren()]
                 imageTags, ts = loadImageTags(imgIds)
