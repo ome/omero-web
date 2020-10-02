@@ -107,12 +107,16 @@
                         liClass = "disabled";
                         tooltip = tooltip.replace("Open", "Cannot open");
                     }
-                    var html = "<li class='" + liClass + "'><a title='" + tooltip + "'";
-                    if (enabled) {
-                        html += " target='_blank' href='" + url + "'>" + label + "</a></li>";
-                    } else {
-                        html += ">" + label + "</a></li>";
-                    }
+                    var html = `
+                      <li class='${ liClass }'>
+                        <a title='${ tooltip }'
+                          target='_blank'
+                          ${enabled ? "href = '" + url + "'" : ''}
+                          data-openwithid='${ v.id }' >
+                          ${ label }
+                        </a>
+                      </li>
+                    `
                     return html;
                   
                   });
@@ -127,8 +131,19 @@
 
                 // Listen for clicks on Open-with menu items in case we want to handle with a function
                 // instead of default link behaviour
-                $("#right_panel_openwith tbody").on("click", "tr", function () {
-                  console.log($(this).text());
+                $("#right_panel_openwith").on("click", "a", function (event) {
+                  var $a = $(this);
+                  if ($a.attr('href') === '#') {
+                    event.preventDefault();
+                    let openwith_id = $a.data('openwithid');
+                    let ow = WEBCLIENT.OPEN_WITH.filter(o => o.id === openwith_id)[0];
+                    if (ow) {
+                      let fn = ow.getUrl(selJson, ow.url);
+                      if (typeof fn === 'function') {
+                        fn();
+                      }
+                    }
+                  }
                 });
 
               {% endif %}
