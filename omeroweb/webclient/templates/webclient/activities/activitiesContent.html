@@ -242,6 +242,12 @@
                                             </li>
                                         {% endif %}
 
+					{% ifequal v.type "URL" %}
+					    <li class="btn_url">
+					        <a href='#' onClick="return window.open('{{ v.href }}', '{{ v.target|default:'_blank' }}');" title='{{ v.title }}'></a>
+					    </li>
+					{% endifequal %}
+
                                         {% ifequal v.type "FileAnnotation" %}
                                             <!-- Download -->
                                             <li class="btn_download">
