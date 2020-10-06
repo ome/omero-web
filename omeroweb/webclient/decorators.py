@@ -169,6 +169,9 @@ class render_response(omeroweb.decorators.render_response):
                     .get("tree", {})
                     .get("type_order")
                 )
+                context["ui"]["tree"][
+                    "sort_key_function"
+                ] = settings.TREE_SORT_KEY_FUNCTION
 
         self.load_settings(request, context, conn)
 

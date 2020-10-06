@@ -208,6 +208,7 @@
         WEBCLIENT.UI.TREE = {};
         WEBCLIENT.UI.TREE.pagination_nodes = ["experimenter", "screen", "plate", "acquisition", "project", "tagset", "image"];
         WEBCLIENT.UI.TREE.type_order = "{{ui.tree.type_order}}".toLowerCase().split(",").filter(function(e){return e});
+        WEBCLIENT.UI.TREE.sort_key_function = {{ui.tree.sort_key_function|safe}};
 
         {% if page_size %}
             var PAGE_SIZE = {{ page_size }};

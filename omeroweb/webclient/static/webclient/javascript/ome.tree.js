@@ -1280,8 +1280,14 @@ $(function() {
                         return 1;
                     }
                 }
-                var name1 = node1.text.toLowerCase();
-                var name2 = node2.text.toLowerCase();
+                var name1, name2;
+                if (WEBCLIENT.UI.TREE.sort_key_function) {
+                    name1 = WEBCLIENT.UI.TREE.sort_key_function(node1.text);
+                    name2 = WEBCLIENT.UI.TREE.sort_key_function(node2.text);
+                } else {
+                    name1 = node1.text.toLowerCase();
+                    name2 = node2.text.toLowerCase();
+                }
 
                 // If names are same, sort by ID
                 if (name1 === name2) {

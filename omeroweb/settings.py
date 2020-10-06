@@ -1001,6 +1001,18 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "The javascript loads data into ``$('#div_id')``."
         ),
     ],
+    "omero.web.ui.tree.sort_key_function": [
+        "TREE_SORT_KEY_FUNCTION",
+        "null",
+        str,
+        (
+            "An inline javascript function that returns a key used for "
+            "sorting the tree. Must be of the form (string) -> string, e.g. "
+            "``function(name) {return name.split('-')[1];} ``. "
+            "Warning: this is raw Javascript, errors could affect the "
+            "security of OMERO.web."
+        ),
+    ],
     # CORS
     "omero.web.cors_origin_whitelist": [
         "CORS_ORIGIN_WHITELIST",
