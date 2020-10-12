@@ -77,7 +77,16 @@
                     if (typeof v.isEnabled === "function") {
                         // If plugin has provided a function 'isEnabled'...
                         // prepare json of selected objects to pass to function
-                        enabled = v.isEnabled(selJson);
+                        enabled = v.isEnabled(selJson, function(enable) {
+                          // This callback allows asyn enable/disable of menu item
+                          let $a = $(`#right_panel_openwith a[data-openwithid="${v.id}"]`);
+                          $a.data('openwith_disabled', !enable);
+                          if (!enable) {
+                            $a.parent().addClass('disabled');
+                          } else {
+                            $a.parent().removeClass('disabled');
+                          }
+                        });
                     }
                     // ...Otherwise if supported_objects list is configured...
                     // v.supported_objects is ['image'] or ['dataset', 'images'] etc.
@@ -111,7 +120,8 @@
                       <li class='${ liClass }'>
                         <a title='${ tooltip }'
                           target='_blank'
-                          ${enabled ? "href = '" + url + "'" : ''}
+                          href = '${ url }'
+                          data-openwith_disabled=${ !enabled }
                           data-openwithid='${ v.id }' >
                           ${ label }
                         </a>
@@ -133,6 +143,10 @@
                 // instead of default link behaviour
                 $("#right_panel_openwith").on("click", "a", function (event) {
                   var $a = $(this);
+                  if ($a.data('openwith_disabled')) {
+                    event.preventDefault();
+                    return;
+                  }
                   if ($a.attr('href') === '#') {
                     event.preventDefault();
                     let openwith_id = $a.data('openwithid');
