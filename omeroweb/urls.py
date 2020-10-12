@@ -101,7 +101,7 @@ for app in settings.ADDITIONAL_APPS:
             if label == settings.OMEROWEB_ROOT_APPLICATION:
                 regex = r"^"
             else:
-                regex = "^(?i)%s/" % label
+                regex = "%s/" % label
             urlpatterns.append(re_path(regex, include(urlmodule)))
         except ImportError:
             print(
@@ -120,12 +120,12 @@ urlpatterns += [
         r"favicon\.ico",
         lambda request: redirect("%swebgateway/img/ome.ico" % settings.STATIC_URL),
     ),
-    re_path(r"^(?i)webgateway/", include("omeroweb.webgateway.urls")),
-    re_path(r"^(?i)webadmin/", include("omeroweb.webadmin.urls")),
-    re_path(r"^(?i)webclient/", include("omeroweb.webclient.urls")),
-    re_path(r"^(?i)url/", include("omeroweb.webredirect.urls")),
-    re_path(r"^(?i)feedback/", include("omeroweb.feedback.urls")),
-    re_path(r"^(?i)api/", include("omeroweb.api.urls")),
+    path(r"webgateway/", include("omeroweb.webgateway.urls")),
+    path(r"webadmin/", include("omeroweb.webadmin.urls")),
+    path(r"webclient/", include("omeroweb.webclient.urls")),
+    path(r"url/", include("omeroweb.webredirect.urls")),
+    path(r"feedback/", include("omeroweb.feedback.urls")),
+    path(r"api/", include("omeroweb.api.urls")),
     path(r"index/", webclient_views.custom_index, name="webindex_custom"),
 ]
 
