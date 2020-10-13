@@ -11,10 +11,12 @@
   padding: 0;
   list-style-type: none;
   list-style-image: none;
-  padding-bottom: 2em;
 }
 .jstree-node {
   white-space: nowrap;
+}
+.jstree-container-ul {
+  padding-bottom: 2em;
 }
 .jstree-anchor {
   display: inline-block;
