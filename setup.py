@@ -55,6 +55,7 @@ setup(
         # minimum requirements for `omero web start`
         "Django>=2.2,<3.0",
         "django-pipeline==1.6.14",
+        "django-extensions==3.0.9",
         "gunicorn>=19.3",
         "omero-marshal>=0.7.0",
         "Pillow",

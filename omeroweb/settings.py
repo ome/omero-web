@@ -1419,6 +1419,7 @@ INSTALLED_APPS = (
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.sites",
+    "django_extensions"
 )
 
 # ADDITONAL_APPS: We import any settings.py from apps. This allows them to
