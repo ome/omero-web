@@ -1,11 +1,13 @@
 OMERO.web
 =========
-.. image:: https://travis-ci.org/ome/omero-web.svg?branch=master
-    :target: https://travis-ci.org/ome/omero-web
+.. image::  https://github.com/ome/omero-web/workflows/Build/badge.svg
+    :target: https://github.com/ome/omero-web/actions
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
+.. image:: https://badge.fury.io/py/omero-web.svg
+    :target: https://badge.fury.io/py/omero-web
 
 Introduction
 ------------
