@@ -43,4 +43,4 @@ class TestUrls(object):
             if len(kwargs) == 0:
                 kwargs = dict(zip(kwargs, [0] * len(kwargs)))
                 result = resolve(reverse(url_name, kwargs=kwargs))
-                assert result == resolvers.ResolverMatch
+                assert type(result) == resolvers.ResolverMatch
