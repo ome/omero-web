@@ -1,6 +1,6 @@
 OMERO.web
 =========
-.. image::  https://github.com/ome/omero-web/workflows/Build/badge.svg
+.. image::  https://github.com/ome/omero-web/workflows/Tox/badge.svg
     :target: https://github.com/ome/omero-web/actions
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
