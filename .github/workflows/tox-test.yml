@@ -1,0 +1,31 @@
+---
+name: Tox
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Run tox tests
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - '3.6'
+          - '3.7'
+          - '3.8'
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: python -mpip install --upgrade wheel pytest tox
+      - name: Get tox target
+        id: toxtarget
+        run: |
+          py=$(echo ${{ matrix.python-version }} | tr -d .)
+          echo "::set-output name=py::$py"
+      - name: Run tests
+        run: tox -e py${{ steps.toxtarget.outputs.py }}
