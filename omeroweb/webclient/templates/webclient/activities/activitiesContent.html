@@ -242,12 +242,6 @@
                                             </li>
                                         {% endif %}
 
-					{% ifequal v.type "URL" %}
-					    <li class="btn_url">
-					        <a href='#' onClick="return window.open('{{ v.href }}', '{{ v.target|default:'_blank' }}');" title='{{ v.title }}'></a>
-					    </li>
-					{% endifequal %}
-
                                         {% ifequal v.type "FileAnnotation" %}
                                             <!-- Download -->
                                             <li class="btn_download">
@@ -270,7 +264,13 @@
                                                     title="Open Image in Viewer">View Image</a>
                                                 </li>
                                             {% endifequal %}
-
+                                        {% endifequal %}
+                                    {% elif v.type %}
+                                        <!-- Show action button for URL link -->
+                                        {% ifequal v.type "URL" %}
+                                            <li class="btn_url">
+                                                <a href='#' onClick="return window.open('{{ v.href }}', '{{ v.target|default:'_blank' }}');" title='{{ v.title }}'></a>
+                                            </li>
                                         {% endifequal %}
                                     {% endif %}
                                 {% endfor %}
@@ -306,6 +306,8 @@
                             {% for k,v in j.results.items %}
                                 <div>
                                     {% if v.type and v.id %}
+                                        <!-- These should be handled above in buttons list -->
+                                    {% elif v.type == "URL" %}
                                         <!-- These should be handled above in buttons list -->
                                     {% else %}
                                         <!-- Handle rtypes (already unwrapped) -->
