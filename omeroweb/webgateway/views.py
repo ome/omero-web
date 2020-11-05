@@ -2962,29 +2962,15 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 return dict(error="Error executing query: %s" % query)
 
         def row_generator(table, h):
-            if query == "*":
-                # hits are all consecutive rows - can load them in batches
-                idx = 0
-                batch = 1000
-                while idx < len(h):
-                    batch = min(batch, len(h) - idx)
-                    row_data = [[] for r in range(batch)]
-                    for col in table.read(
-                        range(len(cols)), h[idx], h[idx] + batch
-                    ).columns:
-                        for r in range(batch):
-                            row_data[r].append(col.values[r])
-                    idx += batch
-                    # yield a list of rows
-                    yield row_data
-            else:
-                for hit in h:
-                    row_vals = [
-                        col.values[0]
-                        for col in table.read(range(len(cols)), hit, hit + 1).columns
-                    ]
-                    # yield a list of rows, with only a single row
-                    yield [row_vals]
+            # hits are all consecutive rows - can load them in batches
+            idx = 0
+            batch = 1000
+            while idx < len(h):
+                batch = min(batch, len(h) - idx)
+                res = table.slice(range(len(cols)), h[idx:idx + batch])
+                idx += batch
+                # yield a list of rows
+                yield [[col.values[row] for col in res.columns] for row in range(0,len(res.rowNumbers))]
 
         row_gen = row_generator(t, hits)
 
