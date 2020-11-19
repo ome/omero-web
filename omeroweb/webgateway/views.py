@@ -2926,6 +2926,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         query = request.GET.get("query")
     if not query:
         return dict(error="Must specify query parameter, use * to retrieve all")
+    col_names = request.GET.getlist("col_names")
 
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
@@ -2954,6 +2955,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             if match:
                 query = "(%s==%s)" % (match.group(1), match.group(2))
             try:
+                logger.info(query)
                 hits = t.getWhereList(query, None, 0, rows, 1)
                 totalCount = len(hits)
                 # paginate the hits
@@ -2961,13 +2963,17 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             except Exception:
                 return dict(error="Error executing query: %s" % query)
 
+        logger.info("Retrieving {} rows".format(len(hits)))
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
             idx = 0
             batch = 1000
             while idx < len(h):
                 batch = min(batch, len(h) - idx)
-                res = table.slice(range(len(cols)), h[idx:idx + batch])
+                col_indices = range(len(cols))
+                if col_names:
+                    col_indices = [i for (i,j) in enumerate(cols) if j.name in col_names]
+                res = table.slice(col_indices, h[idx:idx + batch])
                 idx += batch
                 # yield a list of rows
                 yield [[col.values[row] for col in res.columns] for row in range(0,len(res.rowNumbers))]
@@ -3001,7 +3007,6 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     finally:
         if not lazy:
             t.close()
-
 
 table_query = login_required()(jsonp(_table_query))
 
