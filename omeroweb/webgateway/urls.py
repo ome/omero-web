@@ -38,6 +38,13 @@ table_query = url(
 Query a table specified by fileid
 """
 
+table_metadata = url(r'^table/(?P<fileid>\d+)/metadata/$',
+    views.table_metadata,
+    name="webgateway_table_metadata")
+"""
+Get omero table metadata
+"""
+
 object_table_query = url(
     r"^table/(?P<objtype>[\w.]+)/(?P<objid>\d+)/query/$",
     views.object_table_query,
@@ -587,6 +594,7 @@ urlpatterns = [
     # bulk annotations
     annotations,
     table_query,
+    table_metadata,
     object_table_query,
     open_with_options,
 ]

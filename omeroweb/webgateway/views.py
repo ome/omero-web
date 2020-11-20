@@ -2942,7 +2942,10 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
 
         offset = kwargs.get("offset", 0)
         limit = kwargs.get("limit", None)
-
+        if not offset:
+            offset = int(request.GET.get("offset", 0))
+        if not limit:
+            limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
         range_start = offset
         range_size = kwargs.get("limit", rows)
         range_end = min(rows, range_start + range_size)
@@ -2986,7 +2989,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 "columns": [col.name for col in cols],
             },
             "meta": {
-                "rowCount": rows,
+                "rowCount": len(hits),
                 "totalCount": totalCount,
                 "limit": limit,
                 "offset": offset,
@@ -3009,6 +3012,34 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             t.close()
 
 table_query = login_required()(jsonp(_table_query))
+
+
+def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+
+    r = conn.getSharedResources()
+    t = r.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not t:
+        return dict(error="Table %s not found" % fileid)
+
+    try:
+        cols = t.getHeaders()
+        rows = t.getNumberOfRows()
+
+        rsp_data = {
+            "columns": [{"name" : col.name,
+                         "description": col.description,
+                         "type": col.__class__.__name__ }
+                         for col in cols],
+            "totalCount": rows
+        }
+        return rsp_data
+    finally:
+        if not lazy:
+            t.close()
+
+table_metadata = login_required()(jsonp(_table_metadata))
 
 
 @login_required()
