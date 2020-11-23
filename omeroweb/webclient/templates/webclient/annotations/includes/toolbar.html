@@ -51,34 +51,42 @@
                 }
             {% endif %}
 
-
+                // if batch_annotate panel, we can use obj_labels
                 var selectedObjs = [{% for o in obj_labels %}{% if forloop.counter > 1 %},{% endif %}"{{ o.type|lower }}-{{ o.id}}"{% endfor %}];
+                var selJson = [{% for o in obj_labels %}{% if forloop.counter > 1 %}, {% endif %}{"id": {{ o.id }}, 'type': '{{ o.type|lower }}', 'name': '{{ o.name }}'  }{% endfor %}];
 
-
-                {% if manager.obj_type %}
+                // If single object selected
+              {% if manager.obj_type %}
                 selectedObjs = ["{{ manager.obj_type }}-{{ manager.obj_id }}"];
-                {% endif %}
+                selJson = [{'id': {{ manager.obj_id }},
+                           'name': '{{ manager.obj_name }}',
+                           'type': '{{ manager.obj_type }}' }]
+              {% endif %}
 
                 var selectedType = selectedObjs.reduce(function(prev, s){
                     return s.split('-')[0] + (selectedObjs.length > 1 ? "s" : "");
                 }, "undefined");
 
-                {% if not share %}
-                var openwith_html = WEBCLIENT.OPEN_WITH.map(function(v){
+              {% if not share %}
+                function getOpenwithHtml() {
+                  var openwith_html = WEBCLIENT.OPEN_WITH.map(function(v){
                     var label = v.label || v.id;
                     var enabled = false;
                     var tooltip = "Open " + selectedType + " with " + label;
 
-                    var selJson = selectedObjs.map(function(obj){
-                        var s = obj.split('-');
-                        var o = {'id': s[1],
-                                 'type': s[0]};
-                        return o;
-                    });
                     if (typeof v.isEnabled === "function") {
                         // If plugin has provided a function 'isEnabled'...
                         // prepare json of selected objects to pass to function
-                        enabled = v.isEnabled(selJson);
+                        enabled = v.isEnabled(selJson, function(enable) {
+                          // This callback allows asyn enable/disable of menu item
+                          let $a = $(`#right_panel_openwith a[data-openwithid="${v.id}"]`);
+                          $a.data('openwith_disabled', !enable);
+                          if (!enable) {
+                            $a.parent().addClass('disabled');
+                          } else {
+                            $a.parent().removeClass('disabled');
+                          }
+                        });
                     }
                     // ...Otherwise if supported_objects list is configured...
                     // v.supported_objects is ['image'] or ['dataset', 'images'] etc.
@@ -98,24 +106,63 @@
                     // use it to update the url...
                     if (v.getUrl) {
                         url = v.getUrl(selJson, v.url);
+                        if (typeof url === 'function') {
+                          // handle click below
+                          url = '#';
+                        }
                     }
                     var liClass = "";
                     if (!enabled) {
                         liClass = "disabled";
                         tooltip = tooltip.replace("Open", "Cannot open");
                     }
-                    var html = "<li class='" + liClass + "'><a title='" + tooltip + "'";
-                    if (enabled) {
-                        html += " target='_blank' href='" + url + "'>" + label + "</a></li>";
-                    } else {
-                        html += ">" + label + "</a></li>";
-                    }
+                    var html = `
+                      <li class='${ liClass }'>
+                        <a title='${ tooltip }'
+                          target='_blank'
+                          href = '${ url }'
+                          data-openwith_disabled=${ !enabled }
+                          data-openwithid='${ v.id }' >
+                          ${ label }
+                        </a>
+                      </li>
+                    `
                     return html;
+                  
+                  });
+                  return openwith_html.join("");
+                }
+
+                // Only build html when we need it
+                $("#show_openwith_menu").on('click', function() {
+                  let html = getOpenwithHtml();
+                  $("#right_panel_openwith").html(html);
                 });
-                $("#right_panel_openwith").html(openwith_html.join(""));
-                {% endif %}
-            });
+
+                // Listen for clicks on Open-with menu items in case we want to handle with a function
+                // instead of default link behaviour
+                $("#right_panel_openwith").on("click", "a", function (event) {
+                  var $a = $(this);
+                  if ($a.data('openwith_disabled')) {
+                    event.preventDefault();
+                    return;
+                  }
+                  if ($a.attr('href') === '#') {
+                    event.preventDefault();
+                    let openwith_id = $a.data('openwithid');
+                    let ow = WEBCLIENT.OPEN_WITH.filter(o => o.id === openwith_id)[0];
+                    if (ow) {
+                      let fn = ow.getUrl(selJson, ow.url);
+                      if (typeof fn === 'function') {
+                        fn();
+                      }
+                    }
+                  }
+                });
+
+              {% endif %}
             
+        });
     </script>
 
 
@@ -359,7 +406,7 @@
 
       <div class="toolbar_dropdown">
           {% if not share %}
-          <button class="btn silver btn_openwith" title="Open with..." style="height: 20px">
+          <button id="show_openwith_menu" class="btn silver btn_openwith" title="Open with..." style="height: 20px">
               <span></span>
           </button>
           <ul id="right_panel_openwith" class="dropdown dropdown_right">

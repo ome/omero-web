@@ -183,6 +183,12 @@ class BaseContainer(BaseController):
         if self.file is not None:
             return self.file
 
+    def obj_name(self):
+        if self.well:
+            return self.well.getImage().name
+        obj = self._get_object()
+        return obj is not None and obj.name or None
+
     def obj_id(self):
         obj = self._get_object()
         return obj is not None and obj.id or None
