@@ -2945,7 +2945,11 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         if not offset:
             offset = int(request.GET.get("offset", 0))
         if not limit:
-            limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
+            limit = (
+                int(request.GET.get("limit"))
+                if request.GET.get("limit") is not None
+                else None
+            )
         range_start = offset
         range_size = kwargs.get("limit", rows)
         range_end = min(rows, range_start + range_size)
@@ -2966,7 +2970,6 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             except Exception:
                 return dict(error="Error executing query: %s" % query)
 
-        logger.info("Retrieving {} rows".format(len(hits)))
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
             idx = 0
@@ -2975,11 +2978,16 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 batch = min(batch, len(h) - idx)
                 col_indices = range(len(cols))
                 if col_names:
-                    col_indices = [i for (i,j) in enumerate(cols) if j.name in col_names]
-                res = table.slice(col_indices, h[idx:idx + batch])
+                    col_indices = [
+                        i for (i, j) in enumerate(cols) if j.name in col_names
+                    ]
+                res = table.slice(col_indices, h[idx : idx + batch])
                 idx += batch
                 # yield a list of rows
-                yield [[col.values[row] for col in res.columns] for row in range(0,len(res.rowNumbers))]
+                yield [
+                    [col.values[row] for col in res.columns]
+                    for row in range(0, len(res.rowNumbers))
+                ]
 
         row_gen = row_generator(t, hits)
 
@@ -3011,6 +3019,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         if not lazy:
             t.close()
 
+
 table_query = login_required()(jsonp(_table_query))
 
 
@@ -3028,16 +3037,21 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
         rows = t.getNumberOfRows()
 
         rsp_data = {
-            "columns": [{"name" : col.name,
-                         "description": col.description,
-                         "type": col.__class__.__name__ }
-                         for col in cols],
-            "totalCount": rows
+            "columns": [
+                {
+                    "name": col.name,
+                    "description": col.description,
+                    "type": col.__class__.__name__,
+                }
+                for col in cols
+            ],
+            "totalCount": rows,
         }
         return rsp_data
     finally:
         if not lazy:
             t.close()
+
 
 table_metadata = login_required()(jsonp(_table_metadata))
 

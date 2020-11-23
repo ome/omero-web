@@ -38,9 +38,11 @@ table_query = url(
 Query a table specified by fileid
 """
 
-table_metadata = url(r'^table/(?P<fileid>\d+)/metadata/$',
+table_metadata = url(
+    r"^table/(?P<fileid>\d+)/metadata/$",
     views.table_metadata,
-    name="webgateway_table_metadata")
+    name="webgateway_table_metadata",
+)
 """
 Get omero table metadata
 """
