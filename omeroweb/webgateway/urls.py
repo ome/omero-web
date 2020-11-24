@@ -47,6 +47,13 @@ table_metadata = url(
 Get omero table metadata
 """
 
+table_obj_id_bitmask = url(r'^table/(?P<fileid>\d+)/obj_id_bitmask/$',
+                  views.obj_id_bitmask,
+                  name="webgateway_table_obj_id_bitmask")
+"""
+Get object id bitmask
+"""
+
 object_table_query = url(
     r"^table/(?P<objtype>[\w.]+)/(?P<objid>\d+)/query/$",
     views.object_table_query,
@@ -597,6 +604,7 @@ urlpatterns = [
     annotations,
     table_query,
     table_metadata,
+    table_obj_id_bitmask,
     object_table_query,
     open_with_options,
 ]

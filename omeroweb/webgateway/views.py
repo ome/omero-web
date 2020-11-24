@@ -2892,38 +2892,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 annotations = login_required()(jsonp(_bulk_file_annotations))
 
 
-def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
-    """
-    Query a table specified by fileid
-    Returns a dictionary with query result if successful, error information
-    otherwise
-
-    @param request:     http request; querystring must contain key 'query'
-                        with query to be executed, or '*' to retrieve all rows.
-                        If query is in the format word-number, e.g. "Well-7",
-                        if will be run as (word==number), e.g. "(Well==7)".
-                        This is supported to allow more readable query strings.
-    @param fileid:      Numeric identifier of file containing the table
-    @param query:       The table query. If None, use request.GET.get('query')
-                        E.g. '*' to return all rows.
-                        If in the form 'colname-1', query will be (colname==1)
-    @param lazy:        If True, instead of returning a 'rows' list,
-                        'lazy_rows' will be a generator.
-                        Each gen.next() will return a list of row data
-                        AND 'table' returned MUST be closed.
-    @param conn:        L{omero.gateway.BlitzGateway}
-    @param **kwargs:    offset, limit
-    @return:            A dictionary with key 'error' with an error message
-                        or with key 'data' containing a dictionary with keys
-                        'columns' (an array of column names) and 'rows'
-                        (an array of rows, each an array of values)
-    """
-    if query is None:
-        query = request.GET.get("query")
-    if not query:
-        return dict(error="Must specify query parameter, use * to retrieve all")
-    col_names = request.GET.getlist("col_names")
-
+def perform_table_query(conn, fileid, query, col_names, offset=0, limit=None, lazy=False):
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
 
@@ -2988,6 +2957,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             except Exception:
                 return dict(error="Error executing query: %s" % query)
 
+        logger.info("Retrieving {} rows".format(len(hits)))
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
             idx = 0
@@ -2997,10 +2967,8 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 res = table.slice(col_indices, h[idx : idx + batch])
                 idx += batch
                 # yield a list of rows
-                yield [
-                    [col.values[row] for col in res.columns]
-                    for row in range(0, len(res.rowNumbers))
-                ]
+                yield [[col.values[row] for col in res.columns] for row in range(0,len(res.rowNumbers))]
+            logger.info(time.perf_counter() - start)
 
         row_gen = row_generator(t, hits)
 
@@ -3031,6 +2999,46 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     finally:
         if not lazy:
             t.close()
+
+def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+    """
+    Query a table specified by fileid
+    Returns a dictionary with query result if successful, error information
+    otherwise
+
+    @param request:     http request; querystring must contain key 'query'
+                        with query to be executed, or '*' to retrieve all rows.
+                        If query is in the format word-number, e.g. "Well-7",
+                        if will be run as (word==number), e.g. "(Well==7)".
+                        This is supported to allow more readable query strings.
+    @param fileid:      Numeric identifier of file containing the table
+    @param query:       The table query. If None, use request.GET.get('query')
+                        E.g. '*' to return all rows.
+                        If in the form 'colname-1', query will be (colname==1)
+    @param lazy:        If True, instead of returning a 'rows' list,
+                        'lazy_rows' will be a generator.
+                        Each gen.next() will return a list of row data
+                        AND 'table' returned MUST be closed.
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    offset, limit
+    @return:            A dictionary with key 'error' with an error message
+                        or with key 'data' containing a dictionary with keys
+                        'columns' (an array of column names) and 'rows'
+                        (an array of rows, each an array of values)
+    """
+    if query is None:
+        query = request.GET.get("query")
+    if not query:
+        return dict(error="Must specify query parameter, use * to retrieve all")
+    col_names = request.GET.getlist("col_names")
+    offset = kwargs.get("offset", 0)
+    limit = kwargs.get("limit", None)
+    if not offset:
+        offset = int(request.GET.get("offset", 0))
+    if not limit:
+        limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
+
+    return perform_table_query(conn, fileid, query, col_names, offset=offset, limit=limit, lazy=False)
 
 
 table_query = login_required()(jsonp(_table_query))
@@ -3079,6 +3087,43 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
 
 
 table_metadata = login_required()(jsonp(_table_metadata))
+
+
+def _obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+    col_name = request.GET.get("col_name", "object")
+    if query is None:
+        query = request.GET.get("query")
+    if not query:
+        return dict(error="Must specify query parameter, use * to retrieve all")
+    offset = kwargs.get("offset", 0)
+    limit = kwargs.get("limit", None)
+    if not offset:
+        offset = int(request.GET.get("offset", 0))
+    if not limit:
+        limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
+
+    rsp_data = perform_table_query(conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False)
+    logger.info(rsp_data)
+    bitmask = bytearray()
+    index = 0
+    value = 0
+    data = bytearray()
+    for obj in rsp_data['data']['rows']:
+        obj_id = obj[0]
+        while index < obj_id:
+            index += 1
+            if index % 8 == 0:
+                data.append(value)
+                value = 0
+                counter = 0
+        # index == obj_id
+        value += 2 ** (index % 8)
+    if value != 0:
+        data.append(value)
+    return HttpResponse(bytes(data), content_type='application/octet-stream')
+
+
+obj_id_bitmask = login_required()(_obj_id_bitmask)
 
 
 @login_required()
