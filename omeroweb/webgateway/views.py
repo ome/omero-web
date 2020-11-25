@@ -2968,7 +2968,6 @@ def perform_table_query(conn, fileid, query, col_names, offset=0, limit=None, la
                 idx += batch
                 # yield a list of rows
                 yield [[col.values[row] for col in res.columns] for row in range(0,len(res.rowNumbers))]
-            logger.info(time.perf_counter() - start)
 
         row_gen = row_generator(t, hits)
 
@@ -3103,7 +3102,6 @@ def _obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs
         limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
 
     rsp_data = perform_table_query(conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False)
-    logger.info(rsp_data)
     bitmask = bytearray()
     index = 0
     value = 0
