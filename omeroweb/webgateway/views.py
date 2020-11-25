@@ -2974,13 +2974,11 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             # hits are all consecutive rows - can load them in batches
             idx = 0
             batch = 1000
+            col_indices = range(len(cols))
+            if col_names:
+                col_indices = [i for (i, j) in enumerate(cols) if j.name in col_names]
             while idx < len(h):
                 batch = min(batch, len(h) - idx)
-                col_indices = range(len(cols))
-                if col_names:
-                    col_indices = [
-                        i for (i, j) in enumerate(cols) if j.name in col_names
-                    ]
                 res = table.slice(col_indices, h[idx : idx + batch])
                 idx += batch
                 # yield a list of rows
