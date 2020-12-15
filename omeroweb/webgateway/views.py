@@ -1991,9 +1991,7 @@ def search_json(request, conn=None, **kwargs):
                     logger.debug("(iid %i) ignoring Server Error: %s" % (e.id, str(x)))
             return rv
         else:
-            return [
-                x.simpleMarshal(xtra=xtra, parents=opts["parents"]) for x in sr
-            ]
+            return [x.simpleMarshal(xtra=xtra, parents=opts["parents"]) for x in sr]
 
     rv = timeit(marshal)()
     logger.debug(rv)
