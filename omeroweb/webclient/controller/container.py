@@ -232,10 +232,13 @@ class BaseContainer(BaseController):
 
     def getBatchAnnotationCounts(self, objDict):
         """
-        Get the annotion counts for the given objects
+        Get the annotion counts for the given objects.
+
+        Only a single object type is supported, e.g. 'dataset'
         """
         keys = [k for k in objDict.keys() if objDict[k]]
-        if len(keys) > 1:
+        if len(keys) != 1:
+            # e.g. for select different objects in search results
             return None
         return self.conn.getAnnotationCounts(objDict)
 
