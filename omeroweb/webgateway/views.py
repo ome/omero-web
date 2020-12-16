@@ -1723,7 +1723,7 @@ def listImages_json(request, did, conn=None, **kwargs):
         "thumbUrlPrefix": kwargs.get("urlprefix", urlprefix),
         "tiled": request.GET.get("tiled", False),
     }
-    return map(lambda x: x.simpleMarshal(xtra=xtra), dataset.listChildren())
+    return [x.simpleMarshal(xtra=xtra) for x in dataset.listChildren()]
 
 
 @login_required()
@@ -1991,9 +1991,7 @@ def search_json(request, conn=None, **kwargs):
                     logger.debug("(iid %i) ignoring Server Error: %s" % (e.id, str(x)))
             return rv
         else:
-            return map(
-                lambda x: x.simpleMarshal(xtra=xtra, parents=opts["parents"]), sr
-            )
+            return [x.simpleMarshal(xtra=xtra, parents=opts["parents"]) for x in sr]
 
     rv = timeit(marshal)()
     logger.debug(rv)
