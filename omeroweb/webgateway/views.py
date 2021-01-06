@@ -2995,7 +2995,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 "columns": [col.name for col in cols],
             },
             "meta": {
-                "rowCount": len(hits),
+                "rowCount": rows,
                 "totalCount": totalCount,
                 "limit": limit,
                 "offset": offset,
