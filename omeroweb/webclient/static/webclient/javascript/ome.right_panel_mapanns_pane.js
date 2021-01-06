@@ -107,10 +107,11 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
             ajaxdata = {"type": "map"};
             // create request ?image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
             var request = OME.buildQueryStringForObjects(objects);
+            var url = this.apiAnnotationUrl(opts.url) + '?' + request;
 
             $.ajax({
                 dataType: "json",
-                url: this.apiAnnotationUrl(opts.url) + '?' + request,
+                url: url,
                 data: ajaxdata,
                 traditional: true,
                 success: function(data){
@@ -180,10 +181,16 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
                         'showTableHead': false, 'showNs': true, 'clientMapAnn': false, 'showParent': showParent});
                     $mapAnnContainer.html(html);
 
-                    // re-use the ajaxdata to set Object IDS data on the parent container
-                    // removing unwanted keys first
-                    delete ajaxdata['type'];
-                    $mapAnnContainer.data('objIds', ajaxdata);
+                    var objIds = {};
+                    for (var i=0; i < objects.length; i++) {
+                        var o = objects[i].split(/-(.+)/);
+                        if (typeof objIds[o[0]] !== 'undefined') {
+                            objIds[o[0]].push(o[1]);
+                        } else {
+                            objIds[o[0]] = [o[1]];
+                        }
+                    }
+                    $mapAnnContainer.data('objIds', objIds);
 
                     // Finish up...
                     OME.linkify_element($( "table.keyValueTable" ));
