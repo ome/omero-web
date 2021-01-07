@@ -2938,6 +2938,22 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
 
     try:
         cols = t.getHeaders()
+        col_indices = range(len(cols))
+        if col_names:
+            enumerated_columns = (
+                [(i, j) for (i, j) in enumerate(cols) if j.name in col_names]
+                if col_names
+                else [(i, j) for (i, j) in enumerate(cols)]
+            )
+            cols = []
+            col_indices = []
+            for col_name in col_names:
+                for (i, j) in enumerated_columns:
+                    if col_name == j.name:
+                        col_indices.append(i)
+                        cols.append(j)
+                        break
+
         rows = t.getNumberOfRows()
 
         offset = kwargs.get("offset", 0)
@@ -2974,9 +2990,6 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             # hits are all consecutive rows - can load them in batches
             idx = 0
             batch = 1000
-            col_indices = range(len(cols))
-            if col_names:
-                col_indices = [i for (i, j) in enumerate(cols) if j.name in col_names]
             while idx < len(h):
                 batch = min(batch, len(h) - idx)
                 res = table.slice(col_indices, h[idx : idx + batch])
