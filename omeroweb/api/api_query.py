@@ -67,6 +67,9 @@ def get_child_counts(conn, link_class, parent_ids):
     @param parent_ids:  List of Parent IDs
     @return             A dict of parent_id: child_count
     """
+    counts = {}
+    if len(parent_ids) == 0:
+        return counts
     ctx = deepcopy(conn.SERVICE_OPTS)
     ctx.setOmeroGroup(-1)
     params = ParametersI()
@@ -76,7 +79,6 @@ def get_child_counts(conn, link_class, parent_ids):
         " where chl.parent.id in (:ids) group by chl.parent.id" % link_class
     )
     result = conn.getQueryService().projection(query, params, ctx)
-    counts = {}
     for d in result:
         counts[d[0].val] = unwrap(d[1])
     return counts
