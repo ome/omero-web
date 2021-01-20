@@ -22,6 +22,7 @@ import tempfile
 import zipfile
 import shutil
 import logging
+
 try:
     import long
 except ImportError:
@@ -30,48 +31,48 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 LUTS_IN_PNG = [
-    '/luts/ncsa_paledit/16_colors.lut',
-    '/luts/3-3-2_rgb.lut',
-    '/luts/ncsa_paledit/5_ramps.lut',
-    '/luts/ncsa_paledit/6_shades.lut',
-    '/luts/ncsa_paledit/blue_orange_icb.lut',
-    '/luts/ncsa_paledit/brgbcmyw.lut',
-    '/luts/ncsa_paledit/cool.lut',
-    '/luts/wcif/cyan_hot.lut',
-    '/luts/ncsa_paledit/edges.lut',
-    '/luts/fire.lut',
-    '/luts/ncsa_paledit/gem.lut',
-    '/luts/glasbey.lut',
-    '/luts/glasbey_inverted.lut',
-    '/luts/glow.lut',
-    '/luts/grays.lut',
-    '/luts/wcif/green_fire_blue.lut',
-    '/luts/wcif/hilo.lut',
-    '/luts/wcif/ica.lut',
-    '/luts/wcif/ica2.lut',
-    '/luts/wcif/ica3.lut',
-    '/luts/ice.lut',
-    '/luts/wcif/magenta_hot.lut',
-    '/luts/wcif/orange_hot.lut',
-    '/luts/ncsa_paledit/phase.lut',
-    '/luts/physics.lut',
-    '/luts/janelia/pup_br.lut',
-    '/luts/janelia/pup_nr.lut',
-    '/luts/wcif/rainbow_rgb.lut',
-    '/luts/red-green.lut',
-    '/luts/wcif/red_hot.lut',
-    '/luts/ncsa_paledit/royal.lut',
-    '/luts/ncsa_paledit/sepia.lut',
-    '/luts/ncsa_paledit/smart.lut',
-    '/luts/spectrum.lut',
-    '/luts/ncsa_paledit/thal.lut',
-    '/luts/ncsa_paledit/thallium.lut',
-    '/luts/thermal.lut',
-    '/luts/ncsa_paledit/unionjack.lut',
-    '/luts/wcif/yellow_hot.lut',
+    "/luts/ncsa_paledit/16_colors.lut",
+    "/luts/3-3-2_rgb.lut",
+    "/luts/ncsa_paledit/5_ramps.lut",
+    "/luts/ncsa_paledit/6_shades.lut",
+    "/luts/ncsa_paledit/blue_orange_icb.lut",
+    "/luts/ncsa_paledit/brgbcmyw.lut",
+    "/luts/ncsa_paledit/cool.lut",
+    "/luts/wcif/cyan_hot.lut",
+    "/luts/ncsa_paledit/edges.lut",
+    "/luts/fire.lut",
+    "/luts/ncsa_paledit/gem.lut",
+    "/luts/glasbey.lut",
+    "/luts/glasbey_inverted.lut",
+    "/luts/glow.lut",
+    "/luts/grays.lut",
+    "/luts/wcif/green_fire_blue.lut",
+    "/luts/wcif/hilo.lut",
+    "/luts/wcif/ica.lut",
+    "/luts/wcif/ica2.lut",
+    "/luts/wcif/ica3.lut",
+    "/luts/ice.lut",
+    "/luts/wcif/magenta_hot.lut",
+    "/luts/wcif/orange_hot.lut",
+    "/luts/ncsa_paledit/phase.lut",
+    "/luts/physics.lut",
+    "/luts/janelia/pup_br.lut",
+    "/luts/janelia/pup_nr.lut",
+    "/luts/wcif/rainbow_rgb.lut",
+    "/luts/red-green.lut",
+    "/luts/wcif/red_hot.lut",
+    "/luts/ncsa_paledit/royal.lut",
+    "/luts/ncsa_paledit/sepia.lut",
+    "/luts/ncsa_paledit/smart.lut",
+    "/luts/spectrum.lut",
+    "/luts/ncsa_paledit/thal.lut",
+    "/luts/ncsa_paledit/thallium.lut",
+    "/luts/thermal.lut",
+    "/luts/ncsa_paledit/unionjack.lut",
+    "/luts/wcif/yellow_hot.lut",
     # NB: this is not a LUT but it is in the current png
     # Used for channel slider gradient when no lut chosen
-    'gradient.png',
+    "gradient.png",
 ]
 
 
@@ -114,7 +115,7 @@ def zip_archived_files(images, temp, zipName, buf=2621440):
 
     # ',' in name causes duplicate headers
     zipName = zipName.replace(" ", "_").replace(",", ".")
-    if not zipName.endswith('.zip'):
+    if not zipName.endswith(".zip"):
         zipName = "%s.zip" % zipName
 
     def getTargetPath(fsFile, templatePrefix):
@@ -133,7 +134,7 @@ def zip_archived_files(images, temp, zipName, buf=2621440):
     temp_zip_dir = tempfile.mkdtemp()
     logger.debug("download dir: %s" % temp_zip_dir)
     try:
-        new_dir_idx = 1     # if needed to avoid file name clashes
+        new_dir_idx = 1  # if needed to avoid file name clashes
         for image in images:
             new_dir = ""
             templatePrefix = ""
@@ -149,8 +150,7 @@ def zip_archived_files(images, temp, zipName, buf=2621440):
             # check if ANY of the files will overwrite exising file
             for f in files:
                 target_path = getTargetPath(f, templatePrefix)
-                base_file = os.path.join(
-                    temp_zip_dir, split_path(target_path)[0])
+                base_file = os.path.join(temp_zip_dir, split_path(target_path)[0])
                 if os.path.exists(base_file):
                     new_dir = str(new_dir_idx)
                     new_dir_idx += 1
@@ -181,7 +181,7 @@ def zip_archived_files(images, temp, zipName, buf=2621440):
                     f.close()
 
         # create zip
-        zip_file = zipfile.ZipFile(temp, 'w', zipfile.ZIP_DEFLATED)
+        zip_file = zipfile.ZipFile(temp, "w", zipfile.ZIP_DEFLATED)
         try:
             for root, dirs, files in os.walk(temp_zip_dir):
                 archive_root = os.path.relpath(root, temp_zip_dir)
@@ -208,8 +208,7 @@ def xy_list_to_bbox(xyList):
         x, y = xy
         xList.append(x)
         yList.append(y)
-    return (min(xList), min(yList), max(xList)-min(xList),
-            max(yList)-min(yList))
+    return (min(xList), min(yList), max(xList) - min(xList), max(yList) - min(yList))
 
 
 def points_string_to_XY_list(string):
@@ -225,8 +224,9 @@ def points_string_to_XY_list(string):
     if len(pointLists) < 2:
         if len(pointLists) == 1 and pointLists[0]:
             xys = pointLists[0].split(" ")
-            xyList = [tuple(map(float, xy.strip(',').split(',')))
-                      for xy in xys if len(xy) > 0]
+            xyList = [
+                tuple(map(float, xy.strip(",").split(","))) for xy in xys if len(xy) > 0
+            ]
             return xyList
 
         msg = "Unrecognised ROI shape 'points' string: %s" % string

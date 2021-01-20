@@ -44,14 +44,15 @@ def get_wellsample_indices(conn, plate_id=None, plateacquisition_id=None):
     ctx = deepcopy(conn.SERVICE_OPTS)
     ctx.setOmeroGroup(-1)
     params = ParametersI()
-    query = "select minIndex(ws), maxIndex(ws) from Well well " \
-            "join well.wellSamples ws"
+    query = (
+        "select minIndex(ws), maxIndex(ws) from Well well " "join well.wellSamples ws"
+    )
     if plate_id is not None:
         query += " where well.plate.id=:plate_id "
-        params.add('plate_id', rlong(plate_id))
+        params.add("plate_id", rlong(plate_id))
     elif plateacquisition_id is not None:
         query += " where ws.plateAcquisition.id=:plateacquisition_id"
-        params.add('plateacquisition_id', rlong(plateacquisition_id))
+        params.add("plateacquisition_id", rlong(plateacquisition_id))
     result = conn.getQueryService().projection(query, params, ctx)
     result = [r for r in unwrap(result)[0] if r is not None]
     return result
@@ -69,10 +70,11 @@ def get_child_counts(conn, link_class, parent_ids):
     ctx = deepcopy(conn.SERVICE_OPTS)
     ctx.setOmeroGroup(-1)
     params = ParametersI()
-    params.add('ids', wrap([rlong(id) for id in parent_ids]))
-    query = ("select chl.parent.id, count(chl.id) from %s chl"
-             " where chl.parent.id in (:ids) group by chl.parent.id"
-             % link_class)
+    params.add("ids", wrap([rlong(id) for id in parent_ids]))
+    query = (
+        "select chl.parent.id, count(chl.id) from %s chl"
+        " where chl.parent.id in (:ids) group by chl.parent.id" % link_class
+    )
     result = conn.getQueryService().projection(query, params, ctx)
     counts = {}
     for d in result:
@@ -84,18 +86,15 @@ def validate_opts(opts):
     """Check that opts dict has valid 'limit' and 'offset'."""
     if opts is None:
         opts = {}
-    if opts.get('limit') is None or opts.get('limit') < 0:
-        opts['limit'] = DEFAULT_LIMIT
-    opts['limit'] = min(opts['limit'], MAX_LIMIT)
-    if opts.get('offset') is None or opts.get('offset') < 0:
-        opts['offset'] = 0
+    if opts.get("limit") is None or opts.get("limit") < 0:
+        opts["limit"] = DEFAULT_LIMIT
+    opts["limit"] = min(opts["limit"], MAX_LIMIT)
+    if opts.get("offset") is None or opts.get("offset") < 0:
+        opts["offset"] = 0
     return opts
 
 
-def query_objects(conn, object_type,
-                  group=None,
-                  opts=None,
-                  normalize=False):
+def query_objects(conn, object_type, group=None, opts=None, normalize=False):
     """
     Base query method, handles different object_types.
 
@@ -122,7 +121,7 @@ def query_objects(conn, object_type,
     objects = []
     extras = {}
 
-    if opts['limit'] == 0:
+    if opts["limit"] == 0:
         result = []
     else:
         result = qs.findAllByQuery(query, params, ctx)
@@ -130,23 +129,23 @@ def query_objects(conn, object_type,
         objects.append(obj)
 
     # Optionally get child counts...
-    if opts and opts.get('child_count') and wrapper.LINK_CLASS:
+    if opts and opts.get("child_count") and wrapper.LINK_CLASS:
         obj_ids = [r.id.val for r in result]
         counts = get_child_counts(conn, wrapper.LINK_CLASS, obj_ids)
         for obj_id in obj_ids:
             count = counts[obj_id] if obj_id in counts else 0
-            extras[obj_id] = {'omero:childCount': count}
+            extras[obj_id] = {"omero:childCount": count}
 
     # Query the count() of objects & add to 'meta' dict
     count_query, params = conn.buildCountQuery(object_type, opts=opts)
     result = qs.projection(count_query, params, ctx)
 
     meta = {}
-    meta['offset'] = opts['offset']
-    meta['limit'] = opts['limit']
-    meta['maxLimit'] = MAX_LIMIT
-    meta['totalCount'] = result[0][0].val
+    meta["offset"] = opts["offset"]
+    meta["limit"] = opts["limit"]
+    meta["maxLimit"] = MAX_LIMIT
+    meta["totalCount"] = result[0][0].val
 
     marshalled = marshal_objects(objects, extras=extras, normalize=normalize)
-    marshalled['meta'] = meta
+    marshalled["meta"] = meta
     return marshalled

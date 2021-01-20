@@ -23,10 +23,10 @@
 # Version: 1.0
 #
 
-''' A view functions is simply a Python function that takes a Web request and
+""" A view functions is simply a Python function that takes a Web request and
 returns a Web response. This response can be the HTML contents of a Web page,
 or a redirect, or the 404 and 500 error, or an XML document, or an image...
-or anything.'''
+or anything."""
 
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -37,15 +37,17 @@ logger = logging.getLogger(__name__)
 
 
 def index(request, **kwargs):
-    if request.GET.get('show', None) is not None:
-        url = "?".join([
-            reverse(viewname="webindex"),
-            "show="+request.GET.get('show')
-            ])
+    if request.GET.get("show", None) is not None:
+        url = "?".join(
+            [reverse(viewname="webindex"), "show=" + request.GET.get("show")]
+        )
         return HttpResponseRedirect(url)
     else:
         return handlerInternalError(
             request,
-            "Path was not recognized. URL should follow the pattern: %s%s" % (
+            "Path was not recognized. URL should follow the pattern: %s%s"
+            % (
                 request.build_absolute_uri(reverse(viewname="webredirect")),
-                ("?path=server=1|project=1|dataset=2|image=3:selected")))
+                ("?path=server=1|project=1|dataset=2|image=3:selected"),
+            ),
+        )

@@ -1,5 +1,13 @@
 OMERO.web
 =========
+.. image::  https://github.com/ome/omero-web/workflows/Tox/badge.svg
+    :target: https://github.com/ome/omero-web/actions
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
+.. image:: https://badge.fury.io/py/omero-web.svg
+    :target: https://badge.fury.io/py/omero-web
 
 Introduction
 ------------
@@ -78,11 +86,22 @@ This will remove the ``.dev0`` suffix from the current version, commit, and tag 
 
 To switch back to a development version run::
 
-    $ bumpversion --no-tag [major|minor|patch]
+    $ bumpversion --no-tag patch
 
-specifying ``major``, ``minor`` or ``patch`` depending on whether the development branch will be a `major, minor or patch release <https://semver.org/>`_. This will also add the ``.dev0`` suffix.
+NB: this assumes next release will be a ``patch`` (see below).
+To complete the release, push the master branch and the release tag to origin::
 
-Remember to ``git push`` all commits and tags.
+    $ git push origin master v5.8.0
+
+If any PRs are merged that would require the next release to be a ``major`` or ``minor`` version
+(see `semver.org <https://semver.org/>`_) then that PR can include a version bump created via::
+
+    $ bumpversion --no-tag minor|major
+
+If this hasn't been performed prior to release and you wish to specify the next version
+number directly when creating the release, this can be achieved with::
+
+    $ bumpversion --new-version 5.9.0 release
 
 omero-web-docker
 ^^^^^^^^^^^^^^^^
