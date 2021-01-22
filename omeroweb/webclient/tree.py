@@ -1967,7 +1967,7 @@ def marshal_annotations(
     ns=None,
     group_id=-1,
     page=1,
-    limit=settings.PAGE,
+    limit=10000,
 ):
 
     annotations = []
