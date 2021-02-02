@@ -1307,7 +1307,7 @@ def api_annotations(request, conn=None, **kwargs):
     run_ids = get_list(request, "acquisition")
     well_ids = get_list(request, "well")
     page = get_long_or_default(request, "page", 1)
-    limit = get_long_or_default(request, "limit", settings.PAGE)
+    limit = get_long_or_default(request, "limit", 10000)
 
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
