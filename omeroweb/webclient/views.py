@@ -2213,10 +2213,15 @@ def batch_annotate(request, conn=None, **kwargs):
 
     # get groups for selected objects - setGroup() and create links
     obj_ids = []
+    obj_strings = []
     obj_labels = []
     groupIds = set()
     annotationBlocked = False
     for key in objs:
+        if objs[key]:
+            obj_strings.append(
+                "%s=%s" % (key, ",".join([str(o.id) for o in objs[key]]))
+            )
         obj_ids += ["%s=%s" % (key, o.id) for o in objs[key]]
         for o in objs[key]:
             groupIds.add(o.getDetails().group.id.val)
@@ -2225,7 +2230,8 @@ def batch_annotate(request, conn=None, **kwargs):
                     "Can't add annotations because you don't" " have permissions"
                 )
             obj_labels.append({"type": key.title(), "id": o.id, "name": o.getName()})
-    obj_string = "&".join(obj_ids)
+    # e.g. image=1,2,3 - *Could* be image=1,2,3&dataset=4 e.g. for search results
+    obj_string = "&".join(obj_strings)
     link_string = "|".join(obj_ids).replace("=", "-")
     if len(groupIds) == 0:
         # No supported objects found.
