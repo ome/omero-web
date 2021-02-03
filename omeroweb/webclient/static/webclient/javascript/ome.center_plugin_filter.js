@@ -65,6 +65,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
             var self = this;
             $(".filter_map_value", $filter).autocomplete({
                 disabled: false,
+                minLength: 0,
                 source: autocompVals,
                 select: function( event, ui ) {
                     self.filterText = ui.item.value;
@@ -73,6 +74,14 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
                     }
                 }
             });
+            // When user clicks on auto-complete, show ALL options (search: "")
+            $(".filter_map_value", $filter)
+            .on('click', function (event) {
+                $(this).autocomplete("search", "");
+            })
+            .focus()    // immediately focus and 'click' to show auto-complete
+            .click();
+
         }
         $('.filter_map_value', $filter).attr('placeholder', placeholder)
             .attr('title', placeholder)
