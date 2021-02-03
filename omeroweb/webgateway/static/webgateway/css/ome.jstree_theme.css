@@ -15,9 +15,6 @@
 .jstree-node {
   white-space: nowrap;
 }
-.jstree-container-ul {
-  padding-bottom: 2em;
-}
 .jstree-anchor {
   display: inline-block;
   color: black;
