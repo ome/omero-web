@@ -40,12 +40,10 @@ Setting of the environment variable ``OMERODIR`` is required.
 
     export OMERODIR=$(pwd)
 
-See: `OMERO`_ documentation for more details.
-
 Usage
 -----
 
-For running omero-web in production with nginx, see `OMERO`_ documentation.
+For running omero-web in production with nginx, see See: `OMERO.web install`_ documentation.
 To run in development mode, see below.
 
 Contributing
@@ -56,9 +54,9 @@ See: `OMERO`_ documentation
 Developer installation
 ----------------------
 
-For a development installation we recommend creating a virtualenv as described above.
-Then install OMERO.web into your virtualenv as an editable package, so any edits to source files
-should be reflected in your installation.
+For a development installation we recommend creating a virtual environment as described above.
+Then install OMERO.web into your virtual environment as an editable package, so that any edits
+to source files will be reflected in your installation.
 
 ::
 
@@ -146,6 +144,7 @@ Copyright
 2009-2020, The Open Microscopy Environment, Glencoe Software, Inc.
 
 .. _OMERO: https://www.openmicroscopy.org/omero
+.. _OMERO.web install: https://docs.openmicroscopy.org/latest/omero/sysadmins/unix/install-web/web-deployment.html
 .. _OMERO.py: https://pypi.python.org/pypi/omero-py
 .. _ZeroC IcePy: https://zeroc.com/
 .. _Pillow: https://python-pillow.org/
