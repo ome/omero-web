@@ -22,7 +22,13 @@
             <% if (ann.id) { %>
                 Added by: <%= ann.owner.firstName %> <%= ann.owner.lastName %>
                 <% if (showParent && ann.link.parent.name){ %>
-                  <br>To: <%= ann.parentNames ? (ann.parentNames.length + " objects") : ann.link.parent.name %>
+                  <br>
+                  <% if (ann.parentNames) { %>
+                    <%= ann.parentNames.length %> Annotations linked to:
+                  <% } else { %>
+                    To:
+                  <% } %>
+                  <%= ann.parentNames ? (ann.parentNames.length + " objects") : ann.link.parent.name %>
                 <% } %>
 
                 <span class="tooltip_html" style='display:none'>
