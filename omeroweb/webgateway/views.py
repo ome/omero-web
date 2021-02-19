@@ -2540,9 +2540,7 @@ def download_as(request, iid=None, conn=None, **kwargs):
             temp.close()
             stack = traceback.format_exc()
             logger.error(stack)
-            return HttpResponseServerError(
-                "Cannot download file (id:%s).\n%s" % (iid, stack)
-            )
+            return HttpResponseServerError("Cannot download file (id:%s)" % iid)
 
     rsp["Content-Type"] = "application/force-download"
     return rsp
