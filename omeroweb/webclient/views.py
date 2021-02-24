@@ -133,6 +133,10 @@ logger = logging.getLogger(__name__)
 
 logger.info("INIT '%s'" % os.getpid())
 
+# We want to allow a higher default limit for annotations so we can load
+# all the annotations expected for a PAGE of images
+ANNOTATIONS_LIMIT = settings.PAGE * 100
+
 
 def get_long_or_default(request, name, default):
     """
@@ -1307,7 +1311,7 @@ def api_annotations(request, conn=None, **kwargs):
     run_ids = get_list(request, "acquisition")
     well_ids = get_list(request, "well")
     page = get_long_or_default(request, "page", 1)
-    limit = get_long_or_default(request, "limit", 10000)
+    limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
 
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
@@ -2626,7 +2630,7 @@ def annotate_tags(request, conn=None, **kwargs):
         well_ids=selected["wells"],
         ann_type="tag",
         # If we reach this limit we'll get some tags not removed
-        limit=100000,
+        limit=ANNOTATIONS_LIMIT,
     )
 
     userMap = {}
