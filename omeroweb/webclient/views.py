@@ -58,7 +58,7 @@ from django.http import (
 )
 from django.http import HttpResponseServerError, HttpResponseBadRequest
 from django.utils.http import urlencode
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
@@ -3179,6 +3179,11 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     query = request.GET.get("query", "*")
     offset = get_long_or_default(request, "offset", 0)
     limit = get_long_or_default(request, "limit", settings.PAGE)
+    iviewer_url = None
+    try:
+        iviewer_url = reverse("omero_iviewer_index")
+    except NoReverseMatch:
+        pass
 
     # Check if file exists since _table_query() doesn't check
     file_id = long(file_id)
@@ -3240,11 +3245,14 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     # by default, return context as JSON data
     if mtype is None:
         context["template"] = "webclient/annotations/omero_table.html"
+        context["iviewer_url"] = iviewer_url
         col_types = context["data"]["column_types"]
         if "ImageColumn" in col_types:
             context["image_column_index"] = col_types.index("ImageColumn")
         if "WellColumn" in col_types:
             context["well_column_index"] = col_types.index("WellColumn")
+        if "RoiColumn" in col_types:
+            context["roi_column_index"] = col_types.index("RoiColumn")
         # provide example queries - pick first DoubleColumn...
         for idx, c_type in enumerate(col_types):
             if c_type in ("DoubleColumn", "LongColumn"):
