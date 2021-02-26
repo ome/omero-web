@@ -1723,7 +1723,7 @@ def listImages_json(request, did, conn=None, **kwargs):
         "thumbUrlPrefix": kwargs.get("urlprefix", urlprefix),
         "tiled": request.GET.get("tiled", False),
     }
-    return map(lambda x: x.simpleMarshal(xtra=xtra), dataset.listChildren())
+    return [x.simpleMarshal(xtra=xtra) for x in dataset.listChildren()]
 
 
 @login_required()
@@ -1991,9 +1991,7 @@ def search_json(request, conn=None, **kwargs):
                     logger.debug("(iid %i) ignoring Server Error: %s" % (e.id, str(x)))
             return rv
         else:
-            return map(
-                lambda x: x.simpleMarshal(xtra=xtra, parents=opts["parents"]), sr
-            )
+            return [x.simpleMarshal(xtra=xtra, parents=opts["parents"]) for x in sr]
 
     rv = timeit(marshal)()
     logger.debug(rv)
@@ -2926,6 +2924,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         query = request.GET.get("query")
     if not query:
         return dict(error="Must specify query parameter, use * to retrieve all")
+    col_names = request.GET.getlist("col_names")
 
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
@@ -2937,11 +2936,34 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
 
     try:
         cols = t.getHeaders()
+        col_indices = range(len(cols))
+        if col_names:
+            enumerated_columns = (
+                [(i, j) for (i, j) in enumerate(cols) if j.name in col_names]
+                if col_names
+                else [(i, j) for (i, j) in enumerate(cols)]
+            )
+            cols = []
+            col_indices = []
+            for col_name in col_names:
+                for (i, j) in enumerated_columns:
+                    if col_name == j.name:
+                        col_indices.append(i)
+                        cols.append(j)
+                        break
+
         rows = t.getNumberOfRows()
 
         offset = kwargs.get("offset", 0)
         limit = kwargs.get("limit", None)
-
+        if not offset:
+            offset = int(request.GET.get("offset", 0))
+        if not limit:
+            limit = (
+                int(request.GET.get("limit"))
+                if request.GET.get("limit") is not None
+                else None
+            )
         range_start = offset
         range_size = kwargs.get("limit", rows)
         range_end = min(rows, range_start + range_size)
@@ -2954,6 +2976,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             if match:
                 query = "(%s==%s)" % (match.group(1), match.group(2))
             try:
+                logger.info(query)
                 hits = t.getWhereList(query, None, 0, rows, 1)
                 totalCount = len(hits)
                 # paginate the hits
@@ -2962,29 +2985,18 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 return dict(error="Error executing query: %s" % query)
 
         def row_generator(table, h):
-            if query == "*":
-                # hits are all consecutive rows - can load them in batches
-                idx = 0
-                batch = 1000
-                while idx < len(h):
-                    batch = min(batch, len(h) - idx)
-                    row_data = [[] for r in range(batch)]
-                    for col in table.read(
-                        range(len(cols)), h[idx], h[idx] + batch
-                    ).columns:
-                        for r in range(batch):
-                            row_data[r].append(col.values[r])
-                    idx += batch
-                    # yield a list of rows
-                    yield row_data
-            else:
-                for hit in h:
-                    row_vals = [
-                        col.values[0]
-                        for col in table.read(range(len(cols)), hit, hit + 1).columns
-                    ]
-                    # yield a list of rows, with only a single row
-                    yield [row_vals]
+            # hits are all consecutive rows - can load them in batches
+            idx = 0
+            batch = 1000
+            while idx < len(h):
+                batch = min(batch, len(h) - idx)
+                res = table.slice(col_indices, h[idx : idx + batch])
+                idx += batch
+                # yield a list of rows
+                yield [
+                    [col.values[row] for col in res.columns]
+                    for row in range(0, len(res.rowNumbers))
+                ]
 
         row_gen = row_generator(t, hits)
 
@@ -3018,6 +3030,39 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
 
 
 table_query = login_required()(jsonp(_table_query))
+
+
+def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+
+    r = conn.getSharedResources()
+    t = r.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not t:
+        return dict(error="Table %s not found" % fileid)
+
+    try:
+        cols = t.getHeaders()
+        rows = t.getNumberOfRows()
+
+        rsp_data = {
+            "columns": [
+                {
+                    "name": col.name,
+                    "description": col.description,
+                    "type": col.__class__.__name__,
+                }
+                for col in cols
+            ],
+            "totalCount": rows,
+        }
+        return rsp_data
+    finally:
+        if not lazy:
+            t.close()
+
+
+table_metadata = login_required()(jsonp(_table_metadata))
 
 
 @login_required()
