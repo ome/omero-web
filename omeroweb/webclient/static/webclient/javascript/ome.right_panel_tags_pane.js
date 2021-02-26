@@ -125,7 +125,7 @@ var TagPane = function TagPane($element, opts) {
             var annsUrl = WEBCLIENT.URLS.webindex + "api/annotations/?type=tag&" + request
             // set high limit on number of results (default is 200)
             annsUrl += '&limit=10000'
-            $.getJSON(annsUrl, function (data) {
+            $.getJSON(annsUrl, function(data){
 
                 // manipulate data...
                 // make an object of eid: experimenter
