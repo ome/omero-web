@@ -67,7 +67,7 @@ from django.shortcuts import render
 
 from omeroweb.webclient.webclient_utils import _formatReport, _purgeCallback
 from .forms import GlobalSearchForm, ContainerForm
-from .forms import ShareForm, BasketShareForm
+from .forms import ShareForm
 from .forms import ContainerNameForm, ContainerDescriptionForm
 from .forms import CommentAnnotationForm, TagsAnnotationForm
 from .forms import MetadataFilterForm, MetadataDetectorForm
@@ -2866,47 +2866,6 @@ def manage_action_containers(
                 d.update({e[0]: unicode(e[1])})
             rdict = {"bad": "true", "errs": d}
             return JsonResponse(rdict)
-    elif action == "add":
-        template = "webclient/public/share_form.html"
-        experimenters = list(conn.getExperimenters())
-        experimenters.sort(key=lambda x: x.getOmeName().lower())
-        if o_type == "share":
-            img_ids = request.GET.getlist("image", request.POST.getlist("image"))
-            if request.method == "GET" and len(img_ids) == 0:
-                return HttpResponse("No images specified")
-            images_to_share = list(conn.getObjects("Image", img_ids))
-            if request.method == "POST":
-                form = BasketShareForm(
-                    initial={"experimenters": experimenters, "images": images_to_share},
-                    data=request.POST.copy(),
-                )
-                if form.is_valid():
-                    images = form.cleaned_data["image"]
-                    message = form.cleaned_data["message"]
-                    expiration = form.cleaned_data["expiration"]
-                    members = form.cleaned_data["members"]
-                    # guests = request.POST['guests']
-                    enable = form.cleaned_data["enable"]
-                    host = "%s?server=%i" % (
-                        request.build_absolute_uri(
-                            reverse("load_template", args=["public"])
-                        ),
-                        int(conn.server_id),
-                    )
-                    shareId = manager.createShare(
-                        host, images, message, members, enable, expiration
-                    )
-                    return HttpResponse("shareId:%s" % shareId)
-            else:
-                initial = {
-                    "experimenters": experimenters,
-                    "images": images_to_share,
-                    "enable": True,
-                    "selected": request.GET.getlist("image"),
-                }
-                form = BasketShareForm(initial=initial)
-        template = "webclient/public/share_form.html"
-        context = {"manager": manager, "form": form}
 
     elif action == "edit":
         # form for editing Shares only
