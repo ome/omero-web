@@ -58,7 +58,7 @@ from django.http import (
 )
 from django.http import HttpResponseServerError, HttpResponseBadRequest
 from django.utils.http import urlencode
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
@@ -85,7 +85,7 @@ from .controller.share import BaseShare
 from omeroweb.webadmin.forms import LoginForm
 
 from omeroweb.webgateway import views as webgateway_views
-from omeroweb.webgateway.marshal import chgrpMarshal
+from omeroweb.webgateway.marshal import graphResponseMarshal
 from omeroweb.webgateway.util import get_longs as webgateway_get_longs
 
 from omeroweb.feedback.views import handlerInternalError
@@ -132,6 +132,10 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 logger.info("INIT '%s'" % os.getpid())
+
+# We want to allow a higher default limit for annotations so we can load
+# all the annotations expected for a PAGE of images
+ANNOTATIONS_LIMIT = settings.PAGE * 100
 
 
 def get_long_or_default(request, name, default):
@@ -529,6 +533,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["template"] = template
     context["thumbnails_batch"] = settings.THUMBNAILS_BATCH
     context["current_admin_privileges"] = conn.getCurrentAdminPrivileges()
+    context["leader_of_groups"] = conn.getEventContext().leaderOfGroups
 
     return context
 
@@ -1307,7 +1312,7 @@ def api_annotations(request, conn=None, **kwargs):
     run_ids = get_list(request, "acquisition")
     well_ids = get_list(request, "well")
     page = get_long_or_default(request, "page", 1)
-    limit = get_long_or_default(request, "limit", settings.PAGE)
+    limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
 
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
@@ -2633,7 +2638,7 @@ def annotate_tags(request, conn=None, **kwargs):
         well_ids=selected["wells"],
         ann_type="tag",
         # If we reach this limit we'll get some tags not removed
-        limit=100000,
+        limit=ANNOTATIONS_LIMIT,
     )
 
     userMap = {}
@@ -3186,6 +3191,11 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     query = request.GET.get("query", "*")
     offset = get_long_or_default(request, "offset", 0)
     limit = get_long_or_default(request, "limit", settings.PAGE)
+    iviewer_url = None
+    try:
+        iviewer_url = reverse("omero_iviewer_index")
+    except NoReverseMatch:
+        pass
 
     # Check if file exists since _table_query() doesn't check
     file_id = long(file_id)
@@ -3247,11 +3257,14 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     # by default, return context as JSON data
     if mtype is None:
         context["template"] = "webclient/annotations/omero_table.html"
+        context["iviewer_url"] = iviewer_url
         col_types = context["data"]["column_types"]
         if "ImageColumn" in col_types:
             context["image_column_index"] = col_types.index("ImageColumn")
         if "WellColumn" in col_types:
             context["well_column_index"] = col_types.index("WellColumn")
+        if "RoiColumn" in col_types:
+            context["roi_column_index"] = col_types.index("RoiColumn")
         # provide example queries - pick first DoubleColumn...
         for idx, c_type in enumerate(col_types):
             if c_type in ("DoubleColumn", "LongColumn"):
@@ -3517,20 +3530,54 @@ def activities(request, conn=None, **kwargs):
     _purgeCallback(request)
 
     # If we have a jobId (not added to request.session) just process it...
-    # ONLY used for chgrp dry-run in Chgrp dialog.
+    # ONLY used for chgrp/chown dry-run.
     jobId = request.GET.get("jobId", None)
     if jobId is not None:
         jobId = str(jobId)
         try:
             prx = omero.cmd.HandlePrx.checkedCast(conn.c.ic.stringToProxy(jobId))
+            status = prx.getStatus()
+            logger.debug("job status: %s", status)
             rsp = prx.getResponse()
             if rsp is not None:
-                rv = chgrpMarshal(conn, rsp)
+                rv = graphResponseMarshal(conn, rsp)
                 rv["finished"] = True
             else:
                 rv = {"finished": False}
+            rv["status"] = {
+                "currentStep": status.currentStep,
+                "steps": status.steps,
+                "startTime": status.startTime,
+                "stopTime": status.stopTime,
+            }
         except IceException:
             rv = {"finished": True}
+        return rv
+
+    elif request.method == "DELETE":
+        try:
+            json_data = json.loads(request.body)
+        except TypeError:
+            # for Python 3.5
+            json_data = json.loads(bytes_to_native_str(request.body))
+        jobId = json_data.get("jobId", None)
+        if jobId is not None:
+            jobId = str(jobId)
+            rv = {"jobId": jobId}
+            try:
+                prx = omero.cmd.HandlePrx.checkedCast(conn.c.ic.stringToProxy(jobId))
+                status = prx.getStatus()
+                logger.debug("pre-cancel() job status: %s", status)
+                rv["status"] = {
+                    "currentStep": status.currentStep,
+                    "steps": status.steps,
+                    "startTime": status.startTime,
+                    "stopTime": status.stopTime,
+                }
+                prx.cancel()
+            except omero.LockTimeout:
+                # expected that it will take > 5 seconds to cancel
+                logger.info("Timeout on prx.cancel()")
         return rv
 
     # test each callback for failure, errors, completion, results etc
@@ -3544,8 +3591,8 @@ def activities(request, conn=None, **kwargs):
 
         request.session.modified = True
 
-        # update chgrp
-        if job_type == "chgrp":
+        # update chgrp / chown
+        if job_type in ("chgrp", "chown"):
             if status not in ("failed", "finished"):
                 rsp = None
                 try:
@@ -3567,7 +3614,9 @@ def activities(request, conn=None, **kwargs):
                                         for k, v in rsp.parameters.items()
                                     ]
                                 )
-                                logger.error("chgrp failed with: %s" % rsp_params)
+                                logger.error(
+                                    "%s failed with: %s" % (job_type, rsp_params)
+                                )
                                 update_callback(
                                     request,
                                     cbString,
@@ -3582,7 +3631,9 @@ def activities(request, conn=None, **kwargs):
                     finally:
                         prx.close(close_handle)
                 except Exception:
-                    logger.info("Activities chgrp handle not found: %s" % cbString)
+                    logger.info(
+                        "Activities %s handle not found: %s" % (job_type, cbString)
+                    )
                     continue
         elif job_type == "send_email":
             if status not in ("failed", "finished"):
@@ -4496,8 +4547,13 @@ def getAllObjects(
 @require_POST
 @login_required()
 def chgrpDryRun(request, conn=None, **kwargs):
+    return dryRun(request, action="chgrp", conn=conn, **kwargs)
 
-    group_id = getIntOrDefault(request, "group_id", None)
+
+@require_POST
+@login_required()
+def dryRun(request, action, conn=None, **kwargs):
+    """Submit chgrp or chown dry-run"""
     targetObjects = {}
     dtypes = ["Project", "Dataset", "Image", "Screen", "Plate", "Fileset"]
     for dtype in dtypes:
@@ -4506,7 +4562,11 @@ def chgrpDryRun(request, conn=None, **kwargs):
             obj_ids = [int(oid) for oid in oids.split(",")]
             targetObjects[dtype] = obj_ids
 
-    handle = conn.chgrpDryRun(targetObjects, group_id)
+    if action == "chgrp":
+        target_id = getIntOrDefault(request, "group_id", None)
+    elif action == "chown":
+        target_id = getIntOrDefault(request, "owner_id", None)
+    handle = conn.submitDryRun(action, targetObjects, target_id)
     jobId = str(handle)
     return HttpResponse(jobId)
 
@@ -4625,6 +4685,50 @@ def chgrp(request, conn=None, **kwargs):
 
     # return HttpResponse("OK")
     return JsonResponse({"update": update})
+
+
+@login_required()
+def chown(request, conn=None, **kwargs):
+    """
+    Moves data to a new owner, using the chown queue.
+    Handles submission of chown form: all data in POST.
+    Adds the callback handle to the request.session['callback']['jobId']
+    """
+    if not request.method == "POST":
+        return JsonResponse({"Error": "Need to POST to chown"}, status=405)
+    # Get the target owner_id
+    owner_id = getIntOrDefault(request, "owner_id", None)
+    if owner_id is None:
+        return JsonResponse({"Error": "chown: No owner_id specified"})
+    owner_id = int(owner_id)
+    exp = conn.getObject("Experimenter", owner_id)
+    if exp is None:
+        return JsonResponse({"Error": "chown: Experimenter not found" % owner_id})
+
+    dtypes = ["Project", "Dataset", "Image", "Screen", "Plate"]
+    jobIds = []
+    for dtype in dtypes:
+        # Get all requested objects of this type
+        oids = request.POST.get(dtype, None)
+        if oids is not None:
+            obj_ids = [int(oid) for oid in oids.split(",")]
+            logger.debug("chown to owner:%s %s-%s" % (owner_id, dtype, obj_ids))
+            handle = conn.chownObjects(dtype, obj_ids, owner_id)
+            jobId = str(handle)
+            jobIds.append(jobId)
+            request.session["callback"][jobId] = {
+                "job_type": "chown",
+                "owner": exp.getFullName(),
+                "to_owner_id": owner_id,
+                "dtype": dtype,
+                "obj_ids": obj_ids,
+                "job_name": "Change owner",
+                "start_time": datetime.datetime.now(),
+                "status": "in progress",
+            }
+            request.session.modified = True
+
+    return JsonResponse({"jobIds": jobIds})
 
 
 @login_required(setGroupContext=True)
