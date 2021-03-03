@@ -24,6 +24,29 @@ $(function() {
     // Flag holding curent single / multi selection status
     var multiselection = false;
 
+    $.jstree.core.prototype._create_prototype_node = function () {
+        var document = window.document;
+        var _node = document.createElement('LI'), _temp1, _temp2;
+        _node.setAttribute('role', 'presentation');
+        _temp1 = document.createElement('I');
+        _temp1.className = 'jstree-icon jstree-ocl';
+        _temp1.setAttribute('role', 'presentation');
+        _node.appendChild(_temp1);
+        // Use a 'span' instead of 'a' to avoid link showing on hover
+        // see https://github.com/ome/omero-web/pull/257
+        _temp1 = document.createElement('span');
+        _temp1.className = 'jstree-anchor';
+        _temp1.setAttribute('tabindex', '-1');
+        _temp1.setAttribute('role', 'treeitem');
+        _temp2 = document.createElement('I');
+        _temp2.className = 'jstree-icon jstree-themeicon';
+        _temp2.setAttribute('role', 'presentation');
+        _temp1.appendChild(_temp2);
+        _node.appendChild(_temp1);
+        _temp1 = _temp2 = null;
+        return _node;
+    };
+
     // Select jstree and then cascade handle events and setup the tree.
     var jstree = $("#dataTree")
     .on('changed.jstree', function (e, data) {
