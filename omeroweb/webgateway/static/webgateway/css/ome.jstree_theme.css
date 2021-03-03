@@ -341,11 +341,11 @@
   transition: 1s background linear;
 }
 
-.jstree-default ul li ul li a {
+/* .jstree-default ul li ul li a {
   opacity: .9;
-}
+} */
 
-.jstree-default a {
+.jstree-default .jstree-anchor {
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
@@ -359,6 +359,7 @@
   position: relative;
   cursor: pointer;
   font-size: 120%;
+  opacity: .9;
 }
 
 .jstree-default .jstree-no-icons .jstree-anchor > .jstree-themeicon {

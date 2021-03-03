@@ -49,9 +49,10 @@
 	_temp1.className = 'jstree-icon jstree-ocl';
 	_temp1.setAttribute('role', 'presentation');
 	_node.appendChild(_temp1);
-	_temp1 = _d.createElement('A');
+	// In the absense of _create_node_plugin, editing here to use SPAN
+	// See https://github.com/vakata/jstree/pull/1616 and https://github.com/ome/omero-web/pull/257
+	_temp1 = _d.createElement('SPAN');
 	_temp1.className = 'jstree-anchor';
-	_temp1.setAttribute('href','#');
 	_temp1.setAttribute('tabindex','-1');
 	_temp2 = _d.createElement('I');
 	_temp2.className = 'jstree-icon jstree-themeicon';
