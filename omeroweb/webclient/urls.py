@@ -233,6 +233,20 @@ urlpatterns = [
         views.fileset_check,
         name="fileset_check",
     ),
+    # chgrp/chown dry run - 'group/owner_id', obj-types and ids in POST data.
+    # E.g. Dataset=1,2,3 & Fileset=4. Multiple datatypes in one chgrp.
+    url(
+        r"^chgrpDryRun/$",
+        views.dryRun,
+        {"action": "chgrp"},
+        name="chgrpDryRun",
+    ),
+    url(
+        r"^chownDryRun/$",
+        views.dryRun,
+        {"action": "chown"},
+        name="chownDryRun",
+    ),
     # chgrp dry run - 'group_id', obj-types and ids in POST data.
     # E.g. Dataset=1,2,3 & Fileset=4. Multiple datatypes in one chgrp.
     url(r"^chgrpDryRun/$", views.chgrpDryRun, name="chgrpDryRun"),
@@ -244,6 +258,8 @@ urlpatterns = [
     ),
     # chgrp - 'group_id', obj-types and ids in POST data
     url(r"^chgrp/$", views.chgrp, name="chgrp"),
+    # chown - 'owner_id', obj-types and ids in POST data
+    url(r"^chown/$", views.chown, name="chown"),
     # annotations
     url(
         r"^action/(?P<action>[a-zA-Z]+)/(?:(?P<o_type>[a-zA-Z]+)/)"

@@ -88,6 +88,46 @@
                     </tr>
                 {% endifequal %}
 
+                <!-- Chown jobs -->
+                {% ifequal j.job_type "chown" %}
+                    <tr id="{{ j.id }}" class="{% if j.new %}new_result{% endif %}{% ifequal j.status 'in progress' %} in_progress{% endifequal %}" >
+                        <td width="25px">
+                            {% ifequal j.status "in progress" %}<img class="icon" src="{% static "webgateway/img/spinner.gif" %}" />
+                            {% else %}
+                                {% if j.error %}
+                                    <img alt="Chown failed" src="{% static "webgateway/img/failed.png" %}" />
+                                {% else %}
+                                    <img class="icon" src="{% static "webgateway/img/success.png" %}" />
+                                {% endif %}
+                            {% endifequal %}
+                        </td>
+                        <td class="script_description" colspan='2'>
+                            <span class="activity_title">
+                                Change Owner: '{{ j.owner }}'
+                            </span>
+                            <span class="message">
+                                {% ifequal j.status "in progress" %}
+                                    Moving {{ j.dtype }}{{ j.obj_ids|pluralize }} to Owner {{ j.owner }}...
+                                {% else %}
+                                    {% ifequal j.status "finished" %}
+                                        {{ j.dtype }}{{ j.obj_ids|pluralize }} moved to Owner {{ j.owner }}.
+                                        <a href="{% url 'webindex' %}?show={% for o in j.obj_ids %}{{ j.dtype|lower }}-{{ o }}{% if not forloop.last %}|{% endif %}{% endfor %}">
+                                            Show {{ j.dtype }}{{ j.obj_ids|pluralize }}
+                                        </a>
+                                    {% endifequal %}
+                                    {% if j.report %}
+                                        <div class="chgrp_error">
+                                            {{ j.report|truncateafter:"30" }}
+                                            <a href="#" title="Click to Open in new Window"> More...</a>
+                                            <div style="display:none">{{ j.report|linebreaksbr }}</div>
+                                        </div>
+                                    {% endif %}
+                                {% endifequal %}
+                            </span>
+                        </td>
+                    </tr>
+                {% endifequal %}
+
                 <!-- sending_email jobs -->
                 {% ifequal j.job_type "send_email" %}
                     <tr id="{{ j.id }}" class="{% if j.new %}new_result{% endif %}{% ifequal j.status 'in progress' %} in_progress{% endifequal %}" >
