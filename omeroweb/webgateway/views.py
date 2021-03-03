@@ -2963,7 +2963,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 else None
             )
         range_start = offset
-        range_size = kwargs.get("limit", rows)
+        range_size = limit if limit is not None else rows
         range_end = min(rows, range_start + range_size)
 
         if query == "*":
