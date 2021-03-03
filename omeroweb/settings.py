@@ -394,13 +394,13 @@ CUSTOM_SETTINGS_MAPPINGS = {
             '{"index": 3, '
             '"class": "django.contrib.sessions.middleware.SessionMiddleware"},'
             '{"index": 4, '
-            '"class": "omeroweb.middleware.CustomHeadersMiddleware"},'
-            '{"index": 5, '
             '"class": "django.middleware.csrf.CsrfViewMiddleware"},'
-            '{"index": 6, '
+            '{"index": 5, '
             '"class": "django.contrib.messages.middleware.MessageMiddleware"},'
+            '{"index": 6, '
+            '"class": "django.middleware.clickjacking.XFrameOptionsMiddleware"},'
             '{"index": 7, '
-            '"class": "django.middleware.clickjacking.XFrameOptionsMiddleware"}'
+            '"class": "omeroweb.middleware.CustomHeadersMiddleware"}'
             "]"
         ),
         json.loads,
