@@ -1610,7 +1610,13 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
             return reverse(prefix, args=(iid, thumbsize))
         return reverse(prefix, args=(iid,))
 
-    plateGrid = PlateGrid(conn, pid, field, kwargs.get("urlprefix", get_thumb_url))
+    plateGrid = PlateGrid(
+        conn,
+        pid,
+        field,
+        kwargs.get("urlprefix", get_thumb_url),
+        constrain_grid=settings.CONSTRAIN_PLATE_GRID,
+    )
 
     plate = plateGrid.plate
     if plate is None:

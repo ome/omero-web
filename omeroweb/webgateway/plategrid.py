@@ -29,17 +29,19 @@ class PlateGrid(object):
     methods useful for displaying the contents of the plate as a grid.
     """
 
-    def __init__(self, conn, pid, fid, thumbprefix=""):
+    def __init__(self, conn, pid, fid, thumbprefix="", constrain_grid=True):
         self.plate = conn.getObject("plate", long(pid))
         self._conn = conn
         self.field = fid
         self._thumbprefix = thumbprefix
         self._metadata = None
+        self.constrain_grid = constrain_grid
 
     @property
     def metadata(self):
         if self._metadata is None:
-            self.plate.setGridSizeConstraints(8, 12)
+            if self.constrain_grid:
+                self.plate.setGridSizeConstraints(8, 12)
             size = self.plate.getGridSize()
             grid = [[None] * size["columns"] for _ in range(size["rows"])]
 
