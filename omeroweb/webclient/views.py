@@ -2884,9 +2884,7 @@ def manage_action_containers(
         experimenters = list(conn.getExperimenters())
         experimenters.sort(key=lambda x: x.getOmeName().lower())
         if o_type == "share":
-            img_ids = get_list(request, "image")
-            if len(img_ids) == 0:
-                img_ids = get_list(request, "image", post=True)
+            img_ids = request.GET.getlist("image", request.POST.getlist("image"))
             if request.method == "GET" and len(img_ids) == 0:
                 return HttpResponse("No images specified")
             images_to_share = list(conn.getObjects("Image", img_ids))
@@ -2917,7 +2915,7 @@ def manage_action_containers(
                     "experimenters": experimenters,
                     "images": images_to_share,
                     "enable": True,
-                    "selected": get_list(request, "image"),
+                    "selected": request.GET.getlist("image"),
                 }
                 form = BasketShareForm(initial=initial)
         template = "webclient/public/share_form.html"
