@@ -384,25 +384,8 @@ CUSTOM_SETTINGS_MAPPINGS = {
         ("The maximum number of requests a worker will process before " "restarting."),
     ],
     "omero.web.middleware": [
-        "MIDDLEWARE_CLASSES_LIST",
-        (
-            "["
-            '{"index": 1, '
-            '"class": "django.middleware.common.BrokenLinkEmailsMiddleware"},'
-            '{"index": 2, '
-            '"class": "django.middleware.common.CommonMiddleware"},'
-            '{"index": 3, '
-            '"class": "django.contrib.sessions.middleware.SessionMiddleware"},'
-            '{"index": 4, '
-            '"class": "django.middleware.csrf.CsrfViewMiddleware"},'
-            '{"index": 5, '
-            '"class": "django.contrib.messages.middleware.MessageMiddleware"},'
-            '{"index": 6, '
-            '"class": "django.middleware.clickjacking.XFrameOptionsMiddleware"},'
-            '{"index": 7, '
-            '"class": "omeroweb.middleware.CustomHeadersMiddleware"}'
-            "]"
-        ),
+        "ADDITIONAL_MIDDLEWARE_CLASSES",
+        "[]",
         json.loads,
         (
             "Warning: Only system administrators should use this feature. "
@@ -1614,6 +1597,19 @@ SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 # Load custom settings from etc/grid/config.xml
 # Tue  2 Nov 2010 11:03:18 GMT -- ticket:3228
 # MIDDLEWARE: A tuple of middleware classes to use.
+
+MIDDLEWARE_CLASSES_LIST = [
+    {"index": 1, "class": "django.middleware.common.BrokenLinkEmailsMiddleware"},
+    {"index": 2, "class": "django.middleware.common.CommonMiddleware"},
+    {"index": 3, "class": "django.contrib.sessions.middleware.SessionMiddleware"},
+    {"index": 4, "class": "omeroweb.middleware.CustomHeadersMiddleware"},
+    {"index": 5, "class": "django.middleware.csrf.CsrfViewMiddleware"},
+    {"index": 6, "class": "django.contrib.messages.middleware.MessageMiddleware"},
+    {"index": 7, "class": "django.middleware.clickjacking.XFrameOptionsMiddleware"},
+]
+# Add user-configured middleware
+additional_middleware = getattr(sys.modules[__name__], "ADDITIONAL_MIDDLEWARE_CLASSES")
+MIDDLEWARE_CLASSES_LIST += additional_middleware
 MIDDLEWARE = sort_properties_to_tuple(MIDDLEWARE_CLASSES_LIST)  # noqa
 
 for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
