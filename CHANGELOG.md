@@ -16,6 +16,7 @@
 
 - Fix Open_with handling of callbacks in right panel ([#232](https://github.com/ome/omero-web/pull/232))
 - Fix /webgateway/dataset/ID/children/ URL (Thanks to [Johannes Dewender](https://github.com/JonnyJD)) ([#245](https://github.com/ome/omero-web/pull/245))
+- Remove broken 'Create Shares' dialog ([#265](https://github.com/ome/omero-web/pull/265))
 - Fix API ?childCount=true when zero objects found ([#249](https://github.com/ome/omero-web/pull/249))
 - Fix partial loading of annotations ([#256](https://github.com/ome/omero-web/pull/256))
 
