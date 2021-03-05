@@ -334,17 +334,7 @@ OME.get_tree_selection = function() {
         return "";
     }
     var datatree = $.jstree.reference('#dataTree');
-
     var selected = datatree.get_selected(true);
-    if (selected.length == 1) {
-        var klass = selected[0].type;
-        if (klass == 'plate' || klass == 'acquisition') {
-            var plateSelected = $('#spw .ui-selected img');
-            if (plateSelected.size() > 0) {
-                selected = plateSelected;
-            }
-        }
-    }
 
     var selected_ids = {};
 
