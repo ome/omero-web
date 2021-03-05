@@ -3,13 +3,13 @@
 
 ## New features
 
-- Weblclient UI supports Change Owner ([#149](https://github.com/ome/omero-web/pull/149))
+- Webclient UI supports Change Owner ([#149](https://github.com/ome/omero-web/pull/149))
 - Filtering by Key-Value pairs supports autocomplete ([#250](https://github.com/ome/omero-web/pull/250))
 - Support URLs as output from scripts ([#233](https://github.com/ome/omero-web/pull/233))]
 - Improved install info in README ([#239](https://github.com/ome/omero-web/pull/239))]
 - Migrate CI to use GitHub actions ([#240](https://github.com/ome/omero-web/pull/240))]
 - Improve performance of OMERO.table loading ([#243](https://github.com/ome/omero-web/pull/243))
-- OMERO.table ROI column links to ROI in iviewer ([#264](https://github.com/ome/omero-web/pull/264))
+- OMERO.table ROI column links to ROI in OMERO.iviewer ([#264](https://github.com/ome/omero-web/pull/264))
 - Disable placeholder URL popup on tree ([#257](https://github.com/ome/omero-web/pull/257))
 
 ## Bug fixes
