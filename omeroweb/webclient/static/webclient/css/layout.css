@@ -2394,16 +2394,28 @@ div.paging input.button_pagination {
 
 #spw {
     width: 100%;
+    overflow: auto;
 }
 
 #spw table {
     background: #fff none repeat scroll 0 0;
     width: 0;
     table-layout: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 #spw table th {
     vertical-align: middle;
+    position: sticky;
+    top: 0;
+    left: 0;
+    background: white;
+    padding: 5px;
+    z-index: 1;
 }
 
 #spw table td {
