@@ -19,6 +19,7 @@
 - Remove broken 'Create Shares' dialog ([#265](https://github.com/ome/omero-web/pull/265))
 - Fix API ?childCount=true when zero objects found ([#249](https://github.com/ome/omero-web/pull/249))
 - Fix partial loading of annotations ([#256](https://github.com/ome/omero-web/pull/256))
+- Fix ignored limit in webgateway/table endpoint ([#268](https://github.com/ome/omero-web/pull/268))
 
 5.8.1 (September 2020)
 ----------------------
