@@ -2960,10 +2960,10 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             limit = (
                 int(request.GET.get("limit"))
                 if request.GET.get("limit") is not None
-                else None
+                else rows
             )
         range_start = offset
-        range_size = kwargs.get("limit", rows)
+        range_size = limit
         range_end = min(rows, range_start + range_size)
 
         if query == "*":
