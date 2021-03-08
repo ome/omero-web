@@ -37,7 +37,6 @@ from .custom_forms import MetadataModelChoiceField
 from .custom_forms import AnnotationModelMultipleChoiceField
 from .custom_forms import ObjectModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import ExperimenterModelMultipleChoiceField
-from omeroweb.webadmin.custom_forms import GroupModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import GroupModelChoiceField
 from omeroweb.webclient.webclient_utils import formatPercentFraction
 
@@ -125,23 +124,6 @@ class ShareForm(NonASCIIForm):
             if time.mktime(date.timetuple()) <= time.time():
                 raise forms.ValidationError("Expiry date must be in the future.")
         return self.cleaned_data["expiration"]
-
-
-class BasketShareForm(ShareForm):
-    def __init__(self, *args, **kwargs):
-        super(BasketShareForm, self).__init__(*args, **kwargs)
-
-        try:
-            self.fields["image"] = GroupModelMultipleChoiceField(
-                queryset=kwargs["initial"]["images"],
-                initial=kwargs["initial"]["selected"],
-                widget=forms.SelectMultiple(attrs={"size": 10}),
-            )
-        except Exception:
-            self.fields["image"] = GroupModelMultipleChoiceField(
-                queryset=kwargs["initial"]["images"],
-                widget=forms.SelectMultiple(attrs={"size": 10}),
-            )
 
 
 class ContainerForm(NonASCIIForm):
