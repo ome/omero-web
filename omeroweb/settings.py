@@ -1001,13 +1001,15 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "The javascript loads data into ``$('#div_id')``."
         ),
     ],
-    "omero.web.constrain_plate_grid": [
-        "CONSTRAIN_PLATE_GRID",
-        "false",
-        parse_boolean,
+    "omero.web.plate_layout": [
+        "PLATE_LAYOUT",
+        "normal",
+        str,
         (
-            "If True, the plate grid layout will be constrained to "
-            "multiples of 12 columns x 8 rows."
+            "If 'expand', the Plate grid will expand to "
+            "multiples of 12 columns x 8 rows. "
+            "If 'shrink', the grid will not display rows and columns "
+            "before the first Well."
         ),
     ],
     # CORS

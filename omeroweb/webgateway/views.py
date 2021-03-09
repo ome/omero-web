@@ -1595,7 +1595,13 @@ def wellData_json(request, conn=None, _internal=False, **kwargs):
 @login_required()
 @jsonp
 def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
-    """"""
+    """
+    Layout depends on settings 'omero.web.plate_layout' which
+    can be overridden with request param e.g. ?layout=shrink.
+    Use "expand" to expand to multiple of 8 x 12 grid
+    Or "shrink" to remove rows/cols before first Well
+    Or "normal" (default) to neither expand nor shrink
+    """
     try:
         field = long(field or 0)
     except ValueError:
@@ -1610,12 +1616,16 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
             return reverse(prefix, args=(iid, thumbsize))
         return reverse(prefix, args=(iid,))
 
+    layout = request.GET.get("layout")
+    if layout not in ("normal", "expand", "shrink"):
+        layout = settings.PLATE_LAYOUT
+
     plateGrid = PlateGrid(
         conn,
         pid,
         field,
         kwargs.get("urlprefix", get_thumb_url),
-        constrain_grid=settings.CONSTRAIN_PLATE_GRID,
+        plate_layout=layout,
     )
 
     plate = plateGrid.plate

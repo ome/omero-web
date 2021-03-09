@@ -29,21 +29,23 @@ class PlateGrid(object):
     methods useful for displaying the contents of the plate as a grid.
     """
 
-    def __init__(self, conn, pid, fid, thumbprefix="", constrain_grid=True):
+    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None):
+        """
+        Constructor
+
+        param:  plate_layout is "expand" to expand plate to multiple of 8 x 12
+                or "shrink" to ignore all wells before the first row/column
+        """
         self.plate = conn.getObject("plate", long(pid))
         self._conn = conn
         self.field = fid
         self._thumbprefix = thumbprefix
         self._metadata = None
-        self.constrain_grid = constrain_grid
+        self.plate_layout = plate_layout
 
     @property
     def metadata(self):
         if self._metadata is None:
-            if self.constrain_grid:
-                self.plate.setGridSizeConstraints(8, 12)
-            size = self.plate.getGridSize()
-            grid = [[None] * size["columns"] for _ in range(size["rows"])]
 
             q = self._conn.getQueryService()
             params = omero.sys.ParametersI()
@@ -63,7 +65,21 @@ class PlateGrid(object):
                 "and index(ws) = :wsidx"
             )
 
-            for res in q.projection(query, params, self._conn.SERVICE_OPTS):
+            results = q.projection(query, params, self._conn.SERVICE_OPTS)
+            rows = [res[0].val for res in results]
+            cols = [res[1].val for res in results]
+            min_row = 0
+            min_col = 0
+            if self.plate_layout == "expand":
+                self.plate.setGridSizeConstraints(8, 12)
+            elif self.plate_layout == "shrink":
+                min_row = min(rows)
+                min_col = min(cols)
+            collabels = self.plate.getColumnLabels()[min_col:]
+            rowlabels = self.plate.getRowLabels()[min_row:]
+            grid = [[None] * len(collabels) for _ in range(len(rowlabels))]
+
+            for res in results:
                 (
                     row,
                     col,
@@ -98,11 +114,11 @@ class PlateGrid(object):
                 else:
                     wellmeta["thumb_url"] = self._thumbprefix + str(img_id.val)
 
-                grid[row.val][col.val] = wellmeta
+                grid[row.val - min_row][col.val - min_col] = wellmeta
 
             self._metadata = {
                 "grid": grid,
-                "collabels": self.plate.getColumnLabels(),
-                "rowlabels": self.plate.getRowLabels(),
+                "collabels": collabels,
+                "rowlabels": rowlabels,
             }
         return self._metadata
