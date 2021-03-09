@@ -334,7 +334,9 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     Finally this redirects to the 'url'.
     """
     switch_active_group(request)
-    url = url or reverse("webindex")
+    # avoid recursive calls
+    if url is None or url.startswith(reverse("change_active_group")):
+        url = reverse("webindex")
     return HttpResponseRedirect(url)
 
 
@@ -345,7 +347,9 @@ def switch_active_group(request, active_group=None):
     queries.
     """
     if active_group is None:
-        active_group = request.GET.get("active_group")
+        active_group = get_long_or_default(request, "active_group", None)
+    if active_group is None:
+        return
     active_group = int(active_group)
     if (
         "active_group" not in request.session
