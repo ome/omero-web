@@ -66,15 +66,22 @@ class PlateGrid(object):
             )
 
             results = q.projection(query, params, self._conn.SERVICE_OPTS)
-            rows = [res[0].val for res in results]
-            cols = [res[1].val for res in results]
             min_row = 0
             min_col = 0
             if self.plate_layout == "expand":
                 self.plate.setGridSizeConstraints(8, 12)
             elif self.plate_layout == "shrink":
-                min_row = min(rows)
-                min_col = min(cols)
+                # need to know min row/col, regardless of field index
+                params = omero.sys.ParametersI()
+                params.addId(self.plate.id)
+                query = (
+                    "select min(well.row), min(well.column) "
+                    "from Well well "
+                    "where well.plate.id = :id"
+                )
+                min_vals = q.projection(query, params, self._conn.SERVICE_OPTS)
+                min_row = min_vals[0][0].val
+                min_col = min_vals[0][1].val
             collabels = self.plate.getColumnLabels()[min_col:]
             rowlabels = self.plate.getRowLabels()[min_row:]
             grid = [[None] * len(collabels) for _ in range(len(rowlabels))]
