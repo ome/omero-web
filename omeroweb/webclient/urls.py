@@ -166,8 +166,8 @@ urlpatterns = [
         name="web_render_birds_eye_view",
     ),
     url(
-        r"^(?:(?P<share_id>[0-9]+)/)?render_image/(?P<iid>[^/]+)/"
-        r"(?:(?P<z>[^/]+)/)?(?:(?P<t>[^/]+)/)?$",
+        r"^(?:(?P<share_id>[0-9]+)/)?render_image/(?P<iid>[0-9]+)/"
+        r"(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$",
         webgateway.render_image,
         name="web_render_image",
     ),
