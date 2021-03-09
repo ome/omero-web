@@ -191,10 +191,13 @@ jQuery._WeblitzPlateview = function (container, options) {
               }
               $("img#"+parentPrefix+"image-"+key).attr("src", value);
             });
+            if (input.length <= batch) {
+              // last batch (NB: don't *know* that all previous batches have loaded)
+              _this.self.trigger('_thumbsLoaded');
+            }
           }
           gs_json(thumbnails_url, null, _load_thumbnails);
-          input = input.slice(batch, input.length);
-          load_thumbnails(input, batch);
+          load_thumbnails(input.slice(batch, input.length), batch);
         }
       }
     }
