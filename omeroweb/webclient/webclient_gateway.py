@@ -24,7 +24,6 @@
 # Version: 1.0
 #
 
-from io import StringIO
 from io import BytesIO
 import traceback
 import logging
@@ -919,7 +918,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             finally:
                 store.close()
             try:
-                im = Image.open(StringIO(photo))
+                im = Image.open(BytesIO(photo))
             except Exception:
                 logger.error(traceback.format_exc())
                 return None
