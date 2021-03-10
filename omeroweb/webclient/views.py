@@ -4919,7 +4919,7 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
             message = ""  # template displays message and link
         else:
             # Don't log user mistake as ERROR
-            if x.message.startswith("Invalid parameters"):
+            if isinstance(x, omero.ValidationException):
                 logger.debug(x.message)
             else:
                 logger.error(traceback.format_exc())
