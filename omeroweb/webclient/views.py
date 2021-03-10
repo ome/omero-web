@@ -446,7 +446,11 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
 
     # need to be sure that tree will be correct omero.group
     if first_sel is not None:
-        switch_active_group(request, first_sel.details.group.id.val)
+        group_id = first_sel.details.group.id.val
+        if conn.isValidGroup(group_id):
+            switch_active_group(request, group_id)
+        else:
+            first_sel = None
 
     # search support
     init = {}
