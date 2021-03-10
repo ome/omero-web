@@ -4918,7 +4918,11 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
             status = "no processor available"
             message = ""  # template displays message and link
         else:
-            logger.error(traceback.format_exc())
+            # Don't log user mistake as ERROR
+            if x.message.startswith("Invalid parameters"):
+                logger.debug(x.message)
+            else:
+                logger.error(traceback.format_exc())
             error = traceback.format_exc()
             status = "failed"
             message = x.message
