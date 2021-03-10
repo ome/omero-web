@@ -11,6 +11,7 @@
 - Improve performance of OMERO.table loading ([#243](https://github.com/ome/omero-web/pull/243))
 - OMERO.table ROI column links to ROI in OMERO.iviewer ([#264](https://github.com/ome/omero-web/pull/264))
 - Disable placeholder URL popup on tree ([#257](https://github.com/ome/omero-web/pull/257))
+- Add an option to set SESSION_COOKIE_PATH ([#271]https://github.com/ome/omero-web/pull/271). Thanks to [Andrey Yuding](https://github.com/andreyyudin)
 
 ## Bug fixes
 
