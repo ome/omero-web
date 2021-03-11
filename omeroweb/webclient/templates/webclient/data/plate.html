@@ -200,7 +200,7 @@
 
             // Need to apply correct thumb size once loaded
             // and scroll to selected well
-            wpv.self.on('_resetLoaded', function(){
+            wpv.self.bind('_resetLoaded', function(){
                 // scroll to selected well:
                 var selection = $("td.ui-selected").first();
                 if (typeof selection !== 'undefined' && selection.length > 0) {
