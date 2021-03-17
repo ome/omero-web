@@ -166,7 +166,7 @@
         WEBCLIENT.active_group_id = {{ active_group.id }};
         WEBCLIENT.USER = {'id': {{ ome.user.id }}, 'fullName': "{{ ome.user.getFullName }}"};
         WEBCLIENT.active_user = {'id': {{ ome.user_id }}, 'fullName': "{{ active_user.getFullName }}"};
-        WEBCLIENT.eventContext = {{ ome.eventContext|json_dumps|safe }};
+        WEBCLIENT.member_of_groups = {{ member_of_groups|json_dumps|safe }};
         WEBCLIENT.isAdmin = {% if ome.user.isAdmin %}true{% else %}false{% endif %};
         WEBCLIENT.CAN_CREATE = {{ ome.can_create|json_dumps|safe }};
         WEBCLIENT.current_admin_privileges = {{ current_admin_privileges|json_dumps|safe }};

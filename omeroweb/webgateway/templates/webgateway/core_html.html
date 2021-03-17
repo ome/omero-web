@@ -25,6 +25,7 @@
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="referrer" content="{{ html.meta_referrer|default:"origin-when-crossorigin" }}">
 
     {% block link %}
 		<link rel="stylesheet" href="{% static "webgateway/css/reset.css"|add:url_suffix %}" type="text/css" />   
