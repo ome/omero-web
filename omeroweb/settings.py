@@ -508,6 +508,12 @@ CUSTOM_SETTINGS_MAPPINGS = {
         leave_none_unset,
         "The name to use for session cookies",
     ],
+    "omero.web.session_cookie_path": [
+        "SESSION_COOKIE_PATH",
+        None,
+        leave_none_unset,
+        "The path to use for session cookies",
+    ],
     "omero.web.session_cookie_secure": [
         "SESSION_COOKIE_SECURE",
         "false",

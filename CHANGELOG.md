@@ -1,3 +1,27 @@
+5.9.0 (March 2021)
+------------------
+
+## New features
+
+- Webclient UI supports Change Owner ([#149](https://github.com/ome/omero-web/pull/149))
+- Filtering by Key-Value pairs supports autocomplete ([#250](https://github.com/ome/omero-web/pull/250))
+- Support URLs as output from scripts ([#233](https://github.com/ome/omero-web/pull/233))]
+- Improved install info in README ([#239](https://github.com/ome/omero-web/pull/239))]
+- Migrate CI to use GitHub actions ([#240](https://github.com/ome/omero-web/pull/240))]
+- Improve performance of OMERO.table loading ([#243](https://github.com/ome/omero-web/pull/243))
+- OMERO.table ROI column links to ROI in OMERO.iviewer ([#264](https://github.com/ome/omero-web/pull/264))
+- Disable placeholder URL popup on tree ([#257](https://github.com/ome/omero-web/pull/257))
+- Add an option to set SESSION_COOKIE_PATH ([#271]https://github.com/ome/omero-web/pull/271). Thanks to [Andrey Yudin](https://github.com/andreyyudin)
+
+## Bug fixes
+
+- Fix Open_with handling of callbacks in right panel ([#232](https://github.com/ome/omero-web/pull/232))
+- Fix /webgateway/dataset/ID/children/ URL (Thanks to [Johannes Dewender](https://github.com/JonnyJD)) ([#245](https://github.com/ome/omero-web/pull/245))
+- Remove broken 'Create Shares' dialog ([#265](https://github.com/ome/omero-web/pull/265))
+- Fix API ?childCount=true when zero objects found ([#249](https://github.com/ome/omero-web/pull/249))
+- Fix partial loading of annotations ([#256](https://github.com/ome/omero-web/pull/256))
+- Fix ignored limit in webgateway/table endpoint ([#268](https://github.com/ome/omero-web/pull/268))
+
 5.8.1 (September 2020)
 ----------------------
 
