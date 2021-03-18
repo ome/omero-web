@@ -1,3 +1,10 @@
+5.9.1 (March 2021)
+------------------
+
+## Bug fixes
+
+- Fix regression introduced in 5.9.0 ([#278](https://github.com/ome/omero-web/pull/278))
+
 5.9.0 (March 2021)
 ------------------
 
