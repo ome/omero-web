@@ -135,6 +135,7 @@ class render_response(omeroweb.decorators.render_response):
         public_user = omeroweb.decorators.is_public_user(request)
         if public_user is not None:
             context["ome"]["is_public_user"] = public_user
+        context["ome"]["is_admin"] = conn.getEventContext().isAdmin
         context["ome"]["user"] = conn.getUser
         context["ome"]["user_id"] = request.session.get("user_id", conn.getUserId())
         context["ome"]["group_id"] = request.session.get("group_id", None)

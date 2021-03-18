@@ -241,12 +241,12 @@
            
            <div id="avatar">
                <img src="{% url 'wamyphoto' %}" class="imgzoom"/>                 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.eventContext.userId %}">
+               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.user_id %}">
                    <span>Change</span>
                </a> 
 
                {% if myaccount.hasAvatar %} 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.eventContext.userId "deletephoto" %}">
+               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.user_id "deletephoto" %}">
                    <span>Delete</span>
                </a>
                {% endif %}
@@ -290,7 +290,7 @@
            <!-- hidden dialog for password change -->
            <div id="password_change_dialog" title="Change Password">
 
-               <form id="change_password_form" action="{% url 'wamanagechangepasswordid' ome.eventContext.userId %}" method="POST">{% csrf_token %}
+               <form id="change_password_form" action="{% url 'wamanagechangepasswordid' ome.user_id %}" method="POST">{% csrf_token %}
 
                    <table>
                        <tbody>
