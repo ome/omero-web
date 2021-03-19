@@ -1103,12 +1103,16 @@ def manage_avatar(request, action=None, conn=None, **kwargs):
                     )
                 )
     elif action == "crop":
-        x1 = int(request.POST.get("x1"))
-        x2 = int(request.POST.get("x2"))
-        y1 = int(request.POST.get("y1"))
-        y2 = int(request.POST.get("y2"))
-        box = (x1, y1, x2, y2)
-        conn.cropExperimenterPhoto(box)
+        try:
+            x1 = int(request.POST.get("x1"))
+            x2 = int(request.POST.get("x2"))
+            y1 = int(request.POST.get("y1"))
+            y2 = int(request.POST.get("y2"))
+        except ValueError:
+            pass
+        else:
+            box = (x1, y1, x2, y2)
+            conn.cropExperimenterPhoto(box)
         return HttpResponseRedirect(reverse("wamyaccount"))
     elif action == "editphoto":
         photo_size = conn.getExperimenterPhotoSize()
