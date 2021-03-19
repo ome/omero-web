@@ -582,7 +582,8 @@ class render_response(object):
 
     def prepare_context(self, request, context, *args, **kwargs):
         """ Hook for adding additional data to the context dict """
-        pass
+        context["html"] = context.get("html", {})
+        context["html"]["meta_referrer"] = settings.HTML_META_REFERRER
 
     def __call__(ctx, f):
         """ Here we wrap the view method f and return the wrapped method """

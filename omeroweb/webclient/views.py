@@ -35,6 +35,7 @@ import sys
 import warnings
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
+from django.utils.http import is_safe_url
 
 from time import time
 
@@ -176,6 +177,17 @@ def get_bool_or_default(request, name, default):
     return toBoolean(request.GET.get(name, default))
 
 
+def validate_redirect_url(url):
+    """
+    Returns a URL is safe to redirect to.
+    If url is a different host, not in settings.REDIRECT_ALLOWED_HOSTS
+    we return webclient index URL.
+    """
+    if not is_safe_url(url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS):
+        url = reverse("webindex")
+    return url
+
+
 ##############################################################################
 # custom index page
 
@@ -257,6 +269,8 @@ class WebclientLoginView(LoginView):
                 url = parse_url(settings.LOGIN_REDIRECT)
             except Exception:
                 url = reverse("webindex")
+        else:
+            url = validate_redirect_url(url)
         return HttpResponseRedirect(url)
 
     def handle_not_logged_in(self, request, error=None, form=None):
@@ -337,6 +351,7 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     # avoid recursive calls
     if url is None or url.startswith(reverse("change_active_group")):
         url = reverse("webindex")
+    url = validate_redirect_url(url)
     return HttpResponseRedirect(url)
 
 
@@ -538,6 +553,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["thumbnails_batch"] = settings.THUMBNAILS_BATCH
     context["current_admin_privileges"] = conn.getCurrentAdminPrivileges()
     context["leader_of_groups"] = conn.getEventContext().leaderOfGroups
+    context["member_of_groups"] = conn.getEventContext().memberOfGroups
 
     return context
 

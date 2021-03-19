@@ -508,6 +508,12 @@ CUSTOM_SETTINGS_MAPPINGS = {
         leave_none_unset,
         "The name to use for session cookies",
     ],
+    "omero.web.session_cookie_path": [
+        "SESSION_COOKIE_PATH",
+        None,
+        leave_none_unset,
+        "The path to use for session cookies",
+    ],
     "omero.web.session_cookie_secure": [
         "SESSION_COOKIE_SECURE",
         "false",
@@ -866,6 +872,16 @@ CUSTOM_SETTINGS_MAPPINGS = {
             ' {"experimenter": -1}}\'``'
         ),
     ],
+    "omero.web.redirect_allowed_hosts": [
+        "REDIRECT_ALLOWED_HOSTS",
+        "[]",
+        json.loads,
+        (
+            "If you wish to allow redirects to an external site, "
+            "the domains must be listed here. "
+            'For example ["openmicroscopy.org"].'
+        ),
+    ],
     "omero.web.login.show_client_downloads": [
         "SHOW_CLIENT_DOWNLOADS",
         "true",
@@ -1020,6 +1036,20 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "If True, cors_origin_whitelist will not be used and all origins "
             "will be authorized to make cross-site HTTP requests."
+        ),
+    ],
+    "omero.web.html_meta_referrer": [
+        "HTML_META_REFERRER",
+        "origin-when-crossorigin",
+        str,
+        (
+            "Default content for the HTML Meta referrer tag. "
+            "See https://www.w3.org/TR/referrer-policy/#referrer-policies for "
+            "allowed values and https://caniuse.com/#feat=referrer-policy for "
+            "browser compatibility. "
+            "Warning: Internet Explorer 11 does not support the default value "
+            'of this setting, you may want to change this to "origin" after '
+            "reviewing the linked documentation."
         ),
     ],
     "omero.web.x_frame_options": [
