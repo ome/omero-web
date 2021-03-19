@@ -30,8 +30,8 @@
 - Fix ignored limit in webgateway/table endpoint ([#268](https://github.com/ome/omero-web/pull/268))
 
 - Security vulnerability fixes for
-  [2021-SV1](https://www.openmicroscopy.org/security/advisories/2021-SV1-user-context/),
-  [2021-SV2](https://www.openmicroscopy.org/security/advisories/2021-SV2-url-validation/)
+  [2021-SV1](https://www.openmicroscopy.org/security/advisories/2021-SV1),
+  [2021-SV2](https://www.openmicroscopy.org/security/advisories/2021-SV2)
 
 5.8.1 (September 2020)
 ----------------------
