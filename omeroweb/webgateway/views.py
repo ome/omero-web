@@ -1600,7 +1600,7 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
     can be overridden with request param e.g. ?layout=shrink.
     Use "expand" to expand to multiple of 8 x 12 grid
     Or "shrink" to remove rows/cols before first Well
-    Or "normal" (default) to neither expand nor shrink
+    Or "trim" (default) to neither expand nor shrink
     """
     try:
         field = long(field or 0)
@@ -1617,7 +1617,7 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         return reverse(prefix, args=(iid,))
 
     layout = request.GET.get("layout")
-    if layout not in ("normal", "expand", "shrink"):
+    if layout not in ("shrink", "trim", "expand"):
         layout = settings.PLATE_LAYOUT
 
     plateGrid = PlateGrid(
