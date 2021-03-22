@@ -122,7 +122,8 @@ jQuery._WeblitzPlateview = function (container, options) {
   var _reset = function (result, data) {
     _this.self.html("");
     var table = $('<table></table>').appendTo(_this.self);
-    var tr = $('<tr></tr>').appendTo(table);
+    var thead = $('<thead></thead>').appendTo(table);
+    var tr = $('<tr></tr>').appendTo(thead);
     tr.append('<th>&nbsp;</th>');
     for (var i=0; i<data.collabels.length; i++) {
       tr.append('<th>'+data.collabels[i]+'</th>');
@@ -136,6 +137,7 @@ jQuery._WeblitzPlateview = function (container, options) {
     // NB: don't add other classes here - will get removed on slider change.
     table.addClass('showWellLabel wellSize' + opts.width);
 
+    var tbody = $('<tbody></tbody>').appendTo(table);
     var imgIds = [];
     var html = "";
     // Build table html and append below
@@ -160,7 +162,7 @@ jQuery._WeblitzPlateview = function (container, options) {
       }
       html += '</tr>';
     }
-    table.append(html);
+    tbody.append(html);
 
 
     // Handle loading of images - NB: need to bind to each image since load events don't bubble

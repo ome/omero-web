@@ -2406,6 +2406,9 @@ div.paging input.button_pagination {
     bottom: 0;
     left: 0;
     right: 0;
+    /* Need these to preserve sticky th borders on scroll */
+    border-collapse: separate;
+    border-spacing: 0
 }
 
 #spw table th {
@@ -2418,9 +2421,18 @@ div.paging input.button_pagination {
     z-index: 1;
 }
 
+#spw table thead th {
+    border-bottom: 1px solid #ccc;
+}
+#spw table tbody th {
+    border-right: 1px solid #ccc;
+}
+
 #spw table td {
     padding: 1px;
     border: 1px solid #ccc;
+    border-left-width: 0;
+    border-top-width: 0;
     position: relative;
 }
 
