@@ -123,9 +123,27 @@ class PlateGrid(object):
 
                 grid[row.val - min_row][col.val - min_col] = wellmeta
 
+            # find dimensions of first image, to help in layout
+            img_sizes = []
+            if len(results) > 0:
+                image_id = results[0][2].val
+                params = omero.sys.ParametersI()
+                params.addId(image_id)
+                query = (
+                    "select pixels.sizeX, pixels.sizeY "
+                    "from Pixels pixels "
+                    "where pixels.image.id = :id"
+                )
+                sizes = q.projection(query, params, self._conn.SERVICE_OPTS)
+                if len(sizes) > 0:
+                    size_x = sizes[0][0].val
+                    size_y = sizes[0][1].val
+                    img_sizes.append({"x": size_x, "y": size_y, "image_id": image_id})
+
             self._metadata = {
                 "grid": grid,
                 "collabels": collabels,
                 "rowlabels": rowlabels,
+                "image_sizes": img_sizes,
             }
         return self._metadata
