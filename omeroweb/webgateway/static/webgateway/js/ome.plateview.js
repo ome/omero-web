@@ -118,6 +118,7 @@ jQuery._WeblitzPlateview = function (container, options) {
   var spacer_gif_src = opts.staticurl + 'img/spacer.gif';
   var thumbsLoaded = false;
   var thumbAspectRatio;
+  var thumbStyles = [];
 
   var _reset = function (result, data) {
     _this.self.html("");
@@ -128,25 +129,25 @@ jQuery._WeblitzPlateview = function (container, options) {
     for (var i=0; i<data.collabels.length; i++) {
       tr.append('<th>'+data.collabels[i]+'</th>');
     }
-    var tclick = function (tdata,thumb) {
-      return function () {
-        _this.self.trigger('thumbClick', [tdata, this]);
-      };
-    };
-    // Classes added to table by thumb slider to control well size and hover wellLabel
-    // NB: don't add other classes here - will get removed on slider change.
-    table.addClass('showWellLabel wellSize' + opts.width);
 
     var tbody = $('<tbody></tbody>').appendTo(table);
     var imgIds = [];
     var html = "";
     // Build table html and append below
+    thumb_w = opts.width;
+    if (data.image_sizes && data.image_sizes.length > 0) {
+      sizes = data.image_sizes[0];
+      thumbAspectRatio = sizes.x / sizes.y;
+      thumb_h = (sizes.y / sizes.x) * thumb_w;
+      _this.setSpwThumbSize(opts.width);
+    }
+
     for (i=0; i < data.rowlabels.length; i++) {
       html += '<tr>';
       html += '<th>'+data.rowlabels[i]+'</th>';
       for (var j=0; j<data.grid[i].length; j++) {
         if (data.grid[i][j] === null) {
-          html += '<td class="placeholder"><img src="' + spacer_gif_src + '" /></td>';
+          html += '<td class="placeholder"><img src="' + spacer_gif_src + '" style = "width:' + thumb_w + 'px; height:' + thumb_h + 'px" /></td>';
         } else {
           imgIds.push(data.grid[i][j].id);
           data.grid[i][j]._wellpos = data.rowlabels[i]+data.collabels[j];
@@ -155,26 +156,25 @@ jQuery._WeblitzPlateview = function (container, options) {
               parentPrefix = thisid+'-';
           }
           html += '<td class="well" id="'+parentPrefix+'well-'+data.grid[i][j].wellId+'">' +
-            '<img class="waiting" src="' + spacer_gif_src + '" />' +
+            '<img class="waiting" style = "width:' + thumb_w + 'px; height:' + thumb_h + 'px"  src="' + spacer_gif_src + '" />' +
             '<div class="wellLabel">' + data.rowlabels[i] + data.collabels[j] + '</div>' +
-            '<img id="'+parentPrefix+'image-'+data.grid[i][j].id+'" class="loading" name="'+(data.rowlabels[i] + data.collabels[j])+'"></td>';
+            '<img id="' + parentPrefix + 'image-' + data.grid[i][j].id + '" style = "width:' + thumb_w + 'px; height:' + thumb_h + 'px" class="loading" name="' + (data.rowlabels[i] + data.collabels[j]) + '"></td>';
         }
       }
       html += '</tr>';
     }
     tbody.append(html);
 
+    thumbStyles = [];
+    $(".placeholder img, img.loading", table).each(function(index, img){
+      thumbStyles.push(img.style);
+    });
+
+    _this.self.trigger('_gridLoaded');
 
     // Handle loading of images - NB: need to bind to each image since load events don't bubble
     $("img.loading", table).on("load", function(){
       $(this).removeClass('loading').siblings('.waiting').remove();
-      if (!thumbsLoaded) {
-        // When first thumbnails loads, we get aspect ratio and use that to scale
-        // all images (including unloaded images and placeholder spacers)
-        thumbAspectRatio = $(this).width()/$(this).height();
-        _this.setSpwThumbSize(opts.width);
-        thumbsLoaded = true;
-      }
       _this.self.trigger('thumbLoad', [$(this).parent(), $(this)]);
     });
 
@@ -238,21 +238,23 @@ jQuery._WeblitzPlateview = function (container, options) {
   };
 
   this.setSpwThumbSize = function(size) {
-    // This handles square or landscape thumbnails.
-    // using css: width and max-height;
-    // (portrait thumbnails will be shown as square)
-    // Since we don't want to remove previous class (don't know it),
-    // just set new class
+    // This sets width and height of all spw images (thumbnails and placeholders)
+    // based on the aspect ratio;
+
     // if well is small, offset the hover label
-    var cls = size < 30 ? 'wellLabelOffset ' : '';
-    cls += 'wellSize' + size;
-    $("#spw>table").prop('class', cls);
-    // Bulk update placeholder images
+    if (size < 30) {
+      $("#spw>table").addClass("wellLabelOffset");
+    } else {
+      $("#spw>table").removeClass("wellLabelOffset");
+    }
+    // Bulk update all image styles directly (faster than jQuery.css())
     if (thumbAspectRatio) {
-      var thumbWidth = size;
-      var thumbHeight = size/thumbAspectRatio;
-      // Same css behaviour as for image thumbnails
-      $(".placeholder img").css({'width': thumbWidth + 'px', 'max-height': thumbHeight + 'px'});
+      var thumbWidth = size + 'px';
+      var thumbHeight = (size / thumbAspectRatio) + 'px';
+      for (var i = 0; i < thumbStyles.length; i++){
+        thumbStyles[i].width = thumbWidth;
+        thumbStyles[i].height = thumbHeight;
+      }
     }
   };
 };

@@ -195,23 +195,23 @@
                         }
                         showImagesInWell(imageIds);
                     }
+
+                    var selection = $("td.ui-selected").first();
+                    if (typeof selection !== 'undefined' && selection.length > 0) {
+                        var spwContainer = $("#spwContainer");
+                        var fillSpace = $("#spw");
+                        fillSpace.scrollTop(selection.position().top - (spwContainer.height() / 2) + selection.height() / 2);
+                        fillSpace.scrollLeft(selection.position().left - (spwContainer.width() / 2) + selection.width() / 2);
+                    }
                 });
             {% endif %}
 
             // Need to apply correct thumb size once loaded
             // and scroll to selected well
-            wpv.self.bind('_thumbsLoaded', function(){
-                var selection = $("td.ui-selected").first();
-                if (typeof selection !== 'undefined' && selection.length > 0) {
-                    var spwContainer = $("#spwContainer");
-                    var fillSpace = $("#spw");
-                    fillSpace.scrollTop(selection.position().top - (spwContainer.height()/2) + selection.height()/2);
-                    fillSpace.scrollLeft(selection.position().left - (spwContainer.width()/2) + selection.width()/2);
-                } else {
-                    // sroll to put 1st well top-left
-                    var pos = $("#spw td.well").first().position();
-                    $("#spw").scrollTop(pos.top - 50).scrollLeft(pos.left - 50);
-                }
+            wpv.self.bind('_gridLoaded', function(){
+                // scroll to put 1st well top-left
+                var pos = $("#spw td.well").first().position();
+                $("#spw").scrollTop(pos.top - 50).scrollLeft(pos.left - 50);
             });
 
             // Kick-off loading...
