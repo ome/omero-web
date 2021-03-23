@@ -60,7 +60,7 @@
                     selectUsersFromGroup(gid);
                 });
 
-                var gid = -1;
+                var gid = {{ search_default_group|default:-1 }};
                 $("#searchGroup").val(gid);
                 selectUsersFromGroup(gid);
 
@@ -367,7 +367,7 @@
             <select name="ownedBy" id="searchByGroupMember--1">
                 <option value="-1">All Users</option>
                 {% for user in myColleagues %}}
-                    <option value="{{ user.id }}" {% ifequal user.id ome.user.id %}selected="selected"{% endifequal %}>
+                    <option value="{{ user.id }}" {% ifequal user.id search_default_user|default:ome.user.id %}selected="selected"{% endifequal %}>
                         {{ user.getFullName|truncateafter:"50" }}
                     </option>
                 {% endfor %}
@@ -378,12 +378,12 @@
             <select name="ownedBy" id="searchByGroupMember-{{ grp.id }}">
                 <option value="-1">All Members</option>
                 {% for user in grp.leaders %}}
-                    <option value="{{ user.id }}" {% ifequal user.id ome.user.id %}selected="selected"{% endifequal %}>
+                    <option value="{{ user.id }}" {% ifequal user.id search_default_user|default:ome.user.id %}selected="selected"{% endifequal %}>
                         {{ user.getFullName|truncateafter:"50" }}
                     </option>
                 {% endfor %}
                 {% for user in grp.colleagues %}}
-                    <option value="{{ user.id }}" {% ifequal user.id ome.user.id %}selected="selected"{% endifequal %}>
+                    <option value="{{ user.id }}" {% ifequal user.id search_default_user|default:ome.user.id %}selected="selected"{% endifequal %}>
                         {{ user.getFullName|truncateafter:"50" }}
                     </option>
                 {% endfor %}
