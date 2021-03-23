@@ -2441,15 +2441,16 @@ div.paging input.button_pagination {
 }
 
 #spw table td.ui-selecting {
-    border: 1px dashed #555;
-    padding: 1px;
     background-color: #87ABD2;
 }
 
 #spw table td.ui-selected {
-    border: 1px dashed #555;
-    padding: 1px;
     background-color: #87ABD2;
+}
+
+#spw table td.ui-selected img {
+    box-sizing: border-box;
+    border: solid 3px transparent;
 }
 
 .wellLabel {
