@@ -60,7 +60,18 @@
                 min: 10,
                 value: spw_thumb_size,
                 slide: function(event, ui) {
+                    // find current centre (as ratio of grid width/height)
+                    let $spw = $("#spw");
+                    let $table = $("#spw>table");
+                    let tableW = $spw.width() / 2;
+                    let tableH = $spw.height() / 2;
+                    let cx = ($spw.scrollLeft() + tableW) / $table.width();
+                    let cy = ($spw.scrollTop() + tableH) / $table.height();
+                    // resize
                     wpv.setSpwThumbSize(ui.value);
+                    // scroll to recentre
+                    $spw.scrollLeft((cx * $table.width()) - tableW);
+                    $spw.scrollTop((cx * $table.height()) - tableH);
                 },
                 stop: function(event, ui) {
                     $('body').data('spw_thumb_size', ui.value);
