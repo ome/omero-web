@@ -30,6 +30,7 @@
     
     <h1><a href="{% url 'wamyaccount' %}" style="position:relative; top:-38px; float:right" title="Go Back to User settings">Back to User Settings</a></h1>
 
+
     <div style="width:150px">
         {% if has_photo %}
         <img src="{% url 'wamyphoto' %}" style="max-width:200px; max-height:200px"/>
@@ -38,9 +39,9 @@
         <br/><ul class="errorlist"><li>No avatar set.</li></ul></p>
         {% endif %}
     </div>
-    
+
     <div >
-        <form enctype="multipart/form-data" method="post" action="{% url 'wamanageavatar' ome.eventContext.userId "upload" %}"
+        <form enctype="multipart/form-data" method="post" action="{% url 'wamanageavatar' ome.user_id "upload" %}"
             class="standard_form settings_form" style="position:relative;">{% csrf_token %}
             <p>Upload new picture. Select an image file on your computer (max 200KB):</p>
             
