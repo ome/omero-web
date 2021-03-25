@@ -58,7 +58,7 @@
     $(document).ready(function () { 
         
         {% if edit_mode %}
-        $('#save_thumb').on('click', function() {
+        $('#save_thumb').click(function() {
             var x1 = $('#x1').val();
             var y1 = $('#y1').val();
             var x2 = $('#x2').val();
@@ -76,7 +76,7 @@
     }); 
 
     {% if edit_mode %}
-    $(window).on("load", function () {
+    $(window).load(function () { 
         var dim = {{ photo_size.0.0 }}/4
         var x1 = {{ photo_size.0.0 }}/2-dim
         var x2 = {{ photo_size.0.0 }}/2+dim
