@@ -1102,8 +1102,9 @@ def manage_avatar(request, action=None, conn=None, **kwargs):
                     )
                 )
     elif action == "deletephoto":
-        conn.deleteExperimenterPhoto()
-        return HttpResponseRedirect(reverse("wamyaccount"))
+        if request.method == "POST":
+            conn.deleteExperimenterPhoto()
+            return HttpResponseRedirect(reverse("wamyaccount"))
 
     has_photo = conn.hasExperimenterPhoto()
     context = {"form_file": form_file, "has_photo": has_photo}

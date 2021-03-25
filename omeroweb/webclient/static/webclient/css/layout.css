@@ -2155,7 +2155,8 @@ ul.criteria_right input{
 
 	#avatar {
 		width:30%;
-		float:left;
+        float:left;
+        margin: 40px 20px;
 	}
 	
 		#avatar img {
