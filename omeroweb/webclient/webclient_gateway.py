@@ -57,6 +57,8 @@ from omeroweb.webgateway.templatetags.common_filters import (
     lengthformat,
 )
 
+NSEXPERIMENTERPHOTO = omero.constants.namespaces.NSEXPERIMENTERPHOTO
+
 try:
     import hashlib
 
@@ -815,9 +817,9 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         if pid is not None:
             return pid
 
-    def hasExperimenterPhoto(self, oid=None):
+    def getExperimenterPhotoAnnotation(self, oid=None):
         """
-        Check if File annotation with the namespace:
+        Get File annotation ID with the namespace:
         "openmicroscopy.org/omero/experimenter/photo" (NSEXPERIMENTERPHOTO) is
         linked to the given user ID. If user id not set, owned by the current
         user.
@@ -831,47 +833,43 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         meta = self.getMetadataService()
         try:
             if oid is None:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None, None, None
-                ).get(self.getEventContext().userId, [])
+                oid = self.getEventContext().userId
             else:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None, None
-                ).get(int(oid), [])
-            if len(ann) > 0:
-                return True
-            else:
-                return False
+                oid = int(oid)
+            anns = meta.loadAnnotations("Experimenter", [oid], None, None, None).get(
+                oid, []
+            )
+            anns = [ann for ann in anns if unwrap(ann.ns) == NSEXPERIMENTERPHOTO]
+            if len(anns) > 0:
+                return anns[0]
         except Exception:
             logger.error(traceback.format_exc())
-            return False
+
+    def hasExperimenterPhoto(self, oid=None):
+        """
+        Return True if user has an annotation with experimenter photo namespace
+
+        @param oid      experimenter ID
+        @type oid       Long
+        @return         True or False
+        @rtype          Boolean
+        """
+        return self.getExperimenterPhotoAnnotation(oid) is not None
 
     def getExperimenterPhoto(self, oid=None):
         """
-        Get File annotation with the namespace:
-        "openmicroscopy.org/omero/experimenter/photo" (NSEXPERIMENTERPHOTO)
-        linked to the given user ID. If user id not set, owned by the current
-        user.
+        Get Photo bytes for Experimenter Photo.
 
         @param oid      experimenter ID
         @type oid       Long
         @return         Data from the image.
-        @rtype          String
+        @rtype          Bytes
         """
 
         photo = None
-        meta = self.getMetadataService()
         try:
-            if oid is None:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None, None, None
-                ).get(self.getEventContext().userId, [])
-            else:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None, None
-                ).get(int(oid), [])
-            if len(ann) > 0:
-                ann = ann[0]
+            ann = self.getExperimenterPhotoAnnotation(oid)
+            if ann is not None:
                 store = self.createRawFileStore()
                 try:
                     store.setFileId(ann.file.id.val)
@@ -887,121 +885,11 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             photo = self.getExperimenterDefaultPhoto()
         return photo
 
-    def getExperimenterPhotoSize(self, oid=None):
-        """
-        Get size of File annotation with the namespace:
-        "openmicroscopy.org/omero/experimenter/photo" (NSEXPERIMENTERPHOTO)
-        linked to the given user ID. If user id not set, owned by the current
-        user.
-
-        @param oid      experimenter ID
-        @type oid       Long
-        @return         Tuple including dimention and size of the file
-        @rtype          Tuple
-        """
-
-        photo = None
-        meta = self.getMetadataService()
-        try:
-            if oid is None:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None, None, None
-                ).get(self.getEventContext().userId, [])[0]
-            else:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None, None
-                ).get(int(oid), [])[0]
-            store = self.createRawFileStore()
-            try:
-                store.setFileId(ann.file.id.val)
-                photo = store.read(0, int(ann.file.size.val))
-            finally:
-                store.close()
-            try:
-                im = Image.open(BytesIO(photo))
-            except Exception:
-                logger.error(traceback.format_exc())
-                return None
-            else:
-                return (im.size, ann.file.size.val)
-        except Exception:
-            return None
-
     def deleteExperimenterPhoto(self, oid=None):
         ann = None
-        meta = self.getMetadataService()
-        try:
-            if oid is None:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None, None, None
-                ).get(self.getEventContext().userId, [])[0]
-            else:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None, None
-                ).get(int(oid), [])[0]
-        except Exception:
-            logger.error(traceback.format_exc())
-            raise IOError("Photo does not exist.")
-        else:
-            exp = self.getUser()
-            links = exp._getAnnotationLinks()
-            # there should be only one ExperimenterAnnotationLink
-            # but if there is more then one all of them should be deleted.
-            linkIds = [link.id.val for link in links]
-            self.deleteObjects("ExperimenterAnnotationLink", linkIds, wait=True)
-            # No error handling?
-            self.deleteObject(ann)
-
-    def cropExperimenterPhoto(self, box, oid=None):
-        """
-        Crop File annotation with the namespace:
-        "openmicroscopy.org/omero/experimenter/photo" (NSEXPERIMENTERPHOTO)
-        linked to the given user ID. If user id not set, owned by the current
-        user.
-        New dimensions are defined by squer positions box = (x1,y1,x2,y2)
-
-        @param box      tuple of new square positions
-        @type box       Tuple
-        @param oid      experimenter ID
-        @type oid       Long
-        """
-        # TODO: crop method could be moved to the server side
-
-        photo = None
-        meta = self.getMetadataService()
-        ann = None
-        try:
-            if oid is None:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [self.getEventContext().userId], None, None, None
-                ).get(self.getEventContext().userId, [])[0]
-            else:
-                ann = meta.loadAnnotations(
-                    "Experimenter", [int(oid)], None, None, None
-                ).get(int(oid), [])[0]
-            store = self.createRawFileStore()
-            try:
-                store.setFileId(ann.file.id.val)
-                photo = store.read(0, int(ann.file.size.val))
-            finally:
-                store.close()
-        except Exception:
-            logger.error(traceback.format_exc())
-            raise IOError("Photo does not exist.")
-        else:
-            region = None
-            try:
-                im = Image.open(BytesIO(photo))
-                region = im.crop(box)
-            except IOError:
-                logger.error(traceback.format_exc())
-                raise IOError("Cannot open that photo.")
-            else:
-                imdata = BytesIO()
-                region.save(imdata, format=im.format)
-                self.uploadMyUserPhoto(
-                    ann.file.name.val, ann.file.mimetype.val, imdata.getvalue()
-                )
+        ann = self.getExperimenterPhotoAnnotation(oid)
+        if ann is not None:
+            self.deleteObjects("Annotation", [ann.id.val], wait=True)
 
     def getExperimenterDefaultPhoto(self):
         """
