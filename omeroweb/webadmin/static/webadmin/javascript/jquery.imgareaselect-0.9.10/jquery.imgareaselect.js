@@ -197,7 +197,7 @@ $.imgAreaSelect = function (img, options) {
 
         if (resetKeyPress !== false) {
             if ($.imgAreaSelect.onKeyPress != docKeyPress)
-                $(document).off($.imgAreaSelect.keyPress,
+                $(document).unbind($.imgAreaSelect.keyPress,
                     $.imgAreaSelect.onKeyPress);
 
             if (options.keys)
@@ -258,8 +258,8 @@ $.imgAreaSelect = function (img, options) {
         if (options.autoHide || selection.width * selection.height == 0)
             hide($box.add($outer), function () { $(this).hide(); });
 
-        $(document).off('mousemove', selectingMouseMove);
-        $box.on('mousemove', areaMouseMove);
+        $(document).unbind('mousemove', selectingMouseMove);
+        $box.mousemove(areaMouseMove);
 
         options.onSelectEnd(img, getSelection());
     }
@@ -275,26 +275,26 @@ $.imgAreaSelect = function (img, options) {
             x1 = viewX(selection[/w/.test(resize) ? 'x2' : 'x1']);
             y1 = viewY(selection[/n/.test(resize) ? 'y2' : 'y1']);
 
-            $(document).on('mousemove', selectingMouseMove)
+            $(document).mousemove(selectingMouseMove)
                 .one('mouseup', docMouseUp);
-            $box.off('mousemove', areaMouseMove);
+            $box.unbind('mousemove', areaMouseMove);
         }
         else if (options.movable) {
             startX = left + selection.x1 - evX(event);
             startY = top + selection.y1 - evY(event);
 
-            $box.off('mousemove', areaMouseMove);
+            $box.unbind('mousemove', areaMouseMove);
 
-            $(document).on('mousemove', movingMouseMove)
+            $(document).mousemove(movingMouseMove)
                 .one('mouseup', function () {
                     options.onSelectEnd(img, getSelection());
 
-                    $(document).off('mousemove', movingMouseMove);
-                    $box.on('mousemove', areaMouseMove);
+                    $(document).unbind('mousemove', movingMouseMove);
+                    $box.mousemove(areaMouseMove);
                 });
         }
         else
-            $img.on('mousedown', event);
+            $img.mousedown(event);
 
         return false;
     }
@@ -398,7 +398,7 @@ $.imgAreaSelect = function (img, options) {
     }
 
     function startSelection() {
-        $(document).off('mousemove', startSelection);
+        $(document).unbind('mousemove', startSelection);
         adjust();
 
         x2 = x1;
@@ -413,16 +413,16 @@ $.imgAreaSelect = function (img, options) {
 
         shown = true;
 
-        $(document).off('mouseup', cancelSelection)
-            .on('mousemove', selectingMouseMove).one('mouseup', docMouseUp);
-        $box.off('mousemove', areaMouseMove);
+        $(document).unbind('mouseup', cancelSelection)
+            .mousemove(selectingMouseMove).one('mouseup', docMouseUp);
+        $box.unbind('mousemove', areaMouseMove);
 
         options.onSelectStart(img, getSelection());
     }
 
     function cancelSelection() {
-        $(document).off('mousemove', startSelection)
-            .off('mouseup', cancelSelection);
+        $(document).unbind('mousemove', startSelection)
+            .unbind('mouseup', cancelSelection);
         hide($box.add($outer));
 
         setSelection(selX(x1), selY(y1), selX(x1), selY(y1));
@@ -440,7 +440,7 @@ $.imgAreaSelect = function (img, options) {
         startX = x1 = evX(event);
         startY = y1 = evY(event);
 
-        $(document).on('mousemove', startSelection).on('mouseup', cancelSelection);
+        $(document).mousemove(startSelection).mouseup(cancelSelection);
 
         return false;
     }
@@ -624,22 +624,22 @@ $.imgAreaSelect = function (img, options) {
 
         aspectRatio = (d = (options.aspectRatio || '').split(/:/))[0] / d[1];
 
-        $img.add($outer).off('mousedown', imgMouseDown);
+        $img.add($outer).unbind('mousedown', imgMouseDown);
 
         if (options.disable || options.enable === false) {
-            $box.off('mousemove', areaMouseMove).off('mousedown', areaMouseDown);
-            $(window).off('resize', windowResize);
+            $box.unbind('mousemove', areaMouseMove).unbind('mousedown', areaMouseDown);
+            $(window).unbind('resize', windowResize);
         }
         else {
             if (options.enable || options.disable === false) {
                 if (options.resizable || options.movable)
-                    $box.on('mousemove', areaMouseMove).on('mousedown', areaMouseDown);
+                    $box.mousemove(areaMouseMove).mousedown(areaMouseDown);
 
-                $(window).on('resize', windowResize);
+                $(window).resize(windowResize);
             }
 
             if (!options.persistent)
-                $img.add($outer).on('mousedown', imgMouseDown);
+                $img.add($outer).mousedown(imgMouseDown);
         }
 
         options.enable = options.disable = undefined;
