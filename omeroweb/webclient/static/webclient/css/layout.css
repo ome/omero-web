@@ -2449,8 +2449,45 @@ div.paging input.button_pagination {
 }
 
 #spw table td.ui-selected img {
-    box-sizing: border-box;
     border: solid 3px transparent;
+}
+
+.wellSize {
+    position: relative;
+    width: 96px;
+}
+
+.wellSize img {
+    overflow: hidden;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-sizing: border-box;
+}
+
+.wellSize::before {
+    height: 0px;
+    content: "";
+    display: block;
+    /* padding-bottom: 75%; This aspectratio set in ome.plateview.js */
+    box-sizing: border-box;
 }
 
 .wellLabel {
@@ -2491,7 +2528,7 @@ div.paging input.button_pagination {
 .wellImages {
     border-top: solid 1px #bbb;
 }
-.wellImages img {
+.wellImages li {
     margin: 5px;
     cursor: pointer;
 }
@@ -2503,6 +2540,9 @@ div.paging input.button_pagination {
 }
 #wellImages .ui-selected {
     background-color: #87ABD2;
+}
+#wellImages .ui-selected img{
+    border: solid transparent 4px;
 }
 .wellImagesLabel {
     width: 30px;

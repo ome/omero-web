@@ -116,7 +116,7 @@
                 event.preventDefault();
                 // Update 'ui-selected' on images, handling shift-click etc
                 var $a = $(event.target).parent();
-                OME.handleClickSelection(event, $a, "#wellImages a");
+                OME.handleClickSelection(event, $a, "#wellImages .wellSize");
                 triggerWellImagesSelection();
                 return false;
             });
@@ -192,7 +192,7 @@
                         }
                     }
                     if (selected_wells.length > 0) {
-                        OME.handleClickSelection(undefined, selected_wells.children("img"), "#spw td.well img");
+                        OME.handleClickSelection(undefined, $("img", selected_wells), "#spw td.well img");
                         $selected = $('td.ui-selected', wpv.self);
                         syncTreeSelection($selected, {{ index }}, '{{ manager.getPermsCss }}');
                         var show = OME.getURLParameter('show');
@@ -277,7 +277,7 @@
                             }
                             html += '<li ' + cls + ' title="' + w.name + '" data-imageId="' + w.id + '">';
                             html += '<a href="{% url 'webindex' %}img_detail/' + w.id + '/">';
-                            html += '<img />';
+                            html += '<div class="wellSize"><img /></div>';
                             html += '</a></li>';
                             if (!isNaN(imagesPerRow) && (idx+1)%imagesPerRow === 0) {
                                 html += '<br>';

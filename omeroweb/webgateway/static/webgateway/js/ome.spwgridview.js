@@ -172,7 +172,7 @@ $(function(){
         if (event && event.shiftKey ) {
             if ( primaryIndex === -1 ) {
                 primaryIndex = selIndex;
-                $clickedImage.parent().addClass("ui-selected");
+                $clickedImage.parent().parent().addClass("ui-selected");
                 return;
             }
             
@@ -180,7 +180,7 @@ $(function(){
             var start = Math.min(primaryIndex,selIndex);
             var end = Math.max(primaryIndex,selIndex);
             
-            thumbs.slice(start, end+1).parent().addClass("ui-selected");
+            thumbs.slice(start, end + 1).parent().parent().addClass("ui-selected");
             
         }
         else if (event && event.metaKey) {
@@ -188,15 +188,15 @@ $(function(){
                 primaryIndex = selIndex;
             }
             
-            if($clickedImage.parent().hasClass("ui-selected")) {
-                $clickedImage.parent().removeClass("ui-selected");
+            if ($clickedImage.parent().parent().hasClass("ui-selected")) {
+                $clickedImage.parent().parent().removeClass("ui-selected");
             } else {
-                $clickedImage.parent().addClass("ui-selected");
+                $clickedImage.parent().parent().addClass("ui-selected");
             }
         }
         else {
-            thumbs.parent().removeClass("ui-selected");
-            $clickedImage.parent().addClass("ui-selected");
+            thumbs.parent().parent().removeClass("ui-selected");
+            $clickedImage.parent().parent().addClass("ui-selected");
             primaryIndex = selIndex;
         }
     };
