@@ -116,9 +116,6 @@ jQuery._WeblitzPlateview = function (container, options) {
   var _this = this;
   var thisid = this.self.attr('id');
   var spacer_gif_src = opts.staticurl + 'img/spacer.gif';
-  var thumbsLoaded = false;
-  var thumbAspectRatio;
-  var thumbStyles = [];
 
   var _reset = function (result, data) {
     _this.self.html("");
@@ -168,11 +165,6 @@ jQuery._WeblitzPlateview = function (container, options) {
       html += '</tr>';
     }
     tbody.append(html);
-
-    thumbStyles = [];
-    $(".placeholder img, img.loading", table).each(function(index, img){
-      thumbStyles.push(img.style);
-    });
 
     _this.self.trigger('_gridLoaded');
 
