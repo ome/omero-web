@@ -27,9 +27,6 @@
 {{ block.super }}
 <div class="one_column_content">
     <h1>{% trans "Change user photo" %}</h1>
-    
-    <h1><a href="{% url 'wamyaccount' %}" style="position:relative; top:-38px; float:right" title="Go Back to User settings">Back to User Settings</a></h1>
-
 
     <div style="width:150px">
         {% if has_photo %}
@@ -50,7 +47,11 @@
                 {{ field }}{{ field.help_text|safe }}
                 <br />
             {% endfor %}
-             <input type="submit" style="position: absolute; right: 20px; bottom: 20px"{% trans 'Upload' %}" />
+            <input type="submit" style="float:none" value="{% trans 'Upload' %}" />
+
+            <a style="position: absolute; right: 20px; bottom: 20px; color: inherit" class="submit_btn" href="{% url 'wamyaccount' %}">
+                <span>Done</span>
+            </a>
         </form>
     </div>
 </div>
