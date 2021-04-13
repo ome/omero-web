@@ -3064,7 +3064,7 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
                 for col in cols
             ],
             "totalCount": rows,
-            "attributes": user_metadata,
+            "user_metadata": user_metadata,
         }
         return rsp_data
     finally:
