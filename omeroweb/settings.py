@@ -1009,14 +1009,14 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.plate_layout": [
         "PLATE_LAYOUT",
-        "trim",
+        "expand",
         str,
         (
             "If 'shrink', the plate will not display rows and columns "
             "before the first Well, or after the last Well. "
-            "If 'trim' (default), the plate will only show Wells "
+            "If 'trim', the plate will only show Wells "
             "from A1 to the last Well. "
-            "If 'expand', the plate will expand from A1 to a "
+            "If 'expand' (default), the plate will expand from A1 to a "
             "multiple of 12 columns x 8 rows after the last Well."
         ),
     ],
