@@ -332,7 +332,7 @@ class WebclientLoginView(LoginView):
 
 @login_required(ignore_login_fail=True)
 def keepalive_ping(request, conn=None, **kwargs):
-    """ Keeps the OMERO session alive by pinging the server """
+    """Keeps the OMERO session alive by pinging the server"""
 
     # login_required handles ping, timeout etc, so we don't need to do
     # anything else
@@ -895,7 +895,7 @@ def api_plate_acquisition_list(request, conn=None, **kwargs):
 
 
 def get_object_links(conn, parent_type, parent_id, child_type, child_ids):
-    """ This is just used internally by api_link DELETE below """
+    """This is just used internally by api_link DELETE below"""
     if parent_type == "orphaned":
         return None
     link_type = None
@@ -948,7 +948,7 @@ def get_object_links(conn, parent_type, parent_id, child_type, child_ids):
 
 
 def create_link(parent_type, parent_id, child_type, child_id):
-    """ This is just used internally by api_link DELETE below """
+    """This is just used internally by api_link DELETE below"""
     if parent_type == "experimenter":
         if child_type == "dataset" or child_type == "plate":
             # This is actually not a link that needs creating, this
@@ -1528,7 +1528,7 @@ def load_chgrp_groups(request, conn=None, **kwargs):
 @login_required()
 @render_response()
 def load_chgrp_target(request, group_id, target_type, conn=None, **kwargs):
-    """ Loads a tree for user to pick target Project, Dataset or Screen """
+    """Loads a tree for user to pick target Project, Dataset or Screen"""
 
     # filter by group (not switching group)
     conn.SERVICE_OPTS.setOmeroGroup(int(group_id))
@@ -3265,7 +3265,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
 
 @login_required(doConnectionCleanup=False)
 def download_annotation(request, annId, conn=None, **kwargs):
-    """ Returns the file annotation as an http response for download """
+    """Returns the file annotation as an http response for download"""
     ann = conn.getObject("FileAnnotation", annId)
     if ann is None:
         return handlerInternalError(
@@ -3284,7 +3284,7 @@ def download_annotation(request, annId, conn=None, **kwargs):
 
 @login_required()
 def download_orig_metadata(request, imageId, conn=None, **kwargs):
-    """ Downloads the 'Original Metadata' as a text file """
+    """Downloads the 'Original Metadata' as a text file"""
 
     image = conn.getObject("Image", imageId)
     if image is None:
@@ -3426,7 +3426,7 @@ def load_calendar(request, year=None, month=None, conn=None, **kwargs):
 @login_required(setGroupContext=True)
 @render_response()
 def load_history(request, year, month, day, conn=None, **kwargs):
-    """ The data for a particular date that is loaded into the center panel """
+    """The data for a particular date that is loaded into the center panel"""
 
     if year is None or month is None or day is None:
         raise Http404("Year, month, and day are required")
@@ -3914,7 +3914,7 @@ def activities_update(request, action, **kwargs):
 
 @login_required()
 def avatar(request, oid=None, conn=None, **kwargs):
-    """ Returns the experimenter's photo """
+    """Returns the experimenter's photo"""
     photo = conn.getExperimenterPhoto(oid)
     return HttpResponse(photo, content_type="image/jpeg")
 
@@ -3925,7 +3925,7 @@ def avatar(request, oid=None, conn=None, **kwargs):
 
 @login_required()
 def image_viewer(request, iid, share_id=None, **kwargs):
-    """ Delegates to webgateway, using share connection if appropriate """
+    """Delegates to webgateway, using share connection if appropriate"""
     kwargs["viewport_server"] = (
         share_id is not None and reverse("webindex") + share_id or reverse("webindex")
     )

@@ -681,7 +681,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         return dsid
 
     def createProject(self, name, description=None):
-        """ Creates new Project and returns ID """
+        """Creates new Project and returns ID"""
         warnings.warn(
             "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
         )
@@ -692,7 +692,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         return self.saveAndReturnId(pr)
 
     def createScreen(self, name, description=None):
-        """ Creates new Screen and returns ID """
+        """Creates new Screen and returns ID"""
         warnings.warn(
             "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
         )
@@ -703,7 +703,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         return self.saveAndReturnId(sc)
 
     def createTag(self, name, description=None):
-        """ Creates new Tag and returns ID """
+        """Creates new Tag and returns ID"""
         warnings.warn(
             "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
         )
@@ -714,7 +714,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         return self.saveAndReturnId(tag)
 
     def createTagset(self, name, description=None):
-        """ Creates new Tag Set and returns ID """
+        """Creates new Tag Set and returns ID"""
         warnings.warn(
             "Deprecated as of OMERO 5.4.0. Use createContainer()", DeprecationWarning
         )
@@ -2496,7 +2496,7 @@ class ExperimenterGroupWrapper(
                 yield ExperimenterWrapper(self._conn, gem.child)
 
     def isOwner(self):
-        """ Returns True if current user is Owner of this group """
+        """Returns True if current user is Owner of this group"""
         return self.getId() in self._conn.getEventContext().leaderOfGroups
 
     def isLocked(self):
