@@ -319,7 +319,7 @@ class TagsAnnotationForm(BaseAnnotationForm):
 
 
 class NewTagsAnnotationForm(forms.Form):
-    """ Helper form for new tags """
+    """Helper form for new tags"""
 
     tag = forms.CharField(required=True, widget=forms.HiddenInput)
     description = forms.CharField(required=False, widget=forms.HiddenInput)

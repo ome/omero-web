@@ -106,7 +106,7 @@ class BaseSearch(BaseController):
                 raise ValueError(msg)
 
         def doSearch(searchType):
-            """ E.g. searchType is 'images' """
+            """E.g. searchType is 'images'"""
             objType = searchType[0:-1]  # remove 's'
 
             obj_list = list(
