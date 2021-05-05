@@ -1,3 +1,10 @@
+5.9.1 (March 2021)
+------------------
+
+## Bug fixes
+
+- Fix regression introduced in 5.9.0 ([#278](https://github.com/ome/omero-web/pull/278))
+
 5.9.0 (March 2021)
 ------------------
 
@@ -21,6 +28,10 @@
 - Fix API ?childCount=true when zero objects found ([#249](https://github.com/ome/omero-web/pull/249))
 - Fix partial loading of annotations ([#256](https://github.com/ome/omero-web/pull/256))
 - Fix ignored limit in webgateway/table endpoint ([#268](https://github.com/ome/omero-web/pull/268))
+
+- Security vulnerability fixes for
+  [2021-SV1](https://www.openmicroscopy.org/security/advisories/2021-SV1),
+  [2021-SV2](https://www.openmicroscopy.org/security/advisories/2021-SV2)
 
 5.8.1 (September 2020)
 ----------------------

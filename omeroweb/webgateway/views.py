@@ -120,7 +120,7 @@ except ImportError:
 
 
 def index(request):
-    """ /webgateway/ index placeholder """
+    """/webgateway/ index placeholder"""
     return HttpResponse("Welcome to webgateway")
 
 
@@ -147,7 +147,7 @@ class UserProxy(object):
         self.loggedIn = False
 
     def logIn(self):
-        """ Sets the loggedIn Flag to True """
+        """Sets the loggedIn Flag to True"""
 
         self.loggedIn = True
 
@@ -757,7 +757,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
 
 @login_required()
 def render_shape_mask(request, shapeId, conn=None, **kwargs):
-    """ Returns mask as a png (supports transparency) """
+    """Returns mask as a png (supports transparency)"""
 
     if not numpyInstalled:
         raise NotImplementedError("numpy not installed")
@@ -1600,7 +1600,7 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
     can be overridden with request param e.g. ?layout=shrink.
     Use "expand" to expand to multiple of 8 x 12 grid
     Or "shrink" to remove rows/cols before first Well
-    Or "trim" (default) to neither expand nor shrink
+    Or "trim" to neither expand nor shrink
     """
     try:
         field = long(field or 0)

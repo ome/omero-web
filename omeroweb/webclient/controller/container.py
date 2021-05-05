@@ -212,11 +212,11 @@ class BaseContainer(BaseController):
         return obj is not None and obj.canEdit() or None
 
     def getPermsCss(self):
-        """ Shortcut to get permissions flags, E.g. for css """
+        """Shortcut to get permissions flags, E.g. for css"""
         return self._get_object().getPermsCss()
 
     def getNumberOfFields(self):
-        """ Applies to Plates (all fields) or PlateAcquisitions"""
+        """Applies to Plates (all fields) or PlateAcquisitions"""
         if self.plate is not None:
             return self.plate.getNumberOfFields()
         elif self.acquisition:
@@ -224,7 +224,7 @@ class BaseContainer(BaseController):
             return p.getNumberOfFields(self.acquisition.getId())
 
     def getPlateId(self):
-        """ Used by templates that display Plates or PlateAcquisitions """
+        """Used by templates that display Plates or PlateAcquisitions"""
         if self.plate is not None:
             return self.plate.getId()
         elif self.acquisition:

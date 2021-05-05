@@ -161,19 +161,19 @@ urlpatterns = [
     ),
     url(
         r"^(?:(?P<share_id>[0-9]+)/)?render_birds_eye_view/"
-        r"(?P<iid>[^/]+)/(?:(?P<size>[^/]+)/)?$",
+        r"(?P<iid>[0-9]+)/(?:(?P<size>[0-9]+)/)?$",
         webgateway.render_birds_eye_view,
         name="web_render_birds_eye_view",
     ),
     url(
-        r"^(?:(?P<share_id>[0-9]+)/)?render_image/(?P<iid>[^/]+)/"
-        r"(?:(?P<z>[^/]+)/)?(?:(?P<t>[^/]+)/)?$",
+        r"^(?:(?P<share_id>[0-9]+)/)?render_image/(?P<iid>[0-9]+)/"
+        r"(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$",
         webgateway.render_image,
         name="web_render_image",
     ),
     url(
         r"^(?:(?P<share_id>[0-9]+)/)?render_image_download/"
-        r"(?P<iid>[^/]+)/(?:(?P<z>[^/]+)/)?(?:(?P<t>[^/]+)/)?$",
+        r"(?P<iid>[0-9]+)/(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$",
         webgateway.render_image,
         {"download": True},
         name="web_render_image_download",
@@ -189,25 +189,25 @@ urlpatterns = [
         name="web_imageData_json",
     ),
     url(
-        r"^(?:(?P<share_id>[0-9]+)/)?render_row_plot/(?P<iid>[^/]+)/"
-        r"(?P<z>[^/]+)/(?P<t>[^/]+)/(?P<y>[^/]+)/(?:(?P<w>[^/]+)/)?$",
+        r"^(?:(?P<share_id>[0-9]+)/)?render_row_plot/(?P<iid>[0-9]+)/"
+        r"(?P<z>[0-9]+)/(?P<t>[0-9]+)/(?P<y>[0-9]+)/(?:(?P<w>[0-9]+)/)?$",
         webgateway.render_row_plot,
         name="web_render_row_plot",
     ),
     url(
-        r"^(?:(?P<share_id>[0-9]+)/)?render_col_plot/(?P<iid>[^/]+)/"
-        r"(?P<z>[^/]+)/(?P<t>[^/]+)/(?P<x>[^/]+)/(?:(?P<w>[^/]+)/)?$",
+        r"^(?:(?P<share_id>[0-9]+)/)?render_col_plot/(?P<iid>[0-9]+)/"
+        r"(?P<z>[0-9]+)/(?P<t>[0-9]+)/(?P<x>[0-9]+)/(?:(?P<w>[0-9]+)/)?$",
         webgateway.render_col_plot,
         name="web_render_col_plot",
     ),
     url(
         r"^(?:(?P<share_id>[0-9]+)/)?render_split_channel/"
-        r"(?P<iid>[^/]+)/(?P<z>[^/]+)/(?P<t>[^/]+)/$",
+        r"(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$",
         webgateway.render_split_channel,
         name="web_render_split_channel",
     ),
     url(
-        r"^saveImgRDef/(?P<iid>[^/]+)/$",
+        r"^saveImgRDef/(?P<iid>[0-9]+)/$",
         webgateway.save_image_rdef_json,
         name="web_save_image_rdef_json",
     ),

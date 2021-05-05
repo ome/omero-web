@@ -1151,8 +1151,8 @@ $(function() {
 
                 var userId = WEBCLIENT.active_user.id,
                     // admin may be viewing a Group that they are not a member of
-                    memberOfGroup = WEBCLIENT.eventContext.memberOfGroups.indexOf(WEBCLIENT.active_group_id) > -1,
-                    writeOwned = WEBCLIENT.eventContext.adminPrivileges.indexOf("WriteOwned") > -1,
+                    memberOfGroup = WEBCLIENT.member_of_groups.indexOf(WEBCLIENT.active_group_id) > -1,
+                    writeOwned = WEBCLIENT.current_admin_privileges.indexOf("WriteOwned") > -1,
                     allMembers = userId === -1,
                     // canCreate if looking at your own data or 'All Members' OR User's data && writeOwned
                     canCreate = (userId === WEBCLIENT.USER.id || (allMembers && memberOfGroup) ||
