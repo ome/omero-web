@@ -409,17 +409,11 @@
                                 loadBulkAnnotations(projectQuery, query, function(data) {
                                     if (data && data.id) {
                                         showBulkAnnTooltip(data);
-                                    } else {
-                                        // If query1 didn't work, try query2 on the same OMERO.table
-                                        loadBulkAnnotations(projectQuery, query2, showBulkAnnTooltip);
                                     }
                                 });
                                 loadBulkAnnotations(datasetQuery, query, function(data) {
                                     if (data && data.id) {
                                         showBulkAnnTooltip(data);
-                                    } else {
-                                        // If query1 didn't work, try query2 on the same OMERO.table
-                                        loadBulkAnnotations(datasetQuery, query2, showBulkAnnTooltip);
                                     }
                                 });
                             {% endif %}
