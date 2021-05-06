@@ -241,12 +241,12 @@
            
            <div id="avatar">
                <img src="{% url 'wamyphoto' %}" class="imgzoom"/>                 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.user_id %}">
+               <a class="btn btn_text silver" href="{% url 'wamanageavatar' %}">
                    <span>Change</span>
                </a> 
 
                {% if myaccount.hasAvatar %} 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.user_id "deletephoto" %}">
+               <a class="btn btn_text silver" href="{% url 'wamanageavatar' "deletephoto" %}">
                    <span>Delete</span>
                </a>
                {% endif %}

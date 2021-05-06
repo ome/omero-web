@@ -81,7 +81,7 @@ urlpatterns = [
         name="waloaddrivespace_user",
     ),
     url(
-        r"^change_avatar/(?P<eid>[0-9]+)/(?:(?P<action>[a-z]+)/)?$",
+        r"^change_avatar/(?:(?P<action>[a-z]+)/)?$",
         views.manage_avatar,
         name="wamanageavatar",
     ),
