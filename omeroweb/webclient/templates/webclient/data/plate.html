@@ -221,8 +221,14 @@
             // and scroll to selected well
             wpv.self.bind('_gridLoaded', function(){
                 // scroll to put 1st well top-left
-                var pos = $("#spw td.well").first().position();
-                $("#spw").scrollTop(pos.top - 50).scrollLeft(pos.left - 50);
+                var firstPos = $("#spw td.well").first().position();
+                var wellLeft = firstPos.left;
+                // check other rows for left-most Well
+                $("#spw td.well").each(function(count, td){
+                    var firstWellLeft = $(td).first().position().left;
+                    wellLeft = Math.min(wellLeft, firstWellLeft);
+                });
+                $("#spw").scrollTop(firstPos.top - 50).scrollLeft(wellLeft - 50);
             });
 
             // Kick-off loading...
