@@ -2934,6 +2934,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
 
     try:
         cols = t.getHeaders()
+        column_names = [col.name for col in cols]
         col_indices = range(len(cols))
         if col_names:
             enumerated_columns = (
@@ -2972,7 +2973,12 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         else:
             match = re.match(r"^(\w+)-(\d+)", query)
             if match:
-                query = "(%s==%s)" % (match.group(1), match.group(2))
+                c_name = match.group(1)
+                if c_name in ("Image", "Roi", "Plate", "Well"):
+                    # older tables may have column named e.g. 'image'
+                    if c_name not in column_names and c_name.lower() in column_names:
+                        c_name = c_name.lower()
+                query = "(%s==%s)" % (c_name, match.group(2))
             try:
                 logger.info(query)
                 hits = t.getWhereList(query, None, 0, rows, 1)
@@ -3001,7 +3007,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         rsp_data = {
             "data": {
                 "column_types": [col.__class__.__name__ for col in cols],
-                "columns": [col.name for col in cols],
+                "columns": column_names,
             },
             "meta": {
                 "rowCount": rows,
