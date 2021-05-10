@@ -209,6 +209,12 @@
               });
             });
 
+            // Toggle 'Confirm Delete' button visibility
+            $("#delete_photo").click(function(event){
+                event.preventDefault();
+                $("#delete_photo_submit").toggle();
+            });
+
         });
         
     </script>
@@ -233,26 +239,30 @@
      <!-- Personal Settings -->
     <div id="personal_settings" class="settings_content">
 
-
-       <form class="standard_form settings_form" action="{% url 'wamyaccount' "save" %}" method="POST">{% csrf_token %}
-
            <p>{% trans "Fields marked in red are mandatory." %}</p>
            <br/>
            
            <div id="avatar">
-               <img src="{% url 'wamyphoto' %}" class="imgzoom"/>                 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' %}">
-                   <span>Change</span>
-               </a> 
+                <img src="{% url 'wamyphoto' %}" class="imgzoom"/>
 
-               {% if myaccount.hasAvatar %} 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' "deletephoto" %}">
-                   <span>Delete</span>
-               </a>
-               {% endif %}
+                <form class="standard_form settings_form" action="{% url 'wamanageavatar' 'deletephoto' %}"
+                    style="padding: 0; margin: 0; border: none" method="POST">
+                    <a class="btn btn_text silver" href="{% url 'wamanageavatar' %}">
+                        <span>Change</span>
+                    </a> 
+
+                {% if hasAvatar %}
+                    {% csrf_token %}
+                    <a id="delete_photo" class="btn btn_text silver" href="#">
+                        <span>Delete Photo</span>
+                    </a>
+                    <input id="delete_photo_submit" type="submit" style="margin: 10px; display: none" value="Confirm Delete" />
+                {% endif %}
+                </form>
             </div>
 
 
+        <form class="standard_form settings_form" action="{% url 'wamyaccount' "save" %}" method="POST">{% csrf_token %}
 
            <div id="personal_details">
 
