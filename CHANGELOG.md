@@ -1,3 +1,20 @@
+5.9.2 (May 2021)
+----------------
+
+## Bug fixes
+
+- Fix invalid Z/T values in webclient render_image URL ([#272](https://github.com/ome/omero-web/pull/272))
+- Active group switch handles invalid group ([#273](https://github.com/ome/omero-web/pull/273))
+- Fix delete of user's photo ([#274](https://github.com/ome/omero-web/pull/274))
+- Don't log missing script params as Error ([#275](https://github.com/ome/omero-web/pull/275))
+- Handle ?show=object-id in invalid group ([#276](https://github.com/ome/omero-web/pull/276))
+- OMERO.table query case insensitive ([#277](https://github.com/ome/omero-web/pull/277))
+- Fix changes that cause bugs in OMERO.mapr ([#282](https://github.com/ome/omero-web/pull/282))
+
+## New features
+- Add metadata support to webgateway table endpoint ([#283](https://github.com/ome/omero-web/pull/283))
+
+
 5.9.1 (March 2021)
 ------------------
 
