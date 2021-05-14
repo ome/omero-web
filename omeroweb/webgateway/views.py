@@ -3048,7 +3048,18 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
     try:
         cols = t.getHeaders()
         rows = t.getNumberOfRows()
+        allmeta = t.getAllMetadata()
 
+        user_metadata = {}
+        for k in allmeta:
+            if allmeta[k].__class__ == omero.rtypes.RStringI:
+                try:
+                    val = json.loads(allmeta[k].val)
+                    user_metadata[k] = val
+                except json.decoder.JSONDecodeError:
+                    user_metadata[k] = allmeta[k].val
+            else:
+                user_metadata[k] = allmeta[k].val
         rsp_data = {
             "columns": [
                 {
@@ -3059,6 +3070,7 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
                 for col in cols
             ],
             "totalCount": rows,
+            "user_metadata": user_metadata,
         }
         return rsp_data
     finally:
