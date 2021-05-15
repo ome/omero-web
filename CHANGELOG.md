@@ -10,6 +10,7 @@
 - Handle ?show=object-id in invalid group ([#276](https://github.com/ome/omero-web/pull/276))
 - OMERO.table query case insensitive ([#277](https://github.com/ome/omero-web/pull/277))
 - Fix changes that cause bugs in OMERO.mapr ([#282](https://github.com/ome/omero-web/pull/282))
+- Fix User Settings page when in 'All Members' context ([#285](https://github.com/ome/omero-web/pull/285))
 
 ## New features
 - Add metadata support to webgateway table endpoint ([#283](https://github.com/ome/omero-web/pull/283))
