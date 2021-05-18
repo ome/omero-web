@@ -245,7 +245,7 @@
            <div id="avatar">
                 <img src="{% url 'wamyphoto' %}" class="imgzoom"/>
 
-                <form class="standard_form settings_form" action="{% url 'wamanageavatar' 'deletephoto' %}"
+                <form class="standard_form settings_form" action="{% url 'wamanageavatar' action='deletephoto' %}"
                     style="padding: 0; margin: 0; border: none" method="POST">
                     <a class="btn btn_text silver" href="{% url 'wamanageavatar' %}">
                         <span>Change</span>
