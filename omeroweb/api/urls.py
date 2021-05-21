@@ -324,6 +324,15 @@ api_image_rois = url(
 GET ROIs that belong to an Image, using omero-marshal to generate json
 """
 
+api_shapes = url(
+    r"^v(?P<api_version>%s)/m/shapes/$" % versions,
+    views.ShapesView.as_view(),
+    name="api_shapes",
+)
+"""
+GET all Shapes, using omero-marshal to generate json
+"""
+
 api_shape = url(
     r"^v(?P<api_version>%s)/m/shapes/(?P<object_id>[0-9]+)/$" % versions,
     views.ShapeView.as_view(),
@@ -424,6 +433,7 @@ urlpatterns = [
     api_rois,
     api_roi,
     api_image_rois,
+    api_shapes,
     api_shape,
     api_experimenters,
     api_experimenter,

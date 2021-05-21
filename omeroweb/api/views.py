@@ -755,6 +755,12 @@ class RoisView(ObjectsView):
         return opts
 
 
+class ShapesView(ObjectsView):
+    """Handles GET for /shapes/ to list available Shapes."""
+
+    OMERO_TYPE = "Shape"
+
+
 class ExperimentersView(ObjectsView):
     """Handles GET for /experimenters/ to list Experimenters."""
 
