@@ -165,12 +165,14 @@ class ObjectView(ApiView):
         query, params, wrapper = conn.buildQuery(
             self.OMERO_TYPE, [object_id], opts=opts
         )
-        result = conn.getQueryService().findByQuery(query, params, conn.SERVICE_OPTS)
+        self.result = conn.getQueryService().findByQuery(
+            query, params, conn.SERVICE_OPTS
+        )
 
-        if result is None:
+        if self.result is None:
             raise NotFoundError("%s %s not found" % (self.OMERO_TYPE, object_id))
-        encoder = get_encoder(result.__class__)
-        marshalled = encoder.encode(result)
+        encoder = get_encoder(self.result.__class__)
+        marshalled = encoder.encode(self.result)
 
         # Optionally lookup child counts
         child_count = request.GET.get("childCount", False) == "true"
@@ -394,6 +396,17 @@ class ShapeView(ObjectView):
     """Handle access to an individual Shape to GET or DELETE it."""
 
     OMERO_TYPE = "Shape"
+
+    def add_data(self, marshalled, request, conn, urls=None, **kwargs):
+        """Add 'url:roi' to Shape."""
+        marshalled = super(ShapeView, self).add_data(
+            marshalled, request, conn, urls=urls, **kwargs
+        )
+
+        version = kwargs["api_version"]
+        roi_id = self.result.roi.id.val
+        marshalled["url:roi"] = build_url(request, "api_roi", version, object_id=roi_id)
+        return marshalled
 
 
 class ExperimenterView(ObjectView):
