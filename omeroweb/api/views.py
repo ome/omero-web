@@ -390,6 +390,12 @@ class RoiView(ObjectView):
         return opts
 
 
+class ShapeView(ObjectView):
+    """Handle access to an individual Shape to GET or DELETE it."""
+
+    OMERO_TYPE = "Shape"
+
+
 class ExperimenterView(ObjectView):
 
     OMERO_TYPE = "Experimenter"

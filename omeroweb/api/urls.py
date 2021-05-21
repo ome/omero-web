@@ -316,12 +316,21 @@ ROI url to GET or DELETE a single ROI
 """
 
 api_image_rois = url(
-    r"^v(?P<api_version>%s)/m/images/" "(?P<image_id>[0-9]+)/rois/$" % versions,
+    r"^v(?P<api_version>%s)/m/images/(?P<image_id>[0-9]+)/rois/$" % versions,
     views.RoisView.as_view(),
     name="api_image_rois",
 )
 """
 GET ROIs that belong to an Image, using omero-marshal to generate json
+"""
+
+api_shape = url(
+    r"^v(?P<api_version>%s)/m/shapes/(?P<object_id>[0-9]+)/$" % versions,
+    views.ShapeView.as_view(),
+    name="api_shape",
+)
+"""
+Shape url to GET or DELETE a single Shape
 """
 
 api_experimenters = url(
@@ -415,6 +424,7 @@ urlpatterns = [
     api_rois,
     api_roi,
     api_image_rois,
+    api_shape,
     api_experimenters,
     api_experimenter,
     api_group_experimenters,
