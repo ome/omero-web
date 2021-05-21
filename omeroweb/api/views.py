@@ -773,6 +773,20 @@ class ShapesView(ObjectsView):
 
     OMERO_TYPE = "Shape"
 
+    def add_data(self, marshalled, request, conn, urls=None, **kwargs):
+        """Add url:roi to each Shape"""
+        marshalled = super(ShapesView, self).add_data(
+            marshalled, request, conn, urls=urls, **kwargs
+        )
+
+        # We need the shape.roi (if it's been added by omero-marshal)
+        if "roi" in marshalled:
+            roi_id = marshalled["roi"]
+            url = build_url(request, "api_roi", kwargs["api_version"], object_id=roi_id)
+            marshalled["url:roi"] = url
+
+        return marshalled
+
 
 class ExperimentersView(ObjectsView):
     """Handles GET for /experimenters/ to list Experimenters."""
