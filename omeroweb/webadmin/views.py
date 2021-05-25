@@ -1096,11 +1096,7 @@ def manage_avatar(request, action=None, conn=None, **kwargs):
             form_file = UploadPhotoForm(request.POST, request.FILES)
             if form_file.is_valid():
                 attach_photo(conn, request.FILES["photo"])
-                return HttpResponseRedirect(
-                    reverse(
-                        viewname="wamanageavatar", args=[conn.getEventContext().userId]
-                    )
-                )
+                return HttpResponseRedirect(reverse(viewname="wamanageavatar"))
     elif action == "deletephoto":
         if request.method == "POST":
             conn.deleteExperimenterPhoto()

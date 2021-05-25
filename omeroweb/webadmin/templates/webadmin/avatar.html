@@ -38,7 +38,7 @@
     </div>
 
     <div >
-        <form enctype="multipart/form-data" method="post" action="{% url 'wamanageavatar' ome.user_id "upload" %}"
+        <form enctype="multipart/form-data" method="post" action="{% url 'wamanageavatar' "upload" %}"
             class="standard_form settings_form" style="position:relative;">{% csrf_token %}
             <p>Upload new picture. Select an image file on your computer (max 200KB):</p>
             

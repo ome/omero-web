@@ -288,7 +288,7 @@
             };
 
             // We 'canCreate' top level items, E.g. Project, Dataset, Screen, if the current userId is self or 'All Members'
-            var userId = {{ ome.user_id }},
+            var userId = {{ ome.active_user }},
                 memberOfGroup = WEBCLIENT.member_of_groups.indexOf(WEBCLIENT.active_group_id) > -1,
                 writeOwned = WEBCLIENT.current_admin_privileges.indexOf("WriteOwned") > -1,
                 allMembers = userId === -1,
@@ -559,7 +559,7 @@
                     var root = inst.get_node('#');
                     $.each(root.children, function(index, id) {
                         var node = inst.get_node(id);
-                        if (node.type === 'experimenter' && node.data.obj.id === {{ ome.user_id }}) {
+                        if (node.type === 'experimenter' && node.data.obj.id === {{ ome.active_user }}) {
                             parent = node;
                             // Break out of each
                             return false;
@@ -592,7 +592,7 @@
                         var root = inst.get_node('#');
                         $.each(root.children, function(index, id) {
                             var node = inst.get_node(id);
-                             if (node.type === 'experimenter' && node.data.obj.id === {{ ome.user_id }}) {
+                             if (node.type === 'experimenter' && node.data.obj.id === {{ ome.active_user }}) {
                                 parent = node;
                                 // Break out of each
                                 return false;
