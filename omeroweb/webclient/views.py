@@ -35,6 +35,7 @@ import sys
 import warnings
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
+from django.utils.http import is_safe_url
 
 from time import time
 
@@ -67,7 +68,7 @@ from django.shortcuts import render
 
 from omeroweb.webclient.webclient_utils import _formatReport, _purgeCallback
 from .forms import GlobalSearchForm, ContainerForm
-from .forms import ShareForm, BasketShareForm
+from .forms import ShareForm
 from .forms import ContainerNameForm, ContainerDescriptionForm
 from .forms import CommentAnnotationForm, TagsAnnotationForm
 from .forms import MetadataFilterForm, MetadataDetectorForm
@@ -176,6 +177,17 @@ def get_bool_or_default(request, name, default):
     return toBoolean(request.GET.get(name, default))
 
 
+def validate_redirect_url(url):
+    """
+    Returns a URL is safe to redirect to.
+    If url is a different host, not in settings.REDIRECT_ALLOWED_HOSTS
+    we return webclient index URL.
+    """
+    if not is_safe_url(url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS):
+        url = reverse("webindex")
+    return url
+
+
 ##############################################################################
 # custom index page
 
@@ -257,6 +269,8 @@ class WebclientLoginView(LoginView):
                 url = parse_url(settings.LOGIN_REDIRECT)
             except Exception:
                 url = reverse("webindex")
+        else:
+            url = validate_redirect_url(url)
         return HttpResponseRedirect(url)
 
     def handle_not_logged_in(self, request, error=None, form=None):
@@ -318,7 +332,7 @@ class WebclientLoginView(LoginView):
 
 @login_required(ignore_login_fail=True)
 def keepalive_ping(request, conn=None, **kwargs):
-    """ Keeps the OMERO session alive by pinging the server """
+    """Keeps the OMERO session alive by pinging the server"""
 
     # login_required handles ping, timeout etc, so we don't need to do
     # anything else
@@ -334,7 +348,10 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     Finally this redirects to the 'url'.
     """
     switch_active_group(request)
-    url = url or reverse("webindex")
+    # avoid recursive calls
+    if url is None or url.startswith(reverse("change_active_group")):
+        url = reverse("webindex")
+    url = validate_redirect_url(url)
     return HttpResponseRedirect(url)
 
 
@@ -345,7 +362,9 @@ def switch_active_group(request, active_group=None):
     queries.
     """
     if active_group is None:
-        active_group = request.GET.get("active_group")
+        active_group = get_long_or_default(request, "active_group", None)
+    if active_group is None:
+        return
     active_group = int(active_group)
     if (
         "active_group" not in request.session
@@ -446,7 +465,11 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
 
     # need to be sure that tree will be correct omero.group
     if first_sel is not None:
-        switch_active_group(request, first_sel.details.group.id.val)
+        group_id = first_sel.details.group.id.val
+        if conn.isValidGroup(group_id):
+            switch_active_group(request, group_id)
+        else:
+            first_sel = None
 
     # search support
     init = {}
@@ -534,6 +557,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["thumbnails_batch"] = settings.THUMBNAILS_BATCH
     context["current_admin_privileges"] = conn.getCurrentAdminPrivileges()
     context["leader_of_groups"] = conn.getEventContext().leaderOfGroups
+    context["member_of_groups"] = conn.getEventContext().memberOfGroups
 
     return context
 
@@ -871,7 +895,7 @@ def api_plate_acquisition_list(request, conn=None, **kwargs):
 
 
 def get_object_links(conn, parent_type, parent_id, child_type, child_ids):
-    """ This is just used internally by api_link DELETE below """
+    """This is just used internally by api_link DELETE below"""
     if parent_type == "orphaned":
         return None
     link_type = None
@@ -924,7 +948,7 @@ def get_object_links(conn, parent_type, parent_id, child_type, child_ids):
 
 
 def create_link(parent_type, parent_id, child_type, child_id):
-    """ This is just used internally by api_link DELETE below """
+    """This is just used internally by api_link DELETE below"""
     if parent_type == "experimenter":
         if child_type == "dataset" or child_type == "plate":
             # This is actually not a link that needs creating, this
@@ -1504,7 +1528,7 @@ def load_chgrp_groups(request, conn=None, **kwargs):
 @login_required()
 @render_response()
 def load_chgrp_target(request, group_id, target_type, conn=None, **kwargs):
-    """ Loads a tree for user to pick target Project, Dataset or Screen """
+    """Loads a tree for user to pick target Project, Dataset or Screen"""
 
     # filter by group (not switching group)
     conn.SERVICE_OPTS.setOmeroGroup(int(group_id))
@@ -2878,47 +2902,6 @@ def manage_action_containers(
                 d.update({e[0]: unicode(e[1])})
             rdict = {"bad": "true", "errs": d}
             return JsonResponse(rdict)
-    elif action == "add":
-        template = "webclient/public/share_form.html"
-        experimenters = list(conn.getExperimenters())
-        experimenters.sort(key=lambda x: x.getOmeName().lower())
-        if o_type == "share":
-            img_ids = request.GET.getlist("image", request.POST.getlist("image"))
-            if request.method == "GET" and len(img_ids) == 0:
-                return HttpResponse("No images specified")
-            images_to_share = list(conn.getObjects("Image", img_ids))
-            if request.method == "POST":
-                form = BasketShareForm(
-                    initial={"experimenters": experimenters, "images": images_to_share},
-                    data=request.POST.copy(),
-                )
-                if form.is_valid():
-                    images = form.cleaned_data["image"]
-                    message = form.cleaned_data["message"]
-                    expiration = form.cleaned_data["expiration"]
-                    members = form.cleaned_data["members"]
-                    # guests = request.POST['guests']
-                    enable = form.cleaned_data["enable"]
-                    host = "%s?server=%i" % (
-                        request.build_absolute_uri(
-                            reverse("load_template", args=["public"])
-                        ),
-                        int(conn.server_id),
-                    )
-                    shareId = manager.createShare(
-                        host, images, message, members, enable, expiration
-                    )
-                    return HttpResponse("shareId:%s" % shareId)
-            else:
-                initial = {
-                    "experimenters": experimenters,
-                    "images": images_to_share,
-                    "enable": True,
-                    "selected": request.GET.getlist("image"),
-                }
-                form = BasketShareForm(initial=initial)
-        template = "webclient/public/share_form.html"
-        context = {"manager": manager, "form": form}
 
     elif action == "edit":
         # form for editing Shares only
@@ -3289,7 +3272,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
 
 @login_required(doConnectionCleanup=False)
 def download_annotation(request, annId, conn=None, **kwargs):
-    """ Returns the file annotation as an http response for download """
+    """Returns the file annotation as an http response for download"""
     ann = conn.getObject("FileAnnotation", annId)
     if ann is None:
         return handlerInternalError(
@@ -3308,7 +3291,7 @@ def download_annotation(request, annId, conn=None, **kwargs):
 
 @login_required()
 def download_orig_metadata(request, imageId, conn=None, **kwargs):
-    """ Downloads the 'Original Metadata' as a text file """
+    """Downloads the 'Original Metadata' as a text file"""
 
     image = conn.getObject("Image", imageId)
     if image is None:
@@ -3450,7 +3433,7 @@ def load_calendar(request, year=None, month=None, conn=None, **kwargs):
 @login_required(setGroupContext=True)
 @render_response()
 def load_history(request, year, month, day, conn=None, **kwargs):
-    """ The data for a particular date that is loaded into the center panel """
+    """The data for a particular date that is loaded into the center panel"""
 
     if year is None or month is None or day is None:
         raise Http404("Year, month, and day are required")
@@ -3938,7 +3921,7 @@ def activities_update(request, action, **kwargs):
 
 @login_required()
 def avatar(request, oid=None, conn=None, **kwargs):
-    """ Returns the experimenter's photo """
+    """Returns the experimenter's photo"""
     photo = conn.getExperimenterPhoto(oid)
     return HttpResponse(photo, content_type="image/jpeg")
 
@@ -3949,7 +3932,7 @@ def avatar(request, oid=None, conn=None, **kwargs):
 
 @login_required()
 def image_viewer(request, iid, share_id=None, **kwargs):
-    """ Delegates to webgateway, using share connection if appropriate """
+    """Delegates to webgateway, using share connection if appropriate"""
     kwargs["viewport_server"] = (
         share_id is not None and reverse("webindex") + share_id or reverse("webindex")
     )
@@ -4966,7 +4949,11 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
             status = "no processor available"
             message = ""  # template displays message and link
         else:
-            logger.error(traceback.format_exc())
+            # Don't log user mistake as ERROR
+            if isinstance(x, omero.ValidationException):
+                logger.debug(x.message)
+            else:
+                logger.error(traceback.format_exc())
             error = traceback.format_exc()
             status = "failed"
             message = x.message

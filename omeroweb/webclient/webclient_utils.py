@@ -30,7 +30,7 @@ def getDateTime(timeString):
 
 
 def formatPercentFraction(value):
-    """ Formats a fraction as a percentage for display """
+    """Formats a fraction as a percentage for display"""
     value = value * 100
     if value < 1:
         # Handle python3 rounding 0.05 towards even numbers

@@ -35,7 +35,6 @@ from django.core.urlresolvers import NoReverseMatch
 
 from omeroweb.webclient.forms import GlobalSearchForm
 from omeroweb.utils import reverse_with_params
-from omeroweb.webgateway.marshal import eventContextMarshal
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +115,8 @@ class render_response(omeroweb.decorators.render_response):
         context.
         """
 
+        super(render_response, self).prepare_context(request, context, *args, **kwargs)
+
         # we expect @login_required to pass us 'conn', but just in case...
         if "conn" not in kwargs:
             return
@@ -134,13 +135,16 @@ class render_response(omeroweb.decorators.render_response):
         public_user = omeroweb.decorators.is_public_user(request)
         if public_user is not None:
             context["ome"]["is_public_user"] = public_user
-        context["ome"]["eventContext"] = eventContextMarshal(conn.getEventContext())
+        context["ome"]["is_admin"] = conn.getEventContext().isAdmin
         context["ome"]["user"] = conn.getUser
-        context["ome"]["user_id"] = request.session.get("user_id", conn.getUserId())
+        # The currently logged-in user ID
+        context["ome"]["user_id"] = conn.getUserId()
+        # group_id never set and never used
         context["ome"]["group_id"] = request.session.get("group_id", None)
         context["ome"]["active_group"] = request.session.get(
             "active_group", conn.getEventContext().groupId
         )
+        context["ome"]["active_user"] = request.session.get("user_id", conn.getUserId())
         context["global_search_form"] = GlobalSearchForm()
         context["ome"]["can_create"] = request.session.get("can_create", True)
         # UI server preferences

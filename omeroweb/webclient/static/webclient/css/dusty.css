@@ -604,7 +604,7 @@ button::-moz-focus-inner {
 			
 			
 			
-	.standard_form input[type="submit"] {
+	.standard_form input[type="submit"], .submit_btn {
 		cursor: pointer;
 		float:right;
 		margin: 0;
@@ -639,6 +639,10 @@ button::-moz-focus-inner {
 		text-shadow: 0 1px 0 rgba(255,255,255,.3);
 		border-radius:3px;
 		font-family: Helvetica, Arial;
+	}
+
+	a.submit_btn:visited {
+		color: inherit;
 	}
 
 	.standard_form input[type="submit"]:disabled {

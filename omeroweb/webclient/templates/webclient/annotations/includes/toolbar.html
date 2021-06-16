@@ -58,7 +58,7 @@
                 // If single object selected
               {% if manager.obj_type %}
                 selectedObjs = ["{{ manager.obj_type }}-{{ manager.obj_id }}"];
-                selJson = [{'id': {{ manager.obj_id }},
+                selJson = [{'id': '{{ manager.obj_id }}',
                            'name': '{{ manager.obj_name }}',
                            'type': '{{ manager.obj_type }}' }]
               {% endif %}
