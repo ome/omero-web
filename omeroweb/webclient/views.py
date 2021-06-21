@@ -1062,8 +1062,14 @@ def _api_links_POST(conn, json_data, **kwargs):
         ptype = parent_type.title()
         if ptype in ["Tagset", "Tag"]:
             ptype = "TagAnnotation"
-        p = conn.getQueryService().get(ptype, parent_id, conn.SERVICE_OPTS)
-        conn.SERVICE_OPTS.setOmeroGroup(p.details.group.id.val)
+        try:
+            p = conn.getQueryService().get(ptype, parent_id, conn.SERVICE_OPTS)
+            conn.SERVICE_OPTS.setOmeroGroup(p.details.group.id.val)
+        except omero.ValidationException:
+            return JsonResponse(
+                {"error": "Object of type %s and ID %s not found" % (ptype, parent_id)},
+                status=404,
+            )
         logger.info("api_link: Saving %s links" % len(linksToSave))
 
         try:
