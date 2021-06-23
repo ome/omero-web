@@ -689,7 +689,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.max_table_download_rows": [
         "MAX_TABLE_DOWNLOAD_ROWS",
-        100000,
+        10000,
         int,
         "Prevent download of OMERO.tables exceeding this number of rows "
         "in a single request.",
