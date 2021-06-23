@@ -32,9 +32,18 @@
     <body>
 
     <div class="download">
-        Download as CSV
-        <a href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.rowCount }}">Whole Table</a> |
-        <a href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.limit }}&offset={{ meta.offset }}&query={{ meta.query|urlencode }}">This View</a>
+        Download as CSV:
+        <button id="download_csv" title="Download the whole table as CSV">Whole Table</button>
+        {% if meta.query != '*' %}
+            <button id="download_filtered_csv" title="Download the whole table filtered with: {{meta.query}}">
+                With Filter
+            </button>
+        {% endif %}
+        <button id="download_current_view" title="Dowload just the current page{% if meta.query != '*' %}, filtered with: {{meta.query}}{% endif %}">
+            Current View</button>
+        <div id="progress_display" style="visibility:hidden">
+            Downloading: <span id="download_percent">0 MB</span> <progress id="download_progress" value="50" max="100">50%</progress>
+        </div>
     </div>
     {% if meta.query != '*' %}
         <div class="back">
@@ -108,4 +117,94 @@
         </tr>
         {% endfor %}
     </body>
+
+    <script>
+
+    function downloadString(array, fileType, fileName) {
+      // https://gist.github.com/danallison/3ec9d5314788b337b682
+      var blob = new Blob(array, { type: fileType });
+      var a = document.createElement('a');
+      a.download = fileName;
+      a.href = URL.createObjectURL(blob);
+      a.dataset.downloadurl = [fileType, a.download, a.href].join(':');
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+    }
+
+    async function readData(reader) {
+        const decoder = new TextDecoder();
+        let result = "";
+        while (true) {
+            const { value, done } = await reader.read();
+            const str = decoder.decode(value);
+            result = result + str;
+            if (done) break;
+        }
+        return result;
+    }
+
+    function bytesToSize(bytes) {
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes == 0) return '0 Byte';
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    }
+
+    function showProgress(value, bytes, hide) {
+        document.getElementById("progress_display").style.visibility = hide ? 'hidden' : 'visible';
+        document.getElementById("download_percent").innerHTML = bytesToSize(bytes);
+        document.getElementById("download_progress").value = value;
+    }
+
+    async function download_csv(filter){
+        const rowCount = filter ? parseInt("{{ meta.totalCount }}") : parseInt("{{ meta.rowCount }}");
+        console.log('rowCount', filter, rowCount);
+        const tableName = "{{ data.name }}.csv";
+        // Use 10 batches, or max 1000 rows per batch
+        const MAX_BATCH_ROWS = 1000;
+        const batchSize = Math.min(parseInt(rowCount/10), MAX_BATCH_ROWS);
+
+        // load csv in batches...
+        const csvUrl = "{% url 'omero_table' data.id 'csv' %}";
+        const query = "{{ meta.query|urlencode }}";
+
+        let count = 0;
+        let bytes = 0;
+        let blobData = [];
+        showProgress(0)
+        while(count <= rowCount) {
+            let url = `${csvUrl}?&limit=${batchSize}&offset=${count}&header=${count===0 ? 'true' : 'false'}`;
+            if (filter) {
+                url += `&query=${query}`;
+            }
+            const csvString = await fetch(url).then(rsp => rsp.body.getReader()).then(reader => readData(reader));
+            blobData.push(csvString);
+            bytes += csvString.length;
+            count += batchSize;
+            showProgress((count/rowCount) * 100, bytes);
+        }
+        showProgress(100, bytes);
+
+        downloadString(blobData, "text/csv", tableName);
+
+        // hide progress
+        showProgress(100, bytes, true);
+    };
+
+    // Bind Event Listeners to buttons...
+    document.getElementById("download_csv").addEventListener("click", function(){
+        download_csv(false);
+    });
+    document.getElementById("download_filtered_csv")?.addEventListener("click", function(){
+        download_csv(true);
+    });
+    document.getElementById("download_current_view").addEventListener("click", function(){
+        // Don't need progressing download, just use URL directly
+        window.location.href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.limit }}&offset={{ meta.offset }}&query={{ meta.query|urlencode }}";
+    });
+
+    </script>
 </html>

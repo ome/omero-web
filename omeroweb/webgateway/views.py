@@ -2963,6 +2963,12 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                 if request.GET.get("limit") is not None
                 else rows
             )
+        if limit > settings.MAX_TABLE_DOWNLOAD_ROWS:
+            error = (
+                "Trying to download %s rows exceeds configured"
+                " omero.web.max_table_download_rows of %s"
+            ) % (limit, settings.MAX_TABLE_DOWNLOAD_ROWS)
+            return dict(error=error)
         range_start = offset
         range_size = limit
         range_end = min(rows, range_start + range_size)

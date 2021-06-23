@@ -687,6 +687,13 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "Prevent multiple files with total aggregate size greater than this "
         "value in bytes from being downloaded as a zip archive.",
     ],
+    "omero.web.max_table_download_rows": [
+        "MAX_TABLE_DOWNLOAD_ROWS",
+        100000,
+        int,
+        "Prevent download of OMERO.tables exceeding this number of rows "
+        "in a single request.",
+    ],
     # VIEWER
     "omero.web.viewer.view": [
         "VIEWER_VIEW",

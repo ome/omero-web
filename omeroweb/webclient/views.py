@@ -3165,6 +3165,12 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     """
     Download OMERO.table as CSV (streaming response) or return as HTML or json
 
+    Request parameters:
+    header: 'false' excludes the column names row if mtype is 'csv'
+    offset: table rows offset for pagination
+    limit: table rows limit for pagination
+    query: OMERO.table query for filtering rows
+
     @param file_id:     OriginalFile ID
     @param mtype:       None for html table or 'csv' or 'json'
     @param conn:        BlitzGateway connection
@@ -3196,10 +3202,12 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     # OR, return as csv or html
     if mtype == "csv":
         table_data = context.get("data")
+        hide_header = request.GET.get("header") == "false"
 
         def csv_gen():
-            csv_cols = ",".join(table_data.get("columns"))
-            yield csv_cols
+            if not hide_header:
+                csv_cols = ",".join(table_data.get("columns"))
+                yield csv_cols
             for rows in table_data.get("lazy_rows"):
                 yield (
                     "\n" + "\n".join([",".join([str(d) for d in row]) for row in rows])
