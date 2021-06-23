@@ -33,13 +33,13 @@
 
     <div class="download">
         Download as CSV:
-        <button id="download_csv" title="Download the whole table as CSV">Whole Table</button>
+        <button class="download_btn" id="download_csv" title="Download the whole table as CSV">Whole Table</button>
         {% if meta.query != '*' %}
-            <button id="download_filtered_csv" title="Download the whole table filtered with: {{meta.query}}">
+            <button class="download_btn" id="download_filtered_csv" title="Download the whole table filtered with: {{meta.query}}">
                 With Filter
             </button>
         {% endif %}
-        <button id="download_current_view" title="Dowload just the current page{% if meta.query != '*' %}, filtered with: {{meta.query}}{% endif %}">
+        <button class="download_btn" id="download_current_view" title="Dowload just the current page{% if meta.query != '*' %}, filtered with: {{meta.query}}{% endif %}">
             Current View</button>
         <div id="progress_display" style="visibility:hidden">
             Downloading: <span id="download_percent">0 MB</span> <progress id="download_progress" value="50" max="100">50%</progress>
@@ -159,7 +159,14 @@
         document.getElementById("download_progress").value = value;
     }
 
+    function enableDownloadButtons(enable) {
+        document.querySelectorAll(".download_btn").forEach(function(el){
+            el.disabled = !enable;
+        });
+    }
+
     async function download_csv(filter){
+        enableDownloadButtons(false);
         const rowCount = filter ? parseInt("{{ meta.totalCount }}") : parseInt("{{ meta.rowCount }}");
         console.log('rowCount', filter, rowCount);
         const tableName = "{{ data.name }}.csv";
@@ -192,6 +199,7 @@
 
         // hide progress
         showProgress(100, bytes, true);
+        enableDownloadButtons(true);
     };
 
     // Bind Event Listeners to buttons...
