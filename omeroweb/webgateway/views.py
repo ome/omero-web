@@ -2930,7 +2930,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     r = conn.getSharedResources()
     t = r.openTable(omero.model.OriginalFileI(fileid), ctx)
     if not t:
-        return dict(error="Table %s not found" % fileid)
+        return JsonResponse({"error": "Table %s not found" % fileid}, status=404)
 
     try:
         cols = t.getHeaders()
@@ -3033,7 +3033,13 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             t.close()
 
 
-table_query = login_required()(jsonp(_table_query))
+@login_required()
+@jsonp
+def table_query(request, *args, **kwargs):
+    tableData = _table_query(request, args, kwargs)
+    if "error" in tableData:
+        return JsonResponse(tableData, status=tableData.get("status", 404))
+    return tableData
 
 
 def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs):
@@ -3078,7 +3084,13 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
             t.close()
 
 
-table_metadata = login_required()(jsonp(_table_metadata))
+@login_required()
+@jsonp
+def table_metadata(request, *args, **kwargs):
+    tableData = _table_metadata(request, args, kwargs)
+    if "error" in tableData:
+        return JsonResponse(tableData, status=tableData.get("status", 404))
+    return tableData
 
 
 @login_required()
@@ -3114,10 +3126,12 @@ def object_table_query(request, objtype, objid, conn=None, **kwargs):
     """
     a = _bulk_file_annotations(request, objtype, objid, conn, **kwargs)
     if "error" in a:
-        return a
+        return JsonResponse(a, status=a.get("status", 500))
 
     if len(a["data"]) < 1:
-        return dict(error="Could not retrieve bulk annotations table")
+        return JsonResponse(
+            {"error": "Could not retrieve bulk annotations table"}, status=404
+        )
 
     # multiple bulk annotations files could be attached, use the most recent
     # one (= the one with the highest identifier)
@@ -3132,10 +3146,13 @@ def object_table_query(request, objtype, objid, conn=None, **kwargs):
             fileId = annotation["file"]
             break
     if ann is None:
-        return dict(
-            error=tableData.get(
-                "error", "Could not retrieve matching bulk annotation table"
-            )
+        return JsonResponse(
+            {
+                "error": tableData.get(
+                    "error", "Could not retrieve matching bulk annotation table"
+                ),
+            },
+            status=tableData.get("status", 404),
         )
     tableData["id"] = fileId
     tableData["annId"] = ann["id"]

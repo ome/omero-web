@@ -3191,7 +3191,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     )
 
     if context.get("error") or not context.get("data"):
-        return JsonResponse(context)
+        return JsonResponse(context, status=context.get("status", 500))
 
     # OR, return as csv or html
     if mtype == "csv":
