@@ -31,7 +31,7 @@
         </li>
     {% endfor %}
 
-    {% if ome.eventContext.isAdmin %}
+    {% if ome.is_admin %}
         <li class="admin"><a href="{% url 'waindex' %}" title="Web-Admin: Edit users and groups">{% trans "Admin" %}</a></li>
     {% endif %}
 </ul>

@@ -40,39 +40,40 @@ from omero_model_LongAnnotationI import LongAnnotationI
 class MultiEmailField(forms.Field):
     def clean(self, value):
         if not value:
-            raise forms.ValidationError('No email.')
-        if value.count(' ') > 0:
-            raise forms.ValidationError(
-                'Use only separator ";". Remove every space.')
-        emails = value.split(';')
+            raise forms.ValidationError("No email.")
+        if value.count(" ") > 0:
+            raise forms.ValidationError('Use only separator ";". Remove every space.')
+        emails = value.split(";")
         for email in emails:
             if not self.is_valid_email(email):
                 raise forms.ValidationError(
-                    '%s is not a valid e-mail address. Use separator ";"'
-                    % email)
+                    '%s is not a valid e-mail address. Use separator ";"' % email
+                )
         return emails
 
     def is_valid_email(self, email):
         email_pat = re.compile(
-            r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)",
-            re.IGNORECASE)
+            r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)", re.IGNORECASE
+        )
         return email_pat.match(email) is not None
 
 
 class UrlField(forms.Field):
-
     def clean(self, value):
         if not value:
-            raise forms.ValidationError('No url.')
+            raise forms.ValidationError("No url.")
         if not self.is_valid_url(value):
-            raise forms.ValidationError('%s is not a valid url' % value)
+            raise forms.ValidationError("%s is not a valid url" % value)
         return value
 
     def is_valid_url(self, url):
         url_pat = re.compile(
-            r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|'
-            '(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE)
+            r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|"
+            "(?:%[0-9a-fA-F][0-9a-fA-F]))+",
+            re.IGNORECASE,
+        )
         return url_pat.match(url) is not None
+
 
 ##################################################################
 # Metadata queryset iterator for group form
@@ -85,17 +86,16 @@ class MetadataQuerySetIterator(object):
 
     def __iter__(self):
         if self.empty_label is not None:
-            yield (u"", self.empty_label)
+            yield ("", self.empty_label)
         for obj in self.queryset:
             yield (obj.value, smart_text(obj.value))
 
 
 class MetadataModelChoiceField(ModelChoiceField):
-
     def _get_choices(self):
         # If self._choices is set, then somebody must have manually set
         # the property self.choices. In this case, just return self._choices.
-        if hasattr(self, '_choices'):
+        if hasattr(self, "_choices"):
             return self._choices
         # Otherwise, execute the QuerySet in self.queryset to determine the
         # choices dynamically. Return a fresh QuerySetIterator that has not
@@ -122,19 +122,18 @@ class MetadataModelChoiceField(ModelChoiceField):
             if int(value) == q.id:
                 res = True
         if not res:
-            raise ValidationError(self.error_messages['invalid_choice'])
+            raise ValidationError(self.error_messages["invalid_choice"])
         return value
 
 
 class AnnotationQuerySetIterator(object):
-
     def __init__(self, queryset, empty_label):
         self.queryset = queryset
         self.empty_label = empty_label
 
     def __iter__(self):
         if self.empty_label is not None:
-            yield (u"", self.empty_label)
+            yield ("", self.empty_label)
         for obj in self.queryset:
             textValue = None
             if isinstance(obj._obj, FileAnnotationI):
@@ -142,19 +141,23 @@ class AnnotationQuerySetIterator(object):
                 if not file_name:
                     textValue = "No name. ID %s" % obj.id
                 else:
-                    textValue = (len(file_name) < 45 and file_name or
-                                 (file_name[:42]+"..."))
+                    textValue = (
+                        len(file_name) < 45 and file_name or (file_name[:42] + "...")
+                    )
             elif isinstance(obj._obj, TagAnnotationI):
                 if obj.textValue is not None:
                     if obj.ns is not None and obj.ns != "":
                         textValue = (
-                            (len(obj.textValue) < 45) and
-                            ("%s (tagset)" % obj.textValue) or
-                            ("%s (tagset)" % obj.textValue[:42]+"..."))
+                            (len(obj.textValue) < 45)
+                            and ("%s (tagset)" % obj.textValue)
+                            or ("%s (tagset)" % obj.textValue[:42] + "...")
+                        )
                     else:
                         textValue = (
-                            (len(obj.textValue) < 45) and (obj.textValue) or
-                            (obj.textValue[:42]+"..."))
+                            (len(obj.textValue) < 45)
+                            and (obj.textValue)
+                            or (obj.textValue[:42] + "...")
+                        )
             elif isinstance(obj._obj, LongAnnotationI):
                 textValue = obj.longValue
             else:
@@ -169,11 +172,10 @@ class AnnotationQuerySetIterator(object):
 
 
 class AnnotationModelChoiceField(ModelChoiceField):
-
     def _get_choices(self):
         # If self._choices is set, then somebody must have manually set
         # the property self.choices. In this case, just return self._choices.
-        if hasattr(self, '_choices'):
+        if hasattr(self, "_choices"):
             return self._choices
         # Otherwise, execute the QuerySet in self.queryset to determine the
         # choices dynamically. Return a fresh QuerySetIterator that has not
@@ -200,47 +202,64 @@ class AnnotationModelChoiceField(ModelChoiceField):
             if int(value) == q.id:
                 res = True
         if not res:
-            raise ValidationError(self.error_messages['invalid_choice'])
+            raise ValidationError(self.error_messages["invalid_choice"])
         return value
 
 
 class AnnotationModelMultipleChoiceField(AnnotationModelChoiceField):
     """A MultipleChoiceField whose choices are a model QuerySet."""
+
     hidden_widget = MultipleHiddenInput
     default_error_messages = {
-        'list': _(u'Enter a list of values.'),
-        'invalid_choice': _(u'Select a valid choice. That choice is not one'
-                            u' of the available choices.')}
+        "list": _("Enter a list of values."),
+        "invalid_choice": _(
+            "Select a valid choice. That choice is not one" " of the available choices."
+        ),
+    }
 
-    def __init__(self, queryset, required=True,
-                 widget=SelectMultiple, label=None, initial=None,
-                 help_text=None, *args, **kwargs):
+    def __init__(
+        self,
+        queryset,
+        required=True,
+        widget=SelectMultiple,
+        label=None,
+        initial=None,
+        help_text=None,
+        *args,
+        **kwargs
+    ):
         super(AnnotationModelMultipleChoiceField, self).__init__(
-            queryset=queryset, empty_label=None, required=required,
-            widget=widget, label=label, initial=initial,
-            help_text=help_text, *args, **kwargs)
+            queryset=queryset,
+            empty_label=None,
+            required=required,
+            widget=widget,
+            label=label,
+            initial=initial,
+            help_text=help_text,
+            *args,
+            **kwargs,
+        )
 
     def clean(self, value):
         if self.required and not value:
-            raise ValidationError(self.error_messages['required'])
+            raise ValidationError(self.error_messages["required"])
         elif not self.required and not value:
             return []
         if not isinstance(value, (list, tuple)):
-            raise ValidationError(self.error_messages['list'])
+            raise ValidationError(self.error_messages["list"])
         final_values = []
         for val in value:
             try:
                 int(val)
             except Exception:
-                raise ValidationError(self.error_messages['invalid_choice'])
+                raise ValidationError(self.error_messages["invalid_choice"])
             else:
                 res = False
                 for q in self.queryset:
                     if int(val) == q.id:
                         res = True
                 if not res:
-                    raise ValidationError(
-                        self.error_messages['invalid_choice'])
+                    raise ValidationError(self.error_messages["invalid_choice"])
                 else:
                     final_values.append(val)
         return final_values
@@ -254,20 +273,19 @@ class ObjectQuerySetIterator(object):
 
     def __iter__(self):
         if self.empty_label is not None:
-            yield (u"", self.empty_label)
+            yield ("", self.empty_label)
         for obj in self.queryset:
-            if hasattr(obj.id, 'val'):
+            if hasattr(obj.id, "val"):
                 yield (obj.id.val, smart_text(obj.id.val))
             else:
                 yield (obj.id, smart_text(obj.id))
 
 
 class ObjectModelChoiceField(ModelChoiceField):
-
     def _get_choices(self):
         # If self._choices is set, then somebody must have manually set
         # the property self.choices. In this case, just return self._choices.
-        if hasattr(self, '_choices'):
+        if hasattr(self, "_choices"):
             return self._choices
         # Otherwise, execute the QuerySet in self.queryset to determine the
         # choices dynamically. Return a fresh QuerySetIterator that has not
@@ -291,59 +309,75 @@ class ObjectModelChoiceField(ModelChoiceField):
             return None
         res = False
         for q in self.queryset:
-            if hasattr(q.id, 'val'):
+            if hasattr(q.id, "val"):
                 if int(value) == q.id.val:
                     res = True
             else:
                 if int(value) == q.id:
                     res = True
         if not res:
-            raise ValidationError(self.error_messages['invalid_choice'])
+            raise ValidationError(self.error_messages["invalid_choice"])
         return value
 
 
 class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
     """A MultipleChoiceField whose choices are a model QuerySet."""
+
     hidden_widget = MultipleHiddenInput
     default_error_messages = {
-        'list': _(u'Enter a list of values.'),
-        'invalid_choice': _(u'Select a valid choice. That choice is not one'
-                            u' of the available choices.'),
+        "list": _("Enter a list of values."),
+        "invalid_choice": _(
+            "Select a valid choice. That choice is not one" " of the available choices."
+        ),
     }
 
-    def __init__(self, queryset, required=True,
-                 widget=SelectMultiple, label=None, initial=None,
-                 help_text=None, *args, **kwargs):
+    def __init__(
+        self,
+        queryset,
+        required=True,
+        widget=SelectMultiple,
+        label=None,
+        initial=None,
+        help_text=None,
+        *args,
+        **kwargs
+    ):
         super(ObjectModelMultipleChoiceField, self).__init__(
-            queryset=queryset, empty_label=None, required=required,
-            widget=widget, label=label, initial=initial,
-            help_text=help_text, *args, **kwargs)
+            queryset=queryset,
+            empty_label=None,
+            required=required,
+            widget=widget,
+            label=label,
+            initial=initial,
+            help_text=help_text,
+            *args,
+            **kwargs,
+        )
 
     def clean(self, value):
         if self.required and not value:
-            raise ValidationError(self.error_messages['required'])
+            raise ValidationError(self.error_messages["required"])
         elif not self.required and not value:
             return []
         if not isinstance(value, (list, tuple)):
-            raise ValidationError(self.error_messages['list'])
+            raise ValidationError(self.error_messages["list"])
         final_values = []
         for val in value:
             try:
                 int(val)
             except Exception:
-                raise ValidationError(self.error_messages['invalid_choice'])
+                raise ValidationError(self.error_messages["invalid_choice"])
             else:
                 res = False
                 for q in self.queryset:
-                    if hasattr(q.id, 'val'):
+                    if hasattr(q.id, "val"):
                         if int(val) == q.id.val:
                             res = True
                     else:
                         if int(val) == q.id:
                             res = True
                 if not res:
-                    raise ValidationError(
-                        self.error_messages['invalid_choice'])
+                    raise ValidationError(self.error_messages["invalid_choice"])
                 else:
                     final_values.append(val)
         return final_values

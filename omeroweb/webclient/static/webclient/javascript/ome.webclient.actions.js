@@ -520,6 +520,29 @@ OME.truncateNames = (function(){
     return truncateNames;
 }());
 
+OME.checkForMultipleParents = function(objList, callback) {
+    // objList is list of ['image=1'] etc.
+    var url = WEBCLIENT.URLS.api_parent_links + '?' + objList.join('&');
+
+    $.getJSON(url, function(data){
+        // look for any child that has > 1 parent:
+        var multiple = false;
+        var links = {};
+        data.data.forEach(function(link){
+            var childId = link.child.type + link.child.id;
+            var parentId = link.parent.type + link.parent.id;
+            // do we already have a parent link for that child?
+            if (links[childId]) {
+                multiple = true;
+            }
+            links[childId] = parentId;
+        });
+        if (callback) {
+            callback(multiple);
+        }
+    });
+}
+
 // Handle deletion of selected objects in jsTree in containers.html
 OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     var datatree = $.jstree.reference($('#dataTree'));
@@ -543,19 +566,6 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
 
     var disabledNodes = [];
 
-    function traverse(state) {
-        // Check if this state is one that we are looking for
-        var n = datatree.get_node(state);
-        disabledNodes.push(n);
-
-        if (n.children) {
-            $.each(n.children, function(index, child) {
-                 traverse(child);
-            });
-        }
-        datatree.disable_node(n);
-
-    }
     var notOwned = false;
     $.each(selected, function(index, node) {
         // What types are being deleted and how many (for pluralization)
@@ -578,13 +588,19 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
         // Disable the nodes marked for deletion
         // Record them so they can easily be removed/re-enabled later
         disabledNodes.push(node);
-        if (node.children) {
-            $.each(node.children, function(index, child) {
-                 traverse(child);
-            });
-        }
         datatree.disable_node(node);
     });
+
+    // Hide warning, show it if e.g Image is in multiple groups
+    // https://forum.image.sc/t/caution-with-copy-links-in-omero/33680
+    $("#deleteCopyWarning").hide();
+    $("#delete-dialog-form").css('height', '92px');
+    OME.checkForMultipleParents(ajax_data, function(multiple){
+        if (multiple) {
+            $("#deleteCopyWarning").show();
+            $("#delete-dialog-form").css('height', '192px');
+        }
+    })
 
     if (notOwned) {
         $("#deleteOthersWarning").show();
@@ -593,11 +609,17 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     }
 
     var type_strings = [];
+    var parent_types = {image:'dataset', dataset:'project', plate:'screen'};
+    var parent_strings = [];
     for (var key in dtypes) {
+        if (parent_types[key]) {
+            parent_strings.push(parent_types[key].capitalize());
+        }
         type_strings.push(key.replace("acquisition", "Run").capitalize() + (dtypes[key]>1 && "s" || ""));
     }
     var type_str = type_strings.join(" & ");    // For delete dialog: E.g. 'Project & Datasets'
-    $("#delete_type").text(type_str);
+    $(".delete_type").text(type_str);
+    $(".delete_parent_type").text(parent_strings.join(" or "));
     if (!askDeleteContents) $("#delete_contents_form").hide();  // don't ask about deleting contents
 
     // callback when delete dialog is closed
@@ -997,7 +1019,13 @@ OME.showScriptList = function(event) {
                 return html;
             };
 
-            var html = "<ul class='menulist'>" + build_ul(data) + "</ul>";
+            var html = build_ul(data);
+
+            // For Admins, add a 'Upload Script' option.
+            if (WEBCLIENT.current_admin_privileges.indexOf("WriteScriptRepo") > -1) {
+                html += "<li><a class='upload_script' href='" + WEBCLIENT.URLS.script_upload + "'>Upload Script</a></li>";
+            }
+            html = "<ul class='menulist'>" + html + "</ul>";
 
             // In case multiple requests are sent at once, don't duplicate menu
             if ($("#scriptList li").length === 0) {
@@ -1016,10 +1044,9 @@ OME.hideScriptList = function() {
 
 // Helper can be used by 'open with' plugins to add isEnabled()
 // handlers to the OPEN_WITH object.
-OME.setOpenWithEnabledHandler = function(label, fn) {
-    // look for label in OPEN_WITH
+OME.setOpenWithEnabledHandler = function(id, fn) {
     WEBCLIENT.OPEN_WITH.forEach(function(ow){
-        if (ow.label === label) {
+        if (ow.id === id) {
             ow.isEnabled = function() {
                 // wrap fn with try/catch, since error here will break jsTree menu
                 var args = Array.from(arguments);
@@ -1028,7 +1055,7 @@ OME.setOpenWithEnabledHandler = function(label, fn) {
                     enabled = fn.apply(this, args);
                 } catch (e) {
                     // Give user a clue as to what went wrong
-                    console.log("Open with " + label + ": " + e);
+                    console.log("Open with " + id + ": " + e);
                 }
                 return enabled;
             }

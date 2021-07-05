@@ -30,10 +30,12 @@ from omeroweb.feedback import views
 
 # url patterns
 urlpatterns = [
-    url(r'^feedback/', views.send_feedback, name="fsend"),
-    url(r'^comment/', views.send_comment, name="csend"),
-    url(r'^thanks/', TemplateView.as_view(template_name='thanks.html'),
-        name="fthanks"),
-    url(r'^disabled/', TemplateView.as_view(template_name='disabled.html'),
-        name="feedback_disabled"),
+    url(r"^feedback/", views.send_feedback, name="fsend"),
+    url(r"^comment/", views.send_comment, name="csend"),
+    url(r"^thanks/", TemplateView.as_view(template_name="thanks.html"), name="fthanks"),
+    url(
+        r"^disabled/",
+        TemplateView.as_view(template_name="disabled.html"),
+        name="feedback_disabled",
+    ),
 ]

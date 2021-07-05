@@ -1,0 +1,23 @@
+---
+name: Install
+on:
+  push:
+  pull_request:
+
+jobs:
+  install:
+    name: Install distribution from source
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - name: Install dependencies
+        run: python -mpip install --upgrade wheel
+      - name: Install Ice
+        run: pip install https://github.com/ome/zeroc-ice-py-manylinux/releases/download/0.2.0/zeroc_ice-3.6.5-cp36-cp36m-manylinux2010_x86_64.whl
+      - name: Run tests
+        run: python setup.py sdist && pip install dist/omero-web*gz
+      - name: Test import
+        run: python -c "import omeroweb.version as owv; print(owv.omeroweb_version)"

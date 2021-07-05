@@ -127,7 +127,8 @@ button::-moz-focus-inner {
 	
     .btn_view {background: url('../../webgateway/img/icon_view.png') center center no-repeat;}
     .btn_folder {background: url('../../webgateway/img/icon_folder.png') center center no-repeat;}
-    .btn_download {background: url('../../webgateway/img/icon_download.png') center center no-repeat;}
+	.btn_download {background: url('../../webgateway/img/icon_download.png') center center no-repeat;}
+	.btn_url {background: url('../../webgateway/img/icon_external_link.svg') center center no-repeat; background-size: 14px 14px; width: 26px; height: 26px;}
     .btn_filetype {background: url('../../webgateway/img/icon_filetype.png') center center no-repeat;}
     .btn_view_error {background: url('../../webgateway/img/icon_view_error.png') center center no-repeat;}
     .btn_info {background: url('../../webgateway/img/icon_info.png')center center no-repeat;}
@@ -603,7 +604,7 @@ button::-moz-focus-inner {
 			
 			
 			
-	.standard_form input[type="submit"] {
+	.standard_form input[type="submit"], .submit_btn {
 		cursor: pointer;
 		float:right;
 		margin: 0;
@@ -638,6 +639,10 @@ button::-moz-focus-inner {
 		text-shadow: 0 1px 0 rgba(255,255,255,.3);
 		border-radius:3px;
 		font-family: Helvetica, Arial;
+	}
+
+	a.submit_btn:visited {
+		color: inherit;
 	}
 
 	.standard_form input[type="submit"]:disabled {
@@ -1105,6 +1110,23 @@ button::-moz-focus-inner {
 		margin: 2px 2px 2px 7px;
 	}
 
+	/* Filter by Map Annotation - auto-complete */
+	ul.ui-autocomplete{
+		background: #ffffff;
+		border:solid 1px #D4D6D8;
+		max-height: 400px;
+		overflow-y: scroll;
+	}
+
+	.ui-menu-item a.ui-state-focus{
+		background: #D4D6D8;
+	}
+
+	.ui-menu-item a{
+		background:#ffffff;
+		font-size: 10px;
+		width: 135px;
+	}
 
 
 

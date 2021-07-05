@@ -20,6 +20,9 @@
 */
 {% endcomment %}
 
+<!-- Include script for filtering center panel -->
+<script src="{% static 'webclient/javascript/ome.center_plugin_filter.js'|add:url_suffix %}" type="text/javascript"></script>
+
 <script>
 /**
  * This script is included in the main containers.html page as well as public.html,
@@ -393,7 +396,34 @@ $(document).ready(function() {
         // All the image filtering functionality setup here...
         // {'id': {'text': 'name', 'images': [1,2,3]} } for all tags used for filtering
         var usedTags = {};
+        // {key: {'values':{'imageId': 'val1, val2'}, 'type': 'number'}
+        var usedKeyValues = {};
+        var currentFilterKey;
         var filter_tag_ids = [];
+
+        var filterObjects = [];
+
+        function doFiltering() {
+            // get image IDs, find which are filtered and update images
+            $("#dataIcons li.row").each(function(){
+                var $this = $(this);
+                var iid = $this.attr("data-id");
+                // check if visible in all filters
+                var visible = true;
+                filterObjects.forEach(function(f){
+                    if (!f.isImageVisible(iid)) {
+                        visible = false;
+                    }
+                });
+                if (visible) {
+                    $this.removeClass('mapFilter_hidden');
+                } else {
+                    $this.addClass('mapFilter_hidden');
+                }
+            });
+            // finally, we de-select hidden
+            deselectFiltered();
+        }
 
         // Chooser for revealing various filter components
         $("#choosefilter").change(function() {
@@ -456,6 +486,18 @@ $(document).ready(function() {
                     }, {});
                     renderFilterTags();
                 });
+            }
+
+            if (filterby === "map") {
+                // Load map annotations for images
+                var iids = [];
+                $("#dataIcons li.row").each(function(){
+                    iids.push($(this).attr("data-id"));
+                });
+
+                var f = new MapAnnFilter(iids, $('#center_toolbar'), doFiltering, filterObjects);
+                filterObjects.push(f);
+                return;
             }
 
             // Show filter

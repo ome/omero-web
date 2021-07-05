@@ -49,9 +49,10 @@
 	_temp1.className = 'jstree-icon jstree-ocl';
 	_temp1.setAttribute('role', 'presentation');
 	_node.appendChild(_temp1);
-	_temp1 = _d.createElement('A');
+	// In the absense of _create_node_plugin, editing here to use SPAN
+	// See https://github.com/vakata/jstree/pull/1616 and https://github.com/ome/omero-web/pull/257
+	_temp1 = _d.createElement('SPAN');
 	_temp1.className = 'jstree-anchor';
-	_temp1.setAttribute('href','#');
 	_temp1.setAttribute('tabindex','-1');
 	_temp2 = _d.createElement('I');
 	_temp2.className = 'jstree-icon jstree-themeicon';
@@ -5349,7 +5350,8 @@
 						str += "<"+"li class='vakata-context-separator'><"+"a href='#' " + ($.vakata.context.settings.icons ? '' : 'style="margin-left:0px;"') + ">&#160;<"+"/a><"+"/li>";
 					}
 					sep = false;
-					str += "<"+"li class='" + (val._class || "") + (val._disabled === true || ($.isFunction(val._disabled) && val._disabled({ "item" : val, "reference" : vakata_context.reference, "element" : vakata_context.element })) ? " vakata-contextmenu-disabled " : "") + "' "+(val.shortcut?" data-shortcut='"+val.shortcut+"' ":'')+">";
+					str += "<"+"li " + (val.title ? "title='" + val.title + "' " : "");
+					str += "class='" + (val._class || "") + (val._disabled === true || ($.isFunction(val._disabled) && val._disabled({ "item" : val, "reference" : vakata_context.reference, "element" : vakata_context.element })) ? " vakata-contextmenu-disabled " : "") + "' "+(val.shortcut?" data-shortcut='"+val.shortcut+"' ":'')+">";
 					str += "<"+"a href='#' rel='" + (vakata_context.items.length - 1) + "'>";
 					if($.vakata.context.settings.icons) {
 						str += "<"+"i ";
@@ -7045,6 +7047,8 @@
 
 
 (function ($) {
+	// NB: document.registerElement is deprecated - see https://github.com/vakata/jstree/issues/2094
+	// But seems this is not used by OMERO.web currently - see https://github.com/ome/omero-web/pull/119
 	if(document.registerElement && Object && Object.create) {
 		var proto = Object.create(HTMLElement.prototype);
 		proto.createdCallback = function () {
@@ -7066,7 +7070,7 @@
 		};
 		// proto.attributeChangedCallback = function (name, previous, value) { };
 		try {
-			document.registerElement("vakata-jstree", { prototype: proto });
+			window.customElements.define("vakata-jstree", { prototype: proto });
 		} catch(ignore) { }
 	}
 }(jQuery));

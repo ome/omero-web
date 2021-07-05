@@ -33,7 +33,7 @@ $.fn.colorbtn = function(cfg) {
 
     var callback = function (color) {
       self.attr('data-picked-color', color);
-      jQuery('input#'+self[0].cfg.prefix+'-tb').attr('value', color.substring(1).toUpperCase());
+      jQuery('input#'+self[0].cfg.prefix+'-tb').val(color.substring(1).toUpperCase());
     };
 
     var ok_callback = function () {
@@ -90,12 +90,12 @@ $.fn.colorbtn = function(cfg) {
       self.trigger('prepared');
       picker = jQuery.farbtastic("#"+this.cfg.prefix);
       jQuery('input#'+this.cfg.prefix+'-tb').bind('change', function () {
-          var new_color = sanitizeHexColor(jQuery('input#'+self[0].cfg.prefix+'-tb').attr('value'));
+          var new_color = sanitizeHexColor(jQuery('input#'+self[0].cfg.prefix+'-tb').val());
           if (new_color !== null) {
             picker.setColor(new_color);
-            jQuery(this).attr('value', new_color.substring(1).toUpperCase());
+            jQuery(this).val(new_color.substring(1).toUpperCase());
           } else {
-            jQuery(this).attr('value', picker.pack(picker.rgb).substring(1).toUpperCase());
+            jQuery(this).val(picker.pack(picker.rgb).substring(1).toUpperCase());
           }
         });
     };
@@ -187,7 +187,7 @@ $.fn.colorbtn = function(cfg) {
         color = '#FF0000';
       }
       picker.linkTo(null_cb).setColor(color).linkTo(callback);
-      jQuery("#"+this.cfg.prefix+"-tb").attr('value', color.substring(1).toUpperCase());
+      jQuery("#"+this.cfg.prefix+"-tb").val(color.substring(1).toUpperCase());
       jQuery("#"+this.cfg.prefix+"-defc").css("background-color", self.css("background-color"));
       jQuery("#"+this.cfg.prefix+"-box").mousedown(function () {self.trigger('mousedown');}).show();
       jQuery("#"+this.cfg.prefix+"-box").unbind('closed').bind('closed', function () {self.trigger('hiding');});

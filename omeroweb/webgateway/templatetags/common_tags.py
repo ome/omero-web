@@ -42,18 +42,19 @@ def setting(parser, token):
         tag_name, option = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError(
-            "%r tag requires a single argument" % token.contents[0])
+            "%r tag requires a single argument" % token.contents[0]
+        )
     return SettingNode(option)
 
 
-class SettingNode (template.Node):
+class SettingNode(template.Node):
     def __init__(self, option):
         self.option = option
 
     def render(self, context):
         try:
             setting = settings
-            for name in self.option.split('.'):
+            for name in self.option.split("."):
                 if name.isdigit():
                     setting = setting[int(name)]
                 else:
@@ -77,9 +78,9 @@ class PluralNode(template.Node):
 
     def render(self, context):
         if self.quantity.resolve(context) == 1:
-            return u'%s' % self.single.resolve(context)
+            return "%s" % self.single.resolve(context)
         else:
-            return u'%s' % self.plural.resolve(context)
+            return "%s" % self.plural.resolve(context)
 
 
 @register.tag(name="plural")
@@ -96,8 +97,8 @@ def do_plural(parser, token):
         tag_name, quantity, single, plural = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError(
-            "%r tag requires exactly three arguments"
-            % token.contents.split()[0])
+            "%r tag requires exactly three arguments" % token.contents.split()[0]
+        )
 
     return PluralNode(quantity, single, plural)
 
@@ -109,9 +110,11 @@ class TemplateTokenNode(template.Node):
 
     def render(self, context):
         timestamp = time.time()
-        return u'%s-%s-%s' % (self.component.resolve(context),
-                              self.cid.resolve(context),
-                              timestamp)
+        return "%s-%s-%s" % (
+            self.component.resolve(context),
+            self.cid.resolve(context),
+            timestamp,
+        )
 
 
 @register.tag(name="content_identifier")
@@ -128,7 +131,7 @@ def content_identifier(parser, token):
         tag_name, component, cid = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError(
-            "%r tag requires exactly three arguments"
-            % token.contents.split()[0])
+            "%r tag requires exactly three arguments" % token.contents.split()[0]
+        )
 
     return TemplateTokenNode(component, cid)

@@ -12,7 +12,7 @@
 
             if(obj) {
                 var node = inst.get_node(obj);
-                var anchor = $(obj).children('a.jstree-anchor');
+                var anchor = $(obj).children('.jstree-anchor');
 
                 // Add child count html
                 if (node.data !== undefined && node.data.obj.childCount > 0) {
