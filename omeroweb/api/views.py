@@ -165,6 +165,7 @@ class ObjectView(ApiView):
         query, params, wrapper = conn.buildQuery(
             self.OMERO_TYPE, [object_id], opts=opts
         )
+        # Allow subclasses to access the result object
         self.result = conn.getQueryService().findByQuery(
             query, params, conn.SERVICE_OPTS
         )
@@ -781,7 +782,7 @@ class ShapesView(ObjectsView):
 
         # We need the shape.roi (if it's been added by omero-marshal)
         if "roi" in marshalled:
-            roi_id = marshalled["roi"]
+            roi_id = marshalled["roi"]["@id"]
             url = build_url(request, "api_roi", kwargs["api_version"], object_id=roi_id)
             marshalled["url:roi"] = url
 
