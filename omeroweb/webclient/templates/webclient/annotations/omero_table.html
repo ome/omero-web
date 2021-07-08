@@ -27,6 +27,10 @@
                 top: 10px;
                 left: 20px;
             }
+            #cancel_btn {
+                border: solid black 1px;
+                border-radius: 10px;
+            }
         </style>
     </head>
     <body>
@@ -43,6 +47,7 @@
             Current View</button>
         <div id="progress_display" style="visibility:hidden">
             Downloading: <span id="download_percent">0 MB</span> <progress id="download_progress" value="50" max="100">50%</progress>
+            <button title="Cancel Download" id="cancel_btn">X</button>
         </div>
     </div>
     {% if meta.query != '*' %}
@@ -165,10 +170,19 @@
         });
     }
 
+    var cancelled = false;
+
+    function cancel_download() {
+        // This will interrupt the download of chunks
+        cancelled = true;
+        // hide progress
+        showProgress(0, 0, true);
+        enableDownloadButtons(true);
+    }
+
     async function download_csv(filter){
         enableDownloadButtons(false);
         const rowCount = filter ? parseInt("{{ meta.totalCount }}") : parseInt("{{ meta.rowCount }}");
-        console.log('rowCount', filter, rowCount);
         const tableName = "{{ data.name }}.csv";
         // Use 10 batches, or max 1000 rows per batch
         const MAX_BATCH_ROWS = 1000;
@@ -181,8 +195,9 @@
         let count = 0;
         let bytes = 0;
         let blobData = [];
+        cancelled = false;
         showProgress(0, 0)
-        while(count <= rowCount) {
+        while(count <= rowCount && !cancelled) {
             let url = `${csvUrl}?&limit=${batchSize}&offset=${count}&header=${count===0 ? 'true' : 'false'}`;
             if (filter) {
                 url += `&query=${query}`;
@@ -195,7 +210,9 @@
         }
         showProgress(100, bytes);
 
-        downloadString(blobData, "text/csv", tableName);
+        if (!cancelled) {
+            downloadString(blobData, "text/csv", tableName);
+        }
 
         // hide progress
         showProgress(100, bytes, true);
@@ -212,6 +229,10 @@
     document.getElementById("download_current_view").addEventListener("click", function(){
         // Don't need progressing download, just use URL directly
         window.location.href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.limit }}&offset={{ meta.offset }}&query={{ meta.query|urlencode }}";
+    });
+
+    document.getElementById("cancel_btn").addEventListener("click", function() {
+        cancel_download();
     });
 
     </script>
