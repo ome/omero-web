@@ -185,7 +185,7 @@
         const rowCount = filter ? parseInt("{{ meta.totalCount }}") : parseInt("{{ meta.rowCount }}");
         const tableName = "{{ data.name }}.csv";
         // Use 10 batches, or max 1000 rows per batch
-        const MAX_BATCH_ROWS = 1000;
+        const MAX_BATCH_ROWS = 3000;
         const batchSize = Math.min(parseInt(rowCount/10), MAX_BATCH_ROWS);
 
         // load csv in batches...
