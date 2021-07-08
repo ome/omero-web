@@ -181,7 +181,7 @@
         let count = 0;
         let bytes = 0;
         let blobData = [];
-        showProgress(0)
+        showProgress(0, 0)
         while(count <= rowCount) {
             let url = `${csvUrl}?&limit=${batchSize}&offset=${count}&header=${count===0 ? 'true' : 'false'}`;
             if (filter) {
