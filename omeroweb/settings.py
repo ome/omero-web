@@ -36,6 +36,7 @@ import omero.clients
 import tempfile
 import re
 import json
+import pytz
 import random
 import string
 from builtins import str as text
@@ -227,16 +228,12 @@ def identity(x):
     return x
 
 
-def json_or_plain_str(s):
+def check_timezone(s):
     """
-    Most omero.web properties are JSON objects but some are plain strings.
-    Use this to allow both JSON objects/strings and plain strings. Obviously
-    this can only be used when the plain string can't also be a JSON object.
+    Checks that string is a valid time-zone. If not, raise Exception
     """
-    try:
-        return json.loads(s)
-    except ValueError:
-        return s
+    pytz.timezone(s)
+    return s
 
 
 def str_slash(s):
@@ -1072,24 +1069,13 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.time_zone": [
         "TIME_ZONE",
-        "UTC",
-        json_or_plain_str,
+        "Europe/London",
+        check_timezone,
         (
             "Time zone for this installation. Choices can be found in the "
             "``TZ database name`` column of: "
             "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones "
-            'Default ``"UTC"``'
-        ),
-    ],
-    "omero.web.server_returns_utc": [
-        "OMERO_SERVER_RETURNS_UTC",
-        "true",
-        parse_boolean,
-        (
-            "Should OMERO.server date-times be treated as UTC. If ``true`` "
-            "attempt to do client side local time-zone conversion, If "
-            "``false`` assumes date-times returned by OMERO.server are already "
-            "in localtime."
+            'Default ``"Europe/London"``'
         ),
     ],
     "omero.web.django_additional_settings": [
