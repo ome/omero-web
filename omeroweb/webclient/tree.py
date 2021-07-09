@@ -505,7 +505,9 @@ def marshal_datasets(
 def _marshal_date(time):
     try:
         d = datetime.fromtimestamp(old_div(time, 1000))
-        return d.isoformat() + "Z"
+        # Format UTC date according to local timezone (settings.TIME_ZONE)
+        # If this is UTC, client can format to it's own timezone.
+        return d.isoformat()
     except ValueError:
         return ""
 
