@@ -202,10 +202,23 @@
             if (filter) {
                 url += `&query=${query}`;
             }
-            const csvString = await fetch(url).then(rsp => rsp.body.getReader()).then(reader => readData(reader));
-            blobData.push(csvString);
-            bytes += csvString.length;
-            count += batchSize;
+            const csvString = await fetch(url)
+            .then(rsp => {
+                if (rsp.status != 200) {
+                    throw rsp;
+                }
+                return rsp.body.getReader();
+            })
+            .then(reader => readData(reader))
+            .catch(rsp => {
+                console.log("FAILED to load chunk:", url);
+            });
+            if (csvString !== undefined) {
+                console.log("csvString.length", csvString.length);
+                blobData.push(csvString);
+                bytes += csvString.length;
+                count += batchSize;
+            }
             showProgress((count/rowCount) * 100, bytes);
         }
         showProgress(100, bytes);
