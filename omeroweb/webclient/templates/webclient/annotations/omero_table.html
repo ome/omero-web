@@ -184,8 +184,9 @@
         enableDownloadButtons(false);
         const rowCount = filter ? parseInt("{{ meta.totalCount }}") : parseInt("{{ meta.rowCount }}");
         const tableName = "{{ data.name }}.csv";
-        // Use 10 batches, or max 1000 rows per batch
+        // Use 10 batches, or max 3000 rows per batch
         const MAX_BATCH_ROWS = 3000;
+        const MAX_FAILED_CALLS = 5;
         const batchSize = Math.min(parseInt(rowCount/10), MAX_BATCH_ROWS);
 
         // load csv in batches...
@@ -196,7 +197,8 @@
         let bytes = 0;
         let blobData = [];
         cancelled = false;
-        showProgress(0, 0)
+        showProgress(0, 0);
+        failedChunks = 0;
         while(count <= rowCount && !cancelled) {
             let url = `${csvUrl}?&limit=${batchSize}&offset=${count}&header=${count===0 ? 'true' : 'false'}`;
             if (filter) {
@@ -212,6 +214,10 @@
             .then(reader => readData(reader))
             .catch(rsp => {
                 console.log("FAILED to load chunk:", url);
+                failedChunks += 1;
+                if (failedChunks >= MAX_FAILED_CALLS){
+                    cancelled = true;
+                }
             });
             if (csvString !== undefined) {
                 console.log("csvString.length", csvString.length);
@@ -225,6 +231,8 @@
 
         if (!cancelled) {
             downloadString(blobData, "text/csv", tableName);
+        } else if (failedChunks >= MAX_FAILED_CALLS) {
+            alert(`Downloading cancelled due to ${failedChunks} failed reads of table data.`)
         }
 
         // hide progress
