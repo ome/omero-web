@@ -3088,7 +3088,9 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
 table_metadata = login_required()(jsonp(_table_metadata))
 
 
-def _obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+@login_required()
+@jsonp
+def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     col_name = request.GET.get("col_name", "object")
     if query is None:
         query = request.GET.get("query")
@@ -3102,7 +3104,6 @@ def _obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs
         limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
 
     rsp_data = perform_table_query(conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False)
-    bitmask = bytearray()
     index = 0
     value = 0
     data = bytearray()
@@ -3113,15 +3114,11 @@ def _obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs
             if index % 8 == 0:
                 data.append(value)
                 value = 0
-                counter = 0
         # index == obj_id
         value += 2 ** (index % 8)
     if value != 0:
         data.append(value)
     return HttpResponse(bytes(data), content_type='application/octet-stream')
-
-
-obj_id_bitmask = login_required()(_obj_id_bitmask)
 
 
 @login_required()
