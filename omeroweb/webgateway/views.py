@@ -2922,18 +2922,8 @@ def perform_table_query(conn, fileid, query, col_names, offset=0, limit=None, la
         column_names = [col.name for col in cols]
         rows = t.getNumberOfRows()
 
-        offset = kwargs.get("offset", 0)
-        limit = kwargs.get("limit", None)
-        if not offset:
-            offset = int(request.GET.get("offset", 0))
-        if not limit:
-            limit = (
-                int(request.GET.get("limit"))
-                if request.GET.get("limit") is not None
-                else rows
-            )
         range_start = offset
-        range_size = limit
+        range_size = limit if limit is not None else rows
         range_end = min(rows, range_start + range_size)
 
         if query == "*":
@@ -3030,13 +3020,17 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     if not query:
         return dict(error="Must specify query parameter, use * to retrieve all")
     col_names = request.GET.getlist("col_names")
+
     offset = kwargs.get("offset", 0)
     limit = kwargs.get("limit", None)
     if not offset:
         offset = int(request.GET.get("offset", 0))
     if not limit:
-        limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
-
+        limit = (
+            int(request.GET.get("limit"))
+            if request.GET.get("limit") is not None
+            else None
+        )
     return perform_table_query(conn, fileid, query, col_names, offset=offset, limit=limit, lazy=False)
 
 
@@ -3096,12 +3090,17 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
         query = request.GET.get("query")
     if not query:
         return dict(error="Must specify query parameter, use * to retrieve all")
+
     offset = kwargs.get("offset", 0)
     limit = kwargs.get("limit", None)
     if not offset:
         offset = int(request.GET.get("offset", 0))
     if not limit:
-        limit = int(request.GET.get("limit")) if request.GET.get("limit") is not None else None
+        limit = (
+            int(request.GET.get("limit"))
+            if request.GET.get("limit") is not None
+            else None
+        )
 
     rsp_data = perform_table_query(conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False)
     index = 0
