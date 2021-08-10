@@ -2934,7 +2934,6 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
 
     try:
         cols = t.getHeaders()
-        column_names = [col.name for col in cols]
         col_indices = range(len(cols))
         if col_names:
             enumerated_columns = (
@@ -2951,6 +2950,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                         cols.append(j)
                         break
 
+        column_names = [col.name for col in cols]
         rows = t.getNumberOfRows()
 
         offset = kwargs.get("offset", 0)
