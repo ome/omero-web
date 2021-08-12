@@ -2892,7 +2892,9 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 annotations = login_required()(jsonp(_bulk_file_annotations))
 
 
-def perform_table_query(conn, fileid, query, col_names, offset=0, limit=None, lazy=False):
+def perform_table_query(
+    conn, fileid, query, col_names, offset=0, limit=None, lazy=False
+):
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
 
@@ -2948,6 +2950,7 @@ def perform_table_query(conn, fileid, query, col_names, offset=0, limit=None, la
                 return dict(error="Error executing query: %s" % query)
 
         logger.info("Retrieving {} rows".format(len(hits)))
+
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
             idx = 0
@@ -2957,7 +2960,10 @@ def perform_table_query(conn, fileid, query, col_names, offset=0, limit=None, la
                 res = table.slice(col_indices, h[idx : idx + batch])
                 idx += batch
                 # yield a list of rows
-                yield [[col.values[row] for col in res.columns] for row in range(0,len(res.rowNumbers))]
+                yield [
+                    [col.values[row] for col in res.columns]
+                    for row in range(0, len(res.rowNumbers))
+                ]
 
         row_gen = row_generator(t, hits)
 
@@ -2988,6 +2994,7 @@ def perform_table_query(conn, fileid, query, col_names, offset=0, limit=None, la
     finally:
         if not lazy:
             t.close()
+
 
 def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     """
@@ -3031,7 +3038,9 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             if request.GET.get("limit") is not None
             else None
         )
-    return perform_table_query(conn, fileid, query, col_names, offset=offset, limit=limit, lazy=False)
+    return perform_table_query(
+        conn, fileid, query, col_names, offset=offset, limit=limit, lazy=False
+    )
 
 
 table_query = login_required()(jsonp(_table_query))
@@ -3102,11 +3111,13 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
             else None
         )
 
-    rsp_data = perform_table_query(conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False)
+    rsp_data = perform_table_query(
+        conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False
+    )
     index = 0
     value = 0
     data = bytearray()
-    for obj in rsp_data['data']['rows']:
+    for obj in rsp_data["data"]["rows"]:
         obj_id = int(obj[0])
         while index < obj_id:
             index += 1
@@ -3117,7 +3128,7 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
         value += 2 ** (index % 8)
     if value != 0:
         data.append(value)
-    return HttpResponse(bytes(data), content_type='application/octet-stream')
+    return HttpResponse(bytes(data), content_type="application/octet-stream")
 
 
 @login_required()
