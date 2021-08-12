@@ -3107,7 +3107,7 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
     value = 0
     data = bytearray()
     for obj in rsp_data['data']['rows']:
-        obj_id = obj[0]
+        obj_id = int(obj[0])
         while index < obj_id:
             index += 1
             if index % 8 == 0:
