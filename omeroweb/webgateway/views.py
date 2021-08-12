@@ -3039,7 +3039,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             else None
         )
     return perform_table_query(
-        conn, fileid, query, col_names, offset=offset, limit=limit, lazy=False
+        conn, fileid, query, col_names, offset=offset, limit=limit, lazy=lazy
     )
 
 
