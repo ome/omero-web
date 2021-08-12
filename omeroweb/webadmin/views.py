@@ -1071,6 +1071,7 @@ def my_account(request, action=None, conn=None, **kwargs):
         "experimenter": experimenter,
         "ownedGroups": ownedGroups,
         "password_form": password_form,
+        "hasAvatar": hasAvatar,
     }
     context["freeSpace"] = conn.getFreeSpace()
     context["template"] = template
@@ -1088,8 +1089,6 @@ def myphoto(request, conn=None, **kwargs):
 def manage_avatar(request, action=None, conn=None, **kwargs):
     template = "webadmin/avatar.html"
 
-    edit_mode = False
-    photo_size = None
     form_file = UploadPhotoForm()
 
     if action == "upload":
@@ -1097,29 +1096,14 @@ def manage_avatar(request, action=None, conn=None, **kwargs):
             form_file = UploadPhotoForm(request.POST, request.FILES)
             if form_file.is_valid():
                 attach_photo(conn, request.FILES["photo"])
-                return HttpResponseRedirect(
-                    reverse(
-                        viewname="wamanageavatar", args=[conn.getEventContext().userId]
-                    )
-                )
-    elif action == "crop":
-        x1 = int(request.POST.get("x1"))
-        x2 = int(request.POST.get("x2"))
-        y1 = int(request.POST.get("y1"))
-        y2 = int(request.POST.get("y2"))
-        box = (x1, y1, x2, y2)
-        conn.cropExperimenterPhoto(box)
-        return HttpResponseRedirect(reverse("wamyaccount"))
-    elif action == "editphoto":
-        photo_size = conn.getExperimenterPhotoSize()
-        if photo_size is not None:
-            edit_mode = True
+                return HttpResponseRedirect(reverse(viewname="wamanageavatar"))
     elif action == "deletephoto":
-        conn.deleteExperimenterPhoto()
-        return HttpResponseRedirect(reverse("wamyaccount"))
+        if request.method == "POST":
+            conn.deleteExperimenterPhoto()
+            return HttpResponseRedirect(reverse("wamyaccount"))
 
-    photo_size = conn.getExperimenterPhotoSize()
-    context = {"form_file": form_file, "edit_mode": edit_mode, "photo_size": photo_size}
+    has_photo = conn.hasExperimenterPhoto()
+    context = {"form_file": form_file, "has_photo": has_photo}
     context["template"] = template
     return context
 

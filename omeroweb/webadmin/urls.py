@@ -80,8 +80,10 @@ urlpatterns = [
         views.drivespace_json,
         name="waloaddrivespace_user",
     ),
+    # NB: eid is not used and is optional in URL.
+    # Left in place to avoid breaking change.
     url(
-        r"^change_avatar/(?P<eid>[0-9]+)/(?:(?P<action>[a-z]+)/)?$",
+        r"^change_avatar/(?:(?P<eid>[0-9]+)/)?(?:(?P<action>[a-z]+)/)?$",
         views.manage_avatar,
         name="wamanageavatar",
     ),

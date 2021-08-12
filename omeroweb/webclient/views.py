@@ -1062,8 +1062,14 @@ def _api_links_POST(conn, json_data, **kwargs):
         ptype = parent_type.title()
         if ptype in ["Tagset", "Tag"]:
             ptype = "TagAnnotation"
-        p = conn.getQueryService().get(ptype, parent_id, conn.SERVICE_OPTS)
-        conn.SERVICE_OPTS.setOmeroGroup(p.details.group.id.val)
+        try:
+            p = conn.getQueryService().get(ptype, parent_id, conn.SERVICE_OPTS)
+            conn.SERVICE_OPTS.setOmeroGroup(p.details.group.id.val)
+        except omero.ValidationException:
+            return JsonResponse(
+                {"error": "Object of type %s and ID %s not found" % (ptype, parent_id)},
+                status=404,
+            )
         logger.info("api_link: Saving %s links" % len(linksToSave))
 
         try:
@@ -4942,7 +4948,11 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
             status = "no processor available"
             message = ""  # template displays message and link
         else:
-            logger.error(traceback.format_exc())
+            # Don't log user mistake as ERROR
+            if isinstance(x, omero.ValidationException):
+                logger.debug(x.message)
+            else:
+                logger.error(traceback.format_exc())
             error = traceback.format_exc()
             status = "failed"
             message = x.message

@@ -183,7 +183,7 @@ $(function(){
             thumbs.slice(start, end + 1).parent().parent().addClass("ui-selected");
             
         }
-        else if (event && event.metaKey) {
+        else if (event && event[OME.multi_key() + "Key"]) {
             if ( primaryIndex === -1 ) {
                 primaryIndex = selIndex;
             }

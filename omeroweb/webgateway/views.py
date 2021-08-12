@@ -2966,6 +2966,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
                         cols.append(j)
                         break
 
+        column_names = [col.name for col in cols]
         rows = t.getNumberOfRows()
 
         offset = kwargs.get("offset", 0)
@@ -2988,7 +2989,12 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         else:
             match = re.match(r"^(\w+)-(\d+)", query)
             if match:
-                query = "(%s==%s)" % (match.group(1), match.group(2))
+                c_name = match.group(1)
+                if c_name in ("Image", "Roi", "Plate", "Well"):
+                    # older tables may have column named e.g. 'image'
+                    if c_name not in column_names and c_name.lower() in column_names:
+                        c_name = c_name.lower()
+                query = "(%s==%s)" % (c_name, match.group(2))
             try:
                 logger.info(query)
                 hits = t.getWhereList(query, None, 0, rows, 1)
@@ -3017,7 +3023,7 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         rsp_data = {
             "data": {
                 "column_types": [col.__class__.__name__ for col in cols],
-                "columns": [col.name for col in cols],
+                "columns": column_names,
             },
             "meta": {
                 "rowCount": rows,
@@ -3058,7 +3064,18 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
     try:
         cols = t.getHeaders()
         rows = t.getNumberOfRows()
+        allmeta = t.getAllMetadata()
 
+        user_metadata = {}
+        for k in allmeta:
+            if allmeta[k].__class__ == omero.rtypes.RStringI:
+                try:
+                    val = json.loads(allmeta[k].val)
+                    user_metadata[k] = val
+                except json.decoder.JSONDecodeError:
+                    user_metadata[k] = allmeta[k].val
+            else:
+                user_metadata[k] = allmeta[k].val
         rsp_data = {
             "columns": [
                 {
@@ -3069,6 +3086,7 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
                 for col in cols
             ],
             "totalCount": rows,
+            "user_metadata": user_metadata,
         }
         return rsp_data
     finally:
