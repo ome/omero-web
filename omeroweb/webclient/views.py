@@ -3248,6 +3248,7 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
         if "RoiColumn" in col_types:
             context["roi_column_index"] = col_types.index("RoiColumn")
         # we don't use ShapeColumn type - just check name and LongColumn type...
+        # TODO: when ShapeColumn is supported, add handling to this code
         cnames = [n.lower() for n in context["data"]["columns"]]
         if "shape" in cnames and col_types[cnames.index("shape")] == "LongColumn":
             context["shape_column_index"] = cnames.index("shape")
