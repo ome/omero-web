@@ -3114,20 +3114,19 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
     rsp_data = perform_table_query(
         conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False
     )
-    index = 0
-    value = 0
-    data = bytearray()
+    maxval = 0
     for obj in rsp_data["data"]["rows"]:
         obj_id = int(obj[0])
-        while index < obj_id:
-            index += 1
-            if index % 8 == 0:
-                data.append(value)
-                value = 0
-        # index == obj_id
-        value += 2 ** (index % 8)
-    if value != 0:
-        data.append(value)
+        maxval = max(obj_id, maxval)
+    index = 0
+    value = 0
+    bytesSize = (maxval // 8) + 1
+    data = bytearray(bytesSize)
+    for obj in rsp_data["data"]["rows"]:
+        obj_id = int(obj[0])
+        byteIdx = obj_id // 8
+        bitToSet = obj_id % 8
+        data[byteIdx] = data[byteIdx] | 2 ** (bitToSet)
     return HttpResponse(bytes(data), content_type="application/octet-stream")
 
 
