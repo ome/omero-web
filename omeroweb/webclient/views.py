@@ -3165,6 +3165,12 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     """
     Download OMERO.table as CSV (streaming response) or return as HTML or json
 
+    Request parameters:
+    header: 'false' excludes the column names row if mtype is 'csv'
+    offset: table rows offset for pagination
+    limit: table rows limit for pagination
+    query: OMERO.table query for filtering rows
+
     @param file_id:     OriginalFile ID
     @param mtype:       None for html table or 'csv' or 'json'
     @param conn:        BlitzGateway connection
@@ -3196,10 +3202,12 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     # OR, return as csv or html
     if mtype == "csv":
         table_data = context.get("data")
+        hide_header = request.GET.get("header") == "false"
 
         def csv_gen():
-            csv_cols = ",".join(table_data.get("columns"))
-            yield csv_cols
+            if not hide_header:
+                csv_cols = ",".join(table_data.get("columns"))
+                yield csv_cols
             for rows in table_data.get("lazy_rows"):
                 yield (
                     "\n" + "\n".join([",".join([str(d) for d in row]) for row in rows])
@@ -3247,6 +3255,11 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
             context["well_column_index"] = col_types.index("WellColumn")
         if "RoiColumn" in col_types:
             context["roi_column_index"] = col_types.index("RoiColumn")
+        # we don't use ShapeColumn type - just check name and LongColumn type...
+        # TODO: when ShapeColumn is supported, add handling to this code
+        cnames = [n.lower() for n in context["data"]["columns"]]
+        if "shape" in cnames and col_types[cnames.index("shape")] == "LongColumn":
+            context["shape_column_index"] = cnames.index("shape")
         # provide example queries - pick first DoubleColumn...
         for idx, c_type in enumerate(col_types):
             if c_type in ("DoubleColumn", "LongColumn"):

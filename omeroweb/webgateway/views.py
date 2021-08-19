@@ -2949,7 +2949,12 @@ def perform_table_query(
             except Exception:
                 return dict(error="Error executing query: %s" % query)
 
-        logger.info("Retrieving {} rows".format(len(hits)))
+        if len(hits) > settings.MAX_TABLE_DOWNLOAD_ROWS:
+            error = (
+                "Trying to download %s rows exceeds configured"
+                " omero.web.max_table_download_rows of %s"
+            ) % (len(hits), settings.MAX_TABLE_DOWNLOAD_ROWS)
+            return {"error": error, "status": 404}
 
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
