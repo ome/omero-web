@@ -2893,7 +2893,7 @@ annotations = login_required()(jsonp(_bulk_file_annotations))
 
 
 def perform_table_query(
-    conn, fileid, query, col_names, offset=0, limit=None, lazy=False
+    conn, fileid, query, col_names, offset=0, limit=None, lazy=False, check_max_rows=True
 ):
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
@@ -2949,12 +2949,13 @@ def perform_table_query(
             except Exception:
                 return dict(error="Error executing query: %s" % query)
 
-        if len(hits) > settings.MAX_TABLE_DOWNLOAD_ROWS:
-            error = (
-                "Trying to download %s rows exceeds configured"
-                " omero.web.max_table_download_rows of %s"
-            ) % (len(hits), settings.MAX_TABLE_DOWNLOAD_ROWS)
-            return {"error": error, "status": 404}
+        if check_max_rows:
+            if len(hits) > settings.MAX_TABLE_DOWNLOAD_ROWS:
+                error = (
+                    "Trying to download %s rows exceeds configured"
+                    " omero.web.max_table_download_rows of %s"
+                ) % (len(hits), settings.MAX_TABLE_DOWNLOAD_ROWS)
+                return {"error": error, "status": 404}
 
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
@@ -3117,7 +3118,8 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
         )
 
     rsp_data = perform_table_query(
-        conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False
+        conn, fileid, query, [col_name], offset=offset, limit=limit, lazy=False,
+        check_max_rows=False
     )
     maxval = 0
     for obj in rsp_data["data"]["rows"]:
