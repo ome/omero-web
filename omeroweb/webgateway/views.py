@@ -3118,8 +3118,6 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
     for obj in rsp_data["data"]["rows"]:
         obj_id = int(obj[0])
         maxval = max(obj_id, maxval)
-    index = 0
-    value = 0
     bytesSize = (maxval // 8) + 1
     data = bytearray(bytesSize)
     for obj in rsp_data["data"]["rows"]:
