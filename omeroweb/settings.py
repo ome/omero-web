@@ -832,7 +832,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.show_forgot_password": [
         "SHOW_FORGOT_PASSWORD",
-        'true',
+        "true",
         json.loads,
         (
             "Allows to hide 'Forgot password' from the login view"
