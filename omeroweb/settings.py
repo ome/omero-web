@@ -830,6 +830,15 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "(OME team by default)."
         ),
     ],
+    "omero.web.show_forgot_password": [
+        "SHOW_FORGOT_PASSWORD",
+        'true',
+        json.loads,
+        (
+            "Allows to hide 'Forgot password' from the login view"
+            " - useful for LDAP/ActiveDir installations"
+        ),
+    ],
     "omero.web.staticfile_dirs": [
         "STATICFILES_DIRS",
         "[]",

@@ -143,7 +143,11 @@
         	<input type="submit" value="Login" />
 
             <div>
-                <p><a href="{% url 'waforgottenpassword' %}">Forgot your password?</a></p>
+                <p style="min-height: 15px">
+		    {% if show_forgot_password %}
+		        <a href="{% url 'waforgottenpassword' %}">Forgot your password?</a>
+		    {% endif %}
+		</p>
             </div>
 
             {% if public_enabled %}
