@@ -834,9 +834,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "FAVICON_URL",
         '"webgateway/img/ome.ico"',
         json.loads,
-        (
-            "Favicon URL, specifies the path relative to django's static file dirs."
-        ),
+        ("Favicon URL, specifies the path relative to django's static file dirs."),
     ],
     "omero.web.staticfile_dirs": [
         "STATICFILES_DIRS",
