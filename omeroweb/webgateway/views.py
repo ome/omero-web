@@ -3134,6 +3134,8 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
         lazy=False,
         check_max_rows=False,
     )
+    if 'error' in rsp_data:
+        return rsp_data
     maxval = 0
     for obj in rsp_data["data"]["rows"]:
         obj_id = int(obj[0])
