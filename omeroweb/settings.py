@@ -833,7 +833,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     "omero.web.show_forgot_password": [
         "SHOW_FORGOT_PASSWORD",
         "true",
-        json.loads,
+        parse_boolean,
         (
             "Allows to hide 'Forgot password' from the login view"
             " - useful for LDAP/ActiveDir installations"
