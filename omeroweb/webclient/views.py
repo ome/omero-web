@@ -558,6 +558,8 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["current_admin_privileges"] = conn.getCurrentAdminPrivileges()
     context["leader_of_groups"] = conn.getEventContext().leaderOfGroups
     context["member_of_groups"] = conn.getEventContext().memberOfGroups
+    context["search_default_user"] = settings.SEARCH_DEFAULT_USER
+    context["search_default_group"] = settings.SEARCH_DEFAULT_GROUP
 
     return context
 

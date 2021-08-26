@@ -944,6 +944,18 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "?highlight=limit_request_line"
         ),
     ],
+    "omero.web.search.default_user": [
+        "SEARCH_DEFAULT_USER",
+        0,
+        int,
+        ("ID of user to pre-select in search form."),
+    ],
+    "omero.web.search.default_group": [
+        "SEARCH_DEFAULT_GROUP",
+        0,
+        int,
+        ("ID of group to pre-select in search form."),
+    ],
     "omero.web.ui.top_links": [
         "TOP_LINKS",
         (
