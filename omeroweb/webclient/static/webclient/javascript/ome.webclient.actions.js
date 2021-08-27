@@ -711,7 +711,7 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
 
     // Check if delete will attempt to partially delete a Fileset.
     var $deleteYesBtn = $('.delete_confirm_dialog .ui-dialog-buttonset button:nth-child(1)'),
-        $deleteNoBtn = $('.delete_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span');
+        $deleteNoBtn = $('.delete_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
     $.get(filesetCheckUrl + "?" + OME.get_tree_selection(), function(html){
         html = html.trim();
         if($('div.split_fileset', html).length > 0) {
