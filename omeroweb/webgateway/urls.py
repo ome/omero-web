@@ -54,6 +54,16 @@ table_obj_id_bitmask = url(
 )
 """
 Get object id bitmask
+The user specifies a fileid for an OMERO Table and a query, and
+optionally provides a "col_name" query parameter for the column
+name to get a bitmask for. By default, "object" is used.
+The server will return a bitmask with the nth bit flipped to 1
+if the query returns a row where the col_name has a value of n.
+The bits returned are 0-indexed.
+E.g. if your query returns col_name values of 1, 7, 11, and 12,
+you will get back 2 bytes and the bitmask will be 0100000100011000
+Note that the 1st, 7th, 11th, and 12th bits are flipped to 1 and
+the rest are 0.
 """
 
 object_table_query = url(
