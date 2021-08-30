@@ -3139,6 +3139,7 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
     data = rowsToByteArray(rsp_data["data"]["rows"])
     return HttpResponse(bytes(data), content_type="application/octet-stream")
 
+
 def rowsToByteArray(rows):
     maxval = 0
     for obj in rows:
