@@ -3136,18 +3136,22 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs)
     )
     if "error" in rsp_data:
         return rsp_data
+    data = rowsToByteArray(rsp_data["data"]["rows"])
+    return HttpResponse(bytes(data), content_type="application/octet-stream")
+
+def rowsToByteArray(rows):
     maxval = 0
-    for obj in rsp_data["data"]["rows"]:
+    for obj in rows:
         obj_id = int(obj[0])
         maxval = max(obj_id, maxval)
     bytesSize = (maxval // 8) + 1
     data = bytearray(bytesSize)
-    for obj in rsp_data["data"]["rows"]:
+    for obj in rows:
         obj_id = int(obj[0])
         byteIdx = obj_id // 8
         bitToSet = obj_id % 8
         data[byteIdx] = data[byteIdx] | 2 ** (bitToSet)
-    return HttpResponse(bytes(data), content_type="application/octet-stream")
+    return data
 
 
 @login_required()
