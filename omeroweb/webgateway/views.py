@@ -21,6 +21,7 @@ from functools import wraps
 import omero
 import omero.clients
 from past.builtins import unicode
+import numpy
 
 from django.http import (
     HttpResponse,
@@ -3145,13 +3146,14 @@ def rowsToByteArray(rows):
     for obj in rows:
         obj_id = int(obj[0])
         maxval = max(obj_id, maxval)
-    bytesSize = (maxval // 8) + 1
-    data = bytearray(bytesSize)
+    bitArray = numpy.zeros(maxval + 1, dtype='uint8')
     for obj in rows:
         obj_id = int(obj[0])
-        byteIdx = obj_id // 8
-        bitToSet = obj_id % 8
-        data[byteIdx] = data[byteIdx] | 2 ** (bitToSet)
+        bitArray[obj_id] = 1
+    packed = numpy.packbits(bitArray, bitorder='big')
+    data = bytearray()
+    for val in packed:
+        data.append(val)
     return data
 
 
