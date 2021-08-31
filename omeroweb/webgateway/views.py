@@ -3106,7 +3106,34 @@ table_metadata = login_required()(jsonp(_table_metadata))
 
 @login_required()
 @jsonp
-def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
+    """
+    Get an ID bitmask representing which ids match the given query
+    Returns a http response where the content is a 0-indexed array of
+    big-endian bit-ordered bytes representing the selected ids.
+    E.g. if your query returns IDs 1,2,7, 11, and 12, you will
+    get back 0110000100011000, or [97, 24]. The response will be the
+    smallest number of bytes necessary to represent all IDs and will
+    be padded with 0s to the end of the byte.
+
+    @param request:     http request; querystring must contain key 'query'
+                        with query to be executed, or '*' to retrieve all rows.
+                        If query is in the format word-number, e.g. "Well-7",
+                        if will be run as (word==number), e.g. "(Well==7)".
+                        This is supported to allow more readable query strings.
+                        querystring may optionally specify 'col_name' which is
+                        the ID column to use to create the mask. By default
+                        'object' is used.
+    @param fileid:      Numeric identifier of file containing the table
+    @param query:       The table query. If None, use request.GET.get('query')
+                        E.g. '*' to return all rows.
+                        If in the form 'colname-1', query will be (colname==1)
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    offset, limit
+    @return:            A dictionary with key 'error' with an error message
+                        or with an array of bytes as described above
+    """
+
     if not numpyInstalled:
         raise NotImplementedError("numpy not installed")
     col_name = request.GET.get("col_name", "object")
