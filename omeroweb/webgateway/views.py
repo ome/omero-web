@@ -3176,7 +3176,7 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
 def rowsToByteArray(rows):
     maxval = 0
     if len(rows) > 0 and type(rows[0][0]) == float:
-        raise ValueError('Cannot have ID of float')
+        raise ValueError("Cannot have ID of float")
     for obj in rows:
         obj_id = int(obj[0])
         maxval = max(obj_id, maxval)
