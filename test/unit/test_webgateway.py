@@ -386,9 +386,10 @@ class TestWebGatewayCache(object):
         self.wcache.clear()
         assert self.wcache._json_cache._num_entries == 0
 
+
 class TestViews(object):
     def testRowstoByteArray(self):
-        rows = [[1],[2],[7],[11],[12]]
+        rows = [[1], [2], [7], [11], [12]]
         data = views.rowsToByteArray(rows)
-        assert data[0] == 97  #01100001 First, Second and 7th bits
-        assert data[1] == 24  #00011000 11th and 12th bits
+        assert data[0] == 97  # 01100001 First, Second and 7th bits
+        assert data[1] == 24  # 00011000 11th and 12th bits

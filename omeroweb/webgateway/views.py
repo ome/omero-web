@@ -3146,11 +3146,11 @@ def rowsToByteArray(rows):
     for obj in rows:
         obj_id = int(obj[0])
         maxval = max(obj_id, maxval)
-    bitArray = numpy.zeros(maxval + 1, dtype='uint8')
+    bitArray = numpy.zeros(maxval + 1, dtype="uint8")
     for obj in rows:
         obj_id = int(obj[0])
         bitArray[obj_id] = 1
-    packed = numpy.packbits(bitArray, bitorder='big')
+    packed = numpy.packbits(bitArray, bitorder="big")
     data = bytearray()
     for val in packed:
         data.append(val)
