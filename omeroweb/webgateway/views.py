@@ -3165,12 +3165,18 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
     )
     if "error" in rsp_data:
         return rsp_data
-    data = rowsToByteArray(rsp_data["data"]["rows"])
-    return HttpResponse(bytes(data), content_type="application/octet-stream")
+    try:
+        data = rowsToByteArray(rsp_data["data"]["rows"])
+        return HttpResponse(bytes(data), content_type="application/octet-stream")
+    except ValueError as e:
+        logger.error("ValueError when getting obj_id_bitmask")
+        return {"error": "Specified column has invalid type"}
 
 
 def rowsToByteArray(rows):
     maxval = 0
+    if len(rows) > 0 and type(rows[0][0]) == float:
+        raise ValueError('Cannot have ID of float')
     for obj in rows:
         obj_id = int(obj[0])
         maxval = max(obj_id, maxval)
