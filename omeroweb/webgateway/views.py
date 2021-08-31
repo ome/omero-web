@@ -21,7 +21,6 @@ from functools import wraps
 import omero
 import omero.clients
 from past.builtins import unicode
-import numpy
 
 from django.http import (
     HttpResponse,
@@ -3108,6 +3107,8 @@ table_metadata = login_required()(jsonp(_table_metadata))
 @login_required()
 @jsonp
 def obj_id_bitmask(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+    if not numpyInstalled:
+        raise NotImplementedError("numpy not installed")
     col_name = request.GET.get("col_name", "object")
     if query is None:
         query = request.GET.get("query")
