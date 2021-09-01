@@ -3168,7 +3168,7 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
     try:
         data = rowsToByteArray(rsp_data["data"]["rows"])
         return HttpResponse(bytes(data), content_type="application/octet-stream")
-    except ValueError as e:
+    except ValueError:
         logger.error("ValueError when getting obj_id_bitmask")
         return {"error": "Specified column has invalid type"}
 
