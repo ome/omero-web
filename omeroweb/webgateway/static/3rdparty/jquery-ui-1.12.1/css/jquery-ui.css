@@ -129,6 +129,17 @@
 	/* support: IE10, see #8844 */
 	list-style-image: url("data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
 }
+
+/* EDIT - copied from jquery-ui-1.10.4/themes/base/jquery.ui.menu.css */
+.ui-menu .ui-menu-item a {
+	text-decoration: none;
+    display: block;
+    padding: 2px .4em;
+    line-height: 1.5;
+    min-height: 0;
+    font-weight: normal;
+}
+
 .ui-menu .ui-menu-item-wrapper {
 	position: relative;
 	padding: 3px 1em 3px .4em;
@@ -143,6 +154,12 @@
 .ui-menu .ui-state-focus,
 .ui-menu .ui-state-active {
 	margin: -1px;
+}
+
+/* Fixes auto-complete menu in mapr */
+.ui-menu-item a.ui-state-active{
+    background: #D4D6D8;
+	margin: 0;
 }
 
 /* icon support */
