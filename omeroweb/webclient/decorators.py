@@ -238,3 +238,4 @@ class render_response(omeroweb.decorators.render_response):
         context["ome"]["center_plugins"] = c_plugins
 
         context["ome"]["user_dropdown"] = settings.USER_DROPDOWN
+        context["ome"]["login_view"] = settings.LOGIN_VIEW
