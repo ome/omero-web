@@ -36,6 +36,7 @@ import omero.clients
 import tempfile
 import re
 import json
+import pytz
 import random
 import string
 from builtins import str as text
@@ -225,6 +226,14 @@ def check_session_engine(s):
 
 def identity(x):
     return x
+
+
+def check_timezone(s):
+    """
+    Checks that string is a valid time-zone. If not, raise Exception
+    """
+    pytz.timezone(s)
+    return s
 
 
 def str_slash(s):
@@ -1077,6 +1086,17 @@ CUSTOM_SETTINGS_MAPPINGS = {
         str,
         "Whether to allow OMERO.web to be loaded in a frame.",
     ],
+    "omero.web.time_zone": [
+        "TIME_ZONE",
+        "Europe/London",
+        check_timezone,
+        (
+            "Time zone for this installation. Choices can be found in the "
+            "``TZ database name`` column of: "
+            "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones "
+            'Default ``"Europe/London"``'
+        ),
+    ],
     "omero.web.django_additional_settings": [
         "DJANGO_ADDITIONAL_SETTINGS",
         "[]",
@@ -1353,10 +1373,6 @@ report_settings(sys.modules[__name__])
 
 SITE_ID = 1
 
-# Local time zone for this installation. Choices can be found here:
-# http://www.postgresql.org/docs/8.1/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE
-# although not all variations may be possible on all operating systems.
-TIME_ZONE = "Europe/London"
 FIRST_DAY_OF_WEEK = 0  # 0-Monday, ... 6-Sunday
 
 # LANGUAGE_CODE: A string representing the language code for this

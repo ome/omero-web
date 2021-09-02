@@ -421,6 +421,12 @@
                     }
 
                 {% endif %}
+
+
+                $('[data-isodate]').each(function() {
+                    $(this).text(OME.formatDate($(this).data('isodate')));
+                });
+
             });
             
     </script>
@@ -496,8 +502,8 @@
                 <table>
                     <tr>
                         <th>Creation Date:</th>
-                        <td id='creation_date'>{{ manager.dataset.getDate|date:"Y-m-d H:i:s" }}</td>
-                    </tr>                    
+                        <td id='creation_date' data-isodate='{{ manager.dataset.getDate|date:"r" }}'></td>
+                    </tr>
                 </table>
                 </div>
             {% else %}
@@ -523,7 +529,7 @@
                     <table>
                         <tr>
                             <th>Creation Date:</th>
-                            <td id='creation_date'>{{ manager.project.getDate|date:"Y-m-d H:i:s" }}</td>
+                            <td id='creation_date' data-isodate='{{ manager.project.getDate|date:"r" }}'></td>
                         </tr>
                     </table>
                     </div>
@@ -564,15 +570,15 @@
                 <table>
                     <tr>
                         <th>Creation Date:</th>
-                        <td id='creation_date'>{{ manager.acquisition.getDate|date:"Y-m-d H:i:s" }}</td>
+                        <td id='creation_date' data-isodate='{{ manager.acquisition.getDate|date:"r" }}'></td>
                     </tr>
                     <tr>
                         <th>Start Time:</th>
-                        <td>{{ manager.acquisition.getStartTime|date:"Y-m-d H:i:s" }}</td>
+                        <td data-isodate='{{ manager.acquisition.getStartTime|date:"r" }}'></td>
                     </tr>
                     <tr>
                         <th>End Time:</th>
-                        <td>{{ manager.acquisition.getEndTime|date:"Y-m-d H:i:s" }}</td>
+                        <td data-isodate='{{ manager.acquisition.getEndTime|date:"r" }}'></td>
                     </tr>
                 </table>
                 </div>
@@ -601,7 +607,7 @@
                     <table>
                         <tr>
                             <th>Creation Date:</th>
-                            <td id='creation_date'>{{ manager.plate.getDate|date:"Y-m-d H:i:s" }}</td>
+                            <td id='creation_date' data-isodate='{{ manager.plate.getDate|date:"r" }}'></td>
                         </tr>
                         <!--{% comment %}
                         <tr>
@@ -635,8 +641,8 @@
                         <table>
                             <tr>
                                 <th>Creation Date:</th>
-                                <td id='creation_date'>{{ manager.screen.getDate|date:"Y-m-d H:i:s" }}</td>
-                            </tr>                    
+                                <td id='creation_date' data-isodate='{{ manager.screen.getDate|date:"r" }}'></td>
+                            </tr>
                             <tr>
                                 <th>Plate Count:</th>
                                 <td id='child_count'>{{ manager.screen.countChildren }} {% plural manager.screen.countChildren 'plate' 'plates' %}</td>
@@ -703,7 +709,7 @@
                     </tr>
                     <tr>
                         <th>Creation Date:</th>
-                        <td id='creation_date'>{{ manager.tag.getDate|date:"Y-m-d H:i:s" }}</td>
+                        <td id='creation_date' data-isodate='{{ manager.tag.getDate|date:"r" }}'></td>
                     </tr>
                     <tr>
                         <th>Image Count:</th>
