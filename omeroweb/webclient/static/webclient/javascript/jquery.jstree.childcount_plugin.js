@@ -15,7 +15,7 @@
                 var anchor = $(obj).children('.jstree-anchor');
 
                 // Add child count html
-                if (node.data !== undefined && node.data.obj.childCount > 0) {
+                if (node?.data?.obj?.childCount > 0) {
                     var span = document.createElement('span');
                     $(span).addClass('children_count');
                     var text = document.createTextNode(node.data.obj.childCount);
