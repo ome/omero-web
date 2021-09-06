@@ -108,7 +108,7 @@ $(function() {
             html = html.trim();
             if($('div.split_fileset', html).length > 0) {
                 $(html).appendTo($chgrpform);
-                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span').text("Move All");
+                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)').text("Move All");
                 var filesetIds = [];
                 $('input[name="fileset"]', html).each(function(){
                     filesetIds.push(parseInt($(this).val(), 10));
@@ -268,7 +268,7 @@ $(function() {
                 newContainer();
             },
             "OK": function() {
-                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span');
+                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
                 // If we have split filesets, first submission is to confirm 'Move All'?
                 // We hide the split_filesets info panel and rename submit button to 'OK'
                 if ($(".split_filesets_info .split_fileset", $chgrpform).length > 0 && $thisBtn.text() == 'Move All') {
