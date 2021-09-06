@@ -70,18 +70,6 @@
                     $("#link_info_popup").hide();
                 });
 
-
-                $(".dropdown_menu .menu_launch").on('click', function(e){
-                    $(this).parent().find('ul').css('visibility', 'visible');
-                    $(this).parent().find('.dropdown_menu_options').show();
-                    return false;
-                });
-                // on hover-out of the menu itself, hide drop-down menus
-                $(".dropdown_menu_options").on("hover", function(){}, function(){
-                    $(this).css('visibility', 'hidden');
-                }).hide();
-
-
                 $(".tooltip_title").tooltip({
                     items: '.tooltip_title',
                     content: function() {
