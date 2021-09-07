@@ -314,10 +314,10 @@
 
         /* Image details */
         var tmp = viewport.getMetadata();
-        $('#wblitz-image-name').html(tmp.imageName);
-        $('#wblitz-image-description-content').html(tmp.imageDescription.replace(/\n/g, '<br />'));
-        $('#wblitz-image-author').html(tmp.imageAuthor);
-        $('#wblitz-image-pub').html(tmp.projectName);
+        $('#wblitz-image-name').html(tmp.imageName.escapeHTML());
+        $('#wblitz-image-description-content').html(tmp.imageDescription.escapeHTML().replace(/\n/g, '<br />'));
+        $('#wblitz-image-author').html(tmp.imageAuthor.escapeHTML());
+        $('#wblitz-image-pub').html(tmp.projectName.escapeHTML());
         $('#wblitz-image-pubid').html(tmp.projectId);
         $('#wblitz-image-timestamp').html(tmp.imageTimestamp);
 
@@ -392,8 +392,8 @@
             $('<button id="wblitz-ch'+i+
                 '" class="squared' + (channels[i].active?' pressed':'') +
                 '" style="background-color: #'+ channels[i].color +
-                '" title="' + channels[i].label +
-                '"><div class="lutBackground"></div><div class="btnLabel">'+channels[i].label+'</div></button>')
+                '" title="' + channels[i].label.escapeHTML() +
+                '"><div class="lutBackground"></div><div class="btnLabel">'+channels[i].label.escapeHTML()+'</div></button>')
             .appendTo(box)
             .on('click', doToggle(i));
         }
@@ -542,11 +542,11 @@
             tmp.after(template
                 .replace(/\$class/g, btnClass)
                 .replace(/\$col/g, '#' + channels[i].color)
-                .replace(/\$label/g, channels[i].label)
-                .replace(/\$l/g, lbl)
+                .replace(/\$label/g, channels[i].label.escapeHTML())
+                .replace(/\$l/g, lbl.escapeHTML())
                 .replace(/\$idx0/g, i) // Channel Index, 0 based
                 .replace(/\$idx1/g, i+1) // Channel Index, 1 based
-                .replace(/\$cwl/g, channels[i].label) // Wavelength
+                .replace(/\$cwl/g, channels[i].label.escapeHTML()) // Wavelength
                 .replace(/\$cls/g, i/2!=parseInt(i/2, 10)?'even':'odd') // class
             );
 

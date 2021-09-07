@@ -37,7 +37,7 @@ $(function() {
     var templateText = `
         <!-- Hidden fields for objects. e.g. name='Image' value='1,2,3' -->
         <% _.each(selobjs, function(obj, idx) { %>
-            <input name='<%= obj.split("=")[0] %>' value='<%= obj.split("=")[1] %>' hidden/>
+            <input name='<%- obj.split("=")[0] %>' value='<%- obj.split("=")[1] %>' hidden/>
         <% }) %>
 
         <!-- List target new owners -->
@@ -50,7 +50,7 @@ $(function() {
             <% _.each(exps, function(exp, idx) { %>
                 <label>
                     <input name='owner_id' type='radio' value='<%= exp['@id'] %>'/>
-                    <%= exp.FirstName%> <%= exp.LastName %> 
+                    <%- exp.FirstName%> <%- exp.LastName %>
                 </label>
                 <br/>
             <% }) %>

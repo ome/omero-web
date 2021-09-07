@@ -169,7 +169,9 @@ String.prototype.escapeHTML = function(){
         switch(s) {
             case "&": return "&amp;";
             case "\\": return "&#92;";
-            case '"': return '\"';
+            case "`": return '&#x60;';
+            case "'": return '&#x27;';
+            case '"': return '&quot;';
             case "<": return "&lt;";
             case ">": return "&gt;";
             default: return s;

@@ -127,7 +127,7 @@ $(function(){
                     // check if min===max to avoid zero-division error
                     var x = (maxX === minX) ? 0.5 : (ws.position.x.value - minX)/(maxX - minX);
                     var y = (maxY === minY) ? 0.5 : (ws.position.y.value - minY)/(maxY - minY);
-                    return '<img style="left: ' + (x * 100) + '%; top: ' + (y * 100) + '%" title="' + ws.name + '" data-imageId="' + ws.id + '" />';
+                    return '<img style="left: ' + (x * 100) + '%; top: ' + (y * 100) + '%" title="' + ws.name.escapeHTML() + '" data-imageId="' + ws.id + '" />';
                 }, "");
                 $well_birds_eye.append(html.join(""));
             }

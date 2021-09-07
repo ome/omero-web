@@ -98,8 +98,9 @@ var tagging_form = function(
         for (var id in all_tags) {
             var tag = all_tags[id];
             if (tag && !(id in child_tags)) {
-                html += create_tag_html(tag.t, tag.d, owners[tag.o], tag.i,
-                                        null, tag.s !== 0);
+                html += create_tag_html(
+                    tag.t, tag.d, tag.i, null, tag.s !== 0
+                );
                 tag.sort_key = tag.t.toLowerCase();
                 if (tag.s) {
                     for (var sid in tag.s) {
@@ -108,8 +109,8 @@ var tagging_form = function(
                             child.sort_key = (tag.t.toLowerCase() +
                                 child.t.toLowerCase());
                             html += create_tag_html(
-                                child.t, child.d, owners[child.o], child.i,
-                                tag.i);
+                                child.t, child.d, child.i, tag.i
+                            );
                         }
                     }
                 }
@@ -118,15 +119,7 @@ var tagging_form = function(
         div_all_tags.append(html);
         // TODO This tooltip application is used until the extra data has loaded
         // at which point the tooltips are updated and this handler is replaced?
-        $(".tag_selection div").on('click', tag_click).tooltip({
-            track: false,
-            show: false,
-            hide: false,
-            items: '[data-content]',
-            content: function() {
-                return $(this).data('content');
-            }
-        });
+        $(".tag_selection div").on('click', tag_click);
     };
 
     var update_selected_labels = function() {
@@ -145,7 +138,7 @@ var tagging_form = function(
         if (tagset) {
             $("#id_selected_tag_set").html(
                 "Add a new tag in <span class='tagset-title'>" +
-                tagset.text() + "</span> tag set and select it immediately:");
+                tagset.text().escapeHTML() + "</span> tag set and select it immediately:");
         } else {
             $("#id_selected_tag_set").text(
                 "Add a new tag and select it immediately:");
@@ -169,6 +162,7 @@ var tagging_form = function(
             track: false,
             show: false,
             hide: false,
+            items: '[data-id]',  // Just needs an attribute that exists
             content: title
         });
     };
@@ -369,45 +363,35 @@ var tagging_form = function(
         }
     };
 
-    var encode_html = function(text) {
-        return $('<div/>').text(text).html();
-    };
-
     var create_tag_title = function(description, owner, tagset, link_owner) {
         var title = "";
         if (owner) {
-            title += "<b>Owner:</b> " + owner + "<br />";
+            title += "<b>Owner:</b> " + owner.escapeHTML() + "<br />";
         }
         if (link_owner) {
-            title += "<b>Linked by:</b> " + link_owner + "<br />";
+            title += "<b>Linked by:</b> " + link_owner.escapeHTML() + "<br />";
         }
         if (description) {
-            title += "<b>Description:</b> " + description + "<br />";
+            title += "<b>Description:</b> " + description.escapeHTML() + "<br />";
         }
         if (tagset) {
-            title += "<b>Tag set:</b> " + tagset + "<br />";
+            title += "<b>Tag set:</b> " + tagset.escapeHTML() + "<br />";
         }
         return title;
     };
 
-    var create_tag_html = function(text, description, owner, id, parent_id,
+    var create_tag_html = function(text, description, id, parent_id,
                                    is_tagset) {
         var cls = is_tagset ? "alltags-tagset" :
             (parent_id ? "alltags-childtag" : "alltags-tag");
         var html = "<div class='" + cls + "' data-id='" + id + "'";
-        var tagset;
         if (parent_id) {
             html += " data-set='" + parent_id + "'";
-            tagset = all_tags[parent_id].t;
         }
         if (id < 0) { // new tag, save description
-            html += " data-description='" + encode_html(description) + "'";
+            html += " data-description='" + description.escapeHTML() + "'";
         }
-        var title = create_tag_title(description, owner, tagset);
-        // Add content even if it is empty
-        // and handle case for no tooltip in the tooltip code
-        html += " data-content='" + title.replace(/'/g, "&#39;") + "'";
-        html += ">" + encode_html(text) + "</div>";
+        html += ">" + text.escapeHTML() + "</div>";
         return html;
     };
 
@@ -633,7 +617,7 @@ var tagging_form = function(
             new_tag_counter -= 1;
             var tagset_id = (tagset ? parseInt(tagset.attr('data-id'), 10) :
                              false);
-            owners[me] = owners[me] || my_name;
+            owners[me] = owners[me] || _.unescape(my_name);
             all_tags[new_tag_counter] = {
                 i: new_tag_counter,
                 d: description,
@@ -644,16 +628,18 @@ var tagging_form = function(
                            '') + text.toLowerCase()
             };
             var div = $(create_tag_html(
-                text, description, my_name, new_tag_counter,
+                text, description, new_tag_counter,
                 tagset ? tagset.attr('data-id') : null));
+            var title = create_tag_title(
+                description, _.unescape(my_name),
+                tagset_id? all_tags[tagset_id].t : null
+            );
             div.addClass('ui-selected').on('click', tag_click).tooltip({
                 track: true,
                 show: false,
                 hide: false,
-                items: '[data-content]',
-                content: function() {
-                    return $(this).data('content');
-                }
+                items: '[data-id]',  // Just needs an attribute that exists
+                content: title
             });
             $("div.ui-selected", div_selected_tags).removeClass('ui-selected');
             div_selected_tags.append(div);

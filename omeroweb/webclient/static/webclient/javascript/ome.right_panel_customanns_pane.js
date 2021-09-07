@@ -88,7 +88,7 @@ var CustomAnnsPane = function CustomAnnsPane($element, opts) {
                     var attrs = ['textValue', 'timeValue', 'termValue', 'longValue', 'doubleValue', 'boolValue'];
                     attrs.forEach(function(a){
                         if (ann[a] !== undefined){
-                            ann.value = _.escape(ann[a]);
+                            ann.value = ann[a];
                         }
                     });
                     if (objects.length > 1) {

@@ -201,7 +201,7 @@ $(document).ready(function() {
                         // start a new container...
                         topLevelTag = tagData.tags[0] || tagsText;      // Group under 1st tag (unless we have no tags)
 
-                        $tr = $('<tr><th><h2>' + topLevelTag + '</h2></th></tr>');
+                        $tr = $('<tr><th><h2>' + topLevelTag.escapeHTML() + '</h2></th></tr>');
                         $tr.appendTo($this);
                         $td = $('<td></td>').appendTo($tr);
                     }

@@ -143,8 +143,8 @@ var TagPane = function TagPane($element, opts) {
                     }
                     // AddedBy IDs for filtering
                     tag.addedBy = [tag.link.owner.id];
-                    tag.textValue = _.escape(tag.textValue);
-                    tag.description = _.escape(tag.description);
+                    tag.textValue = tag.textValue;
+                    tag.description = tag.description;
                     tag.canRemove = tag.link.permissions.canDelete;
                     return tag;
                 });
@@ -158,7 +158,7 @@ var TagPane = function TagPane($element, opts) {
                         var tagId = tag.id,
                             linkOwner = tag.link.owner.id;
                         if (summary[tagId] === undefined) {
-                            summary[tagId] = {'textValue': tag.textValue,
+                            summary[tagId] = {'textValue': _.escape(tag.textValue),
                                               'id': tag.id,
                                               'canRemove': false,
                                               'canRemoveCount': 0,

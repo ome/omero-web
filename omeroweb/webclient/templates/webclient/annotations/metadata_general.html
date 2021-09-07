@@ -359,10 +359,10 @@
                         var bulkAnnTooltip = "<span class='tooltip_html' style='display:none'>" +
                             "Data from tables file:<br />" +
                             "<b>File ID:</b> " + data.id + "<br />" +
-                            "<b>Owner:</b> " + data.owner + " <br />" +
+                            "<b>Owner:</b> " + data.owner.escapeHTML() + " <br />" +
                             "<b>Annotation ID:</b> " + data.annId + "<br />" +
                             "<b>Linked to:</b> " + data.parentType + " " + data.parentId + "<br />" +
-                            "<b>Linked by:</b> " + data.addedBy + " <br />" +
+                            "<b>Linked by:</b> " + data.addedBy.escapeHTML() + " <br />" +
                             "<b>On:</b> " + OME.formatDate(data.addedOn) + "</span>";
                         $("#bulk-annotations").append(bulkAnnTooltip);
                         $("#bulk-annotations").parent().tooltip({

@@ -35,6 +35,7 @@ import sys
 import warnings
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
+from django.utils.html import escape
 from django.utils.http import is_safe_url
 
 from time import time
@@ -1793,7 +1794,7 @@ def load_metadata_preview(request, c_type, c_id, conn=None, share_id=None, **kwa
         rdefQueries.append(
             {
                 "id": r["id"],
-                "owner": r["owner"],
+                "owner": escape(r["owner"]),  # May be used unsafe later
                 "c": ",".join(chs),
                 "m": r["model"] == "greyscale" and "g" or "c",
             }

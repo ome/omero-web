@@ -123,7 +123,7 @@
                 }
                 $('#targetInfo').show();
                 if (!chosen_file.endsWith(".py")) {
-                    $("#targetMessage").html("File: " + chosen_file + " not valid.<br/>File must be Python script (.py)");
+                    $("#targetMessage").html("File: " + chosen_file.escapeHTML() + " not valid.<br/>File must be Python script (.py)");
                     return;
                 }
 

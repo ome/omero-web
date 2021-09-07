@@ -642,7 +642,7 @@ $(document).ready(function() {
             var html = tagList.map(function(t){
                 // don't show tags we're filtering by
                 if (filter_tag_ids.indexOf(t.id) > -1) return "";
-                return "<option value='" + t.id + "'>" + t.text + "</option>";
+                return "<option value='" + t.id + "'>" + t.text.escapeHTML() + "</option>";
             }).join("");
             html = "<option value='0'>Choose Tag</option>" + html;
             $("#filter_by_tag").html(html);
@@ -663,7 +663,7 @@ $(document).ready(function() {
             });
             // show tags
             var html = filter_tag_ids.map(function(tagId){
-                var tagText = usedTags[tagId].textValue;
+                var tagText = usedTags[tagId].textValue.escapeHTML();
                 return "<div class='tag' data-tagId='" + tagId + "'><a class='tag_inner' href='#'>" + tagText + "</a><span class='removeTag removefilter' title='Remove Tag'>-</span></div>";
             }).join("");
             $("#currentFilterTags").html(html);

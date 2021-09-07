@@ -62,7 +62,7 @@ $(function() {
             data_owners = data.owners;  // save for later
             var ownernames = [];
             for (var o=0; o<data.owners.length; o++) {ownernames.push(data.owners[o][1]);}
-            var headerTxt = "<p>Move data owned by " + ownernames.join(", ") + ".</p>" +
+            var headerTxt = "<p>Move data owned by " + ownernames.join(", ").escapeHTML() + ".</p>" +
                             "<h1>Please choose target group below:</h1>";
             $group_chooser.append(headerTxt);
 
@@ -72,7 +72,7 @@ $(function() {
                 var g = data.groups[i];
                 html += "<div class='chgrpGroup' data-gid='"+ g.id + "'>";
                 html += "<img src='" + permsIcon(g.perms) + "'/>";
-                html += g.name + "<hr></div>";
+                html += g.name.escapeHTML() + "<hr></div>";
             }
             // If no target groups found...
             if (data.groups.length === 0) {
@@ -407,7 +407,7 @@ $(function() {
             if (count === 1) otype = otype.slice(0, -1);  // remove s
             var namesList = [], names;
             unlinked.forEach(function (u) {
-                namesList.push(u.name);
+                namesList.push(u.name.escapeHTML());
             });
             names = namesList.join(", ");
             names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";

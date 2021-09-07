@@ -267,7 +267,7 @@
                             if (selectImageIds && selectImageIds.indexOf(w.id) > -1) {
                                 cls = 'class="ui-selected"';
                             }
-                            html += '<li ' + cls + ' title="' + w.name + '" data-imageId="' + w.id + '">';
+                            html += '<li ' + cls + ' title="' + w.name.escapeHTML() + '" data-imageId="' + w.id + '">';
                             html += '<a href="{% url 'webindex' %}img_detail/' + w.id + '/">';
                             html += '<div class="wellSize"><img /></div>';
                             html += '</a></li>';
