@@ -195,11 +195,10 @@
         $("input[name='role']").on('click', function(evt) {
             evt.stopPropagation();
             // If role of 'user' is picked, de-select 'system' from the 'default group' chooser
-            if($("input[name='role'][value='user']").is(':checked')) {
-                $("#id_other_groups option[value='0']").removeProp("selected");
-            } else {
-                $("#id_other_groups option[value='0']").prop('selected', true);
-            }
+            var isAdmin = !$("input[name='role'][value='user']").is(':checked');
+            // update underlying DOM - plays best when updating chosen
+            $("#id_other_groups option[value='0']").get(0).selected = isAdmin;
+
             $("#id_other_groups").trigger("chosen:updated");
             syncPrivilegesPanel();
             syncDefaultGroupOptions(0);
