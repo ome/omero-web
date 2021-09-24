@@ -26,7 +26,7 @@
 {% block link %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "webadmin/css/picklist.css"|add:url_suffix %}" type="text/css" media="screen"/>
-    <link rel="stylesheet" href="{% static '3rdparty/jquery.chosen-1.2.0/chosen.css' %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static '3rdparty/jquery.chosen-1.8.7/chosen.css' %}" type="text/css" media="screen"/>
     
     <link rel="stylesheet" href="{% static 'webadmin/css/chosen.css'|add:url_suffix %}" type="text/css" media="screen"/>
     
@@ -43,8 +43,8 @@
 
 {% block script %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static "webclient/javascript/jquery.form-3.51.js" %}"></script>
-    <script type="text/javascript" src="{% static '3rdparty/jquery.chosen-1.2.0/chosen.jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static '3rdparty/jquery.form-4.3.0.js' %}"></script>
+    <script type="text/javascript" src="{% static '3rdparty/jquery.chosen-1.8.7/chosen.jquery.js' %}"></script>
     <script type="text/javascript" src="{% static '3rdparty/jquery.selectboxes-2.2.6.js' %}"></script>
     <style>
         #privileges label {
@@ -156,7 +156,7 @@
         // Setup chosen plugin on 'Groups' chooser
         $("#id_other_groups")
             .chosen({placeholder_text:'Type group names to add...'})
-            .change(function(evt, data) {
+            .on('change', function(evt, data) {
                 // In case we've added the system group:
                 hideSystemGroupX();
 
@@ -192,14 +192,13 @@
         }
 
         // When 'role' is changed, might need to add/remove 'system' group from choosers
-        $("input[name='role']").click( function(evt) {
+        $("input[name='role']").on('click', function(evt) {
             evt.stopPropagation();
             // If role of 'user' is picked, de-select 'system' from the 'default group' chooser
-            if($("input[name='role'][value='user']").is(':checked')) {
-                $("#id_other_groups option[value='0']").removeProp("selected");
-            } else {
-                $("#id_other_groups option[value='0']").prop('selected', true);
-            }
+            var isAdmin = !$("input[name='role'][value='user']").is(':checked');
+            // update underlying DOM - plays best when updating chosen
+            $("#id_other_groups option[value='0']").get(0).selected = isAdmin;
+
             $("#id_other_groups").trigger("chosen:updated");
             syncPrivilegesPanel();
             syncDefaultGroupOptions(0);
@@ -222,7 +221,7 @@
             buttons: {
                 "OK": function() {
                     // simply submit the form (AJAX handling set-up above)
-                    $("#change_password_form").submit();
+                    $("#change_password_form").trigger('submit');
                 },
                 "Cancel": function() {
                     $( this ).dialog( "close" );
@@ -237,7 +236,7 @@
             }
         });
         
-        $( "#change_password" ).click(function() {
+        $( "#change_password" ).on('click', function() {
             // clear fields
             var $pw_form = $("#change_password_form");
             $("div.error", $pw_form).text("");
@@ -248,7 +247,7 @@
             $( "#password_change_dialog" ).dialog( "open" );
             return false;
         });
-        $("#password_cancel").click(function() {
+        $("#password_cancel").on('click', function() {
             $( "#password_change_dialog" ).dialog( "close" );
             return false;
         });
@@ -261,7 +260,7 @@
                 var new_pw = $("input[name='password']", $pw_form).val();
                 var conf_pw = $("input[name='confirmation']", $pw_form).val();
                 var old_pw = $("input[name='old_password']", $pw_form).val();
-                if ($.trim(new_pw).length==0 || $.trim(conf_pw).length==0 || $.trim(old_pw).length==0) {
+                if (new_pw.trim().length==0 || conf_pw.trim().length==0 || old_pw.trim().length==0) {
                     $("div.error", $pw_form).text("All fields must be filled in.");
                     return false;
                 }
@@ -269,7 +268,7 @@
                     $("div.error", $pw_form).text("New passwords don't match.");
                     return false;
                 }
-                if ($.trim(new_pw).length<3 || $.trim(conf_pw).length<3 || $.trim(old_pw).length==0) {
+                if (new_pw.trim().length<3 || conf_pw.trim().length<3 || old_pw.trim().length==0) {
                     $("div.error", $pw_form).text("Passwords should be at least 3 characters long.");
                     return false;
                 }

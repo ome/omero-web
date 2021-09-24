@@ -31,7 +31,7 @@ $(document).ready(function() {
             $(".notTagged").hide();
         }
     };
-    $("input[name=Show_Untagged_Images]").click(updateNotTagged);
+    $("input[name=Show_Untagged_Images]").on('click', updateNotTagged);
 
 
     // Add <br> to break up long rows of thumbnails
@@ -56,7 +56,7 @@ $(document).ready(function() {
             });
         });
     };
-    $("input[name=Max_Columns]").bind('keyup input', updateRowCount);
+    $("input[name=Max_Columns]").on('keyup input', updateRowCount);
 
     updateRowCount();   // initialise layout
 
@@ -83,7 +83,7 @@ $(document).ready(function() {
     var selectedTagIds = [];
     $("#tagChooser")
         .chosen({placeholder_text:'Choose Tags'})
-        .change(function(evt, data) {
+        .on('change', function(evt, data) {
             if (data.deselected) {
                 var toRemove = data.deselected;
                 selectedTagIds.splice(selectedTagIds.indexOf(toRemove), 1);

@@ -168,7 +168,7 @@
 			function detectParserForColumn(table,node) {
 				var l = parsers.length;
 				for(var i=1; i < l; i++) {
-					if(parsers[i].is($.trim(getElementText(table.config,node)),table,node)) {
+					if(parsers[i].is(getElementText(table.config,node).trim(),table,node)) {
 						return parsers[i];
 					}
 				}
@@ -517,7 +517,7 @@
 					
 					// apply event handling to headers
 					// this is to big, perhaps break it out?
-					$headers.click(function(e) {
+					$headers.on('click', function(e) {
 						
 						$this.trigger("sortStart");
 						
@@ -581,7 +581,7 @@
 							return false;
 						}
 					// cancel selection	
-					}).mousedown(function() {
+					}).on('mousedown', function() {
 						if(config.cancelSelection) {
 							this.onselectstart = function() {return false};
 							return false;
@@ -589,7 +589,7 @@
 					});
 					
 					// apply easy methods that trigger binded events
-					$this.bind("update",function() {
+					$this.on("update",function() {
 						
 						// rebuild parsers.
 						this.config.parsers = buildParserCache(this,$headers);
@@ -597,7 +597,7 @@
 						// rebuild the cache map
 						cache = buildCache(this);
 						
-					}).bind("sorton",function(e,list) {
+					}).on("sorton",function(e,list) {
 						
 						$(this).trigger("sortStart");
 						
@@ -616,15 +616,15 @@
 						// sort the table and append it to the dom
 						appendToTable(this,multisort(this,sortList,cache));
 
-					}).bind("appendCache",function() {
+					}).on("appendCache",function() {
 						
 						appendToTable(this,cache);
 					
-					}).bind("applyWidgetId",function(e,id) {
+					}).on("applyWidgetId",function(e,id) {
 						
 						getWidgetById(id).format(this);
 						
-					}).bind("applyWidgets",function() {
+					}).on("applyWidgets",function() {
 						// apply widgets
 						applyWidget(this);
 					});
@@ -668,7 +668,7 @@
 			this.isDigit = function(s,config) {
 				var DECIMAL = '\\' + config.decimal;
 				var exp = '/(^[+]?0(' + DECIMAL +'0+)?$)|(^([-+]?[1-9][0-9]*)$)|(^([-+]?((0?|[1-9][0-9]*)' + DECIMAL +'(0*[1-9][0-9]*)))$)|(^[-+]?[1-9]+[0-9]*' + DECIMAL +'0+$)/';
-				return RegExp(exp).test($.trim(s));
+				return RegExp(exp).test(s.trim());
 			};
 			
 			this.clearTableBody = function(table) {
@@ -698,7 +698,7 @@
 			return true;
 		},
 		format: function(s) {
-			return $.trim(s.toLowerCase());
+			return s.toLowerCase().trim();
 		},
 		type: "text"
 	});
@@ -771,7 +771,7 @@
 	ts.addParser({
 		id: "percent",
 		is: function(s) { 
-			return /\%$/.test($.trim(s));
+			return /\%$/.test(s.trim());
 		},
 		format: function(s) {
 			return $.tablesorter.formatFloat(s.replace(new RegExp(/%/g),""));

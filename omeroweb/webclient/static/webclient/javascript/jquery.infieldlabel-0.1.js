@@ -36,17 +36,17 @@
 				base.showing = false;
 			};
 			
-			base.$field.focus(function(){
+			base.$field.on("focus", function(){
 				base.fadeOnFocus();
-			}).blur(function(){
+			}).on("blur", function(){
 				base.checkForEmpty(true);
-			}).bind('keydown.infieldlabel',function(e){
+			}).on('keydown.infieldlabel',function(e){
 				// Use of a namespace (.infieldlabel) allows us to
 				// unbind just this method later
 				base.hideOnChange(e);
-			}).change(function(e){
+			}).on("change", function(e){
 				base.checkForEmpty();
-			}).bind('onPropertyChange', function(){
+			}).on('onPropertyChange', function(){
 				base.checkForEmpty();
 			});
         };
@@ -83,7 +83,7 @@
 				base.$label.css({opacity: 0.0}).show();
 				
 				// Reattach the keydown event
-				base.$field.bind('keydown.infieldlabel',function(e){
+				base.$field.on('keydown.infieldlabel',function(e){
 					base.hideOnChange(e);
 				});
 			};
@@ -101,7 +101,7 @@
 			};
 			
 			// Remove keydown event to save on CPU processing
-			base.$field.unbind('keydown.infieldlabel');
+			base.$field.off('keydown.infieldlabel');
 		};
       
 		// Run the initialization method

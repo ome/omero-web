@@ -29,7 +29,7 @@ var TagPane = function TagPane($element, opts) {
 
     var initEvents = (function initEvents() {
 
-        $header.click(function(){
+        $header.on('click', function(){
             $header.toggleClass('closed');
             $body.slideToggle();
 
@@ -48,7 +48,7 @@ var TagPane = function TagPane($element, opts) {
             .hide().appendTo('body');
     }
 
-    $("#launch_tags_form").click(function(event) {
+    $("#launch_tags_form").on('click', function(event) {
         $("#add_tags_form").dialog("open");
         // load form via AJAX...
         var load_url = $(this).attr('href');
@@ -66,7 +66,7 @@ var TagPane = function TagPane($element, opts) {
         buttons: {
             "Save": function() {
                 // simply submit the form (AJAX handling set-up above)
-                $("#add_tags_form").trigger('prepare-submit').submit();
+                $("#add_tags_form").trigger('prepare-submit').trigger('submit');
                 $( this ).dialog( "close" );
             },
             "Cancel": function() {

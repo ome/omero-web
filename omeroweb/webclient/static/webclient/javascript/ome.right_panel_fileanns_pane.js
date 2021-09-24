@@ -29,7 +29,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
 
     var initEvents = (function initEvents() {
 
-        $header.click(function(){
+        $header.on('click', function(){
             $header.toggleClass('closed');
             $body.slideToggle();
 
@@ -74,7 +74,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
         buttons: {
             "Accept": function() {
                 // simply submit the form (AJAX handling set-up above)
-                $("#choose_attachments_form").submit();
+                $("#choose_attachments_form").trigger('submit');
                 $( this ).dialog( "close" );
             },
             "Cancel": function() {
@@ -83,7 +83,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
         }
     });
     // show dialog for choosing file to attach...
-    $("#choose_file_anns").click(function() {
+    $("#choose_file_anns").on('click', function() {
         // show dialog first, then do the AJAX call to load files...
         var $attach_form = $( "#choose_attachments_form" );
         $attach_form.dialog( "open" );
@@ -96,7 +96,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
 
 
     // Show/hide checkboxes beside files to select files for scripts
-    $(".toolbar input[type=button]", $body).click(
+    $(".toolbar input[type=button]", $body).on('click',
         OME.toggleFileAnnotationCheckboxes
     );
     $("#fileanns_container").on(

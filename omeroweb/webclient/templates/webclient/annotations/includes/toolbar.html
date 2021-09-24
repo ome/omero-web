@@ -22,17 +22,6 @@
         
         $(document).ready(function()
             {
-
-                $(".dropdown_menu .menu_launch").click(function(e){
-                    $(this).parent().find('ul').css('visibility', 'visible');
-                    $(this).parent().find('.dropdown_menu_options').show();
-                    return false;
-                });
-                // on hover-out of the menu itself, hide drop-down menus
-                $(".dropdown_menu_options").hover(function(){}, function(){
-                    $(this).css('visibility', 'hidden');
-                }).hide();
-
                 {% if link_string %}
                 $("#link_info_popup_string").val(location.protocol + "//" + location.host + "{{ webclient_path }}?show={{ link_string }}");
                 {% endif %}

@@ -17,7 +17,7 @@ $(function(){
         // Also clear content
         OME.emptyWellBirdsEye();
     };
-    $("#hide_well_birds_eye").click(OME.hideWellBirdsEye);
+    $("#hide_well_birds_eye").on('click', OME.hideWellBirdsEye);
 
 
     OME.WellBirdsEye = function(opts) {

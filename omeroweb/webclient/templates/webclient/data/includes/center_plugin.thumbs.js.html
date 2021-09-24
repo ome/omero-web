@@ -134,7 +134,7 @@ $(document).ready(function() {
             }
         });
         // handle Radio buttons
-        $("#layout_chooser button").click(function(event) {
+        $("#layout_chooser button").on('click', function(event) {
             if ($(event.target).attr('id') == 'table_layout') {
                 layout = 'table';
             } else {
@@ -356,9 +356,9 @@ $(document).ready(function() {
     var focusThumbnail = function() {
         // We focus the thumbnail to make sure it's scrolled into view
         var $focused = $(':focus');
-        $("#dataIcons li.ui-selected").first().focus();
+        $("#dataIcons li.ui-selected").first().trigger('focus');
         // Then re-focus the jstree node, so that hot-keys work etc
-        $focused.focus();
+        $focused.trigger('focus');
     }
 
     var getRandom = function() {
@@ -426,7 +426,7 @@ $(document).ready(function() {
         }
 
         // Chooser for revealing various filter components
-        $("#choosefilter").change(function() {
+        $("#choosefilter").on('change', function() {
             var $this = $(this),
                 filterby = $this.val();
             // reset chooser
@@ -582,7 +582,7 @@ $(document).ready(function() {
         };
 
         // filter by rating
-        $("#filterrating img").click(function(event) {
+        $("#filterrating img").on('click', function(event) {
             var iids = [],
                 $rating = $(this),
                 clickX = event.pageX - $rating.offset().left;
@@ -669,7 +669,7 @@ $(document).ready(function() {
             $("#currentFilterTags").html(html);
         };
 
-        $("#filter_by_tag").change(function(event){
+        $("#filter_by_tag").on('change', function(event){
             var $this = $(event.target);
             var tagId = $this.val();
             if (filter_tag_ids.indexOf(tagId) === -1) {
@@ -830,7 +830,7 @@ $(document).ready(function() {
                 inst.select_node(selectedNode, true);
                 // we also focus the node, so that hotkey events come from the node
                 if (selectedNode) {
-                    $("#" + selectedNode.id).children('.jstree-anchor').focus();
+                    $("#" + selectedNode.id).children('.jstree-anchor').trigger('focus');
                 }
             });
         } else {

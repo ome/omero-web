@@ -207,7 +207,7 @@ jQuery.fn.numbersOnly = function(options) {
     this.each(function() {
         $(this).data('numbersOnly', $(this).val());
     })
-    .keypress(function(event){
+    .on('keypress', function(event){
 
         // we allow copy, paste, left or right
         var allowedChars = [37, 39, 99, 118];
@@ -334,17 +334,7 @@ OME.get_tree_selection = function() {
         return "";
     }
     var datatree = $.jstree.reference('#dataTree');
-
     var selected = datatree.get_selected(true);
-    if (selected.length == 1) {
-        var klass = selected[0].type;
-        if (klass == 'plate' || klass == 'acquisition') {
-            var plateSelected = $('#spw .ui-selected img');
-            if (plateSelected.size() > 0) {
-                selected = plateSelected;
-            }
-        }
-    }
 
     var selected_ids = {};
 
@@ -503,7 +493,7 @@ OME.feedback_dialog = function(error, feedbackUrl) {
                 $( this ).dialog( "close" );
             },
             "Send": function() {
-                $("form", $feedback_dialog).submit();
+                $("form", $feedback_dialog).trigger('submit');
             }
         }
     });
@@ -648,7 +638,7 @@ OME.login_dialog = function(login_url, callback) {
             });
 
             // on change of selection in tree, update which tabs are enabled
-            $("body").bind("selection_change.ome", function(event) {
+            $("body").on("selection_change.ome", function(event) {
 
                 // clear contents of panel
                 $this.empty();
@@ -729,10 +719,10 @@ OME.login_dialog = function(login_url, callback) {
             };
 
 
-            $('#center_panel_chooser').bind('center_plugin_changed.ome', update_plugin_content);
+            $('#center_panel_chooser').on('center_plugin_changed.ome', update_plugin_content);
 
             // on change of selection in tree, update which tabs are enabled
-            $("body").bind("selection_change.ome", function(event) {
+            $("body").on("selection_change.ome", function(event) {
 
                 // clear contents of panel
                 if (empty_on_sel_change) {
@@ -838,7 +828,7 @@ OME.login_dialog = function(login_url, callback) {
                     if (findSortKey) {
                         $header
                             .addClass('clickable')
-                            .click(function() {
+                            .on('click', function() {
                                 var sortDirection = 1;
                                 if ($header.is('.sorted-asc')) {
                                     sortDirection = -1;
@@ -874,7 +864,7 @@ OME.login_dialog = function(login_url, callback) {
                             });
                         // In this case, we sort by this column during plugin init.
                         if ($header.is('.sort-init')) {
-                            $header.click();
+                            $header.trigger('click');
                         }
                     }
                 });

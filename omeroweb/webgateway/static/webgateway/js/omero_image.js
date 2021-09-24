@@ -30,11 +30,11 @@
         rdefQry = rdefQry + "&imageId=" + viewport.loadedImg.id;
         // save to session
         var jqxhr = $.getJSON(viewport.viewport_server + "/copyImgRDef/?" + rdefQry);
-        jqxhr.complete(function() {
-            $("#rdef-paste-btn").removeAttr('disabled').removeClass("button-disabled");
+        jqxhr.always(function() {
+            $("#rdef-paste-btn").prop('disabled', false).removeClass("button-disabled");
 
             // Optional : only present on webclient app
-            if (WEBCLIENT) {
+            if (window.WEBCLIENT) {
                 WEBCLIENT.HAS_RDEF = true;
             }
         });
@@ -132,14 +132,14 @@
                 }
             });
             $.each(objs.sort(sorter), function () {
-                this.css('z-index', z);
+                this.css('zIndex', z);
                 z++;
             });
-            $(self).css('z-index', z);
+            $(self).css('zIndex', z);
         };
         $.each(wspace, function () {
-            $(this).bind('opening', tofront);
-            $(this).bind('mousedown', tofront);
+            $(this).on('opening', tofront);
+            $(this).on('mousedown', tofront);
         });
     };
 
@@ -239,8 +239,8 @@
                 .slider( "option", "min", Math.min(w.min, w.start) )   // extend range if needed
                 .slider( "option", "max", Math.max(w.max, w.end) );
             $('#wblitz-ch'+i+'-color').attr('data-color', channels[i].color);
-            $('#wblitz-ch'+i+'-cw-start').val(channels[i].window.start).change();
-            $('#wblitz-ch'+i+'-cw-end').val(channels[i].window.end).change();
+            $('#wblitz-ch' + i + '-cw-start').val(channels[i].window.start).trigger('change');
+            $('#wblitz-ch' + i + '-cw-end').val(channels[i].window.end).trigger('change');
         }
         // Colorpicker buttons store 'reverse-intensity' with .data() to populate colorbtn dialog
         $(".picker").each(function(i, pickerBtn) {
@@ -256,12 +256,12 @@
     window.updateUndoRedo = function(viewport) {
         // update disabled status of undo/redo buttons
         if (viewport.has_channels_undo()) {
-            $('#rdef-undo-btn').removeAttr('disabled').removeClass("button-disabled");
+            $('#rdef-undo-btn').prop('disabled', false).removeClass("button-disabled");
         } else {
             $('#rdef-undo-btn').attr("disabled", "disabled").addClass("button-disabled");
         }
         if (viewport.has_channels_redo()) {
-            $('#rdef-redo-btn').removeAttr('disabled').removeClass("button-disabled");
+            $('#rdef-redo-btn').prop('disabled', false).removeClass("button-disabled");
         } else {
             $('#rdef-redo-btn').attr("disabled", "disabled").addClass("button-disabled");
         }
@@ -269,7 +269,7 @@
         if (viewport.getSaved() || !canSaveRdef) {
             $("#rdef-setdef-btn").attr("disabled", "disabled").addClass("button-disabled");
         } else {
-            $("#rdef-setdef-btn").removeAttr('disabled').removeClass("button-disabled");
+            $("#rdef-setdef-btn").prop('disabled', false).removeClass("button-disabled");
         }
     };
 
@@ -395,7 +395,7 @@
                 '" title="' + channels[i].label +
                 '"><div class="lutBackground"></div><div class="btnLabel">'+channels[i].label+'</div></button>')
             .appendTo(box)
-            .bind('click', doToggle(i));
+            .on('click', doToggle(i));
         }
 
         // disable 'split' view for single channel images.
@@ -423,7 +423,7 @@
         }
         /* Fill in the Rendering Details box */
 
-        $(".picker").unbind('prepared').unbind('showing').unbind('hiding');
+        $(".picker").off('prepared').off('showing').off('hiding');
         // $('#rdef-postit ul').not('ul:last-child').remove();
 
         var template = '' +
@@ -477,9 +477,9 @@
                 var s = $(this).data('channel_start');
                 var e = $(this).data('channel_end');
                 if (ui.values[0] !== s) {
-                    $('#wblitz-ch'+$(event.target).data('channel-idx')+'-cw-start').val(ui.values[0]).change();
+                    $('#wblitz-ch' + $(event.target).data('channel-idx') + '-cw-start').val(ui.values[0]).trigger('change');
                 } else if (ui.values[1] !== e) {
-                    $('#wblitz-ch'+$(event.target).data('channel-idx')+'-cw-end').val(ui.values[1]).change();
+                    $('#wblitz-ch'+ $(event.target).data('channel-idx') + '-cw-end').val(ui.values[1]).trigger('change');
                 }
                 viewport.self.trigger("channelSlide", [viewport, $(event.target).data('channel-idx'), ui.values[0], ui.values[1]]);
             };
@@ -552,15 +552,15 @@
 
             $('#wblitz-ch'+(i)+'-cw').append('<td width="10%"><span class="min" title="min: ' + channels[i].window.min + '"><input type="text" id="wblitz-ch' + i + '-cw-start" /></span></td><td><div class="rangeslider" id="wblitz-ch' + i + '-cwslider"></div></td> <td width="10%"><span class="max" title="max: ' + channels[i].window.max + '"><input type="text" id="wblitz-ch' + i + '-cw-end" /></span></td>');
             init_ch_slider(i, channels);
-            $('#wblitz-ch'+i+'-cw-start').val(channels[i].window.start).unbind('change').bind('change', start_cb(i));
-            $('#wblitz-ch'+i+'-cw-start').keyup(keyup_cb()).focusout(focusout_cb());
-            $('#wblitz-ch'+i+'-cw-end').val(channels[i].window.end).unbind('change').bind('change', end_cb(i));
-            $('#wblitz-ch'+i+'-cw-end').keyup(keyup_cb()).focusout(focusout_cb());
+            $('#wblitz-ch'+i+'-cw-start').val(channels[i].window.start).off('change').on('change', start_cb(i));
+            $('#wblitz-ch'+i+'-cw-start').on('keyup', keyup_cb()).on('focusout', focusout_cb());
+            $('#wblitz-ch'+i+'-cw-end').val(channels[i].window.end).off('change').on('change', end_cb(i));
+            $('#wblitz-ch'+i+'-cw-end').on('keyup', keyup_cb()).on('focusout', focusout_cb());
         }
 
         // bind clicking on channel checkboxes
         $(".rd-wblitz-ch").each(function(i){
-            $(this).bind('click', doToggle(i));
+            $(this).on('click', doToggle(i));
         });
 
 
@@ -570,7 +570,7 @@
         });
         $(".picker")
             .colorbtn({'server': viewport.viewport_server})
-            .bind('showing', function () {
+            .on('showing', function () {
                 var t = $(this).parents('.postit'),
                     offset;
                 if (t.length) {
@@ -583,11 +583,11 @@
                 $('.picker-selected').html('&nbsp;');
                 $(this).parent().siblings('.picker-selected').html('&gt;');
             })
-            .bind('hiding', function () {$(this).parent().siblings('.picker-selected').html('&nbsp;');})
-            .bind('prepared', function () {
+            .on('hiding', function () {$(this).parent().siblings('.picker-selected').html('&nbsp;');})
+            .on('prepared', function () {
                 zindex_automator('.postit', 210, $('#cbpicker-box'));
             })
-            .bind('changed', function () {
+            .on('changed', function () {
                 applyRDCW(viewport);
             });
 

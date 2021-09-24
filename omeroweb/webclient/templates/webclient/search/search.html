@@ -55,7 +55,7 @@
                 }
 
                 // Choose group, then pick a user from that group
-                $("#searchGroup").change(function() {
+                $("#searchGroup").on('change', function() {
                     var gid = $(this).val();
                     selectUsersFromGroup(gid);
                 });
@@ -108,7 +108,7 @@
                     }
                 });
                 // removing dates - clear fields and reset ranges.
-                $(".clearDate").click(function() {
+                $(".clearDate").on('click', function() {
                     $(this).hide().prev("input").val("");
                     var end = $( "#enddateinput" ).datepicker( "getDate" ) || 0;
                     $( "#startdateinput" ).datepicker( "option", "maxDate", end);
@@ -143,7 +143,7 @@
                             q = $("input[name='query']").val();
                         }
                         // check we have some search query...
-                        q = $.trim(q);
+                        q = q.trim();
                         if (q.length <= 0) {
                             OME.alert_dialog("Search must contain some text.");
                             return false;
@@ -190,19 +190,19 @@
 
                 {% if init.query %}
                     // query field is already populated with init.query
-                    $("#searching_form").submit();
+                    $("#searching_form").trigger('submit');
                 {% endif %}
 
 
                 OME.table_selection_changed();     // clear selection (hides acquisition & preview tabs)
 
-                $("#showSearchHints").click(function(event){
+                $("#showSearchHints").on('click', function(event){
                     event.preventDefault();
                     $("#searchHints").toggle();
                     return false;
                 });
 
-                $("#show_annotations").click(function(){
+                $("#show_annotations").on('click', function(){
                     $("#search_ann_type").toggleClass("hide");
 
                     if ($(this).is(':checked')) {

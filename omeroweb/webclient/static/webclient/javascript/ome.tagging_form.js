@@ -447,7 +447,7 @@ var tagging_form = function(
         event.preventDefault();
     };
 
-    tag_input_filter.keypress(function(event) {
+    tag_input_filter.on('keypress', function(event) {
         if (event.which === 13) {
             select_tags(event);
             tag_input_filter.val('');
@@ -512,7 +512,7 @@ var tagging_form = function(
         }
         var owner_mode = $(
             "select[name=filter_owner_mode] option:selected").val();
-        filters = $.trim(input).toLowerCase();
+        filters = input.trim().toLowerCase();
         var filters_split = filters.split(/ +/);
         var no_filter = filters === "" && owner_mode === "any";
         if (no_filter) {
@@ -527,7 +527,7 @@ var tagging_form = function(
                     var tag = tags.eq(idx);
                     var tagobj = all_tags[tag.attr("data-id")];
                     var match = true;
-                    var text = $.trim(tagobj.t.toLowerCase());
+                    var text = tagobj.t.toLowerCase().trim();
                     if (mode === "any") {
                         for (var filter in filters_split) {
                             match = match && text.indexOf(
@@ -563,12 +563,12 @@ var tagging_form = function(
         if (text === tag_input.attr('placeholder')) {
             text = '';
         }
-        text = $.trim(text);
+        text = text.trim();
         var description = description_input.val();
         if (description === description_input.attr('placeholder')) {
             description = '';
         }
-        description = $.trim(description);
+        description = description.trim();
 
         var tagset = get_selected_tagset();
         if (text.length > 0) {
@@ -657,7 +657,7 @@ var tagging_form = function(
             });
             $("div.ui-selected", div_selected_tags).removeClass('ui-selected');
             div_selected_tags.append(div);
-            tag_input.val('').focus();
+            tag_input.val('').trigger('focus');
             description_input.val('');
             enable_buttons();
         }
@@ -675,8 +675,8 @@ var tagging_form = function(
             add_new_tag(event);
         }
     };
-    tag_input.keypress(add_new_tag_on_enter_key);
-    description_input.keypress(add_new_tag_on_enter_key);
+    tag_input.on('keypress', add_new_tag_on_enter_key);
+    description_input.on('keypress', add_new_tag_on_enter_key);
 
     var save_tags = function() {
         var existing_tags = [];
@@ -719,33 +719,33 @@ var tagging_form = function(
         }
     };
 
-    $("#id_tag_select_button").click(select_tags);
-    $("#id_tag_deselect_button").click(deselect_tags);
-    $("#id_add_new_tag").click(add_new_tag);
+    $("#id_tag_select_button").on('click', select_tags);
+    $("#id_tag_deselect_button").on('click', deselect_tags);
+    $("#id_add_new_tag").on('click', add_new_tag);
     $("#add_tags_form").off('prepare-submit').on('prepare-submit', save_tags);
-    tag_input.keyup(update_add_new_button_state).change(
+    tag_input.on('keyup', update_add_new_button_state).on('change',
         update_add_new_button_state);
     update_add_new_button_state();
-    tag_input_filter.keyup(update_filter).change(update_filter);
-    $("select[name=filter_mode],select[name=filter_owner_mode]").change(
+    tag_input_filter.on('keyup', update_filter).on('change', update_filter);
+    $("select[name=filter_mode],select[name=filter_owner_mode]").on('change',
         update_filter);
 
     loader();
 
     // placeholder fixes - should probably be in a more generic place
-    $('[placeholder]').focus(function() {
+    $('[placeholder]').on('focus', function() {
         var input = $(this);
         if (input.val() === input.attr('placeholder')) {
             input.val('');
             input.removeClass('placeholder');
         }
-    }).blur(function() {
+    }).on('blur', function() {
         var input = $(this);
         if (input.val() === '' || input.val() === input.attr('placeholder')) {
             input.addClass('placeholder');
             input.val(input.attr('placeholder'));
         }
-    }).blur().parents('form').submit(function() {
+    }).trigger('blur').parents('form').on('submit', function() {
         $(this).find('[placeholder]').each(function() {
             var input = $(this);
             if (input.val() === input.attr('placeholder')) {

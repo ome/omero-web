@@ -105,10 +105,10 @@ $(function() {
         dryRunTargetObjects = {};
         dryRunTargetObjects[dtype] = ids;
         $.get(webindex_url + "fileset_check/chgrp/?" + sel, function(html){
-            html = $.trim(html);
+            html = html.trim();
             if($('div.split_fileset', html).length > 0) {
                 $(html).appendTo($chgrpform);
-                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span').text("Move All");
+                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)').text("Move All");
                 var filesetIds = [];
                 $('input[name="fileset"]', html).each(function(){
                     filesetIds.push(parseInt($(this).val(), 10));
@@ -179,7 +179,7 @@ $(function() {
         var ownerId = data_owners[0][0];
         $move_group_tree.hide();
         $("<p>New " + target_type.capitalize() + " name: <input name='new_container_name'/></p>")
-                .appendTo($chgrpform).click();
+                .appendTo($chgrpform).trigger('click');
         // Hidden input
         $("<input name='new_container_type' value='" + target_type + "'/>")
                 .appendTo($chgrpform).hide();
@@ -235,8 +235,8 @@ $(function() {
                     // toggle any children
                     $("ul" ,$(this).parent()).toggle();
                 };
-                $("#move_group_tree a").click(node_click);
-                $("#move_group_tree ins").click(node_click);
+                $("#move_group_tree a").on('click', node_click);
+                $("#move_group_tree ins").on('click', node_click);
                 $newbtn.show();
             });
         }
@@ -268,7 +268,7 @@ $(function() {
                 newContainer();
             },
             "OK": function() {
-                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span');
+                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
                 // If we have split filesets, first submission is to confirm 'Move All'?
                 // We hide the split_filesets info panel and rename submit button to 'OK'
                 if ($(".split_filesets_info .split_fileset", $chgrpform).length > 0 && $thisBtn.text() == 'Move All') {
@@ -277,7 +277,7 @@ $(function() {
                     $thisBtn.text('OK');
                     return false;
                 }
-                $chgrpform.submit();
+                $chgrpform.trigger('submit');
             },
             "Cancel": function() {
                 resetChgrpForm();

@@ -29,7 +29,7 @@ var CommentsPane = function CommentsPane($element, opts) {
 
     var initEvents = (function initEvents() {
 
-        $header.click(function(){
+        $header.on('click', function(){
             $header.toggleClass('closed');
             $body.slideToggle();
 
@@ -45,12 +45,12 @@ var CommentsPane = function CommentsPane($element, opts) {
     // Comment field - show/hide placeholder and submit button.
     $("#add_comment_wrapper label").inFieldLabels();
     $("#id_comment")
-        .blur(function(event){
+        .on('blur', function(event){
             setTimeout(function(){
                 $("#add_comment_form input[type='submit']").hide();
             }, 200);    // Delay allows clicking on the submit button!
         })
-        .focus(function(){
+        .on('focus', function(){
             $("#add_comment_form input[type='submit']").show();
         });
 
@@ -66,7 +66,7 @@ var CommentsPane = function CommentsPane($element, opts) {
     $("#add_comment_form").ajaxForm({
         beforeSubmit: function(data, $form, options) {
             var textArea = $('#add_comment_form textarea');
-            if ($.trim(textArea.val()).length === 0) return false;
+            if (textArea.val().trim().length === 0) return false;
             // here we specify what objects are to be annotated
             objects.forEach(function(o){
                 var dtypeId = o.split("-");

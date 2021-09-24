@@ -34,7 +34,7 @@
             $("#choose_attachments_form").parent()).prop("disabled", true).addClass(
                 'ui-state-disabled');
         
-        $('#id_annotation_file, #id_files').change(
+        $('#id_annotation_file, #id_files').on('change',
             function(){
                 if ($(this).val()){
                     $(":button:contains('Accept')",
