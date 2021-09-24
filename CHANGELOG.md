@@ -22,7 +22,7 @@
 ## Dependencies Updates
 
 - Upgrade Underscore to 1.13.1 ([#317](https://github.com/ome/omero-web/pull/317))
-- Upgrade jquery.chosen to 1.8.7, jquery.form to 4.3.0, jquery.ui to 1.12.1, jquery to 3.5.1, jstree 3.3.10 ([#180](https://github.com/ome/omero-web/pull/180))
+- Upgrade jquery to 3.5.1, jquery.chosen to 1.8.7, jquery.form to 4.3.0, jquery.ui to 1.12.1, jstree 3.3.10 ([#180](https://github.com/ome/omero-web/pull/180))
 
 5.9.2 (May 2021)
 ----------------
