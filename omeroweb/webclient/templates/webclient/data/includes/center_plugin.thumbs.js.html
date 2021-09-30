@@ -538,9 +538,9 @@ $(document).ready(function() {
             'selector': '.hidden_sort_text',
             // override to replace &amp; from item.innerHTML with '&'
             testQuery: function (query, txt, _row) {
+                txt = txt.replace(/&amp;/g, '&')
                 // query is a list of strings
                 for (var i = 0; i < query.length; i += 1) {
-                    txt = txt.replace(/&amp;/g, '&')
                     if (txt.indexOf(query[i]) === -1) {
                         return false;
                     }
