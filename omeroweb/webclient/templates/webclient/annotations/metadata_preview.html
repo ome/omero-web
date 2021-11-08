@@ -326,7 +326,7 @@
                     spanTxt = $span.text();
                   $span.text("Saving...");
                   var typeId = pid.split("-");
-                  var rdefQry = OME.preview_viewport.getQuery();
+                  var rdefQry = OME.preview_viewport.getQuery(true);
                   // need to paste current settings to all images...
                   var url = "{% url 'webgateway_copy_image_rdef_json' %}"+ "?" + rdefQry;
                   data = {
