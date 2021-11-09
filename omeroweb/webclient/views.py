@@ -310,6 +310,9 @@ class WebclientLoginView(LoginView):
                 context["public_enabled"] = True
                 context["public_login_redirect"] = redirect
 
+        if settings.SHOW_FORGOT_PASSWORD:
+            context["show_forgot_password"] = True
+
         context["show_download_links"] = settings.SHOW_CLIENT_DOWNLOADS
         if settings.SHOW_CLIENT_DOWNLOADS:
             ver = re.match(
