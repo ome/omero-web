@@ -2908,38 +2908,16 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
 annotations = login_required()(jsonp(_bulk_file_annotations))
 
 
-def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
-    """
-    Query a table specified by fileid
-    Returns a dictionary with query result if successful, error information
-    otherwise
-
-    @param request:     http request; querystring must contain key 'query'
-                        with query to be executed, or '*' to retrieve all rows.
-                        If query is in the format word-number, e.g. "Well-7",
-                        if will be run as (word==number), e.g. "(Well==7)".
-                        This is supported to allow more readable query strings.
-    @param fileid:      Numeric identifier of file containing the table
-    @param query:       The table query. If None, use request.GET.get('query')
-                        E.g. '*' to return all rows.
-                        If in the form 'colname-1', query will be (colname==1)
-    @param lazy:        If True, instead of returning a 'rows' list,
-                        'lazy_rows' will be a generator.
-                        Each gen.next() will return a list of row data
-                        AND 'table' returned MUST be closed.
-    @param conn:        L{omero.gateway.BlitzGateway}
-    @param **kwargs:    offset, limit
-    @return:            A dictionary with key 'error' with an error message
-                        or with key 'data' containing a dictionary with keys
-                        'columns' (an array of column names) and 'rows'
-                        (an array of rows, each an array of values)
-    """
-    if query is None:
-        query = request.GET.get("query")
-    if not query:
-        return dict(error="Must specify query parameter, use * to retrieve all")
-    col_names = request.GET.getlist("col_names")
-
+def perform_table_query(
+    conn,
+    fileid,
+    query,
+    col_names,
+    offset=0,
+    limit=None,
+    lazy=False,
+    check_max_rows=True,
+):
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
 
@@ -2969,19 +2947,8 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
         column_names = [col.name for col in cols]
         rows = t.getNumberOfRows()
 
-        offset = kwargs.get("offset", 0)
-        limit = kwargs.get("limit", None)
-        if not offset:
-            offset = int(request.GET.get("offset", 0))
-        if not limit:
-            limit = (
-                int(request.GET.get("limit"))
-                if request.GET.get("limit") is not None
-                else rows
-            )
-
         range_start = offset
-        range_size = limit
+        range_size = limit if limit is not None else rows
         range_end = min(rows, range_start + range_size)
 
         if query == "*":
@@ -3005,12 +2972,13 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
             except Exception:
                 return dict(error="Error executing query: %s" % query)
 
-        if len(hits) > settings.MAX_TABLE_DOWNLOAD_ROWS:
-            error = (
-                "Trying to download %s rows exceeds configured"
-                " omero.web.max_table_download_rows of %s"
-            ) % (len(hits), settings.MAX_TABLE_DOWNLOAD_ROWS)
-            return {"error": error, "status": 404}
+        if check_max_rows:
+            if len(hits) > settings.MAX_TABLE_DOWNLOAD_ROWS:
+                error = (
+                    "Trying to download %s rows exceeds configured"
+                    " omero.web.max_table_download_rows of %s"
+                ) % (len(hits), settings.MAX_TABLE_DOWNLOAD_ROWS)
+                return {"error": error, "status": 404}
 
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
@@ -3055,6 +3023,53 @@ def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
     finally:
         if not lazy:
             t.close()
+
+
+def _table_query(request, fileid, conn=None, query=None, lazy=False, **kwargs):
+    """
+    Query a table specified by fileid
+    Returns a dictionary with query result if successful, error information
+    otherwise
+
+    @param request:     http request; querystring must contain key 'query'
+                        with query to be executed, or '*' to retrieve all rows.
+                        If query is in the format word-number, e.g. "Well-7",
+                        if will be run as (word==number), e.g. "(Well==7)".
+                        This is supported to allow more readable query strings.
+    @param fileid:      Numeric identifier of file containing the table
+    @param query:       The table query. If None, use request.GET.get('query')
+                        E.g. '*' to return all rows.
+                        If in the form 'colname-1', query will be (colname==1)
+    @param lazy:        If True, instead of returning a 'rows' list,
+                        'lazy_rows' will be a generator.
+                        Each gen.next() will return a list of row data
+                        AND 'table' returned MUST be closed.
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    offset, limit
+    @return:            A dictionary with key 'error' with an error message
+                        or with key 'data' containing a dictionary with keys
+                        'columns' (an array of column names) and 'rows'
+                        (an array of rows, each an array of values)
+    """
+    if query is None:
+        query = request.GET.get("query")
+    if not query:
+        return dict(error="Must specify query parameter, use * to retrieve all")
+    col_names = request.GET.getlist("col_names")
+
+    offset = kwargs.get("offset", 0)
+    limit = kwargs.get("limit", None)
+    if not offset:
+        offset = int(request.GET.get("offset", 0))
+    if not limit:
+        limit = (
+            int(request.GET.get("limit"))
+            if request.GET.get("limit") is not None
+            else None
+        )
+    return perform_table_query(
+        conn, fileid, query, col_names, offset=offset, limit=limit, lazy=lazy
+    )
 
 
 table_query = login_required()(jsonp(_table_query))
@@ -3103,6 +3118,93 @@ def _table_metadata(request, fileid, conn=None, query=None, lazy=False, **kwargs
 
 
 table_metadata = login_required()(jsonp(_table_metadata))
+
+
+@login_required()
+@jsonp
+def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
+    """
+    Get an ID bitmask representing which ids match the given query
+    Returns a http response where the content is a 0-indexed array of
+    big-endian bit-ordered bytes representing the selected ids.
+    E.g. if your query returns IDs 1,2,7, 11, and 12, you will
+    get back 0110000100011000, or [97, 24]. The response will be the
+    smallest number of bytes necessary to represent all IDs and will
+    be padded with 0s to the end of the byte.
+
+    @param request:     http request; querystring must contain key 'query'
+                        with query to be executed, or '*' to retrieve all rows.
+                        If query is in the format word-number, e.g. "Well-7",
+                        if will be run as (word==number), e.g. "(Well==7)".
+                        This is supported to allow more readable query strings.
+                        querystring may optionally specify 'col_name' which is
+                        the ID column to use to create the mask. By default
+                        'object' is used.
+    @param fileid:      Numeric identifier of file containing the table
+    @param query:       The table query. If None, use request.GET.get('query')
+                        E.g. '*' to return all rows.
+                        If in the form 'colname-1', query will be (colname==1)
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    offset, limit
+    @return:            A dictionary with key 'error' with an error message
+                        or with an array of bytes as described above
+    """
+
+    if not numpyInstalled:
+        raise NotImplementedError("numpy not installed")
+    col_name = request.GET.get("col_name", "object")
+    if query is None:
+        query = request.GET.get("query")
+    if not query:
+        return dict(error="Must specify query parameter, use * to retrieve all")
+
+    offset = kwargs.get("offset", 0)
+    limit = kwargs.get("limit", None)
+    if not offset:
+        offset = int(request.GET.get("offset", 0))
+    if not limit:
+        limit = (
+            int(request.GET.get("limit"))
+            if request.GET.get("limit") is not None
+            else None
+        )
+
+    rsp_data = perform_table_query(
+        conn,
+        fileid,
+        query,
+        [col_name],
+        offset=offset,
+        limit=limit,
+        lazy=False,
+        check_max_rows=False,
+    )
+    if "error" in rsp_data:
+        return rsp_data
+    try:
+        data = rowsToByteArray(rsp_data["data"]["rows"])
+        return HttpResponse(bytes(data), content_type="application/octet-stream")
+    except ValueError:
+        logger.error("ValueError when getting obj_id_bitmask")
+        return {"error": "Specified column has invalid type"}
+
+
+def rowsToByteArray(rows):
+    maxval = 0
+    if len(rows) > 0 and type(rows[0][0]) == float:
+        raise ValueError("Cannot have ID of float")
+    for obj in rows:
+        obj_id = int(obj[0])
+        maxval = max(obj_id, maxval)
+    bitArray = numpy.zeros(maxval + 1, dtype="uint8")
+    for obj in rows:
+        obj_id = int(obj[0])
+        bitArray[obj_id] = 1
+    packed = numpy.packbits(bitArray, bitorder="big")
+    data = bytearray()
+    for val in packed:
+        data.append(val)
+    return data
 
 
 @login_required()
