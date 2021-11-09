@@ -46,7 +46,7 @@ $.fn.postit = function(cfg) {
     };
     /* Some extra details on the dragbar */
     var dragbar = self.find('h1:first');
-    dragbar.dblclick(function(e) { self.toggleClass('collapsed'); });
+    dragbar.on('dblclick', function(e) { self.toggleClass('collapsed'); });
 
     if (dragbar.get(0).addEventListener) {
       // Respond to mouse wheel in Firefox
@@ -66,8 +66,8 @@ $.fn.postit = function(cfg) {
       .addClass('postit')
       .removeClass('sdialog');
     /* The buttons */
-    self.find('.postit-toggle-btn').click(function(e) { self.toggleClass('collapsed'); });
-    self.find('.postit-close-btn').click(function(e) { self.hide(); });
+    self.find('.postit-toggle-btn').on('click', function(e) { self.toggleClass('collapsed'); });
+    self.find('.postit-close-btn').on('click', function(e) { self.hide(); });
     self.find('.sdialog-content').removeClass('sdialog-content').addClass('postit-content');
     if (cfg && !cfg.noResize) {
       var target;
@@ -99,6 +99,6 @@ $.fn.postit = function(cfg) {
       }
     };
       self.draggable({handle: 'h1:first', scroll: false, containment: 'document'});
-    self.find('h1:first').bind('mouseup', dropEvent)
+    self.find('h1:first').on('mouseup', dropEvent)
   });
 }

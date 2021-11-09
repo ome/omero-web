@@ -25,7 +25,7 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
     $filter.show();
 
     // Bind event handlers to UI
-    $(".choose_map_key", $filter).change(function(event){
+    $(".choose_map_key", $filter).on('change', function(event){
         var $this = $(event.target);
         this.currentFilterKey = $this.val();
         if (this.currentFilterKey == '-') {
@@ -109,14 +109,14 @@ function MapAnnFilter(image_ids, $element, callback, filterObjects) {
         }
     }.bind(this));
 
-    $(".map_more_less", $filter).change(function(event){
+    $(".map_more_less", $filter).on('change', function(event){
         this.moreLess = $(event.target).val();
         if (callback) {
             callback();
         }
     }.bind(this));
 
-    $(".removefilter", $filter).click(function() {
+    $(".removefilter", $filter).on('click', function() {
         let i = filterObjects.indexOf(this);
         // remove this filter from array
         filterObjects.splice(i, 1);

@@ -19,16 +19,20 @@
 
 """ Helper functions for views that handle object trees """
 
+import logging
 import time
+import pytz
 import omero
 from builtins import bytes
-from past.utils import old_div
 
 from omero.rtypes import rlong, unwrap, wrap
 from django.conf import settings
 from datetime import datetime
 from copy import deepcopy
 from omero.gateway import _letterGridLabel
+
+
+logger = logging.getLogger(__name__)
 
 
 def unwrap_to_str(rstr):
@@ -504,8 +508,14 @@ def marshal_datasets(
 
 def _marshal_date(time):
     try:
-        d = datetime.fromtimestamp(old_div(time, 1000))
-        return d.isoformat() + "Z"
+        d = datetime.fromtimestamp(time // 1000)
+        try:
+            # Add time-zone awareness
+            tz = pytz.timezone(settings.TIME_ZONE)
+            d = tz.localize(d)
+        except pytz.exceptions.UnknownTimeZoneError:
+            logger.debug("UnknownTimeZoneError: " + settings.TIME_ZONE)
+        return d.isoformat()
     except ValueError:
         return ""
 

@@ -62,7 +62,7 @@ $(function() {
             data_owners = data.owners;  // save for later
             var ownernames = [];
             for (var o=0; o<data.owners.length; o++) {ownernames.push(data.owners[o][1]);}
-            var headerTxt = "<p>Move data owned by " + ownernames.join(", ") + ".</p>" +
+            var headerTxt = "<p>Move data owned by " + ownernames.join(", ").escapeHTML() + ".</p>" +
                             "<h1>Please choose target group below:</h1>";
             $group_chooser.append(headerTxt);
 
@@ -72,7 +72,7 @@ $(function() {
                 var g = data.groups[i];
                 html += "<div class='chgrpGroup' data-gid='"+ g.id + "'>";
                 html += "<img src='" + permsIcon(g.perms) + "'/>";
-                html += g.name + "<hr></div>";
+                html += g.name.escapeHTML() + "<hr></div>";
             }
             // If no target groups found...
             if (data.groups.length === 0) {
@@ -105,10 +105,10 @@ $(function() {
         dryRunTargetObjects = {};
         dryRunTargetObjects[dtype] = ids;
         $.get(webindex_url + "fileset_check/chgrp/?" + sel, function(html){
-            html = $.trim(html);
+            html = html.trim();
             if($('div.split_fileset', html).length > 0) {
                 $(html).appendTo($chgrpform);
-                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span').text("Move All");
+                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)').text("Move All");
                 var filesetIds = [];
                 $('input[name="fileset"]', html).each(function(){
                     filesetIds.push(parseInt($(this).val(), 10));
@@ -179,7 +179,7 @@ $(function() {
         var ownerId = data_owners[0][0];
         $move_group_tree.hide();
         $("<p>New " + target_type.capitalize() + " name: <input name='new_container_name'/></p>")
-                .appendTo($chgrpform).click();
+                .appendTo($chgrpform).trigger('click');
         // Hidden input
         $("<input name='new_container_type' value='" + target_type + "'/>")
                 .appendTo($chgrpform).hide();
@@ -235,8 +235,8 @@ $(function() {
                     // toggle any children
                     $("ul" ,$(this).parent()).toggle();
                 };
-                $("#move_group_tree a").click(node_click);
-                $("#move_group_tree ins").click(node_click);
+                $("#move_group_tree a").on('click', node_click);
+                $("#move_group_tree ins").on('click', node_click);
                 $newbtn.show();
             });
         }
@@ -268,7 +268,7 @@ $(function() {
                 newContainer();
             },
             "OK": function() {
-                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span');
+                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
                 // If we have split filesets, first submission is to confirm 'Move All'?
                 // We hide the split_filesets info panel and rename submit button to 'OK'
                 if ($(".split_filesets_info .split_fileset", $chgrpform).length > 0 && $thisBtn.text() == 'Move All') {
@@ -277,7 +277,7 @@ $(function() {
                     $thisBtn.text('OK');
                     return false;
                 }
-                $chgrpform.submit();
+                $chgrpform.trigger('submit');
             },
             "Cancel": function() {
                 resetChgrpForm();
@@ -407,7 +407,7 @@ $(function() {
             if (count === 1) otype = otype.slice(0, -1);  // remove s
             var namesList = [], names;
             unlinked.forEach(function (u) {
-                namesList.push(u.name);
+                namesList.push(u.name.escapeHTML());
             });
             names = namesList.join(", ");
             names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";

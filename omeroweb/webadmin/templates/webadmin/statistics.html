@@ -68,12 +68,12 @@
                 });
             }
 
-            $("#load_groups").click(function(event) {
+            $("#load_groups").on('click', function(event) {
                 event.preventDefault();
                 loadGroups();
             });
 
-            $("#load_users").click(function(event) {
+            $("#load_users").on('click', function(event) {
                 event.preventDefault();
                 loadUsers();
             });

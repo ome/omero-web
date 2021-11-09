@@ -1,3 +1,35 @@
+
+5.11.0 (October 2021)
+---------------------
+
+- Security vulnerability fixes for
+  [2021-SV3](https://www.openmicroscopy.org/security/advisories/2021-SV3)
+
+5.11.0.rc1 (September 2021)
+---------------------------
+
+## New features
+
+- Plate layout improvements and configuration. See PR for details ([#270](https://github.com/ome/omero-web/pull/270))
+- Configure custom favicon ([#311](https://github.com/ome/omero-web/pull/311))
+- OMERO.table Shapes link to OMERO.iviewer ([#310](https://github.com/ome/omero-web/pull/310))
+- URL /webgateway/table/FILE_ID/query supports col_names filter ([#305](https://github.com/ome/omero-web/pull/305))
+- Improve OMERO.table download usability ([#300](https://github.com/ome/omero-web/pull/300))
+- Configure default user and group for search ([#297](https://github.com/ome/omero-web/pull/297))
+- Add /shape/ID endpoint to JSON API ([#291](https://github.com/ome/omero-web/pull/291))
+
+## Bug fixes
+
+- Fix Shift-click to multi-select Wells ([#296](https://github.com/ome/omero-web/pull/296))
+- Handle parent not found on POST webclient/api/links ([#294](https://github.com/ome/omero-web/pull/294))
+- Display time-stamps in local time ([#303](https://github.com/ome/omero-web/pull/303))
+- Public login button uses configured login page ([#312](https://github.com/ome/omero-web/pull/312))
+
+## Dependencies Updates
+
+- Upgrade Underscore to 1.13.1 ([#317](https://github.com/ome/omero-web/pull/317))
+- Upgrade jquery to 3.5.1, jquery.chosen to 1.8.7, jquery.form to 4.3.0, jquery.ui to 1.12.1, jstree 3.3.10 ([#180](https://github.com/ome/omero-web/pull/180))
+
 5.9.2 (May 2021)
 ----------------
 

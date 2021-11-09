@@ -24,12 +24,13 @@
     {% if image.getAcquisitionDate %}
     <tr>
         <th>Acquisition Date:</th>
-        <td id='acqu_date'>{{ image.getAcquisitionDate|date:"Y-m-d H:i:s" }}</td> <!-- TODO: Insight is m/d/yy h:min AM/PM -->
+        <!-- acqu_date and import_date formatted by OME.formatDate() see metadata_general.html -->
+        <td id='acqu_date' data-isodate='{{ image.getAcquisitionDate|date:"r" }}'></td>
     </tr>
     {% endif %}
     <tr>
         <th>Import Date:</th>
-        <td id='import_date'>{{ image.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+        <td id='import_date' data-isodate='{{ image.creationEventDate|date:"r" }}'></td>
     </tr>
     <tr>
         <th>Dimensions (XY):</th>

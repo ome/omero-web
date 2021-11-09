@@ -17,7 +17,7 @@ $(function(){
         // Also clear content
         OME.emptyWellBirdsEye();
     };
-    $("#hide_well_birds_eye").click(OME.hideWellBirdsEye);
+    $("#hide_well_birds_eye").on('click', OME.hideWellBirdsEye);
 
 
     OME.WellBirdsEye = function(opts) {
@@ -127,7 +127,7 @@ $(function(){
                     // check if min===max to avoid zero-division error
                     var x = (maxX === minX) ? 0.5 : (ws.position.x.value - minX)/(maxX - minX);
                     var y = (maxY === minY) ? 0.5 : (ws.position.y.value - minY)/(maxY - minY);
-                    return '<img style="left: ' + (x * 100) + '%; top: ' + (y * 100) + '%" title="' + ws.name + '" data-imageId="' + ws.id + '" />';
+                    return '<img style="left: ' + (x * 100) + '%; top: ' + (y * 100) + '%" title="' + ws.name.escapeHTML() + '" data-imageId="' + ws.id + '" />';
                 }, "");
                 $well_birds_eye.append(html.join(""));
             }
@@ -172,7 +172,7 @@ $(function(){
         if (event && event.shiftKey ) {
             if ( primaryIndex === -1 ) {
                 primaryIndex = selIndex;
-                $clickedImage.parent().addClass("ui-selected");
+                $clickedImage.parent().parent().addClass("ui-selected");
                 return;
             }
             
@@ -180,7 +180,7 @@ $(function(){
             var start = Math.min(primaryIndex,selIndex);
             var end = Math.max(primaryIndex,selIndex);
             
-            thumbs.slice(start, end+1).parent().addClass("ui-selected");
+            thumbs.slice(start, end + 1).parent().parent().addClass("ui-selected");
             
         }
         else if (event && event[OME.multi_key() + "Key"]) {
@@ -188,15 +188,15 @@ $(function(){
                 primaryIndex = selIndex;
             }
             
-            if($clickedImage.parent().hasClass("ui-selected")) {
-                $clickedImage.parent().removeClass("ui-selected");
+            if ($clickedImage.parent().parent().hasClass("ui-selected")) {
+                $clickedImage.parent().parent().removeClass("ui-selected");
             } else {
-                $clickedImage.parent().addClass("ui-selected");
+                $clickedImage.parent().parent().addClass("ui-selected");
             }
         }
         else {
-            thumbs.parent().removeClass("ui-selected");
-            $clickedImage.parent().addClass("ui-selected");
+            thumbs.parent().parent().removeClass("ui-selected");
+            $clickedImage.parent().parent().addClass("ui-selected");
             primaryIndex = selIndex;
         }
     };

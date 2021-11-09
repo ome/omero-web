@@ -35,6 +35,7 @@ import sys
 import warnings
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
+from django.utils.html import escape
 from django.utils.http import is_safe_url
 
 from time import time
@@ -561,6 +562,8 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["current_admin_privileges"] = conn.getCurrentAdminPrivileges()
     context["leader_of_groups"] = conn.getEventContext().leaderOfGroups
     context["member_of_groups"] = conn.getEventContext().memberOfGroups
+    context["search_default_user"] = settings.SEARCH_DEFAULT_USER
+    context["search_default_group"] = settings.SEARCH_DEFAULT_GROUP
 
     return context
 
@@ -1794,7 +1797,7 @@ def load_metadata_preview(request, c_type, c_id, conn=None, share_id=None, **kwa
         rdefQueries.append(
             {
                 "id": r["id"],
-                "owner": r["owner"],
+                "owner": escape(r["owner"]),  # May be used unsafe later
                 "c": ",".join(chs),
                 "m": r["model"] == "greyscale" and "g" or "c",
             }
@@ -1887,7 +1890,8 @@ def load_metadata_acquisition(
                             conn.getEnumerationEntries("ContrastMethodI")
                         ),
                         "modes": list(conn.getEnumerationEntries("AcquisitionModeI")),
-                    }
+                    },
+                    auto_id=False,
                 )
                 # 9853 Much metadata is not available to 'shares'
                 if share_id is None:
@@ -2040,7 +2044,8 @@ def load_metadata_acquisition(
                             "mediums": mediums,
                             "immersions": immersions,
                             "corrections": corrections,
-                        }
+                        },
+                        auto_id=False,
                     )
                     form_instrument_objectives.append(obj_form)
                 filters = list(instrument.getFilters())
@@ -2052,13 +2057,16 @@ def load_metadata_acquisition(
                                 "types": list(
                                     conn.getEnumerationEntries("FilterTypeI")
                                 ),
-                            }
+                            },
+                            auto_id=False,
                         )
                         form_filters.append(form_filter)
 
                 dichroics = list(instrument.getDichroics())
                 for d in dichroics:
-                    form_dichroic = MetadataDichroicForm(initial={"dichroic": d})
+                    form_dichroic = MetadataDichroicForm(
+                        initial={"dichroic": d}, auto_id=False
+                    )
                     form_dichroics.append(form_dichroic)
 
                 detectors = list(instrument.getDetectors())
@@ -2071,7 +2079,8 @@ def load_metadata_acquisition(
                                 "types": list(
                                     conn.getEnumerationEntries("DetectorTypeI")
                                 ),
-                            }
+                            },
+                            auto_id=False,
                         )
                         form_detectors.append(form_detector)
 
@@ -2091,7 +2100,8 @@ def load_metadata_acquisition(
                                     conn.getEnumerationEntries("LaserMediumI")
                                 ),
                                 "pulses": list(conn.getEnumerationEntries("PulseI")),
-                            }
+                            },
+                            auto_id=False,
                         )
                         form_lasers.append(form_laser)
 

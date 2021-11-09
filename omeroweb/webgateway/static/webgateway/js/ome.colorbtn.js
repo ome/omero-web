@@ -71,10 +71,10 @@ $.fn.colorbtn = function(cfg) {
       $('<div id="'+this.cfg.prefix+'"></div>').appendTo($cpickerPane);
       $cpickerPane.append('<div style="text-align: center;">Hex RGB <input type="text" id="'+this.cfg.prefix+'-tb" /></div>');
       $('<button id="cbpicker-OK-btn" style="float:right">OK</button>').appendTo($cpickerPane);
-      $('<button style="float:right">Cancel</button>').appendTo($cpickerPane).click(function(){
+      $('<button style="float:right">Cancel</button>').appendTo($cpickerPane).on('click', function(){
         jQuery("#"+that.cfg.prefix+"-box").hide();
       });
-      $('a', $showColorPicker).click(function(event){
+      $('a', $showColorPicker).on('click', function(event){
         event.preventDefault();
         $cpickerPane.toggle();
         $luts.toggle();
@@ -89,7 +89,7 @@ $.fn.colorbtn = function(cfg) {
 
       self.trigger('prepared');
       picker = jQuery.farbtastic("#"+this.cfg.prefix);
-      jQuery('input#'+this.cfg.prefix+'-tb').bind('change', function () {
+      jQuery('input#'+this.cfg.prefix+'-tb').on('change', function () {
           var new_color = sanitizeHexColor(jQuery('input#'+self[0].cfg.prefix+'-tb').val());
           if (new_color !== null) {
             picker.setColor(new_color);
@@ -167,15 +167,15 @@ $.fn.colorbtn = function(cfg) {
       $("label[for='" + currColor + "']", $luts).css('background', '#cddcfc')
 
       // unbind and re-bind appropriate handler (wraps ref to button)
-      $("#cbpicker-OK-btn").unbind('click').bind('click', ok_callback)
-        .bind('click',function(){
+      $("#cbpicker-OK-btn").off('click').on('click', ok_callback)
+        .on('click',function(){
           jQuery("#"+that.cfg.prefix+"-box").hide();
         });
       $('#' + this.cfg.prefix + '-luts').off("click").on( "click", "input", function() {
         self.attr('data-picked-color', this.value);
         ok_callback();
       });
-      $("#invert").off('click').click(function(){
+      $("#invert").off('click').on('click', function(){
         self.data('data-reverse-intensity', this.checked);
         ok_callback();
       });
@@ -189,8 +189,8 @@ $.fn.colorbtn = function(cfg) {
       picker.linkTo(null_cb).setColor(color).linkTo(callback);
       jQuery("#"+this.cfg.prefix+"-tb").val(color.substring(1).toUpperCase());
       jQuery("#"+this.cfg.prefix+"-defc").css("background-color", self.css("background-color"));
-      jQuery("#"+this.cfg.prefix+"-box").mousedown(function () {self.trigger('mousedown');}).show();
-      jQuery("#"+this.cfg.prefix+"-box").unbind('closed').bind('closed', function () {self.trigger('hiding');});
+      jQuery("#" + this.cfg.prefix + "-box").on('mousedown', function () {self.trigger('mousedown');}).show();
+      jQuery("#"+this.cfg.prefix+"-box").off('closed').on('closed', function () {self.trigger('hiding');});
       self.trigger('showing');
       //self.addClass('picking');
     };
@@ -201,6 +201,6 @@ $.fn.colorbtn = function(cfg) {
     };
 
     /* Event handlers */
-    self.click(this.show_picker);
+    self.on('click', this.show_picker);
   });
 };

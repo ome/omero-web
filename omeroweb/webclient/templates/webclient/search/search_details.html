@@ -25,6 +25,11 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
+            // Format all dates according to local time
+            $('[data-isodate]').each(function () {
+                $(this).text(OME.formatDate($(this).data('isodate')));
+            });
+
             var iids = [];
             $(".search_thumb").each(function(){
                 iids.push(this.id);
@@ -37,13 +42,8 @@
                 "{% static 'webgateway/img/image128.png' %}"
             );
 
-            // double-click handler on image - launches image viewer
-            //$("table#dataTable tbody tr").dblclick(function(event) {
-                // TODO: path to the object should be rendered on the server side
-            //});
-
             // single click handler on image (container). Selection then update toolbar & metadata pane
-            $("table#dataTable tbody tr").click(function(event) {
+            $("table#dataTable tbody tr").on('click', function(event) {
                 OME.handleTableClickSelection(event);
             });
             
@@ -123,11 +123,13 @@
                         <span style="color:red">ID: {{ c.id }}</span>
                         <a>{{ c.name|truncatebefor:"65" }}</a>
                     </td>
-                    <td class="date">
-                        <!-- only show Acquisition dates for 'image'. NB image.getDate() returns AquisitionDate-->
-                        {% ifequal byId.otype 'image' %}{{ c.getDate|date:"Y-m-d H:i:s" }}{% endifequal %}
+                    <!-- only show Acquisition dates for 'image'. NB image.getDate() returns AquisitionDate-->
+                    <td class="date"
+                        {% ifequal byId.otype 'image' %}data-isodate='{{ c.getDate|date:"r" }}'{% endifequal %}
                     </td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'>
+                        <script>document.write(OME.formatDate("{{ c.creationEventDate|date:'r' }}")</script></script>
+                    </td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show={{ byId.otype }}-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
@@ -142,7 +144,7 @@
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
                     <td class="date"></td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'></td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show=project-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
@@ -156,7 +158,7 @@
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
                     <td class="date"></td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'></td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show=screen-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
@@ -170,7 +172,7 @@
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
                     <td class="date"></td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'></td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show=dataset-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
@@ -184,7 +186,7 @@
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
                     <td class="date"></td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'></td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show=plate-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
@@ -198,7 +200,7 @@
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
                     <td class="date"></td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'></td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show=run-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
@@ -212,8 +214,8 @@
                             src="{% static "webgateway/img/spinner.gif" %}" />
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate|date:"Y-m-d H:i:s" }}</td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.getDate|date:"r" }}'></td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'></td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show=image-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
@@ -227,7 +229,7 @@
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
                     <td class="date">{{ c.getDate|date:"Y-m-d H:i:s" }}</td>
-                    <td class="date">{{ c.creationEventDate|date:"Y-m-d H:i:s" }}</td>
+                    <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'></td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show=well-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}

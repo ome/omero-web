@@ -166,7 +166,7 @@ $.fn.gs_slider = function(cfg) {
         self.setSliderPos(rpos+self.sliderCfg.min);
       }
 
-      slider.click(handlesliderpos);
+      slider.on('click', handlesliderpos);
 
       var onrepeat = false;
       var repeat_timer;
@@ -197,15 +197,15 @@ $.fn.gs_slider = function(cfg) {
       this.stoprepeat = function () {
         onrepeat = false;
         clearTimeout(repeat_timer);
-        btnup.unbind('mouseout', self.stoprepeat);
-        btnup.unbind('mouseup', self.stoprepeat);
-        btndown.unbind('mouseout', self.stoprepeat);
-        btndown.unbind('mouseup', self.stoprepeat);
+        btnup.off('mouseout', self.stoprepeat);
+        btnup.off('mouseup', self.stoprepeat);
+        btndown.off('mouseout', self.stoprepeat);
+        btndown.off('mouseup', self.stoprepeat);
 	btnplayup.removeClass('onplay');
 	btnplaydown.removeClass('onplay');
       }
 
-      btnplayup.click(function () {
+      btnplayup.on('click', function () {
         var onplay = btnplayup.is('.onplay');
         self.stoprepeat();
   	if (!onplay) {
@@ -214,16 +214,16 @@ $.fn.gs_slider = function(cfg) {
 	}
       });
 
-      btnup.mousedown(function () {
-	self.stoprepeat();
-	btnup.mouseup(self.stoprepeat);
-	btnup.mouseout(self.stoprepeat);
+      btnup.on('mousedown', function () {
+	      self.stoprepeat();
+        btnup.on('mouseup', self.stoprepeat);
+        btnup.on('mouseout', self.stoprepeat);
         startrepeat(-self.sliderCfg.direction);
         return false;
       });
 
 
-      btnplaydown.click(function () {
+      btnplaydown.on('click', function () {
         var onplay = btnplaydown.is('.onplay');
         self.stoprepeat();
   	if (!onplay) {
@@ -232,19 +232,19 @@ $.fn.gs_slider = function(cfg) {
 	}
       });
 
-      btndown.mousedown(function () {
+      btndown.on('mousedown', function () {
 	self.stoprepeat();
-        btndown.mouseup(self.stoprepeat);
-        btndown.mouseout(self.stoprepeat);
+        btndown.on('mouseup', self.stoprepeat);
+        btndown.on('mouseout', self.stoprepeat);
         startrepeat(self.sliderCfg.direction);
         return false;
       });
 
 
-      handle.mousedown(function (e) {
+      handle.on('mousedown', function (e) {
         /* Start handle drag */
-        jQuery(document).mousemove(domove);
-        jQuery(document).mouseup(stopdrag);
+        jQuery(document).on('mousemove', domove);
+        jQuery(document).on('mouseup', stopdrag);
         ondrag = true;
         handle.addClass('ondrag');
         handle.removeClass('draggable');
@@ -254,8 +254,8 @@ $.fn.gs_slider = function(cfg) {
       var stopdrag = function (e) {
         /* Stop handle drag */
         clearTimeout(repeat_timer);
-        jQuery(document).unbind('mousemove', domove);
-        jQuery(document).unbind('mouseup', stopdrag);
+        jQuery(document).off('mousemove', domove);
+        jQuery(document).off('mouseup', stopdrag);
         ondrag = false;
         handle.addClass('draggable');
         handle.removeClass('ondrag');
@@ -279,7 +279,7 @@ $.fn.gs_slider = function(cfg) {
         }
       };
 
-      //jQuery(document).mousemove(domove);
+      //jQuery(document).on('mousemove', domove);
 
       function follow_pos (e) {
         var pos = posFromEvent(e);
@@ -295,11 +295,11 @@ $.fn.gs_slider = function(cfg) {
       }
 
       function ttshow (e) {
-        slider.mousemove(follow_pos);
+        slider.on('mousemove', follow_pos);
       }
 
       function tthide (e) {
-        slider.unbind('mousemove', follow_pos);
+        slider.off('mousemove', follow_pos);
       }
 
       slider.hover(ttshow, tthide);

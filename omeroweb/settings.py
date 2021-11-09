@@ -36,6 +36,7 @@ import omero.clients
 import tempfile
 import re
 import json
+import pytz
 import random
 import string
 from builtins import str as text
@@ -225,6 +226,14 @@ def check_session_engine(s):
 
 def identity(x):
     return x
+
+
+def check_timezone(s):
+    """
+    Checks that string is a valid time-zone. If not, raise Exception
+    """
+    pytz.timezone(s)
+    return s
 
 
 def str_slash(s):
@@ -839,6 +848,12 @@ CUSTOM_SETTINGS_MAPPINGS = {
             " - useful for LDAP/ActiveDir installations"
         ),
     ],
+    "omero.web.favicon_url": [
+        "FAVICON_URL",
+        "webgateway/img/ome.ico",
+        str,
+        ("Favicon URL, specifies the path relative to django's static file dirs."),
+    ],
     "omero.web.staticfile_dirs": [
         "STATICFILES_DIRS",
         "[]",
@@ -953,6 +968,18 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "?highlight=limit_request_line"
         ),
     ],
+    "omero.web.search.default_user": [
+        "SEARCH_DEFAULT_USER",
+        0,
+        int,
+        ("ID of user to pre-select in search form."),
+    ],
+    "omero.web.search.default_group": [
+        "SEARCH_DEFAULT_GROUP",
+        0,
+        int,
+        ("ID of group to pre-select in search form."),
+    ],
     "omero.web.ui.top_links": [
         "TOP_LINKS",
         (
@@ -1033,6 +1060,19 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "The javascript loads data into ``$('#div_id')``."
         ),
     ],
+    "omero.web.plate_layout": [
+        "PLATE_LAYOUT",
+        "expand",
+        str,
+        (
+            "If 'shrink', the plate will not display rows and columns "
+            "before the first Well, or after the last Well. "
+            "If 'trim', the plate will only show Wells "
+            "from A1 to the last Well. "
+            "If 'expand' (default), the plate will expand from A1 to a "
+            "multiple of 12 columns x 8 rows after the last Well."
+        ),
+    ],
     # CORS
     "omero.web.cors_origin_whitelist": [
         "CORS_ORIGIN_WHITELIST",
@@ -1073,6 +1113,17 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "SAMEORIGIN",
         str,
         "Whether to allow OMERO.web to be loaded in a frame.",
+    ],
+    "omero.web.time_zone": [
+        "TIME_ZONE",
+        "Europe/London",
+        check_timezone,
+        (
+            "Time zone for this installation. Choices can be found in the "
+            "``TZ database name`` column of: "
+            "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones "
+            'Default ``"Europe/London"``'
+        ),
     ],
     "omero.web.django_additional_settings": [
         "DJANGO_ADDITIONAL_SETTINGS",
@@ -1350,10 +1401,6 @@ report_settings(sys.modules[__name__])
 
 SITE_ID = 1
 
-# Local time zone for this installation. Choices can be found here:
-# http://www.postgresql.org/docs/8.1/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE
-# although not all variations may be possible on all operating systems.
-TIME_ZONE = "Europe/London"
 FIRST_DAY_OF_WEEK = 0  # 0-Monday, ... 6-Sunday
 
 # LANGUAGE_CODE: A string representing the language code for this

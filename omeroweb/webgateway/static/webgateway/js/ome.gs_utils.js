@@ -257,7 +257,7 @@ function gs_showResultLine (container, data, baseurl, renderurl) {
   var foot = jQuery('<div class="search-result-footnotes"><span> [ </span></div>').appendTo(result);
   var fv = jQuery('<a href="'+data.links.viewer+'" alt="Open Full Viewer">Full Viewer</a>').appendTo(foot);
   foot.append('&nbsp;<a href="'+data.links.paper+'" alt="Paper">Paper</a>&nbsp;');
-  fv.click(data.links.fv_click(data.datasetId, data.imageId));
+  fv.on('click', data.links.fv_click(data.datasetId, data.imageId));
   foot.append('<a href="'+data.links.figure+'" alt="Figure">Figure</a>&nbsp;');
   foot.append('<span>] by <i>'+data.author+'</i> - <i>'+data.timestamp+'</i></span>');
   return result;

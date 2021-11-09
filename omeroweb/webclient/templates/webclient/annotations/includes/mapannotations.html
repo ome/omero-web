@@ -157,7 +157,7 @@
             }
             $input = $("<input />").attr('value', value);
             $td.empty().append($input);
-            $input.focus();
+            $input.trigger('focus');
             $input.get(0).select();
         }
 
@@ -404,7 +404,7 @@
         });
 
         // When we filter annotations by 'me'/'others', need to update toolbar
-        $("#annotationFilter").change(function(){
+        $("#annotationFilter").on('change', function(){
             // wait for annotations to be shown/hidden
             setTimeout(function(){
                 // de-select all rows first
