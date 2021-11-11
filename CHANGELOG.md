@@ -1,3 +1,15 @@
+5.12.0 (November 2021)
+---------------------
+
+## New features
+
+- Add option to hide "Forgot password" on login page ([#313](https://github.com/ome/omero-web/pull/313))
+- Add URL endpoint to return OMERO.table query as a bitmask ([#308](https://github.com/ome/omero-web/pull/308))
+
+# Bug fixes
+
+- Rendering settings Save-To-All includes Z and T indices ([#328](https://github.com/ome/omero-web/pull/328))
+- Fix purging of Activities backlog ([#325](https://github.com/ome/omero-web/pull/325))
 
 5.11.0 (October 2021)
 ---------------------
