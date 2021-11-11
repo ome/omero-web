@@ -1505,7 +1505,7 @@ def marshal_tagged(
              ,
              pix.sizeX as sizeX,
              pix.sizeY as sizeY,
-             pix.sizeT as sizeT
+             pix.sizeT as sizeT,
              pix.sizeZ as sizeZ
              """
         extraObjs = " left outer join obj.pixels pix"
