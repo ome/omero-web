@@ -317,7 +317,7 @@ def drivespace_json(
     # users within a single group
     elif groupId is not None:
         ctx.setOmeroGroup(groupId)
-        for e in conn.getObjects("Experimenter"):
+        for e in conn.getObjects("Experimenter", opts={"experimentergroup": groupId}):
             b = getBytes(ctx, e.getId())
             if b > 0:
                 diskUsage.append(
