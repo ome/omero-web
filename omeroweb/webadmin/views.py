@@ -317,11 +317,27 @@ def drivespace_json(
     # users within a single group
     elif groupId is not None:
         ctx.setOmeroGroup(groupId)
-        for e in conn.getObjects("Experimenter", opts={"experimentergroup": groupId}):
+        exps_in_group = [
+            e.id
+            for e in conn.getObjects(
+                "Experimenter",
+                opts={"load_experimentergroups": False, "experimentergroup": groupId},
+            )
+        ]
+        for e in conn.getObjects(
+            "Experimenter", opts={"load_experimentergroups": False}
+        ):
             b = getBytes(ctx, e.getId())
-            if b > 0:
+            memberOfGroup = e.getId() in exps_in_group
+            # We include users NOT in the group, if they have > 1M of data
+            if (memberOfGroup and b > 0) or (b > 1000000):
                 diskUsage.append(
-                    {"label": e.getNameWithInitial(), "data": b, "userId": e.getId()}
+                    {
+                        "label": e.getNameWithInitial(),
+                        "data": b,
+                        "userId": e.getId(),
+                        "memberOfGroup": memberOfGroup,
+                    }
                 )
 
     diskUsage.sort(key=lambda x: x["data"], reverse=True)
