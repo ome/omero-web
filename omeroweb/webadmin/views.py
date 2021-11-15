@@ -329,16 +329,14 @@ def drivespace_json(
         ):
             b = getBytes(ctx, e.getId())
             memberOfGroup = e.getId() in exps_in_group
-            # We include users NOT in the group, if they have > 1M of data
-            if (memberOfGroup and b > 0) or (b > 1000000):
-                diskUsage.append(
-                    {
-                        "label": e.getNameWithInitial(),
-                        "data": b,
-                        "userId": e.getId(),
-                        "memberOfGroup": memberOfGroup,
-                    }
-                )
+            diskUsage.append(
+                {
+                    "label": e.getNameWithInitial(),
+                    "data": b,
+                    "userId": e.getId(),
+                    "memberOfGroup": memberOfGroup,
+                }
+            )
 
     diskUsage.sort(key=lambda x: x["data"], reverse=True)
 
