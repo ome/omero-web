@@ -45,15 +45,6 @@
                     $("#status").html('');
                     $("#progress").hide();
 
-                    // Filter out any user who is not a member of group AND has less than 10MB of data
-                    data = data.filter(function(user){
-                        console.log('filter', user.label, user.data);
-                        if (user.hasOwnProperty("memberOfGroup") && !user.memberOfGroup && user.data < 10000000) {
-                            return false;
-                        }
-                        return true;
-                    });
-
                     // save the data to use for chart click handling etc.
                     $("#placeholder").data('chart_data', data);
 
