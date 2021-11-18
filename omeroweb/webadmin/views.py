@@ -256,18 +256,28 @@ def drivespace_json(
             "from Pixels p join p.pixelsType as pt join p.image i "
             "left outer join i.fileset f "
             "join p.details.owner as owner "
+            "join p.details.group as group "
             "where f is null"
         )
 
         filesQuery = (
             "select sum(origFile.size) from OriginalFile as origFile "
+            "join origFile.details.group as group "
             "join origFile.details.owner as owner"
         )
 
+        clauses = []
+        group = ctx.getOmeroGroup()
+        # the group context won't filter out files in 'user' group
+        # so we explicitly filter by group ID
+        if group != "-1":
+            params.add("gid", omero.rtypes.rlong(group))
+            clauses.append("group.id = (:gid)")
         if eid is not None:
             params.add("eid", omero.rtypes.rlong(eid))
-            pixelsQuery = pixelsQuery + " and owner.id = (:eid)"
-            filesQuery = filesQuery + " where owner.id = (:eid)"
+            clauses.append("owner.id = (:eid)")
+        pixelsQuery = pixelsQuery + " and " + (" and ".join(clauses))
+        filesQuery = filesQuery + " where " + (" and ".join(clauses))
         # Calculate disk usage via Pixels
         result = queryService.projection(pixelsQuery, params, ctx)
         if len(result) > 0 and len(result[0]) > 0:
@@ -329,14 +339,15 @@ def drivespace_json(
         ):
             b = getBytes(ctx, e.getId())
             memberOfGroup = e.getId() in exps_in_group
-            diskUsage.append(
-                {
-                    "label": e.getNameWithInitial(),
-                    "data": b,
-                    "userId": e.getId(),
-                    "memberOfGroup": memberOfGroup,
-                }
-            )
+            if b > 0:
+                diskUsage.append(
+                    {
+                        "label": e.getNameWithInitial(),
+                        "data": b,
+                        "userId": e.getId(),
+                        "memberOfGroup": memberOfGroup,
+                    }
+                )
 
     diskUsage.sort(key=lambda x: x["data"], reverse=True)
 
