@@ -1830,6 +1830,85 @@ def load_metadata_hierarchy(request, c_type, c_id, conn=None, **kwargs):
 
 
 @login_required()
+def api_metadata_acquisition(request, image_id, conn=None, **kwargs):
+    """
+    Gets acquisition metadata JSON for channels, objective and instrument
+    """
+    image = conn.getObject("Image", image_id)
+    if image is None:
+        raise Http404("Image not found")
+    channels = image.getChannels(noRE=True)
+
+    json_data = {"channels": []}
+    for ch in channels:
+        channel_json = {"id": ch.id}
+        logicalChannel = ch.getLogicalChannel()
+        if logicalChannel is not None:
+            channel_json = {
+                "exWave": ch.getExcitationWave(),
+                "emWave": ch.getEmissionWave(),
+            }
+            lightPath = logicalChannel.getLightPath()
+            if lightPath is not None:
+                lightPathDichroic = lightPath.getDichroic()
+                if lightPathDichroic and lightPathDichroic._obj is not None:
+                    channel_json["dichroic"] = {
+                        "manufacturer": lightPathDichroic.manufacturer,
+                        "model": lightPathDichroic.model,
+                    }
+        json_data["channels"].append(channel_json)
+
+    if image.getObjectiveSettings() is not None:
+        json_data["objectiveSettings"] = {}
+        settings = image.getObjectiveSettings()
+        for prop in ["id", "correctionCollar", "refractiveIndex"]:
+            prop_value = getattr(settings, prop)
+            if prop_value:
+                json_data["objectiveSettings"][prop] = prop_value
+            if settings.getMedium():
+                json_data["objectiveSettings"]["medium"] = settings.getMedium().value
+
+        objective = settings.getObjective()
+        obj_json = {}
+        for prop in [
+            "id",
+            "model",
+            "manufacturer",
+            "serialNumber",
+            "lotNumber",
+            "calibratedMagnification",
+            "nominalMagnification",
+            "lensNA",
+        ]:
+            prop_value = getattr(objective, prop)
+            if prop_value:
+                obj_json[prop] = prop_value
+        if objective.workingDistance:
+            obj_json["workingDistance"] = objective.workingDistance.getValue()
+        for prop in ["getImmersion", "getCorrection", "getIris"]:
+            prop_value = getattr(objective, prop)()
+            if prop_value is not None:
+                obj_json[prop[3:].lower()] = prop_value.getValue()
+        json_data["objectiveSettings"]["objective"] = obj_json
+
+    instrument = image.getInstrument()
+    if instrument is not None:
+        microscope = instrument.getMicroscope()
+        if microscope is not None:
+            json_data["microscope"] = {}
+            for prop in ["id", "model", "manufacturer", "serialNumber", "lotNumber"]:
+                prop_value = getattr(microscope, prop)
+                if prop_value:
+                    json_data["microscope"][prop] = prop_value
+            if microscope.getMicroscopeType() is not None:
+                json_data["microscope"][
+                    "microscopeType"
+                ] = microscope.getMicroscopeType().value
+
+    return JsonResponse(json_data)
+
+
+@login_required()
 @render_response()
 def load_metadata_acquisition(
     request, c_type, c_id, conn=None, share_id=None, **kwargs

@@ -112,6 +112,11 @@ urlpatterns = [
         name="load_metadata_acquisition",
     ),
     url(
+        r"^api/metadata_acquisition/(?P<image_id>[0-9]+)/$",
+        views.api_metadata_acquisition,
+        name="api_metadata_acquisition",
+    ),
+    url(
         r"^metadata_preview/(?P<c_type>((?i)image|well))/"
         r"(?P<c_id>[0-9]+)/(?:(?P<share_id>[0-9]+)/)?$",
         views.load_metadata_preview,
