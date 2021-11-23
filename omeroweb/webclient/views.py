@@ -1841,20 +1841,24 @@ def api_metadata_acquisition(request, image_id, conn=None, **kwargs):
 
     json_data = {"channels": []}
     for ch in channels:
-        channel_json = {"id": ch.id}
+        channel_json = {
+            "id": ch.id,
+            "excitationWave": ch.getExcitationWave(),
+            "emissionWave": ch.getEmissionWave(),
+        }
         logicalChannel = ch.getLogicalChannel()
         if logicalChannel is not None:
-            channel_json = {
-                "exWave": ch.getExcitationWave(),
-                "emWave": ch.getEmissionWave(),
+            channel_json["logicalChannel"] = {
+                "id": logicalChannel.id,
             }
             lightPath = logicalChannel.getLightPath()
             if lightPath is not None:
-                lightPathDichroic = lightPath.getDichroic()
-                if lightPathDichroic and lightPathDichroic._obj is not None:
-                    channel_json["dichroic"] = {
-                        "manufacturer": lightPathDichroic.manufacturer,
-                        "model": lightPathDichroic.model,
+                channel_json["logicalChannel"]["lightPath"] = {"id": lightPath.id}
+                dichroic = lightPath.getDichroic()
+                if dichroic and dichroic._obj is not None:
+                    channel_json["logicalChannel"]["lightPath"]["dichroic"] = {
+                        "manufacturer": dichroic.manufacturer,
+                        "model": dichroic.model,
                     }
         json_data["channels"].append(channel_json)
 
