@@ -147,8 +147,15 @@ api_image = url(
 Image url to GET or DELETE a single Image
 """
 
+api_image_objective_settings = url(
+    r"^v(?P<api_version>%s)/m/images/(?P<image_id>[0-9]+)/objective_settings/$"
+    % versions,
+    views.image_objective_settings,
+    name="api_image_objective_settings",
+)
+
 api_image_datasets = url(
-    r"^v(?P<api_version>%s)/m/images/" "(?P<image_id>[0-9]+)/datasets/$" % versions,
+    r"^v(?P<api_version>%s)/m/images/(?P<image_id>[0-9]+)/datasets/$" % versions,
     views.DatasetsView.as_view(),
     name="api_image_datasets",
 )
@@ -414,6 +421,7 @@ urlpatterns = [
     api_dataset_images,
     api_dataset_projects,
     api_image,
+    api_image_objective_settings,
     api_image_datasets,
     api_screen,
     api_screens,

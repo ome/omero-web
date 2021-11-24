@@ -326,13 +326,14 @@ def acquisitionMetadataMarshal(image):
             "calibratedMagnification",
             "nominalMagnification",
             "lensNA",
+            "iris",
         ]:
             prop_value = getattr(objective, prop)
             if prop_value:
                 obj_json[prop] = prop_value
         if objective.workingDistance:
             obj_json["workingDistance"] = objective.workingDistance.getValue()
-        for prop in ["getImmersion", "getCorrection", "getIris"]:
+        for prop in ["getImmersion", "getCorrection"]:
             prop_value = getattr(objective, prop)()
             if prop_value is not None:
                 obj_json[prop[3:].lower()] = prop_value.getValue()

@@ -873,6 +873,30 @@ class ExperimenterGroupsView(ObjectsView):
         return opts
 
 
+@json_response()
+@login_required(useragent="OMERO.webapi")
+def image_objective_settings(request, image_id, conn=None, **kwargs):
+
+    image = conn.getObject("Image", image_id)
+    if image is None:
+        raise NotFoundError("Image not found")
+
+    settings = image.getObjectiveSettings()
+    objective = settings.getObjective()
+    correction = objective.getCorrection()
+    immersion = objective.getImmersion()
+
+    settings_object = settings._obj
+    objective_object = objective._obj
+    # replace unloaded objects with loaded ones
+    objective_object.correction = correction._obj
+    objective_object.immersion = immersion._obj
+    settings_object.objective = objective_object
+
+    encoder = get_encoder(settings_object.__class__)
+    return encoder.encode(settings_object)
+
+
 class SaveView(View):
     """
     This view provides 'Save' functionality for all types of objects.
