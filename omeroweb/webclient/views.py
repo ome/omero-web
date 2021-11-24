@@ -87,7 +87,7 @@ from .controller.share import BaseShare
 from omeroweb.webadmin.forms import LoginForm
 
 from omeroweb.webgateway import views as webgateway_views
-from omeroweb.webgateway.marshal import graphResponseMarshal
+from omeroweb.webgateway.marshal import graphResponseMarshal, acquisitionMetadataMarshal
 from omeroweb.webgateway.util import get_longs as webgateway_get_longs
 
 from omeroweb.feedback.views import handlerInternalError
@@ -1837,78 +1837,8 @@ def api_metadata_acquisition(request, image_id, conn=None, **kwargs):
     image = conn.getObject("Image", image_id)
     if image is None:
         raise Http404("Image not found")
-    channels = image.getChannels(noRE=True)
 
-    json_data = {"channels": []}
-    for ch in channels:
-        channel_json = {
-            "id": ch.id,
-            "excitationWave": ch.getExcitationWave(),
-            "emissionWave": ch.getEmissionWave(),
-        }
-        logicalChannel = ch.getLogicalChannel()
-        if logicalChannel is not None:
-            channel_json["logicalChannel"] = {
-                "id": logicalChannel.id,
-                "name": logicalChannel.name,
-            }
-            lightPath = logicalChannel.getLightPath()
-            if lightPath is not None:
-                channel_json["logicalChannel"]["lightPath"] = {"id": lightPath.id}
-                dichroic = lightPath.getDichroic()
-                if dichroic and dichroic._obj is not None:
-                    channel_json["logicalChannel"]["lightPath"]["dichroic"] = {
-                        "manufacturer": dichroic.manufacturer,
-                        "model": dichroic.model,
-                    }
-        json_data["channels"].append(channel_json)
-
-    if image.getObjectiveSettings() is not None:
-        json_data["objectiveSettings"] = {}
-        settings = image.getObjectiveSettings()
-        for prop in ["id", "correctionCollar", "refractiveIndex"]:
-            prop_value = getattr(settings, prop)
-            if prop_value:
-                json_data["objectiveSettings"][prop] = prop_value
-            if settings.getMedium():
-                json_data["objectiveSettings"]["medium"] = settings.getMedium().value
-
-        objective = settings.getObjective()
-        obj_json = {}
-        for prop in [
-            "id",
-            "model",
-            "manufacturer",
-            "serialNumber",
-            "lotNumber",
-            "calibratedMagnification",
-            "nominalMagnification",
-            "lensNA",
-        ]:
-            prop_value = getattr(objective, prop)
-            if prop_value:
-                obj_json[prop] = prop_value
-        if objective.workingDistance:
-            obj_json["workingDistance"] = objective.workingDistance.getValue()
-        for prop in ["getImmersion", "getCorrection", "getIris"]:
-            prop_value = getattr(objective, prop)()
-            if prop_value is not None:
-                obj_json[prop[3:].lower()] = prop_value.getValue()
-        json_data["objectiveSettings"]["objective"] = obj_json
-
-    instrument = image.getInstrument()
-    if instrument is not None:
-        microscope = instrument.getMicroscope()
-        if microscope is not None:
-            json_data["microscope"] = {}
-            for prop in ["id", "model", "manufacturer", "serialNumber", "lotNumber"]:
-                prop_value = getattr(microscope, prop)
-                if prop_value:
-                    json_data["microscope"][prop] = prop_value
-            if microscope.getMicroscopeType() is not None:
-                json_data["microscope"][
-                    "microscopeType"
-                ] = microscope.getMicroscopeType().value
+    json_data = acquisitionMetadataMarshal(image)
 
     return JsonResponse(json_data)
 
