@@ -1850,6 +1850,7 @@ def api_metadata_acquisition(request, image_id, conn=None, **kwargs):
         if logicalChannel is not None:
             channel_json["logicalChannel"] = {
                 "id": logicalChannel.id,
+                "name": logicalChannel.name,
             }
             lightPath = logicalChannel.getLightPath()
             if lightPath is not None:
