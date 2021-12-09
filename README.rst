@@ -155,7 +155,7 @@ OMERO.web is released under the AGPL.
 Copyright
 ---------
 
-2009-2020, The Open Microscopy Environment, Glencoe Software, Inc.
+2009-2021, The Open Microscopy Environment, Glencoe Software, Inc.
 
 .. _OMERO: https://www.openmicroscopy.org/omero
 .. _OMERO.web install: https://docs.openmicroscopy.org/latest/omero/sysadmins/unix/install-web/web-deployment.html
