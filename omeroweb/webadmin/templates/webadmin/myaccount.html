@@ -46,6 +46,26 @@
     
     <script type="text/javascript" src="{% static "3rdparty/jquery.chosen-1.8.7/chosen.jquery.js" %}"></script>
     
+    <style>
+        #personal_details {
+            overflow: visible;
+            width: 450px;
+            float: right;
+        }
+        #personal_details input {
+            width: 320px;
+        }
+        #personal_details label {
+            width: 100px;
+        }
+        #personal_details select {
+            width: 250px;
+        }
+        #personal_details input[type='submit'] {
+            width: 75px;
+        }
+
+    </style>
     <script type="text/javascript">
     
     $(document).ready(function () {
@@ -293,7 +313,7 @@
 
                <input type="submit" value="{% trans 'Save' %}" />
              </div>
-
+            <div style="clear:both"></div>
        </form>
 
 

@@ -2187,13 +2187,6 @@ ul.criteria_right input{
 			margin-left:14px;
 		}
 
-	#personal_details {
-		overflow:hidden;
-	}
-	#personal_details label {
-		width: 20%;
-	}
-
     /* improve display of E.g. "group-name (rw----)" */
 	.chzn-results li {
 	    white-space:nowrap;
@@ -2202,11 +2195,6 @@ ul.criteria_right input{
 	    max-height:160px !important;
 	    display: block;
 	}
-	
-	#personal_details select {
-		width:71.5%;
-	}
-	
 	
 	#password {
 		position:relative;
