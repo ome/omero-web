@@ -3232,8 +3232,6 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
         rsp = TableClosingHttpResponse(csv_gen(), content_type="text/csv")
         rsp.conn = conn
         rsp.table = context.get("table")
-        rsp["Content-Type"] = "application/force-download"
-        # rsp['Content-Length'] = ann.getFileSize()
         rsp["Content-Disposition"] = "attachment; filename=%s" % downloadName
         return rsp
 
