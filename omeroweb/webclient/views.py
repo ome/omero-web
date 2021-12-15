@@ -23,8 +23,10 @@ or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything."""
 
 import copy
+import csv
 import os
 import datetime
+from io import StringIO
 import Ice
 from Ice import Exception as IceException
 import logging
@@ -3212,6 +3214,15 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     if context.get("error") or not context.get("data"):
         return JsonResponse(context)
 
+    def values_to_csv(rows_2dlist):
+        # Use csv.writer to convert rows of data into csv string
+        csv_string = StringIO()
+        csv_writer = csv.writer(csv_string, delimiter=",", quoting=csv.QUOTE_MINIMAL)
+        for values in rows_2dlist:
+            csv_writer.writerow(values)
+        csv_string.seek(0)
+        return csv_string.read()
+
     # OR, return as csv or html
     if mtype == "csv":
         table_data = context.get("data")
@@ -3219,12 +3230,9 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
 
         def csv_gen():
             if not hide_header:
-                csv_cols = ",".join(table_data.get("columns"))
-                yield csv_cols
+                yield values_to_csv([table_data.get("columns")])
             for rows in table_data.get("lazy_rows"):
-                yield (
-                    "\n" + "\n".join([",".join([str(d) for d in row]) for row in rows])
-                )
+                yield values_to_csv(rows)
 
         downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
         downloadName = downloadName + ".csv"
