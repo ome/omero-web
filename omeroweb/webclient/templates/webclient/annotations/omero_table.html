@@ -55,7 +55,7 @@
             </button>
         {% endif %}
         <br>
-        Show page as:
+        Show current page as:
         <a href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.limit }}&offset={{ meta.offset }}{% if meta.query != '*' %}&query={{ meta.query|urlencode }}{% endif %}">CSV</a> |
         <a href="{% url 'omero_table' data.id 'json' %}?limit={{ meta.limit }}&offset={{ meta.offset }}{% if meta.query != '*' %}&query={{ meta.query|urlencode }}{% endif %}">JSON</a>
     </div>
@@ -69,7 +69,7 @@
 
     {% if meta.query != '*' %}
         <div class="back">
-            <a href="{{ meta.url }}">< Remove query</a>
+            <a href="{{ meta.url }}">< Remove filter</a>
         </div>
     {% endif %}
     <h2>{{ data.name }}</h2>
