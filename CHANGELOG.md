@@ -1,3 +1,10 @@
+5.12.1 (December 2021)
+---------------------
+
+## Documentation
+
+- Fix redirected link to Referrer Policy ([#345](https://github.com/ome/omero-web/pull/345))
+
 5.12.0 (November 2021)
 ---------------------
 
