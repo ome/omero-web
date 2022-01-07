@@ -340,7 +340,7 @@ def keepalive_ping(request, conn=None, **kwargs):
 
     # login_required handles ping, timeout etc, so we don't need to do
     # anything else
-    return HttpResponse("OK")
+    return HttpResponse("OK", content_type="text/plain")
 
 
 @login_required()
