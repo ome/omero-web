@@ -1688,7 +1688,13 @@
         text-align: center;
         float: left;
     }
-    .iconLayout .desc, .iconLayout .date, .iconLayout .thead, .iconLayout .sizeX, .iconLayout .sizeY, .iconLayout .sizeZ{
+    .iconLayout .desc,
+    .iconLayout .date,
+    .iconLayout .thead,
+    .iconLayout .sizeX,
+    .iconLayout .sizeY,
+    .iconLayout .sizeZ,
+    .iconLayout .sizeT {
         display: none;
     }
 
