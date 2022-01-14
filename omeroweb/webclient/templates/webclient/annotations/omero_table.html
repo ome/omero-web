@@ -21,6 +21,8 @@
                 position: absolute;
                 top: 10px;
                 right: 20px;
+                text-align: right;
+                line-height: 150%;
             }
             .back {
                 position: absolute;
@@ -29,6 +31,15 @@
             }
             #cancel_btn {
                 border: solid black 1px;
+                border-radius: 10px;
+            }
+            #progress_display {
+                position: absolute;
+                top: 70px;
+                right: 20px;
+                background: #eee;
+                padding: 20px;
+                width: fit-content;
                 border-radius: 10px;
             }
         </style>
@@ -43,21 +54,27 @@
                 With Filter
             </button>
         {% endif %}
-        <button class="download_btn" id="download_current_view" title="Dowload just the current page{% if meta.query != '*' %}, filtered with: {{meta.query}}{% endif %}">
-            Current View</button>
-        <div id="progress_display" style="visibility:hidden">
-            Downloading: <span id="download_percent">0 MB</span> <progress id="download_progress" value="50" max="100">50%</progress>
-            <button title="Cancel Download" id="cancel_btn">X</button>
-        </div>
+        <br>
+        Show current page as:
+        <a href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.limit }}&offset={{ meta.offset }}{% if meta.query != '*' %}&query={{ meta.query|urlencode }}{% endif %}">CSV</a> |
+        <a href="{% url 'omero_table' data.id 'json' %}?limit={{ meta.limit }}&offset={{ meta.offset }}{% if meta.query != '*' %}&query={{ meta.query|urlencode }}{% endif %}">JSON</a>
     </div>
+
+    <div id="progress_display" style="visibility:hidden">
+        Downloading: <span id="download_percent">0 MB</span>
+        <br />
+        <progress id="download_progress" value="50" max="100">50%</progress>
+        <button title="Cancel Download" id="cancel_btn">X</button>
+    </div>
+
     {% if meta.query != '*' %}
         <div class="back">
-            <a href="{{ meta.url }}">< Remove query</a>
+            <a href="{{ meta.url }}">< Remove filter</a>
         </div>
     {% endif %}
     <h2>{{ data.name }}</h2>
     {% if example_column %}
-        <p>
+        <p style="margin:0 250px">
             To filter rows you can use a query based on named columns.
             For example, to filter for rows where <b>{{ example_column }}</b>
             is greater than <b>{{ example_min_value }}</b> add 
@@ -248,10 +265,6 @@
     });
     document.getElementById("download_filtered_csv")?.addEventListener("click", function(){
         download_csv(true);
-    });
-    document.getElementById("download_current_view").addEventListener("click", function(){
-        // Don't need progressing download, just use URL directly
-        window.location.href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.limit }}&offset={{ meta.offset }}&query={{ meta.query|urlencode }}";
     });
 
     document.getElementById("cancel_btn").addEventListener("click", function() {
