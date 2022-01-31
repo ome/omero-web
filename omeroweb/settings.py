@@ -691,7 +691,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     "omero.web.webgateway_cache": ["WEBGATEWAY_CACHE", None, leave_none_unset, None],
     "omero.web.maximum_multifile_download_size": [
         "MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE",
-        1024 ** 3,
+        1024**3,
         int,
         "Prevent multiple files with total aggregate size greater than this "
         "value in bytes from being downloaded as a zip archive.",
