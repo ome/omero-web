@@ -343,30 +343,49 @@
                 // loading just the row we need for the current well.
                 {% if manager.well or manager.image %}
                     {% if manager.well %}
-                    var screenQuery = "{% url 'webgateway_object_table_query' 'Screen.plateLinks.child.wells' manager.well.id %}";
-                    var plateQuery = "{% url 'webgateway_object_table_query' 'Plate.wells' manager.well.id %}";
+                    var screenQuery = "{% url 'webgateway_annotations' 'Screen.plateLinks.child.wells' manager.well.id %}";
+                    var plateQuery = "{% url 'webgateway_annotations' 'Plate.wells' manager.well.id %}";
                     var query = "Well-{{ manager.well.id }}";
                     {% elif manager.image %}
-                    var screenQuery = "{% url 'webgateway_object_table_query' 'Screen.plateLinks.child.wells.wellSamples.image' manager.image.id %}";
-                    var plateQuery = "{% url 'webgateway_object_table_query' 'Plate.wells.wellSamples.image' manager.image.id %}";
-                    var projectQuery = "{% url 'webgateway_object_table_query' 'Project.datasetLinks.child.imageLinks.child' manager.image.id %}";
-                    var datasetQuery = "{% url 'webgateway_object_table_query' 'Dataset.imageLinks.child' manager.image.id %}";
+                    var screenQuery = "{% url 'webgateway_annotations' 'Screen.plateLinks.child.wells.wellSamples.image' manager.image.id %}";
+                    var plateQuery = "{% url 'webgateway_annotations' 'Plate.wells.wellSamples.image' manager.image.id %}";
+                    var projectQuery = "{% url 'webgateway_annotations' 'Project.datasetLinks.child.imageLinks.child' manager.image.id %}";
+                    var datasetQuery = "{% url 'webgateway_annotations' 'Dataset.imageLinks.child' manager.image.id %}";
                     var query = "Image-{{ manager.image.id }}";
                     {% endif %}
 
-                    var showBulkAnnTooltip = function(data) {
-                        if (!data || !data.id) return;
-                        var bulkAnnTooltip = "<span class='tooltip_html' style='display:none'>" +
-                            "Data from tables file:<br />" +
-                            "<b>File ID:</b> " + data.id + "<br />" +
-                            "<b>Owner:</b> " + data.owner.escapeHTML() + " <br />" +
-                            "<b>Annotation ID:</b> " + data.annId + "<br />" +
-                            "<b>Linked to:</b> " + data.parentType + " " + data.parentId + "<br />" +
-                            "<b>Linked by:</b> " + data.addedBy.escapeHTML() + " <br />" +
-                            "<b>On:</b> " + OME.formatDate(data.addedOn) + "</span>";
-                        $("#bulk-annotations").append(bulkAnnTooltip);
-                        $("#bulk-annotations").parent().tooltip({
-                                items: '.bulk_annotation',
+                    async function loadTablesOnParents() {
+                        let urls = [screenQuery, plateQuery];
+                            {% if manager.image %}
+                                urls = urls.concat([projectQuery, datasetQuery]);
+                            {% endif %}
+                        let promises = urls.map(url => fetch(url).then(rsp => rsp.json()));
+                        let results = await Promise.all(promises);
+
+                        // Show list of tables, allow user to expand...
+                        let html = results.flatMap(tables => {
+                            return tables.data.map(ann => `
+                                <ul class="lnfiles">
+                                    <li class="can-collapse closed" data-tableid="${ann.file}">
+                                        <a class="tooltip" href="#"/>${ann.name.escapeHTML()}
+                                            <span>(linked to ${ann.parentType}: ${ann.parentId})</span>
+                                        </a>
+                                        <span class="tooltip_html" style="display: none">
+                                            <b>Annotation ID:</b> ${ann.id}<br>
+                                            <b>Owner:</b> ${ann.owner.escapeHTML()}<br>
+                                            <b>Added by:</b> ${ann.owner.escapeHTML()}<br>
+                                            <b>Namespace:</b> ${ann.ns.escapeHTML()}<br>
+                                            <b>On</b> ${OME.formatDate(ann.addedOn)}</br>
+                                            <b>File ID:</b> ${ann.file}
+                                        </span>
+                                    </li>
+                                </ul>
+                                <table id="bulk_annotations_table_${ann.file}" style="display: none; margin: 10px"></table>
+                                `);
+                        }).join("\n");
+                        $("#bulk_annotations_list").html(html);
+                        $("#bulk_annotations_list").tooltip({
+                                items: 'li',
                                 content: function() {
                                     return $("span.tooltip_html", this).html();
                                 },
@@ -387,13 +406,8 @@
                         var expanded = !$header.hasClass('closed');
                         OME.setPaneExpanded('tables', expanded);
 
-                        if (expanded && $("#bulk_annotations_table").is(":empty")) {
-                            loadBulkAnnotations(screenQuery, query, showBulkAnnTooltip);
-                            loadBulkAnnotations(plateQuery, query, showBulkAnnTooltip);
-                            {% if manager.image %}
-                                loadBulkAnnotations(projectQuery, query, showBulkAnnTooltip);
-                                loadBulkAnnotations(datasetQuery, query, showBulkAnnTooltip);
-                            {% endif %}
+                        if (expanded && $("#bulk_annotations_list").is(":empty")) {
+                            loadTablesOnParents();
                         }
                     });
 
@@ -402,23 +416,37 @@
                         $('.can-collapse.closed[data-name="tables"]')
                             .toggleClass('closed')
                             .next().slideToggle();
-                        if ($("#bulk_annotations_table").is(":empty")) {
-                            loadBulkAnnotations(screenQuery, query, showBulkAnnTooltip);
-                            loadBulkAnnotations(plateQuery, query, showBulkAnnTooltip);
-                            {% if manager.image %}
-                                loadBulkAnnotations(projectQuery, query, function(data) {
-                                    if (data && data.id) {
-                                        showBulkAnnTooltip(data);
-                                    }
-                                });
-                                loadBulkAnnotations(datasetQuery, query, function(data) {
-                                    if (data && data.id) {
-                                        showBulkAnnTooltip(data);
-                                    }
-                                });
-                            {% endif %}
+                        if ($("#bulk_annotations_list").is(":empty")) {
+                            loadTablesOnParents();
                         }
                     }
+
+                    // Handle clicking on a table: load data for this Image or Well
+                    $("#bulk_annotations_list").on("click", "li", function () {
+                        // toggle collapse/expand and show/hide table
+                        $(this).toggleClass('closed');
+                        let tableId = $(this).data("tableid");
+                        let $table = $(`#bulk_annotations_table_${tableId}`);
+                        $table.toggle();
+
+                        // Don't need to load if table populated already
+                        if (!$table.is(":empty")) return;
+                        let url = `{% url 'webgateway' %}table/${tableId}/query/?query=${query}`;
+                        $.getJSON(url, function(result) {
+                            if (result.data && result.data.rows) {
+                                var html = result.data.columns.map(function (col, colIdx) {
+                                    var label = col.escapeHTML();
+                                    var values = result.data.rows.map(function (row) {
+                                        return ("" + row[colIdx]).escapeHTML();
+                                    });
+                                    values = values.join('<br />');
+                                    var oddEvenClass = col % 2 == 1 ? 'odd' : 'even';
+                                    return '<tr><td class="title ' + oddEvenClass + '">' + label + ':&nbsp;</td><td>' + values + '</td></tr>';
+                                }).join("");
+                                $table.html(html);
+                            }
+                        });
+                    });
 
                 {% endif %}
 

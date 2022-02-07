@@ -1243,9 +1243,14 @@
 	
 	
     /*   Acquisition Details */
+
+    h1.can-collapse {
+        border: 1px solid #bbb;
+        margin:5px 0;
+        padding: 7px;
+    }
     
     .can-collapse {
-        border: 1px solid #bbb;
         -webkit-box-shadow:0 1px 0 rgba(255,255,255,.7);
 		
 		-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.7); /* Saf3.0+, Chrome */
@@ -1271,8 +1276,6 @@
 		   -moz-border-radius:4px; /* FF1+ */
 		        border-radius:4px; /* Opera 10.5, IE 9 */ 
 				position:relative;
-        padding: 7px;
-        margin:5px 0;
     }
 	
 	
