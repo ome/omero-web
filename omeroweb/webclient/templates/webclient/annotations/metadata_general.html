@@ -374,16 +374,16 @@
                                             <b>Annotation ID:</b> ${ann.id}<br>
                                             <b>Owner:</b> ${ann.owner.escapeHTML()}<br>
                                             <b>Added by:</b> ${ann.owner.escapeHTML()}<br>
-                                            <b>Namespace:</b> ${ann.ns.escapeHTML()}<br>
                                             <b>On</b> ${OME.formatDate(ann.addedOn)}</br>
+                                            <b>Namespace:</b> ${ann.ns.escapeHTML()}<br>
                                             <b>File ID:</b> ${ann.file}
                                         </span>
                                     </li>
                                 </ul>
                                 <table id="bulk_annotations_table_${ann.file}" style="display: none; margin: 10px"></table>
                                 `);
-                        }).join("\n");
-                        $("#bulk_annotations_list").html(html);
+                        });
+                        $("#bulk_annotations_list").html(html.join("\n"));
                         $("#bulk_annotations_list").tooltip({
                                 items: 'li',
                                 content: function() {
@@ -393,6 +393,10 @@
                                 show: false,
                                 hide: false
                             });
+                        // If only a single table was found - expand it automatically:
+                        if (html.length == 1) {
+                            $("#bulk_annotations_list li").click();
+                        }
                     }
 
                     // If user opens tables tab, also load tables
