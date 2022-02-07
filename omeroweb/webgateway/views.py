@@ -2894,7 +2894,9 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
         data.append(
             dict(
                 id=annotation.id.val,
+                name=unwrap(annotation.file.name),
                 file=annotation.file.id.val,
+                ns=unwrap(annotation.ns),
                 parentType=objtype[0],
                 parentId=link.parent.id.val,
                 owner=ownerName,
