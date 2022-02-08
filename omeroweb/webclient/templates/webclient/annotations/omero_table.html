@@ -130,6 +130,8 @@
                 <td><a target="_blank" href="{% url 'webindex' %}?show=image-{{ col }}">{{ col }}</a></td>
                 {% elif well_column_index == forloop.counter0 %}
                 <td><a target="_blank" href="{% url 'webindex' %}?show=well-{{ col }}">{{ col }}</a></td>
+                {% elif dataset_column_index == forloop.counter0 %}
+                <td><a target="_blank" href="{% url 'webindex' %}?show=dataset-{{ col }}">{{ col }}</a></td>
                 {% elif roi_column_index == forloop.counter0 and iviewer_url != None %}
                 <td><a target="_blank" href="{{ iviewer_url }}?roi={{ col }}">{{ col }}</a></td>
                 {% elif shape_column_index == forloop.counter0 and iviewer_url != None %}
