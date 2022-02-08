@@ -367,15 +367,16 @@
                             return tables.data.map(ann => `
                                 <ul class="lnfiles">
                                     <li class="can-collapse closed" data-tableid="${ann.file}">
-                                        <a class="tooltip" href="#"/>${ann.name.escapeHTML()}
-                                            <span>(linked to ${ann.parentType}: ${ann.parentId})</span>
-                                        </a>
+                                        <a class="tooltip" href="#">${ann.name.escapeHTML()}</a>
+                                        <span>(linked to <a href="${WEBCLIENT.URLS.webindex}?show=${ann.parentType.toLowerCase()}-${ann.parentId}">
+                                                ${ann.parentType}: ${ann.parentId}</a>)
+                                        </span>
                                         <span class="tooltip_html" style="display: none">
                                             <b>Annotation ID:</b> ${ann.id}<br>
                                             <b>Owner:</b> ${ann.owner.escapeHTML()}<br>
                                             <b>Linked by:</b> ${ann.addedBy.escapeHTML()}<br>
                                             <b>On</b> ${OME.formatDate(ann.addedOn)}</br>
-                                            <b>Namespace:</b> ${ann.ns.escapeHTML()}<br>
+                                            <b>Namespace:</b> ${(ann.ns || "").escapeHTML()}<br>
                                             <b>File ID:</b> ${ann.file}
                                         </span>
                                     </li>
@@ -395,7 +396,7 @@
                             });
                         // If only a single table was found - expand it automatically:
                         if (html.length == 1) {
-                            $("#bulk_annotations_list li").click();
+                            $("#bulk_annotations_list li a.tooltip").click();
                         }
                     }
 
@@ -426,10 +427,11 @@
                     }
 
                     // Handle clicking on a table: load data for this Image or Well
-                    $("#bulk_annotations_list").on("click", "li", function () {
+                    $("#bulk_annotations_list").on("click", "a.tooltip", function () {
                         // toggle collapse/expand and show/hide table
-                        $(this).toggleClass('closed');
-                        let tableId = $(this).data("tableid");
+                        let $li = $(this).parent();
+                        $li.toggleClass('closed');
+                        let tableId = $li.data("tableid");
                         let $table = $(`#bulk_annotations_table_${tableId}`);
                         $table.toggle();
 
