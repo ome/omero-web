@@ -362,8 +362,16 @@
                         let promises = urls.map(url => fetch(url).then(rsp => rsp.json()));
                         let results = await Promise.all(promises);
 
+                        var compareParentName = function (a, b) {
+                            if (a.name == b.name) {
+                                return a.addedOn > b.addedOn ? 1 : -1;
+                            }
+                            return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
+                        };
+
                         // Show list of tables, allow user to expand...
                         let html = results.flatMap(tables => {
+                            tables.data.sort(compareParentName);
                             return tables.data.map(ann => `
                                 <ul class="lnfiles">
                                     <li class="can-collapse closed" data-tableid="${ann.file}">
