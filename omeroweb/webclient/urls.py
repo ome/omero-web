@@ -38,7 +38,7 @@ urlpatterns = [
     url(r"^$", views.load_template, {"menu": "userdata"}, name="webindex"),
     # render main template
     url(
-        r"^(?P<menu>((?i)userdata|public|history|search|help|usertags))/$",
+        r"^(?P<menu>(userdata|public|history|search|help|usertags))/$",
         views.load_template,
         name="load_template",
     ),
@@ -65,7 +65,7 @@ urlpatterns = [
     # loading data
     url(
         r"^load_plate/(?:(?P<o1_type>"
-        r"((?i)plate|acquisition))/)"
+        r"(plate|acquisition))/)"
         r"?(?:(?P<o1_id>[0-9]+)/)?$",
         views.load_plate,
         name="load_plate",
@@ -77,7 +77,7 @@ urlpatterns = [
     ),  # Query E.g. ?Image=1,2&Dataset=3
     url(
         r"^load_chgrp_target/(?P<group_id>[0-9]+)/"
-        r"(?P<target_type>((?i)project|dataset|screen))/$",
+        r"(?P<target_type>(project|dataset|screen))/$",
         views.load_chgrp_target,
         name="load_chgrp_target",
     ),
@@ -94,7 +94,7 @@ urlpatterns = [
     ),
     # load search
     url(
-        r"^load_searching/(?:(?P<form>((?i)form))/)?$",
+        r"^load_searching/(?:(?P<form>(form))/)?$",
         views.load_searching,
         name="load_searching",
     ),
@@ -112,7 +112,7 @@ urlpatterns = [
         name="load_metadata_acquisition",
     ),
     url(
-        r"^metadata_preview/(?P<c_type>((?i)image|well))/"
+        r"^metadata_preview/(?P<c_type>(image|well))/"
         r"(?P<c_id>[0-9]+)/(?:(?P<share_id>[0-9]+)/)?$",
         views.load_metadata_preview,
         name="load_metadata_preview",
@@ -229,7 +229,7 @@ urlpatterns = [
     # Fileset query (for delete or chgrp dialogs) obj-types and ids in REQUEST
     # data
     url(
-        r"^fileset_check/(?P<action>((?i)delete|chgrp))/$",
+        r"^fileset_check/(?P<action>(delete|chgrp))/$",
         views.fileset_check,
         name="fileset_check",
     ),
@@ -294,7 +294,7 @@ urlpatterns = [
         name="download_orig_metadata",
     ),
     url(
-        r"^omero_table/(?P<file_id>[0-9]+)/(?:(?P<mtype>((?i)json|csv))/)?$",
+        r"^omero_table/(?P<file_id>[0-9]+)/(?:(?P<mtype>(json|csv))/)?$",
         views.omero_table,
         name="omero_table",
     ),
@@ -322,7 +322,7 @@ urlpatterns = [
         name="download_original_file",
     ),  # for stderr, stdout etc
     url(
-        r"^figure_script/(?P<scriptName>" r"((?i)SplitView|Thumbnail|MakeMovie))/$",
+        r"^figure_script/(?P<scriptName>" r"(SplitView|Thumbnail|MakeMovie))/$",
         views.figure_script,
         name="figure_script",
     ),  # shows a form for running a script
