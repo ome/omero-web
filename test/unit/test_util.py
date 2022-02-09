@@ -25,7 +25,7 @@ Simple unit tests for the "webclient_utils" module.
 import pytest
 import json
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from omeroweb.utils import reverse_with_params, sort_properties_to_tuple
 from omeroweb.webclient.webclient_utils import formatPercentFraction
