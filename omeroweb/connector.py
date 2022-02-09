@@ -109,6 +109,10 @@ class Server(ServerBase):
         return r
 
     @classmethod
+    def all(cls):
+        return cls._registry.values()
+
+    @classmethod
     def find(cls, host=None, port=None, server=None):
         rv = []
         for s in cls._registry.values():
