@@ -1738,6 +1738,7 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
             template = "webclient/annotations/metadata_general.html"
             context["canExportAsJpg"] = manager.canExportAsJpg(request)
             context["annotationCounts"] = manager.getAnnotationCounts()
+            context["tableCountsOnParents"] = manager.countTablesOnParents()
             figScripts = manager.listFigureScripts()
     context["manager"] = manager
 

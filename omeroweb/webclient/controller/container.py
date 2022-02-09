@@ -29,6 +29,7 @@ from django.utils.encoding import smart_str
 import logging
 
 from omeroweb.webclient.controller import BaseController
+from omeroweb.webgateway.views import _bulk_file_annotations
 
 logger = logging.getLogger(__name__)
 
@@ -241,6 +242,31 @@ class BaseContainer(BaseController):
         Get the annotion counts for the given objects
         """
         return self.conn.getAnnotationCounts(objDict)
+
+    def countTablesOnParents(self):
+        """
+        For Wells or Images, query parents for any OMERO.tables
+        """
+        img_queries = [
+            "Screen.plateLinks.child.wells.wellSamples.image",
+            "Plate.wells.wellSamples.image",
+            "Project.datasetLinks.child.imageLinks.child",
+            "Dataset.imageLinks.child",
+        ]
+        well_queries = ["Screen.plateLinks.child.wells", "Plate.wells"]
+        total = 0
+        if self.image is not None:
+            for query in img_queries:
+                result = _bulk_file_annotations(None, query, self.image.id, self.conn)
+                if "data" in result:
+                    total += len(result["data"])
+        elif self.well is not None:
+            for query in well_queries:
+                result = _bulk_file_annotations(None, query, self.well.id, self.conn)
+                if "data" in result:
+                    total += len(result["data"])
+
+        return total
 
     def canExportAsJpg(self, request, objDict=None):
         """
