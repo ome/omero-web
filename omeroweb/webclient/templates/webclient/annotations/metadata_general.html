@@ -362,7 +362,7 @@
                         let promises = urls.map(url => fetch(url).then(rsp => rsp.json()));
                         let results = await Promise.all(promises);
 
-                        var compareParentName = function (a, b) {
+                        var compareNameDate = function (a, b) {
                             if (a.name == b.name) {
                                 return a.addedOn > b.addedOn ? 1 : -1;
                             }
@@ -371,21 +371,24 @@
 
                         // Show list of tables, allow user to expand...
                         let html = results.flatMap(tables => {
-                            tables.data.sort(compareParentName);
+                            tables.data.sort(compareNameDate);
                             return tables.data.map(ann => `
                                 <ul class="lnfiles">
                                     <li class="can-collapse closed" data-tableid="${ann.file}">
-                                        <a class="tooltip" href="#">${ann.name.escapeHTML()}</a>
-                                        <span>(linked to <a href="${WEBCLIENT.URLS.webindex}?show=${ann.parentType.toLowerCase()}-${ann.parentId}">
-                                                ${ann.parentType}: ${ann.parentId}</a>)
-                                        </span>
-                                        <span class="tooltip_html" style="display: none">
-                                            <b>Annotation ID:</b> ${ann.id}<br>
-                                            <b>Owner:</b> ${ann.owner.escapeHTML()}<br>
-                                            <b>Linked by:</b> ${ann.addedBy.escapeHTML()}<br>
-                                            <b>On</b> ${OME.formatDate(ann.addedOn)}</br>
-                                            <b>Namespace:</b> ${(ann.ns || "").escapeHTML()}<br>
-                                            <b>File ID:</b> ${ann.file}
+                                        <a class="tooltip" href="#">${ann.name.escapeHTML()}
+                                            <span class="tooltip_html" style="display: none">
+                                                <b>Annotation ID:</b> ${ann.id}<br>
+                                                <b>Owner:</b> ${ann.owner.escapeHTML()}<br>
+                                                <b>Linked by:</b> ${ann.addedBy.escapeHTML()}<br>
+                                                <b>On</b> ${OME.formatDate(ann.addedOn)}</br>
+                                                <b>Namespace:</b> ${(ann.ns || "").escapeHTML()}<br>
+                                                <b>File ID:</b> ${ann.file}
+                                            </span>
+                                        </a>
+                                        <span>(linked to
+                                            <a title="Open ${ann.parentType} in new tab" target="_blank" href="${WEBCLIENT.URLS.webindex}?show=${ann.parentType.toLowerCase()}-${ann.parentId}">
+                                                ${ann.parentType}: ${ann.parentId}
+                                            </a>)
                                         </span>
                                     </li>
                                 </ul>
@@ -394,7 +397,7 @@
                         });
                         $("#bulk_annotations_list").html(html.join("\n"));
                         $("#bulk_annotations_list").tooltip({
-                                items: 'li',
+                                items: 'li a.tooltip',
                                 content: function() {
                                     return $("span.tooltip_html", this).html();
                                 },
@@ -404,7 +407,7 @@
                             });
                         // If only a single table was found - expand it automatically:
                         if (html.length == 1) {
-                            $("#bulk_annotations_list li a.tooltip").click();
+                            $("#bulk_annotations_list li").click();
                         }
                     }
 
@@ -435,9 +438,9 @@
                     }
 
                     // Handle clicking on a table: load data for this Image or Well
-                    $("#bulk_annotations_list").on("click", "a.tooltip", function () {
+                    $("#bulk_annotations_list").on("click", "li", function (event) {
                         // toggle collapse/expand and show/hide table
-                        let $li = $(this).parent();
+                        let $li = $(this);
                         $li.toggleClass('closed');
                         let tableId = $li.data("tableid");
                         let $table = $(`#bulk_annotations_table_${tableId}`);
