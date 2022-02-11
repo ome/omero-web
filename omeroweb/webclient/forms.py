@@ -88,7 +88,7 @@ class ShareForm(NonASCIIForm):
                 queryset=kwargs["initial"]["experimenters"],
                 widget=forms.SelectMultiple(attrs={"size": 28}),
             )
-        self.fields.keyOrder = [
+        self.field_order = [
             "message",
             "expiration",
             "enable",
@@ -382,7 +382,7 @@ class ActiveGroupForm(forms.Form):
                     }
                 ),
             )
-        self.fields.keyOrder = ["active_group"]
+        self.field_order = ["active_group"]
 
 
 class WellIndexForm(forms.Form):
@@ -398,7 +398,7 @@ class WellIndexForm(forms.Form):
                 }
             ),
         )
-        self.fields.keyOrder = ["index"]
+        self.field_order = ["index"]
 
 
 ###############################
@@ -805,7 +805,7 @@ class MetadataChannelForm(forms.Form):
             )
             set_widget_attrs(self.fields["pockelCellSetting"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "name",
             "excitationWave",
             "emissionWave",
@@ -987,7 +987,7 @@ class MetadataDichroicForm(forms.Form):
             )
             set_widget_attrs(self.fields["lotNumber"])
 
-        self.fields.keyOrder = ["model", "manufacturer", "serialNumber", "lotNumber"]
+        self.field_order = ["model", "manufacturer", "serialNumber", "lotNumber"]
 
 
 class MetadataMicroscopeForm(forms.Form):
@@ -1195,7 +1195,7 @@ class MetadataMicroscopeForm(forms.Form):
             )
             set_widget_attrs(self.fields["type"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -1671,7 +1671,7 @@ class MetadataObjectiveForm(forms.Form):
             )
             set_widget_attrs(self.fields["iris"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -1830,7 +1830,7 @@ class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
             )
             set_widget_attrs(self.fields["refractiveIndex"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -2312,7 +2312,7 @@ class MetadataFilterForm(forms.Form):
             )
             set_widget_attrs(self.fields["transmittance"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -2797,7 +2797,7 @@ class MetadataDetectorForm(forms.Form):
             )
             set_widget_attrs(self.fields["binning"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -3400,7 +3400,7 @@ class MetadataLightSourceForm(forms.Form):
             )
         set_widget_attrs(self.fields["attenuation"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -3589,7 +3589,7 @@ class MetadataEnvironmentForm(forms.Form):
             )
             set_widget_attrs(self.fields["co2percent"])
 
-        self.fields.keyOrder = ["airPressure", "co2percent", "humidity", "temperature"]
+        self.field_order = ["airPressure", "co2percent", "humidity", "temperature"]
 
 
 class MetadataStageLabelForm(forms.Form):
@@ -3724,4 +3724,4 @@ class MetadataStageLabelForm(forms.Form):
             )
             set_widget_attrs(self.fields["positionz"])
 
-        self.fields.keyOrder = ["positionx", "positiony", "positionz"]
+        self.field_order = ["positionx", "positiony", "positionz"]

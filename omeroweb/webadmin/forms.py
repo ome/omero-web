@@ -50,7 +50,7 @@ class LoginForm(NonASCIIForm):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.fields["server"] = ServerModelChoiceField(Server, empty_label=None)
 
-        self.fields.keyOrder = ["server", "username", "password"]
+        self.field_order = ["server", "username", "password"]
 
     username = forms.CharField(
         max_length=50,
@@ -389,7 +389,7 @@ class GroupForm(NonASCIIForm):
                 "title"
             ] = "Changing of system group name would be un-doable"
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "name",
             "description",
             "owners",
@@ -439,7 +439,7 @@ class GroupOwnerForm(forms.Form):
                 queryset=kwargs["initial"]["experimenters"], required=False
             )
 
-        self.fields.keyOrder = ["owners", "members", "permissions"]
+        self.field_order = ["owners", "members", "permissions"]
 
     permissions = forms.ChoiceField(
         choices=PERMISSION_CHOICES,
@@ -465,7 +465,7 @@ class MyAccountForm(NonASCIIForm):
             self.fields["default_group"] = GroupModelChoiceField(
                 queryset=kwargs["initial"]["groups"], empty_label=None
             )
-        self.fields.keyOrder = [
+        self.field_order = [
             "omename",
             "first_name",
             "middle_name",
@@ -528,7 +528,7 @@ class ContainedExperimentersForm(NonASCIIForm):
                 queryset=kwargs["initial"]["experimenters"], required=False
             )
 
-        self.fields.keyOrder = ["members"]
+        self.field_order = ["members"]
 
 
 class UploadPhotoForm(forms.Form):
@@ -616,7 +616,7 @@ class EnumerationEntries(NonASCIIForm):
                     label=i + 1,
                 )
 
-        self.fields.keyOrder = [str(k) for k in self.fields.keys()]
+        self.field_order = [str(k) for k in self.fields.keys()]
 
 
 class EmailForm(forms.Form):
