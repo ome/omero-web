@@ -24,10 +24,11 @@ import re
 from django import forms
 from django.forms.widgets import SelectMultiple, MultipleHiddenInput
 
-from django.forms.fields import Field, EMPTY_VALUES
+from django.forms.fields import Field
 from django.forms import ModelChoiceField, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
+from django.core.validators import EMPTY_VALUES
 
 from omero_model_FileAnnotationI import FileAnnotationI
 from omero_model_TagAnnotationI import TagAnnotationI
