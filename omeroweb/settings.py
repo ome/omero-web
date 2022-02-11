@@ -1366,8 +1366,9 @@ if not DEBUG:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
 
 
 def report_settings(module):
-    from django.views.debug import cleanse_setting
+    from django.views.debug import SafeExceptionReporterFilter
 
+    setting_filter = SafeExceptionReporterFilter()
     custom_settings_mappings = getattr(module, "CUSTOM_SETTINGS_MAPPINGS", {})
     for key in sorted(custom_settings_mappings):
         values = custom_settings_mappings[key]
@@ -1378,7 +1379,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (source:%s)",
                 global_name,
-                cleanse_setting(global_name, global_value),
+                setting_filter.cleanse_setting(global_name, global_value),
                 source,
             )
 
@@ -1391,7 +1392,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (deprecated:%s, %s)",
                 global_name,
-                cleanse_setting(global_name, global_value),
+                setting_filter.cleanse_setting(global_name, global_value),
                 key,
                 description,
             )
