@@ -93,7 +93,8 @@ class MetadataQuerySetIterator(object):
 
 
 class MetadataModelChoiceField(ModelChoiceField):
-    def _get_choices(self):
+    @property
+    def choices(self):
         # If self._choices is set, then somebody must have manually set
         # the property self.choices. In this case, just return self._choices.
         if hasattr(self, "_choices"):
@@ -106,13 +107,11 @@ class MetadataModelChoiceField(ModelChoiceField):
         # been consumed.
         return MetadataQuerySetIterator(self.queryset, self.empty_label)
 
-    def _set_choices(self, value):
-        # This method is copied from ChoiceField._set_choices(). It's necessary
-        # because property() doesn't allow a subclass to overwrite only
-        # _get_choices without implementing _set_choices.
-        self._choices = self.widget.choices = list(value)
+    def _set_queryset(self, queryset):
+        self._queryset = queryset
+        self.widget.choices = self.choices
 
-    choices = property(_get_choices, _set_choices)
+    queryset = property(ModelChoiceField._get_queryset, _set_queryset)
 
     def clean(self, value):
         Field.clean(self, value)
@@ -173,7 +172,8 @@ class AnnotationQuerySetIterator(object):
 
 
 class AnnotationModelChoiceField(ModelChoiceField):
-    def _get_choices(self):
+    @property
+    def choices(self):
         # If self._choices is set, then somebody must have manually set
         # the property self.choices. In this case, just return self._choices.
         if hasattr(self, "_choices"):
@@ -186,13 +186,11 @@ class AnnotationModelChoiceField(ModelChoiceField):
         # been consumed.
         return AnnotationQuerySetIterator(self.queryset, self.empty_label)
 
-    def _set_choices(self, value):
-        # This method is copied from ChoiceField._set_choices(). It's
-        # necessary because property() doesn't allow a subclass to overwrite
-        # only _get_choices without implementing _set_choices.
-        self._choices = self.widget.choices = list(value)
+    def _set_queryset(self, queryset):
+        self._queryset = queryset
+        self.widget.choices = self.choices
 
-    choices = property(_get_choices, _set_choices)
+    queryset = property(ModelChoiceField._get_queryset, _set_queryset)
 
     def clean(self, value):
         Field.clean(self, value)
@@ -283,7 +281,8 @@ class ObjectQuerySetIterator(object):
 
 
 class ObjectModelChoiceField(ModelChoiceField):
-    def _get_choices(self):
+    @property
+    def choices(self):
         # If self._choices is set, then somebody must have manually set
         # the property self.choices. In this case, just return self._choices.
         if hasattr(self, "_choices"):
@@ -296,13 +295,11 @@ class ObjectModelChoiceField(ModelChoiceField):
         # been consumed.
         return ObjectQuerySetIterator(self.queryset, self.empty_label)
 
-    def _set_choices(self, value):
-        # This method is copied from ChoiceField._set_choices(). It's
-        # necessary because property() doesn't allow a subclass to overwrite
-        # only _get_choices without implementing _set_choices.
-        self._choices = self.widget.choices = list(value)
+    def _set_queryset(self, queryset):
+        self._queryset = queryset
+        self.widget.choices = self.choices
 
-    choices = property(_get_choices, _set_choices)
+    queryset = property(ModelChoiceField._get_queryset, _set_queryset)
 
     def clean(self, value):
         Field.clean(self, value)
