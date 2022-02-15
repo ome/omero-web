@@ -1,3 +1,23 @@
+
+5.13.0 (February 2022)
+----------------------
+
+## Features
+
+- Handle multiple OMERO.tables on Image or Well containers ([#352](https://github.com/ome/omero-web/pull/352))
+- Show sizeT in table-view of webclient centre panel ([#329](https://github.com/ome/omero-web/pull/329))
+- Improve OMERO.table display, including a link to table as JSON ([#343](https://github.com/ome/omero-web/pull/343))
+- OMERO.table DatasetColumn links to Dataset ([#355](https://github.com/ome/omero-web/pull/355))
+
+## Bug fixes
+
+- Fix non-owned data being shown in user's data usage stats ([#331](https://github.com/ome/omero-web/pull/331))
+- Fix default-group dropdown chooser in User Settings ([#344](https://github.com/ome/omero-web/pull/344))
+- Handle commas in OMERO.table download as CSV ([#342](https://github.com/ome/omero-web/pull/342))
+- Fix link in setting documentation string ([#345](https://github.com/ome/omero-web/pull/345))
+- Fix keep-alive response content-type ([#347](https://github.com/ome/omero-web/pull/347))
+- Fix "Remove all filters" for Key-Value pairs ([#349](https://github.com/ome/omero-web/pull/349))
+
 5.12.1 (December 2021)
 ---------------------
 
