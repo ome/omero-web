@@ -8,4 +8,4 @@ except ImportError:
 
 
 omeroweb_version = "5.13.1.dev0"
-omeroweb_buildyear = "2021"
+omeroweb_buildyear = "2022"
