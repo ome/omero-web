@@ -63,6 +63,6 @@ setup(
     include_package_data=True,
     tests_require=["pytest"],
     extras_require={
-         "redis": ["django-redis==5.0.0"],
+        "redis": ["django-redis==5.0.0"],
     },
 )
