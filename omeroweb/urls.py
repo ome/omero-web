@@ -31,7 +31,7 @@ from django.conf.urls import url, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.functional import lazy
 from django.views.generic import RedirectView
 from django.views.decorators.cache import never_cache
@@ -101,7 +101,7 @@ for app in settings.ADDITIONAL_APPS:
             if label == settings.OMEROWEB_ROOT_APPLICATION:
                 regex = r"^"
             else:
-                regex = "^(?i)%s/" % label
+                regex = "^%s/" % label
             urlpatterns.append(url(regex, include(urlmodule)))
         except ImportError:
             print(
@@ -120,12 +120,12 @@ urlpatterns += [
         r"^favicon\.ico$",
         lambda request: redirect("%s%s" % (settings.STATIC_URL, settings.FAVICON_URL)),
     ),
-    url(r"^(?i)webgateway/", include("omeroweb.webgateway.urls")),
-    url(r"^(?i)webadmin/", include("omeroweb.webadmin.urls")),
-    url(r"^(?i)webclient/", include("omeroweb.webclient.urls")),
-    url(r"^(?i)url/", include("omeroweb.webredirect.urls")),
-    url(r"^(?i)feedback/", include("omeroweb.feedback.urls")),
-    url(r"^(?i)api/", include("omeroweb.api.urls")),
+    url(r"^webgateway/", include("omeroweb.webgateway.urls")),
+    url(r"^webadmin/", include("omeroweb.webadmin.urls")),
+    url(r"^webclient/", include("omeroweb.webclient.urls")),
+    url(r"^url/", include("omeroweb.webredirect.urls")),
+    url(r"^feedback/", include("omeroweb.feedback.urls")),
+    url(r"^api/", include("omeroweb.api.urls")),
     url(r"^index/$", webclient_views.custom_index, name="webindex_custom"),
 ]
 
