@@ -1,4 +1,16 @@
 
+5.14.0rc1 (March 2022)
+----------------------
+
+## Features
+
+- Update to Django 3.2.x ([#356](https://github.com/ome/omero-web/pull/356))
+- Install Django-cors-headers by default ([#359](https://github.com/ome/omero-web/pull/359))
+
+## Documentation
+
+- Fix build year ([#360](https://github.com/ome/omero-web/pull/360))
+
 5.13.0 (February 2022)
 ----------------------
 
