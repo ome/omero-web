@@ -2,11 +2,11 @@
 
 ## Introduction
 
-Django 3.2.x is now the major version that OMERO.web depends upon.  All the way back to 5.6.0, this was previously Django 1.11.x.  This Django version conservatism has helped us establish a very fertile, stable environment for plugin developers.  However, while the usage of the plethora of Django functionality available in core OMERO.web is quite limited, upgrading your plugin to support this new version requires careful consideration.
+Django 3.2.x is now the major version that OMERO.web depends upon. All the way back to 5.6.0, this was previously Django 1.11.x. This Django version conservatism has helped us establish a very fertile, stable environment for plugin developers. However, while the usage of the plethora of Django functionality available in core OMERO.web is quite limited, upgrading your plugin to support this new version requires careful consideration.
 
 ## Background
 
-All plugin developers are encouraged to review the release notes, in particular the *Backwards incompatible* and *Features deprecated* for all major Django versions since 1.11.x to ensure they can be compliant with the new APIs.  They are as follows:
+All plugin developers are encouraged to review the release notes, in particular the *Backwards incompatible* and *Features deprecated* for all major Django versions since 1.11.x to ensure they can be compliant with the new APIs. They are as follows:
 
 * https://docs.djangoproject.com/en/4.0/releases/2.0/
 * https://docs.djangoproject.com/en/4.0/releases/2.1/
