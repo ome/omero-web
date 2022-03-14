@@ -89,6 +89,11 @@ Or, run Django directly::
     ...
     Starting development server at http://127.0.0.1:4080/
 
+Migration guides
+----------------
+
+* [Guide](MIGRATION_TO_DJANGO_32_GUIDE.md) on how to migrate OMERO.web plugin to Django 3.2.x.
+
 Running tests
 -------------
 
