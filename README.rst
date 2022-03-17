@@ -89,6 +89,11 @@ Or, run Django directly::
     ...
     Starting development server at http://127.0.0.1:4080/
 
+Migration guides
+----------------
+
+* The release of ``OMERO.web 5.14.0`` requires an update of Django to ``3.2.x``.  Plugin developers should read the `Guide <MIGRATION_TO_DJANGO_32_GUIDE.md>`_ detailing how to migrate their plugin(s) to Django 3.2.x.
+
 Running tests
 -------------
 
