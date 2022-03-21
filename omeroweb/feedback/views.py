@@ -43,8 +43,10 @@ from django.shortcuts import render
 from django.views.debug import get_exception_reporter_filter
 from django.utils.encoding import force_text
 
+from omeroweb.connector import Connector
 from omeroweb.feedback.sendfeedback import SendFeedback
 from omeroweb.feedback.forms import ErrorForm, CommentForm
+from omeroweb.version import omeroweb_version
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +133,30 @@ def send_comment(request):
             else:
                 return HttpResponseRedirect(reverse("fthanks"))
 
-    context = {"form": form, "error": error}
+    bioformats_version = "Unknown"
+    # Default to the first server_id
+    conn = Connector(1, True).create_guest_connection("OMERO.web")
+    try:
+
+        def get_config_value(key):
+            try:
+                return conn.getConfigService().getConfigValue(key)
+            except Exception:
+                logger.warn("Could not get config value: %s" % key)
+            return "Unknown"
+
+        bioformats_version = get_config_value("omero.bioformats.version")
+        omero_version = get_config_value("omero.version")
+    finally:
+        if conn is not None:
+            conn.close()
+    context = {
+        "form": form,
+        "error": error,
+        "bioformats_version": bioformats_version,
+        "omero_version": omero_version,
+        "omeroweb_version": omeroweb_version,
+    }
     return render(request, "comment.html", context)
 
 
