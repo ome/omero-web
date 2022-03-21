@@ -1,3 +1,10 @@
+5.14.0 (March 2022)
+-------------------
+
+## Documentation
+
+- Add instructions on how to update OMERO.web plugins to Django 3.2.x ([#363](https://github.com/ome/omero-web/pull/363))
+
 
 5.14.0.rc1 (March 2022)
 -----------------------
