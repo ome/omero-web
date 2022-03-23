@@ -37,3 +37,18 @@ h2 {
     width: 600px;
     margin: 5px auto;
 }
+
+.logo_list {
+    display: flex;
+    align-items: center;
+}
+
+.logo_list li {
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
+.logo_list .middle_logo {
+    margin-right: 15px;
+}

@@ -29,6 +29,25 @@
     <div class="bodyWrapper">
         <h1>{% trans "OMERO.web Help" %}</h1>
 
+        <ul class="logo_list">
+            <li>
+                <img src="{% static "feedback/image/ome_logo.svg"|add:url_suffix %}" alt="OME Logo" height="38">
+            </li>
+            <li class="middle_logo">
+                <img src="{% static "feedback/image/omero.svg"|add:url_suffix %}" alt="OMERO Logo" height="25">
+            </li>
+            <li>
+                <img src="{% static "feedback/image/bio-formats.svg"|add:url_suffix %}" alt="Bio-Formats Logo" height="25">
+            </li>
+        </ul>
+
+        <p>
+            <ul>
+                <li>OMERO.web version: {{ omeroweb_version }}</li>
+                <li>OMERO server version: {{ omero_version }}</li>
+                <li>Bio-Formats version: {{ bioformats_version }}</li>
+            </ul>
+        </p>
         
         <p>
             {% trans "You may find the following resources useful. If you have any further questions, comments or suggestions, please use the feedback form below." %}
