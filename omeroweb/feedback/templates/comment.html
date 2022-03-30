@@ -42,10 +42,11 @@
         </ul>
 
         <p>
-            <ul>
-                <li>OMERO.web version: {{ omeroweb_version }}</li>
-                <li>OMERO.server version: {{ omero_version }}</li>
-                <li>Bio-Formats version: {{ bioformats_version }}</li>
+            <ul class="version_list">
+                <li>Server:{% for version in versions %}<span class="version_chip">{{ version.server }}</span>{% endfor %}</li>
+                <li>OMERO.web version:{% for version in versions %}<span class="version_chip">{{ version.omeroweb_version }}</span>{% endfor %}</li>
+                <li>OMERO.server version:{% for version in versions %}<span class="version_chip">{{ version.omero_version }}</span>{% endfor %}</li>
+                <li>Bio-Formats version:{% for version in versions %}<span class="version_chip">{{ version.bioformats_version }}</span>{% endfor %}</li>
             </ul>
         </p>
         
