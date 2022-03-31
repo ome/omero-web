@@ -566,6 +566,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["member_of_groups"] = conn.getEventContext().memberOfGroups
     context["search_default_user"] = settings.SEARCH_DEFAULT_USER
     context["search_default_group"] = settings.SEARCH_DEFAULT_GROUP
+    context["elasticsearch_url"] = settings.ELASTICSEARCH_URL
 
     return context
 

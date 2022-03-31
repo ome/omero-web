@@ -980,6 +980,12 @@ CUSTOM_SETTINGS_MAPPINGS = {
         int,
         ("ID of group to pre-select in search form."),
     ],
+    "omero.web.elasticsearch.url": [
+        "ELASTICSEARCH_URL",
+        "https://idr-testing.openmicroscopy.org/searchengine/",
+        str,
+        "Enables elastic search"
+    ],
     "omero.web.ui.top_links": [
         "TOP_LINKS",
         (

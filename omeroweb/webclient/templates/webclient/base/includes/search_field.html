@@ -22,6 +22,10 @@
 
 <form id="search" action="{% url 'load_template' 'search' %}" title="Search OMERO">
 
+    {% if elasticsearch_url %}
+      {% include "webclient/base/includes/search_field_elastic.html" %}
+    {% endif %}
+
     <div id="top_search_field">
         <label class="inline_label" for="id_search_query">Search:</label>
         {{ global_search_form.search_query }}

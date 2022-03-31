@@ -1,0 +1,85 @@
+{% comment %}
+<!--
+  Copyright (C) 2022 University of Dundee & Open Microscopy Environment.
+  All rights reserved.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+{% endcomment %}
+
+<style>
+    #id_search_query {
+        width: 250px;
+    }
+</style>
+<script>
+    $(function () {
+        let elasticsearch_url = "{{ elasticsearch_url }}";
+        // let elasticsearch_url = "https://idr-testing.openmicroscopy.org/searchengine/";
+
+        $("#id_search_query").autocomplete({
+            autoFocus: false,
+            delay: 1000,
+            source: function (request, response) {
+                let url = `${elasticsearch_url}serachusingvaluesonly/?value=${request.term}&resource=image`;
+                // showSpinner();
+                $.ajax({
+                    dataType: "json",
+                    type: 'GET',
+                    url: url,
+                    success: function (data) {
+                        // hideSpinner();
+                        console.log(data);
+                        let results = [{ label: 'No results found.', value: -1 }]
+                        if (data.results.length > 0) {
+                            results = data.results.map(result => {
+                                return {
+                                    label: `<b>${result.Value}</b> (${result.Attribute}) <span style="color:#bbb">${result["Number of images"]}</span>`,
+                                    value: `${result.Attribute}:${result.Value}`
+                                }
+                            })
+                        }
+                        response(results);
+                    },
+                    error: function (data) {
+                        console.log("ERROR", data);
+                        // hideSpinner();
+                        response([{ label: 'Failed to load', value: -1 }]);
+                    }
+                });
+            },
+            minLength: 3,
+            open: function () { },
+            close: function () {
+                // $(this).val('');
+                return false;
+            },
+            focus: function (event, ui) { },
+            select: function (event, ui) {
+                if (ui.item.value == -1) {
+                    // Ignore 'No results found'
+                    return false;
+                }
+                // Load search page...
+                document.location.href = `${WEBCLIENT.URLS.webindex}search/?search_query=${ui.item.value}`;
+                return false;
+            }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+                .append("<a style='font-size:14px; width:245px'>" + item.label + "</a>")
+                .appendTo(ul);
+        }
+    });
+</script>
