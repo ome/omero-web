@@ -2,7 +2,16 @@
 
 ## Introduction
 
-Django 3.2.x is now the major version that OMERO.web depends upon. All the way back to 5.6.0, this was previously Django 1.11.x. This Django version conservatism has helped us establish a very fertile, stable environment for plugin developers. However, while the usage of the plethora of Django functionality available in core OMERO.web is quite limited, upgrading your plugin to support this new version requires careful consideration.
+Django 3.2.x is now the major version that OMERO.web depends upon. For system administrators, the installation of `omero-web==5.14.0` will also upgrade Django and Django-cors-headers as required.
+You will also need to upgrade your `omero-web` plugin apps to versions compatible with Django 3.2.
+Popular apps such as `omero-iviewer`, `omero-figure`, `omero-parade`, `omero-mapr`
+and `omero-webtagging` have been updated accordingly.
+
+You many need to uninstall other Django apps such as https://pypi.org/project/django-cookies-samesite/ which is not needed for `Django 3.1+`.
+
+The remainder of this guide is for `omero-web` plugin developers.
+
+All the way back to 5.6.0, this was previously Django 1.11.x. This Django version conservatism has helped us establish a very fertile, stable environment for plugin developers. However, while the usage of the plethora of Django functionality available in core OMERO.web is quite limited, upgrading your plugin to support this new version requires careful consideration.
 
 ## Background
 
