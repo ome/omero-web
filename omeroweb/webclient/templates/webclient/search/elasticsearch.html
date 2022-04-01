@@ -50,20 +50,20 @@
         height: 22px;
         max-width: 100%;
     }
-    .elasticSearchResults {
+    #dataTable {
         width: 1200px;
-        margin: 10px;
     }
-    .elasticSearchResults th {
-        font-weight: bold;
-    }
-    .elasticSearchResults td, .elasticSearchResults th {
-        font-size: 13px;
+    #dataTable td, #dataTable th {
+        font-size: 12px;
         vertical-align: middle;
         padding: 2px;
     }
-    .elasticSearchResults img {
+    #dataTable img {
         height: 64px;
+    }
+    #doElasticSearch {
+        float: right;
+        margin: 13px;
     }
 </style>
 
@@ -148,26 +148,19 @@ function get_current_query(){
 }
 
 function displayResults(results) {
-
-    console.log("displayResults", results);
-
     let visibleCols = results.columns_def.filter(col => !col.hide);
-    console.log("visibleCols", visibleCols);
-
     let thead = "<th></th>" + visibleCols.map(col => `<th>${col.field}</th>`).join("");
-    console.log('thead', thead);
     let tbody = results.values.slice(0,100).map(row => {
         let thumb = `<td><img loading="lazy" src="${thumbUrl}${ row.Id }/" /></td>`;
         let tds = visibleCols.map(col => `<td>${row[col.field]}</td>`).join("");
-        return `<tr data-imgid="${ row.Id }">${thumb}${ tds }</tr>`;
+        return `<tr id="image-${ row.Id }">${thumb}${ tds }</tr>`;
     }).join('\n');
 
     let table = `
         <thead>${thead}</thead>
         <tbody>${tbody}</tbody>
     `
-    console.log('table', table);
-    $("#elasticSearchResults").html(table);
+    $("#dataTable").html(table);
 }
 
 function submitQuery() {
@@ -182,38 +175,36 @@ function submitQuery() {
         data: JSON.stringify(searchQuery),
         success: function(data) {
             if (data["Error"] != "none") {
-                alert(data["Error"]);
+                console.error(data["Error"]);
                 return;
             }
             displayResults(data);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-            alert("Error: " + errorThrown + " " + textStatus);
+            console.error("Error: " + errorThrown + " " + textStatus);
         }
     });
 }
 
 async function loadSearchTerms() {
 
-    let url = elasticsearch_url + "searchterms/";
-    // needs https://github.com/ome/omero_search_engine_client/pull/2
-    let searchterms = await fetch(url).then(rsp => rsp.json())
-        .catch(error => {
-            console.log("Failed to load searchterms", error);
-        })
+    // let url = elasticsearch_url + "searchterms/";
+    // // needs https://github.com/ome/omero_search_engine_client/pull/2
+    // let searchterms = await fetch(url).then(rsp => rsp.json())
+    //     .catch(error => {
+    //         console.log("Failed to load searchterms", error);
+    //     })
 
     // hard-coded for now
-    searchterms = searchtermsJson;
+    let searchterms = searchtermsJson;
 
     let options = searchterms.image.map(term => `<option value="${term}">${term}</option>`).join("\n");
-    console.log(options);
     $(".keyFields").append($(options));
 }
 
 async function setKeyField($row, key) {
     // Adds the Key as an <option> to the <select> if not there;
     let $select = $(".keyFields", $row);
-    console.log('setKeyField?', $(`option[value='${key}']`, $select).length);
     if ($(`option[value='${key}']`, $select).length == 0) {
         $select.append($(`<option value="${key}">${key}</option>`));
     }
@@ -242,9 +233,10 @@ $(document).ready(async function() {
         submitQuery();
     });
 
-    $( "#elasticSearchResults").on( "click", "tr", function(event) {
-        console.log("tr click", this);
-        console.log("tr dataset", this.dataset.imgid);
+    // single click handler on image (container). Selection then update toolbar & metadata pane
+    $("#dataTable").on('click', 'tr', function(event) {
+        // uses <tr id='image-1'> to select corrent images etc.
+        OME.handleTableClickSelection(event);
     });
 
 });
@@ -300,7 +292,7 @@ $(document).ready(async function() {
 	</div>
 
 	<div id="content_details" class="center_panel_content">
-        <table id="elasticSearchResults" class="elasticSearchResults"></table>
+        <table id="dataTable" class="tablesorter"></table>
     </div>
 
 {% endblock %}
