@@ -1,0 +1,306 @@
+{% extends "webclient/base/base_container.html" %}
+{% load i18n %}
+{% load common_filters %}
+
+
+{% comment %}
+<!--
+  Copyright (C) 2011 University of Dundee & Open Microscopy Environment.
+  All rights reserved.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+{% endcomment %}
+
+{% block link %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "webgateway/css/ome.table.css"|add:url_suffix %}" type="text/css" media="screen"/>
+{% endblock %}
+
+{% block script %}
+{{ block.super }}
+
+<style>
+    .and_clause {
+        border: solid #aaa 1px;
+        padding: 5px;
+        border-radius: 5px;
+        margin: 5px;
+    }
+    .form-row {
+        display: flex;
+    }
+    .form-row div {
+        flex: 1;
+        padding: 2px;
+    }
+    .search_panel select.keyFields {
+        width: 100%;
+        height: 22px;
+        max-width: 100%;
+    }
+    .elasticSearchResults {
+        width: 1200px;
+        margin: 10px;
+    }
+    .elasticSearchResults th {
+        font-weight: bold;
+    }
+    .elasticSearchResults td, .elasticSearchResults th {
+        font-size: 13px;
+        vertical-align: middle;
+        padding: 2px;
+    }
+    .elasticSearchResults img {
+        height: 64px;
+    }
+</style>
+
+<script type="text/javascript">
+
+let elasticsearch_url = "{{ elasticsearch_url }}";
+let thumbUrl = WEBCLIENT.URLS.webindex + "render_thumbnail/";
+
+
+let searchtermsJson = {
+  "image": [
+    "Phenotype Term Accession",
+    "Organism Part",
+    "Compound Name",
+    "PubChem CID",
+    "Gene Symbol",
+    "siRNA Pool Identifier",
+    "Antibody Identifier",
+    "Pathology",
+    "Cell Line",
+    "InChIKey",
+    "Protein",
+    "Gene Name",
+    "Organism",
+    "siRNA Identifier",
+    "Antibody",
+    "Pathology Identifier",
+    "Phenotype"
+  ],
+  "project": [
+    "License",
+    "Publication Authors",
+    "Imaging Method",
+    "Study Type",
+    "Publication Title",
+    "Name (IDR number)"
+  ],
+  "screen": [
+    "Screen Technology Type",
+    "Screen Type"
+  ]
+}
+
+function get_current_query(){
+    and_conditions=[];
+    or_conditions=[];
+
+    let queryandnodes = document.querySelectorAll('#searching_form .and_clause');
+    for (let i=0; i<queryandnodes.length; i++) {
+
+        query_dict={};
+        let node = queryandnodes[i];
+        // handle each OR...
+        let ors = node.querySelectorAll(".form-row");
+
+        let or_dicts = [...ors].map(orNode => {
+            return {
+                "name": orNode.querySelector(".keyFields").value,
+                "value": orNode.querySelector(".valueFields").value,
+                "operator": "equals",    // orNode.querySelector(".condition").value,
+                "resource": "image"     // get_resource( orNode.querySelector(".keyFields").value),
+            }
+        });
+        if (or_dicts.length > 1) {
+            or_conditions.push(or_dicts);
+        } else {
+            and_conditions.push(or_dicts[0]);
+        }
+    }
+
+    let query_details = {}
+    query_details["and_filters"] = and_conditions;
+    query_details["or_filters"] = or_conditions;
+    query_details["case_sensitive"]=false;
+
+    var query = {
+        "resource": "image",
+        "query_details": query_details,
+        "mode": "usesearchterms"
+    };
+    return query;
+}
+
+function displayResults(results) {
+
+    console.log("displayResults", results);
+
+    let visibleCols = results.columns_def.filter(col => !col.hide);
+    console.log("visibleCols", visibleCols);
+
+    let thead = "<th></th>" + visibleCols.map(col => `<th>${col.field}</th>`).join("");
+    console.log('thead', thead);
+    let tbody = results.values.slice(0,100).map(row => {
+        let thumb = `<td><img loading="lazy" src="${thumbUrl}${ row.Id }/" /></td>`;
+        let tds = visibleCols.map(col => `<td>${row[col.field]}</td>`).join("");
+        return `<tr data-imgid="${ row.Id }">${thumb}${ tds }</tr>`;
+    }).join('\n');
+
+    let table = `
+        <thead>${thead}</thead>
+        <tbody>${tbody}</tbody>
+    `
+    console.log('table', table);
+    $("#elasticSearchResults").html(table);
+}
+
+function submitQuery() {
+    let submitqueryurl = elasticsearch_url + "submitquery/";
+    let searchQuery = get_current_query();
+    console.log("searchQuery", searchQuery)
+    $.ajax({
+        type: "POST",
+        url: submitqueryurl,
+        contentType: "application/json;charset=UTF-8",
+        dataType: 'json',
+        data: JSON.stringify(searchQuery),
+        success: function(data) {
+            if (data["Error"] != "none") {
+                alert(data["Error"]);
+                return;
+            }
+            displayResults(data);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("Error: " + errorThrown + " " + textStatus);
+        }
+    });
+}
+
+async function loadSearchTerms() {
+
+    let url = elasticsearch_url + "searchterms/";
+    // needs https://github.com/ome/omero_search_engine_client/pull/2
+    let searchterms = await fetch(url).then(rsp => rsp.json())
+        .catch(error => {
+            console.log("Failed to load searchterms", error);
+        })
+
+    // hard-coded for now
+    searchterms = searchtermsJson;
+
+    let options = searchterms.image.map(term => `<option value="${term}">${term}</option>`).join("\n");
+    console.log(options);
+    $(".keyFields").append($(options));
+}
+
+async function setKeyField($row, key) {
+    // Adds the Key as an <option> to the <select> if not there;
+    let $select = $(".keyFields", $row);
+    console.log('setKeyField?', $(`option[value='${key}']`, $select).length);
+    if ($(`option[value='${key}']`, $select).length == 0) {
+        $select.append($(`<option value="${key}">${key}</option>`));
+    }
+    $select.val(key);
+}
+
+
+$(document).ready(async function() {
+
+    await loadSearchTerms();
+
+    // bind events when page loads...
+    {% if init.query %}
+        // query field is already populated with init.query
+        let query = "{{ init.query }}";
+        console.log("query", query);
+        if (query && query.includes(":")) {
+            let kv = query.split(":");
+            setKeyField($(".and_clause"), kv[0]);
+            $(".valueFields").val(kv[1]);
+        }
+        submitQuery();
+    {% endif %}
+
+    $("#doElasticSearch").on("click", function() {
+        submitQuery();
+    });
+
+    $( "#elasticSearchResults").on( "click", "tr", function(event) {
+        console.log("tr click", this);
+        console.log("tr dataset", this.dataset.imgid);
+    });
+
+});
+</script>
+
+{% endblock %}
+
+{% block left %}
+
+<div id="searching">
+
+    <form id="searching_form" class="search_panel standard_form">
+
+        <div class="and_clause">
+            <div class="form-row">
+                <div>
+                    <label>Attribute</label><br>
+                    <select class="keyFields">
+                        <option value="Any">Any</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Value</label><br>
+                    <input class="search valueFields" name="query" value="" size="25"/>
+                </div>
+            </div>
+        </div>
+    </form>
+    <button id="doElasticSearch">Search</button>
+
+</div>
+
+{% endblock %}
+
+{% block center %}
+
+	<div id="center_panel_header" >
+		
+		<form class="search filtersearch searchresult_filter" id="filtersearch" action="#" style="display:none">
+		    <div>
+		        <label for="id_search">
+		            Filter Results
+		        </label>
+			    <input type="text" id="id_search" size="25" />
+			</div>
+			<!-- <span class="loading">
+				<img class="loader" alt="Loading" src="{% static "webgateway/img/spinner.gif" %}">
+			</span> -->
+		</form>
+		<ul style="position: relative; left: 200px; width: 300px; top: 12px; font-size:110%">
+            <li id="searchResultCount"></li>
+        </ul>
+	</div>
+
+	<div id="content_details" class="center_panel_content">
+        <table id="elasticSearchResults" class="elasticSearchResults"></table>
+    </div>
+
+{% endblock %}

@@ -444,7 +444,10 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             template = "webclient/data/containers.html"
         else:
             # E.g. search/search.html
-            template = "webclient/%s/%s.html" % (menu, menu)
+            if menu == "search" and settings.ELASTICSEARCH_URL is not None:
+                template = "webclient/search/elasticsearch.html"
+            else:
+                template = "webclient/%s/%s.html" % (menu, menu)
 
     # tree support
     show = kwargs.get("show", Show(conn, request, menu))
