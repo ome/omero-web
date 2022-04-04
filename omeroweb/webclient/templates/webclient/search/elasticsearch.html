@@ -65,6 +65,9 @@
         float: right;
         margin: 13px;
     }
+    .valueFields {
+        width: calc(100% - 8px);
+    }
 </style>
 
 <script type="text/javascript">
@@ -136,8 +139,9 @@ function initAutoComplete(selector) {
                     if (key == "Any" && data.results.length > 0) {
                         results = data.results.map(result => {
                             return {
+                                key: result.Attribute,
                                 label: `<b>${result.Value}</b> (${result.Attribute}) <span style="color:#bbb">${result["Number of images"]}</span>`,
-                                value: `${result.Attribute}:${result.Value}`
+                                value: `${result.Value}`
                             }
                         })
                     } else {
@@ -162,18 +166,16 @@ function initAutoComplete(selector) {
         },
         focus: function (event, ui) { },
         select: function (event, ui) {
-            console.log("select", ui.item.value, key == "Any");
+            console.log("select", ui.item, key == "Any");
             if (ui.item.value == -1) {
                 // Ignore 'No results found'
                 return false;
             }
             if (key == "Any") {
-                let keyVal = ui.item.value.split(":");
-                console.log('keyVal', keyVal);
-                setKeyField($row, keyVal[0]);
-                return keyVal[1];
+                // Use 'key' to update KeyField
+                setKeyField($row, ui.item.key);
             }
-            return ui.item.value;
+            return true;
         }
     }).data("ui-autocomplete")._renderItem = function (ul, item) {
         return $("<li>")
