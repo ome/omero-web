@@ -107,6 +107,81 @@ let searchtermsJson = {
   ]
 }
 
+function initAutoComplete(selector) {
+    let $this = $(selector);
+    let $row = $this.parents(".form-row");
+    // key is updated when user starts typing, also used to handle response and select
+    let key;
+    $this.autocomplete({
+        autoFocus: false,
+        delay: 1000,
+        source: function (request, response) {
+            // Need to know what Attribute is of adjacent <select>
+            key = $(".keyFields", $row).val();
+            console.log("key...", key);
+            let url = `${elasticsearch_url}get_values/?key=${ key }&resource=image`;
+            // 'Any' uses different query
+            if (key == "Any") {
+                url = `${elasticsearch_url}serachusingvaluesonly/?value=${request.term}&resource=image`;
+            }
+            // showSpinner();
+            $.ajax({
+                dataType: "json",
+                type: 'GET',
+                url: url,
+                success: function (data) {
+                    // hideSpinner();
+                    console.log(data);
+                    let results = [{ label: 'No results found.', value: -1 }]
+                    if (key == "Any" && data.results.length > 0) {
+                        results = data.results.map(result => {
+                            return {
+                                label: `<b>${result.Value}</b> (${result.Attribute}) <span style="color:#bbb">${result["Number of images"]}</span>`,
+                                value: `${result.Attribute}:${result.Value}`
+                            }
+                        })
+                    } else {
+                        // We need to filter by input text
+                        let input = request.term.toLowerCase();
+                        results = data.filter(term => term.toLowerCase().includes(input));
+                    }
+                    response(results);
+                },
+                error: function (data) {
+                    console.log("ERROR", data);
+                    // hideSpinner();
+                    response([{ label: 'Failed to load', value: -1 }]);
+                }
+            });
+        },
+        minLength: 3,
+        open: function () { },
+        close: function () {
+            // $(this).val('');
+            return false;
+        },
+        focus: function (event, ui) { },
+        select: function (event, ui) {
+            console.log("select", ui.item.value, key == "Any");
+            if (ui.item.value == -1) {
+                // Ignore 'No results found'
+                return false;
+            }
+            if (key == "Any") {
+                let keyVal = ui.item.value.split(":");
+                console.log('keyVal', keyVal);
+                setKeyField($row, keyVal[0]);
+                return keyVal[1];
+            }
+            return ui.item.value;
+        }
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+        return $("<li>")
+            .append("<a style='font-size:14px; width:245px'>" + item.label + "</a>")
+            .appendTo(ul);
+    }
+}
+
 function get_current_query(){
     and_conditions=[];
     or_conditions=[];
@@ -238,6 +313,8 @@ $(document).ready(async function() {
         // uses <tr id='image-1'> to select corrent images etc.
         OME.handleTableClickSelection(event);
     });
+
+    initAutoComplete(".valueFields");
 
 });
 </script>
