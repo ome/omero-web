@@ -40,6 +40,7 @@
     }
     .form-row {
         display: flex;
+        align-items: end;
     }
     .form-row div {
         flex: 1;
@@ -68,9 +69,11 @@
     .valueFields {
         width: calc(100% - 8px);
     }
-    #addAND {
+    .no-border {
         background: none;
         border: none;
+    }
+    #addAND {
         margin: 0 10px;
     }
     #search_form {
@@ -300,9 +303,20 @@ function addAnd(attribute, operator, value) {
     }
     let $newRow = $andClause.clone();
     $form.append($newRow);
+    hideRemoveIfOnlyOneLeft();
 
     // enable auto-complete
     initAutoComplete($newRow);
+}
+
+// Hide the X button if there's only 1 in the form
+function hideRemoveIfOnlyOneLeft() {
+    let $btns = $("button.remove");
+    if ($btns.length == 1) {
+        $btns.css('visibility', 'hidden');
+    } else {
+        $btns.css('visibility', 'visible');
+    }
 }
 
 let andClause;
@@ -337,8 +351,27 @@ $(document).ready(async function() {
     // for the first row in the form
     initAutoComplete($(".and_clause"));
 
+    // ADD button
     $("#addAND").on("click", function(){
         addAnd();
+    });
+    // Remove button(s)
+    // X buttons
+    $("#search_form").on("click", ".remove", function (event) {
+        let $row = $(this).closest(".form-row");
+        let $clause = $row.parent();
+        $row.remove();
+        // If no rows left, remove clause...
+        if ($(".form-row", $clause).length === 0) {
+            let $and = $clause.prev();
+            if ($and.length == 0) {
+                // in case we're removing the first row
+                $and = $clause.next();
+            }
+            $and.remove();
+            $clause.remove();
+        }
+        hideRemoveIfOnlyOneLeft();
     });
 
     $("#doElasticSearch").on("click", function() {
@@ -368,10 +401,13 @@ $(document).ready(async function() {
                     <label>Value</label><br>
                     <input class="search valueFields" name="query" value="" size="25"/>
                 </div>
+                <button class="remove no-border" style="margin-bottom: 8px; visibility: hidden">
+                    X
+                </button>
             </div>
         </div>
     </form>
-    <button id="addAND" type="button" class="btn btn-success" title="Add an 'AND' clause to the query">
+    <button id="addAND" type="button" class="no-border" title="Add an 'AND' clause to the query">
         add AND
     </button>
     <button id="doElasticSearch">Search</button>
