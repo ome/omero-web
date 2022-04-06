@@ -235,8 +235,13 @@ function get_current_query(){
 }
 
 function displayResults(results) {
+    console.log("displayResults", results);
+    if (results.Error && results.Error != "none") {
+        $("#dataTable").html(`<tr><td>${results.Error}</td></tr>`);
+        return;
+    }
     let visibleCols = results.columns_def.filter(col => !col.hide);
-    let thead = "<th></th>" + visibleCols.map(col => `<th>${col.field}</th>`).join("");
+    let thead = `<th>${new Intl.NumberFormat().format(results.size)} Images</th>` + visibleCols.map(col => `<th>${col.field}</th>`).join("");
     let tbody = results.values.slice(0,100).map(row => {
         let thumb = `<td><img loading="lazy" src="${thumbUrl}${ row.Id }/" /></td>`;
         let tds = visibleCols.map(col => `<td>${row[col.field]}</td>`).join("");
