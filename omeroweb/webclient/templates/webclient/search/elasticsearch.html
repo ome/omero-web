@@ -36,7 +36,7 @@
         border: solid #aaa 1px;
         padding: 5px;
         border-radius: 5px;
-        margin: 5px;
+        margin: 5px 0;
     }
     .form-row {
         display: flex;
@@ -67,6 +67,14 @@
     }
     .valueFields {
         width: calc(100% - 8px);
+    }
+    #addAND {
+        background: none;
+        border: none;
+        margin: 0 10px;
+    }
+    #search_form {
+        padding: 5px;
     }
 </style>
 
@@ -110,9 +118,8 @@ let searchtermsJson = {
   ]
 }
 
-function initAutoComplete(selector) {
-    let $this = $(selector);
-    let $row = $this.parents(".form-row");
+function initAutoComplete($parent) {
+    let $this = $(".valueFields", $parent);
     // key is updated when user starts typing, also used to handle response and select
     let key;
     $this.autocomplete({
@@ -120,7 +127,7 @@ function initAutoComplete(selector) {
         delay: 1000,
         source: function (request, response) {
             // Need to know what Attribute is of adjacent <select>
-            key = $(".keyFields", $row).val();
+            key = $(".keyFields", $parent).val();
             console.log("key...", key);
             let url = `${elasticsearch_url}get_values/?key=${ key }&resource=image`;
             // 'Any' uses different query
@@ -173,7 +180,7 @@ function initAutoComplete(selector) {
             }
             if (key == "Any") {
                 // Use 'key' to update KeyField
-                setKeyField($row, ui.item.key);
+                setKeyField($parent, ui.item.key);
             }
             return true;
         }
@@ -188,7 +195,7 @@ function get_current_query(){
     and_conditions=[];
     or_conditions=[];
 
-    let queryandnodes = document.querySelectorAll('#searching_form .and_clause');
+    let queryandnodes = document.querySelectorAll('#search_form .and_clause');
     for (let i=0; i<queryandnodes.length; i++) {
 
         query_dict={};
@@ -240,27 +247,25 @@ function displayResults(results) {
     $("#dataTable").html(table);
 }
 
-function submitQuery() {
+async function postData(url = '', data = {}) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  return response.json();
+}
+
+async function submitQuery() {
     let submitqueryurl = elasticsearch_url + "submitquery/";
+    // submitqueryurl = "https://idr-testing.openmicroscopy.org/searchengineapi/api/v2/resources/image/searchannotation/";
     let searchQuery = get_current_query();
     console.log("searchQuery", searchQuery)
-    $.ajax({
-        type: "POST",
-        url: submitqueryurl,
-        contentType: "application/json;charset=UTF-8",
-        dataType: 'json',
-        data: JSON.stringify(searchQuery),
-        success: function(data) {
-            if (data["Error"] != "none") {
-                console.error(data["Error"]);
-                return;
-            }
-            displayResults(data);
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            console.error("Error: " + errorThrown + " " + textStatus);
-        }
-    });
+    // submitqueryurl = "http://127.0.0.1:5556/api/v2/resources/image/searchannotation/";
+    const data = await postData(submitqueryurl, searchQuery);
+    displayResults(data);
 }
 
 async function loadSearchTerms() {
@@ -275,23 +280,40 @@ async function loadSearchTerms() {
     // hard-coded for now
     let searchterms = searchtermsJson;
 
-    let options = searchterms.image.map(term => `<option value="${term}">${term}</option>`).join("\n");
+    let options = searchterms.image.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
     $(".keyFields").append($(options));
 }
 
-async function setKeyField($row, key) {
+async function setKeyField($parent, key) {
     // Adds the Key as an <option> to the <select> if not there;
-    let $select = $(".keyFields", $row);
+    let $select = $(".keyFields", $parent);
     if ($(`option[value='${key}']`, $select).length == 0) {
         $select.append($(`<option value="${key}">${key}</option>`));
     }
     $select.val(key);
 }
 
+function addAnd(attribute, operator, value) {
+    let $form = $("#search_form");
+    if ($form.children().length > 0) {
+        $form.append("<div>AND</div>");
+    }
+    let $newRow = $andClause.clone();
+    $form.append($newRow);
+
+    // enable auto-complete
+    initAutoComplete($newRow);
+}
+
+let andClause;
 
 $(document).ready(async function() {
 
     await loadSearchTerms();
+
+    // clone empty form row before any changes
+    // used for building form
+    $andClause = $("#search_form .and_clause").clone();
 
     // bind events when page loads...
     {% if init.query %}
@@ -306,17 +328,22 @@ $(document).ready(async function() {
         submitQuery();
     {% endif %}
 
-    $("#doElasticSearch").on("click", function() {
-        submitQuery();
-    });
-
     // single click handler on image (container). Selection then update toolbar & metadata pane
     $("#dataTable").on('click', 'tr', function(event) {
         // uses <tr id='image-1'> to select corrent images etc.
         OME.handleTableClickSelection(event);
     });
 
-    initAutoComplete(".valueFields");
+    // for the first row in the form
+    initAutoComplete($(".and_clause"));
+
+    $("#addAND").on("click", function(){
+        addAnd();
+    });
+
+    $("#doElasticSearch").on("click", function() {
+        submitQuery();
+    });
 
 });
 </script>
@@ -327,7 +354,7 @@ $(document).ready(async function() {
 
 <div id="searching">
 
-    <form id="searching_form" class="search_panel standard_form">
+    <form id="search_form" class="search_panel standard_form">
 
         <div class="and_clause">
             <div class="form-row">
@@ -344,6 +371,9 @@ $(document).ready(async function() {
             </div>
         </div>
     </form>
+    <button id="addAND" type="button" class="btn btn-success" title="Add an 'AND' clause to the query">
+        add AND
+    </button>
     <button id="doElasticSearch">Search</button>
 
 </div>
