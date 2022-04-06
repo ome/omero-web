@@ -444,10 +444,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             template = "webclient/data/containers.html"
         else:
             # E.g. search/search.html
-            if menu == "search" and settings.ELASTICSEARCH_URL is not None:
-                template = "webclient/search/elasticsearch.html"
-            else:
-                template = "webclient/%s/%s.html" % (menu, menu)
+            template = "webclient/%s/%s.html" % (menu, menu)
 
     # tree support
     show = kwargs.get("show", Show(conn, request, menu))
@@ -486,6 +483,10 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     if menu == "search":
         if global_search_form.is_valid():
             init["query"] = global_search_form.cleaned_data["search_query"]
+        if menu == "search" and settings.ELASTICSEARCH_URL is not None:
+            if not init["query"].isnumeric():
+                # for IDs, don't use elastic
+                template = "webclient/search/elasticsearch.html"
 
     # get url without request string - used to refresh page after switch
     # user/group etc
