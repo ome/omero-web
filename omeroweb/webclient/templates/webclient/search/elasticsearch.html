@@ -87,40 +87,6 @@ let elasticsearch_url = "{{ elasticsearch_url }}";
 let thumbUrl = WEBCLIENT.URLS.webindex + "render_thumbnail/";
 
 
-let searchtermsJson = {
-  "image": [
-    "Phenotype Term Accession",
-    "Organism Part",
-    "Compound Name",
-    "PubChem CID",
-    "Gene Symbol",
-    "siRNA Pool Identifier",
-    "Antibody Identifier",
-    "Pathology",
-    "Cell Line",
-    "InChIKey",
-    "Protein",
-    "Gene Name",
-    "Organism",
-    "siRNA Identifier",
-    "Antibody",
-    "Pathology Identifier",
-    "Phenotype"
-  ],
-  "project": [
-    "License",
-    "Publication Authors",
-    "Imaging Method",
-    "Study Type",
-    "Publication Title",
-    "Name (IDR number)"
-  ],
-  "screen": [
-    "Screen Technology Type",
-    "Screen Type"
-  ]
-}
-
 function initAutoComplete($parent) {
     let $this = $(".valueFields", $parent);
     // key is updated when user starts typing, also used to handle response and select
@@ -268,25 +234,19 @@ async function postData(url = '', data = {}) {
 
 async function submitQuery() {
     let submitqueryurl = elasticsearch_url + "submitquery/";
-    // submitqueryurl = "https://idr-testing.openmicroscopy.org/searchengineapi/api/v2/resources/image/searchannotation/";
     let searchQuery = get_current_query();
     console.log("searchQuery", searchQuery)
-    // submitqueryurl = "http://127.0.0.1:5556/api/v2/resources/image/searchannotation/";
     const data = await postData(submitqueryurl, searchQuery);
     displayResults(data);
 }
 
 async function loadSearchTerms() {
 
-    // let url = elasticsearch_url + "searchterms/";
-    // // needs https://github.com/ome/omero_search_engine_client/pull/2
-    // let searchterms = await fetch(url).then(rsp => rsp.json())
-    //     .catch(error => {
-    //         console.log("Failed to load searchterms", error);
-    //     })
-
-    // hard-coded for now
-    let searchterms = searchtermsJson;
+    let url = elasticsearch_url + "searchterms";
+    let searchterms = await fetch(url).then(rsp => rsp.json())
+        .catch(error => {
+            console.log("Failed to load searchterms", error);
+        });
 
     let options = searchterms.image.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
     $(".keyFields").append($(options));
