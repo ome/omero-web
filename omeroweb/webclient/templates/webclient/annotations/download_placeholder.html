@@ -168,7 +168,7 @@ Download files
 
             $("#downloadForm").hide();
             $(".downloading").show();
-            window.location.href = "{{ url }}&zipname=" + zipName;
+            window.location.href = "{{ url|safe }}&zipname=" + zipName;
         }
 
         return false;
