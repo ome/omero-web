@@ -33,7 +33,7 @@
             autoFocus: false,
             delay: 1000,
             source: function (request, response) {
-                let url = `${elasticsearch_url}serachusingvaluesonly/?value=${request.term}&resource=image`;
+                let url = `${elasticsearch_url}searchusingvaluesonly/?value=${request.term}&resource=image`;
                 // showSpinner();
                 $.ajax({
                     dataType: "json",

@@ -103,7 +103,7 @@ function initAutoComplete($parent) {
             let url = `${elasticsearch_url}get_values/?key=${ key }&resource=image`;
             // 'Any' uses different query
             if (key == "Any") {
-                url = `${elasticsearch_url}serachusingvaluesonly/?value=${request.term}&resource=image`;
+                url = `${elasticsearch_url}searchusingvaluesonly/?value=${request.term}&resource=image`;
             }
             // showSpinner();
             $.ajax({
