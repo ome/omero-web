@@ -982,7 +982,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.elasticsearch.url": [
         "ELASTICSEARCH_URL",
-        "https://idr-testing.openmicroscopy.org/searchengine/",
+        "https://idr-testing.openmicroscopy.org/searchengineapi/",
         str,
         "Enables elastic search",
     ],
