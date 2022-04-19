@@ -218,19 +218,12 @@ function displayResults(results) {
     if (!results_array) {
         alert("No results");
     }
-    // Use first result to get column names from key_values...
-    let columnNames = [];
-    results_array[0].key_values.forEach(kv => {
-        if (columnNames.indexOf(kv.name) == -1) {
-            columnNames.push(kv.name);
-        }
-    });
 
-    // Do we need to check for other column names from ALL results??
+    let columnNames = [];
+    // compile column names from 'key_values' of ALL results
     results_array.forEach(r => {
         r.key_values.forEach(kv => {
             if (columnNames.indexOf(kv.name) === -1) {
-                alert("adding column from later result: " + kv.name);
                 columnNames.push(kv.name);
             }
         });
@@ -238,7 +231,11 @@ function displayResults(results) {
 
     // Build a list of dicts from results...
     const result_objs = results_array.map(r => {
-        let obj = {id: r.id};
+        let obj = {
+            id: r.id,
+            Name: r.name,
+            Study_name: r.project_name || r.screen_name
+        };
         r.key_values.forEach(kv => {
             if (!obj[kv.name]) {
                 obj[kv.name] = kv.value;
@@ -250,13 +247,21 @@ function displayResults(results) {
         return obj;
     });
 
-    console.log("columnNames", columnNames)
+    let visibleColNames = ["Name", "Study_name"];
+    columnNames.sort();
+    if (searchterms.image) {
+        columnNames = columnNames.filter(name => searchterms.image.includes(name));
+    }
+    visibleColNames = visibleColNames.concat(columnNames);
+
+    console.log("visibleColNames", visibleColNames);
+    console.log("result_objs", result_objs);
 
     let thead = `<th>${new Intl.NumberFormat().format(results.results.size)} Images</th>`;
-    thead += columnNames.map(col => `<th>${col}</th>`).join("");
+    thead += visibleColNames.map(col => `<th>${col}</th>`).join("");
     let tbody = result_objs.slice(0,100).map(row => {
         let thumb = `<td><img loading="lazy" src="${thumbUrl}${ row.id }/" /></td>`;
-        let tds = columnNames.map(col => `<td>${row[col]}</td>`).join("");
+        let tds = visibleColNames.map(col => `<td>${row[col] || ""}</td>`).join("");
         // let tds = row.key_values.map(kv => `<td>${kv.value}</td>`).join("");
         return `<tr id="image-${ row.id }">${thumb}${ tds }</tr>`;
     }).join('\n');
@@ -287,12 +292,14 @@ async function submitQuery() {
     displayResults(data);
 }
 
+let searchterms = {};
+
 async function loadSearchTerms() {
 
     let url = elasticsearch_url + "searchterms";
     // NB: this is not provided by omero_search_engine yet. Need to use omero_search_engine_client
     url = "https://idr-testing.openmicroscopy.org/searchengine/searchterms"
-    let searchterms = await fetch(url).then(rsp => rsp.json())
+    searchterms = await fetch(url).then(rsp => rsp.json())
         .catch(error => {
             console.log("Failed to load searchterms", error);
         });
