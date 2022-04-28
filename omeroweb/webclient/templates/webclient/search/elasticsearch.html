@@ -61,7 +61,12 @@
         text-align: center;
         padding: 2px;
     }
+    #dataTable td {
+        height: 64px;
+    }
     #dataTable th {
+        height: 35px;
+        border-width: 0;
         position: sticky;
         top: 0;
         z-index: 1;
@@ -69,7 +74,8 @@
         background-image: -webkit-linear-gradient(top, hsl(210,10%,90%) 0%,hsl(210,10%,85%) 100%);
     }
     #dataTable img {
-        height: 64px;
+        max-height: 64px;
+        max-width: 96px;
     }
     #dataTable .browse {
         position: sticky;
