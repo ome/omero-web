@@ -121,10 +121,10 @@ function initAutoComplete($parent) {
             // Need to know what Attribute is of adjacent <select>
             key = $(".keyFields", $parent).val();
             console.log("key...", key);
-            let url = `${elasticsearch_url}get_values/?key=${ key }&resource=image`;
+            let url = `${elasticsearch_url}api/v1/resources/image/getannotationvalueskey/?key=${encodeURI(key)}&resource=image`;
             // 'Any' uses different query
             if (key == "Any") {
-                url = `${elasticsearch_url}searchusingvaluesonly/?value=${request.term}&resource=image`;
+                url = `${elasticsearch_url}api/v1/resources/image/searchvalues/?value=${encodeURI(request.term)}&resource=image`;
             }
             // showSpinner();
             $.ajax({
@@ -135,8 +135,8 @@ function initAutoComplete($parent) {
                     // hideSpinner();
                     console.log(data);
                     let results = [{ label: 'No results found.', value: -1 }]
-                    if (key == "Any" && data.results.length > 0) {
-                        results = data.results.map(result => {
+                    if (key == "Any" && data.data.length > 0) {
+                        results = data.data.map(result => {
                             return {
                                 key: result.Attribute,
                                 label: `<b>${result.Value}</b> (${result.Attribute}) <span style="color:#bbb">${result["Number of images"]}</span>`,
