@@ -53,14 +53,29 @@
     }
     #dataTable {
         width: 1200px;
+        position: absolute;
     }
     #dataTable td, #dataTable th {
         font-size: 12px;
         vertical-align: middle;
+        text-align: center;
         padding: 2px;
+    }
+    #dataTable th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        border-bottom: solid 1px #aaa;
+        background-image: -webkit-linear-gradient(top, hsl(210,10%,90%) 0%,hsl(210,10%,85%) 100%);
     }
     #dataTable img {
         height: 64px;
+    }
+    #dataTable .browse {
+        position: sticky;
+        right: 0;
+        padding: 8px;
+        background: inherit;
     }
     #doElasticSearch {
         float: right;
@@ -259,11 +274,13 @@ function displayResults(results) {
 
     let thead = `<th>${new Intl.NumberFormat().format(results.results.size)} Images</th>`;
     thead += visibleColNames.map(col => `<th>${col}</th>`).join("");
+    thead += "<th></th>";
     let tbody = result_objs.slice(0,100).map(row => {
         let thumb = `<td><img loading="lazy" src="${thumbUrl}${ row.id }/" /></td>`;
         let tds = visibleColNames.map(col => `<td>${row[col] || ""}</td>`).join("");
+        let browse = `<td class="browse"><a target="_blank" title="Open this Image in another tab" href="https:idr.openmicroscopy.org/webclient/?show=image-${ row.id }">Browse</a></td>`;
         // let tds = row.key_values.map(kv => `<td>${kv.value}</td>`).join("");
-        return `<tr id="image-${ row.id }">${thumb}${ tds }</tr>`;
+        return `<tr id="image-${ row.id }">${thumb}${ tds }${browse}</tr>`;
     }).join('\n');
 
     let table = `

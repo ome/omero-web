@@ -30,7 +30,7 @@ table#drivespaceTable tbody tr:hover{
  
  
  
-	  .tablesorter thead {
+	  .tablesorter thead, .tablesorter th {
 		 font-size:1.1em;
 		 border-top:solid 1px rgba(255,255,255,.05);
 		 background-image: -webkit-gradient(linear, left bottom, left top, from(hsl(210, 10%, 85%)), to(hsl(210, 10%, 90%)));
@@ -110,6 +110,9 @@ table#drivespaceTable tbody tr:hover{
 		 .tablesorter tbody tr:nth-child(even) {
 			 background-color:hsl(210,3%,94%);
 		 }
+		 .tablesorter tbody tr:nth-child(odd) {
+			background-color:hsl(210,1%,98%);;
+		}
 
 		 .tablesorter_basic tbody tr:hover {
 			 background:none;
