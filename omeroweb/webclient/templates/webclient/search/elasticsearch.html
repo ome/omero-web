@@ -100,6 +100,22 @@
     #search_form {
         padding: 5px;
     }
+    .filterColumn {
+        position: absolute;
+        right: 0;
+        top: 0;
+        border: solid 1px transparent;
+        background: transparent;
+        padding: 0;
+    }
+    th:hover .filterColumn {
+        border-color: #aaa;
+    }
+    .filterColumn img {
+        width: 14px;
+        height: 12px;
+        opacity: 0.5;
+    }
 </style>
 
 <script type="text/javascript">
@@ -279,12 +295,17 @@ function displayResults(results) {
     console.log("result_objs", result_objs);
 
     let thead = `<th>${new Intl.NumberFormat().format(results.results.size)} Images</th>`;
-    thead += visibleColNames.map(col => `<th>${col}</th>`).join("");
+    thead += ["Name", "Study_name"].map(col => `<th>${col}</th>`).join("");
+    thead += columnNames.map(col => `<th>
+        <button title="Filter by ${col}" class="filterColumn" data-colname="${col}">
+            <img src="{% static "webclient/image/filter-icon-12.png" %}"/>
+        </button>
+        ${col}</th>`).join("");
     thead += "<th></th>";
     let tbody = result_objs.slice(0,100).map(row => {
         let thumb = `<td><img loading="lazy" src="${thumbUrl}${ row.id }/" /></td>`;
         let tds = visibleColNames.map(col => `<td>${row[col] || ""}</td>`).join("");
-        let browse = `<td class="browse"><a target="_blank" title="Open this Image in another tab" href="https:idr.openmicroscopy.org/webclient/?show=image-${ row.id }">Browse</a></td>`;
+        let browse = `<td class="browse"><a target="_blank" title="Open this Image in another tab" href="${WEBCLIENT.URLS.webindex}?show=image-${ row.id }">Browse</a></td>`;
         // let tds = row.key_values.map(kv => `<td>${kv.value}</td>`).join("");
         return `<tr id="image-${ row.id }">${thumb}${ tds }${browse}</tr>`;
     }).join('\n');
@@ -326,8 +347,7 @@ async function loadSearchTerms() {
         .catch(error => {
             console.log("Failed to load searchterms", error);
         });
-
-    let options = searchterms.image.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
+    let options = searchterms?.image?.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
     $(".keyFields").append($(options));
 }
 
@@ -340,7 +360,7 @@ async function setKeyField($parent, key) {
     $select.val(key);
 }
 
-function addAnd(attribute, operator, value) {
+function addAnd(attribute) {
     let $form = $("#search_form");
     if ($form.children().length > 0) {
         $form.append("<div>AND</div>");
@@ -349,8 +369,14 @@ function addAnd(attribute, operator, value) {
     $form.append($newRow);
     hideRemoveIfOnlyOneLeft();
 
+    if (attribute) {
+        setKeyField($newRow, attribute);
+    }
+
     // enable auto-complete
     initAutoComplete($newRow);
+
+    return $newRow;
 }
 
 // Hide the X button if there's only 1 in the form
@@ -422,6 +448,12 @@ $(document).ready(async function() {
         submitQuery();
     });
 
+    // Handle click on 'Filter' button
+    $("#dataTable").on("click", ".filterColumn", function() {
+        let $newRow = addAnd(this.dataset.colname);
+        $(".valueFields", $newRow).focus();
+    });
+
 });
 </script>
 
@@ -452,7 +484,7 @@ $(document).ready(async function() {
         </div>
     </form>
     <button id="addAND" type="button" class="no-border" title="Add an 'AND' clause to the query">
-        add AND
+        add AND...
     </button>
     <button id="doElasticSearch">Search</button>
 
