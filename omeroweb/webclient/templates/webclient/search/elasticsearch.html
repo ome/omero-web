@@ -137,10 +137,10 @@ function initAutoComplete($parent) {
             // Need to know what Attribute is of adjacent <select>
             key = $(".keyFields", $parent).val();
             console.log("key...", key);
-            let url = `${elasticsearch_url}api/v1/resources/image/getannotationvalueskey/?key=${encodeURI(key)}&resource=image`;
+            let url = `${elasticsearch_url}resources/image/getannotationvalueskey/?key=${encodeURI(key)}&resource=image`;
             // 'Any' uses different query
             if (key == "Any") {
-                url = `${elasticsearch_url}api/v1/resources/image/searchvalues/?value=${encodeURI(request.term)}&resource=image`;
+                url = `${elasticsearch_url}resources/image/searchvalues/?value=${encodeURI(request.term)}&resource=image`;
             }
             // showSpinner();
             $.ajax({
@@ -329,7 +329,7 @@ async function postData(url = '', data = {}) {
 }
 
 async function submitQuery() {
-    let submitqueryurl = elasticsearch_url + "api/v1/resources/image/searchannotation/";
+    let submitqueryurl = elasticsearch_url + "resources/image/searchannotation/";
     let searchQuery = get_current_query();
     console.log("searchQuery", searchQuery)
     const data = await postData(submitqueryurl, searchQuery);
@@ -340,9 +340,7 @@ let searchterms = {};
 
 async function loadSearchTerms() {
 
-    let url = elasticsearch_url + "searchterms";
-    // NB: this is not provided by omero_search_engine yet. Need to use omero_search_engine_client
-    url = "https://idr-testing.openmicroscopy.org/searchengine/searchterms"
+    let url = elasticsearch_url + "resources/all/keys/?mode=searchterms";
     searchterms = await fetch(url).then(rsp => rsp.json())
         .catch(error => {
             console.log("Failed to load searchterms", error);

@@ -32,7 +32,7 @@
             autoFocus: false,
             delay: 1000,
             source: function (request, response) {
-                let url = `${elasticsearch_url}api/v1/resources/image/searchvalues/?value=${request.term}`;
+                let url = `${elasticsearch_url}resources/image/searchvalues/?value=${request.term}`;
                 // showSpinner();
                 $.ajax({
                     dataType: "json",
@@ -49,14 +49,13 @@
                                     value: id
                                 });
                         }
-                        let data_results = data.returnted_results;
+                        let data_results = data.data;
                         data_results.sort((a, b) => a["Number of images"] > b["Number of images"] ? -1 : 1);
-                        console.log("results", data_results.length);
                         if (data_results.length > 0) {
                             results = results.concat(data_results.map(result => {
                                 return {
-                                    label: `<b>${result.Value}</b> (${result.Attribute}) <span style="color:#bbb">${result["Number of images"]}</span>`,
-                                    value: `${result.Attribute}:${result.Value}`
+                                    label: `<b>${result.Value}</b> (${result.Key}) <span style="color:#bbb">${result["Number of images"]}</span>`,
+                                    value: `${result.Key}:${result.Value}`
                                 }
                             }));
                         }

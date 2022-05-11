@@ -141,6 +141,14 @@ logger.info("INIT '%s'" % os.getpid())
 # all the annotations expected for a PAGE of images
 ANNOTATIONS_LIMIT = settings.PAGE * 100
 
+ELASTICSEARCH_URL = None
+if settings.ELASTICSEARCH_ENABLED:
+    try:
+        from omero_search_engine_client import search_engine_settings
+        ELASTICSEARCH_URL = search_engine_settings.SEARCH_ENGINE_URL
+    except ImportError:
+        logger.debug("Failed to import omero_search_engine_client settings")
+
 
 def get_long_or_default(request, name, default):
     """
@@ -483,7 +491,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     if menu == "search":
         if global_search_form.is_valid():
             init["query"] = global_search_form.cleaned_data["search_query"]
-        if menu == "search" and settings.ELASTICSEARCH_URL is not None:
+        if menu == "search" and ELASTICSEARCH_URL is not None:
             if not init["query"].isnumeric():
                 # for IDs, don't use elastic
                 template = "webclient/search/elasticsearch.html"
@@ -570,7 +578,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["member_of_groups"] = conn.getEventContext().memberOfGroups
     context["search_default_user"] = settings.SEARCH_DEFAULT_USER
     context["search_default_group"] = settings.SEARCH_DEFAULT_GROUP
-    context["elasticsearch_url"] = settings.ELASTICSEARCH_URL
+    context["elasticsearch_url"] = ELASTICSEARCH_URL
 
     return context
 
