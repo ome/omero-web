@@ -26,13 +26,13 @@
 </style>
 <script>
     $(function () {
-        let elasticsearch_url = "{{ elasticsearch_url }}";
+        let SEARCH_ENGINE_URL = "{{ search_engine_url }}";
 
         $("#id_search_query").autocomplete({
             autoFocus: false,
             delay: 1000,
             source: function (request, response) {
-                let url = `${elasticsearch_url}resources/image/searchvalues/?value=${request.term}`;
+                let url = `${SEARCH_ENGINE_URL}resources/image/searchvalues/?value=${request.term}`;
                 // showSpinner();
                 $.ajax({
                     dataType: "json",

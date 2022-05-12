@@ -26,6 +26,7 @@
 {% block link %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "webgateway/css/ome.table.css"|add:url_suffix %}" type="text/css" media="screen"/>
+    <script src="{% static 'omero_search_engine_client/js/search_form_utils.js' %}"></script>
 {% endblock %}
 
 {% block script %}
@@ -120,7 +121,11 @@
 
 <script type="text/javascript">
 
-let elasticsearch_url = "{{ elasticsearch_url }}";
+// global variables used by search_form_utils.js
+let resources_data;
+let SEARCH_ENGINE_URL = "{{ search_engine_url }}";
+let query_mode = "searchterms";
+
 let thumbUrl = WEBCLIENT.URLS.webindex + "render_thumbnail/";
 
 // TO RUN LOCALLY
@@ -137,10 +142,10 @@ function initAutoComplete($parent) {
             // Need to know what Attribute is of adjacent <select>
             key = $(".keyFields", $parent).val();
             console.log("key...", key);
-            let url = `${elasticsearch_url}resources/image/getannotationvalueskey/?key=${encodeURI(key)}&resource=image`;
+            let url = `${SEARCH_ENGINE_URL}resources/image/getannotationvalueskey/?key=${encodeURI(key)}&resource=image`;
             // 'Any' uses different query
             if (key == "Any") {
-                url = `${elasticsearch_url}resources/image/searchvalues/?value=${encodeURI(request.term)}&resource=image`;
+                url = `${SEARCH_ENGINE_URL}resources/image/searchvalues/?value=${encodeURI(request.term)}&resource=image`;
             }
             // showSpinner();
             $.ajax({
@@ -199,47 +204,6 @@ function initAutoComplete($parent) {
     }
 }
 
-function get_current_query(){
-    and_conditions=[];
-    or_conditions=[];
-
-    let queryandnodes = document.querySelectorAll('#search_form .and_clause');
-    for (let i=0; i<queryandnodes.length; i++) {
-
-        query_dict={};
-        let node = queryandnodes[i];
-        // handle each OR...
-        let ors = node.querySelectorAll(".form-row");
-
-        let or_dicts = [...ors].map(orNode => {
-            return {
-                "name": orNode.querySelector(".keyFields").value,
-                "value": orNode.querySelector(".valueFields").value,
-                "operator": "equals",    // orNode.querySelector(".condition").value,
-                "resource": "image",     // get_resource( orNode.querySelector(".keyFields").value),
-                "query_type": "keyvalue"
-            }
-        });
-        if (or_dicts.length > 1) {
-            or_conditions.push(or_dicts);
-        } else {
-            and_conditions.push(or_dicts[0]);
-        }
-    }
-
-    let query_details = {}
-    query_details["and_filters"] = and_conditions;
-    query_details["or_filters"] = or_conditions;
-    query_details["case_sensitive"]=false;
-
-    var query = {
-        "query_details": query_details,
-        "main_attributes": { 
-            "or_main_attributes": []
-        }
-    };
-    return {"query": query};
-}
 
 function displayResults(results) {
     console.log("displayResults", results);
@@ -329,7 +293,7 @@ async function postData(url = '', data = {}) {
 }
 
 async function submitQuery() {
-    let submitqueryurl = elasticsearch_url + "resources/image/searchannotation/";
+    let submitqueryurl = SEARCH_ENGINE_URL + "resources/image/searchannotation/";
     let searchQuery = get_current_query();
     console.log("searchQuery", searchQuery)
     const data = await postData(submitqueryurl, searchQuery);
@@ -338,16 +302,16 @@ async function submitQuery() {
 
 let searchterms = {};
 
-async function loadSearchTerms() {
+// async function loadSearchTerms() {
 
-    let url = elasticsearch_url + "resources/all/keys/?mode=searchterms";
-    searchterms = await fetch(url).then(rsp => rsp.json())
-        .catch(error => {
-            console.log("Failed to load searchterms", error);
-        });
-    let options = searchterms?.image?.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
-    $(".keyFields").append($(options));
-}
+//     let url = SEARCH_ENGINE_URL + "resources/all/keys/?mode=searchterms";
+//     searchterms = await fetch(url).then(rsp => rsp.json())
+//         .catch(error => {
+//             console.log("Failed to load searchterms", error);
+//         });
+//     let options = searchterms?.image?.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
+//     $(".keyFields").append($(options));
+// }
 
 async function setKeyField($parent, key) {
     // Adds the Key as an <option> to the <select> if not there;
@@ -391,7 +355,10 @@ let andClause;
 
 $(document).ready(async function() {
 
-    await loadSearchTerms();
+    // await loadSearchTerms();
+    resources_data = await load_resources("searchterms");
+    console.log("resources_data", resources_data);
+
 
     // clone empty form row before any changes
     // used for building form
@@ -459,31 +426,17 @@ $(document).ready(async function() {
 
 {% block left %}
 
-<div id="searching">
+<div id="elastic_search">
 
-    <form id="search_form" class="search_panel standard_form">
+    <form id="search_form" class="standard_form">
 
-        <div class="and_clause">
-            <div class="form-row">
-                <div>
-                    <label>Attribute</label><br>
-                    <select class="keyFields">
-                        <option value="Any">Any</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Value</label><br>
-                    <input class="search valueFields" name="query" value="" size="25"/>
-                </div>
-                <button class="remove no-border" style="margin-bottom: 8px; visibility: hidden">
-                    X
-                </button>
-            </div>
-        </div>
+        {% include "omero_search_engine_client/and_clause.html" %}
+
     </form>
     <button id="addAND" type="button" class="no-border" title="Add an 'AND' clause to the query">
         add AND...
     </button>
+    {% include "omero_search_engine_client/case_insensitive_checkbox.html" %}
     <button id="doElasticSearch">Search</button>
 
 </div>
