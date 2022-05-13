@@ -128,7 +128,7 @@
                         {% ifequal byId.otype 'image' %}data-isodate='{{ c.getDate|date:"r" }}'{% endifequal %}
                     </td>
                     <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'>
-                        <script>document.write(OME.formatDate("{{ c.creationEventDate|date:'r' }}"))</script></script>
+                        <script>document.write(OME.formatDate("{{ c.creationEventDate|date:'r' }}")</script></script>
                     </td>
                     <td class="group">{{ c.getDetails.group.name.val }}</td>
                     <td><a href="{% url 'webindex' %}?show={{ byId.otype }}-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
