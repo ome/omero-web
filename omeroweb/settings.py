@@ -1236,7 +1236,7 @@ def check_worker_class(c):
 
 
 def check_threading(t):
-    t=int(t)
+    t = int(t)
     if t > 1:
         try:
             import concurrent.futures  # NOQA
