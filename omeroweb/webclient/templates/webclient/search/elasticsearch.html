@@ -26,6 +26,7 @@
 {% block link %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "webgateway/css/ome.table.css"|add:url_suffix %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static 'omero_search_engine_client/css/search_form_styles.css' %}">
     <script src="{% static 'omero_search_engine_client/js/search_form_utils.js' %}"></script>
 {% endblock %}
 
