@@ -1236,6 +1236,7 @@ def check_worker_class(c):
 
 
 def check_threading(t):
+    t = int(t)
     if t > 1:
         try:
             import concurrent.futures  # NOQA
@@ -1243,7 +1244,7 @@ def check_threading(t):
             raise ImportError(
                 "You are using sync workers with " "multiple threads. Install futures"
             )
-    return int(t)
+    return t
 
 
 # DEVELOPMENT_SETTINGS_MAPPINGS - WARNING: For each setting developer MUST open
