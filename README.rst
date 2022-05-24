@@ -32,6 +32,8 @@ We recommend installing omero-web in a Python virtual environment.
 Here we show the install using `Conda`_. For more details and
 other options, please see `OMERO.py`_.
 
+::
+
     conda create -n myenv -c conda-forge python=3.8 zeroc-ice omero-py
     conda activate myenv
     pip install omero-web
