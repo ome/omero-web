@@ -2494,14 +2494,8 @@ def download_as(request, iid=None, conn=None, **kwargs):
         return HttpResponseServerError(msg)
 
     if len(images) == 1:
-        jpeg_data = images[0].renderJpeg()
-        if jpeg_data is None:
-            raise Http404
-        rsp = HttpResponse(jpeg_data, mimetype="image/jpeg")
-        rsp["Content-Length"] = len(jpeg_data)
-        rsp["Content-Disposition"] = "attachment; filename=%s.jpg" % (
-            images[0].getName().replace(" ", "_")
-        )
+        # not expected, as download_placeholder is for multiple images
+        return render_image(request, images[0].id, conn=conn, download=True)
     else:
         temp = tempfile.NamedTemporaryFile(suffix=".download_as")
 

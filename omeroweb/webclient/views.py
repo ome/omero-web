@@ -3419,14 +3419,13 @@ def download_placeholder(request, conn=None, **kwargs):
         # E.g. JPEG/PNG - 1 file per image
         fileCount = len(ids)
 
-    query = "&".join([_id.replace("-", "=") for _id in ids])
-    download_url = download_url + "?" + query
-    if format is not None:
-        download_url = download_url + "&format=%s" % format
+    ids = [_id.replace("-", "=") for _id in ids]
 
     context = {
         "template": "webclient/annotations/download_placeholder.html",
         "url": download_url,
+        "format": format,
+        "ids": ids,
         "defaultName": defaultName,
         "fileLists": fileLists,
         "fileCount": fileCount,
