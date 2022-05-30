@@ -251,8 +251,8 @@ function displayResults(results) {
 
     let visibleColNames = ["Name", "Study_name"];
     columnNames.sort();
-    if (searchterms.image) {
-        columnNames = columnNames.filter(name => searchterms.image.includes(name));
+    if (resources_data.image) {
+        columnNames = columnNames.filter(name => resources_data.image.includes(name));
     }
     visibleColNames = visibleColNames.concat(columnNames);
 
@@ -301,19 +301,6 @@ async function submitQuery() {
     displayResults(data);
 }
 
-let searchterms = {};
-
-// async function loadSearchTerms() {
-
-//     let url = SEARCH_ENGINE_URL + "resources/all/keys/?mode=searchterms";
-//     searchterms = await fetch(url).then(rsp => rsp.json())
-//         .catch(error => {
-//             console.log("Failed to load searchterms", error);
-//         });
-//     let options = searchterms?.image?.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
-//     $(".keyFields").append($(options));
-// }
-
 async function setKeyField($parent, key) {
     // Adds the Key as an <option> to the <select> if not there;
     let $select = $(".keyFields", $parent);
@@ -358,8 +345,10 @@ $(document).ready(async function() {
 
     // await loadSearchTerms();
     resources_data = await load_resources("searchterms");
-    console.log("resources_data", resources_data);
 
+    // populate 'Image' common search keys in <select> menu
+    let options = resources_data?.image?.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
+    $(".keyFields").append($(options));
 
     // clone empty form row before any changes
     // used for building form
