@@ -1,10 +1,10 @@
-5.14.1 (June 2022)
-------------------
+5.14.1 (May 2022)
+-----------------
 
 ## Bug fixes
 
 - Fix Download of multiple images as png/tiff/jpeg [#369](https://github.com/ome/omero-web/pull/369)
-- Fix type error for `omero.web.wsgi_threads` configuration [#372](https://github.com/ome/omero-web/pull/372)
+- Fix type error for `omero.web.wsgi_threads` configuration  [#372](https://github.com/ome/omero-web/pull/372). Thanks to [Michael Barrett](https://github.com/barrettMCW)
 - Update `conda create` instructions in the README [#374](https://github.com/ome/omero-web/pull/374)
 
 5.14.0 (March 2022)
