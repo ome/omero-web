@@ -1,0 +1,32 @@
+<div class="and_clause">
+    <div class="search_or_row">
+       <div class="or">OR</div>
+       <div class="search_key">
+          <label for="keyFields">Attribute</label>
+          <select id="keyFields" class="form-control keyFields">
+          </select>
+       </div>
+       <div class="search_condition">
+          <label for="condition">Operator</label>
+          <select id="condition" class="form-control condition">
+            <option value="equals">equals</option>
+            <option value="not_equals">not equals</option>
+            <option value="contains">contains</option>
+            <option value="not_contains">not contains</option>
+          </select>
+       </div>
+       <div class="search_value" style="position: relative">
+          <label for="valueFields">Value</label>
+          <input type="text" class="form-control valueFields" id="valueFields" placeholder="type the attribute value" onfocus="setAutoCompleteValues()">
+       </div>
+       <div class="or">
+          <button class="remove_row btn btn-sm btn-outline-danger">
+             X
+          </button>
+       </div>
+    </div>
+    <a class="addOR" href="#" title="Add OR condition to the group">
+       add 'OR'...
+    </a>
+ </div>
+ 
