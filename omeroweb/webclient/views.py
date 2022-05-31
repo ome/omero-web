@@ -147,7 +147,9 @@ if settings.ELASTICSEARCH_ENABLED:
         # from omero_search_engine_client import search_engine_settings
 
         # SEARCH_ENGINE_URL = search_engine_settings.SEARCH_ENGINE_URL
-        SEARCH_ENGINE_URL = "https://idr-testing.openmicroscopy.org/searchengineapi/api/v1/"
+        SEARCH_ENGINE_URL = (
+            "https://idr-testing.openmicroscopy.org/searchengineapi/api/v1/"
+        )
     except ImportError:
         logger.debug("Failed to import omero_search_engine_client settings")
 
