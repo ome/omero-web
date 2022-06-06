@@ -26,8 +26,8 @@
 {% block link %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "webgateway/css/ome.table.css"|add:url_suffix %}" type="text/css" media="screen"/>
-    <link rel="stylesheet" href="{% static 'webclient/css/search_form_styles.css' %}">
-    <script src="{% static 'webclient/javascript/search_form_utils.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'omero_search_engine_client/css/search_form_styles.css' %}">
+    <script src="{% static 'omero_search_engine_client/js/search_form_utils.js' %}"></script>
 {% endblock %}
 
 {% block script %}
@@ -420,13 +420,13 @@ $(document).ready(async function() {
 
     <form id="search_form" class="standard_form">
 
-        {% include "webclient/search/and_clause.html" %}
+        {% include "omero_search_engine_client/and_clause.html" %}
 
     </form>
     <button id="addAND" type="button" class="no-border" title="Add an 'AND' clause to the query">
         add AND...
     </button>
-    {% include "webclient/search/case_insensitive_checkbox.html" %}
+    {% include "omero_search_engine_client/case_insensitive_checkbox.html" %}
     <button id="doElasticSearch">Search</button>
 
 </div>

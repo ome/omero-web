@@ -144,12 +144,8 @@ ANNOTATIONS_LIMIT = settings.PAGE * 100
 SEARCH_ENGINE_URL = None
 if settings.ELASTICSEARCH_ENABLED:
     try:
-        # from omero_search_engine_client import search_engine_settings
-
-        # SEARCH_ENGINE_URL = search_engine_settings.SEARCH_ENGINE_URL
-        SEARCH_ENGINE_URL = (
-            "https://idr-testing.openmicroscopy.org/searchengineapi/api/v1/"
-        )
+        from omero_search_engine_client import search_engine_settings
+        SEARCH_ENGINE_URL = search_engine_settings.SEARCH_ENGINE_URL
     except ImportError:
         logger.debug("Failed to import omero_search_engine_client settings")
 
