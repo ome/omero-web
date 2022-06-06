@@ -47,12 +47,12 @@ urlpatterns = [
     ),
     url(r"^groups/$", views.groups, name="wagroups"),
     url(
-        r"^group/(?P<action>((?i)new|create|edit|save))/" "(?:(?P<gid>[0-9]+)/)?$",
+        r"^group/(?P<action>(new|create|edit|save))/" "(?:(?P<gid>[0-9]+)/)?$",
         views.manage_group,
         name="wamanagegroupid",
     ),
     url(
-        r"^group_owner/(?P<action>((?i)edit|save))/(?P<gid>[0-9]+)/$",
+        r"^group_owner/(?P<action>(edit|save))/(?P<gid>[0-9]+)/$",
         views.manage_group_owner,
         name="wamanagegroupownerid",
     ),

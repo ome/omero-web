@@ -691,7 +691,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     "omero.web.webgateway_cache": ["WEBGATEWAY_CACHE", None, leave_none_unset, None],
     "omero.web.maximum_multifile_download_size": [
         "MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE",
-        1024 ** 3,
+        1024**3,
         int,
         "Prevent multiple files with total aggregate size greater than this "
         "value in bytes from being downloaded as a zip archive.",
@@ -1101,7 +1101,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "Default content for the HTML Meta referrer tag. "
             "See https://www.w3.org/TR/referrer-policy/#referrer-policies for "
-            "allowed values and https://caniuse.com/#feat=referrer-policy for "
+            "allowed values and https://caniuse.com/referrer-policy for "
             "browser compatibility. "
             "Warning: Internet Explorer 11 does not support the default value "
             'of this setting, you may want to change this to "origin" after '
@@ -1236,6 +1236,7 @@ def check_worker_class(c):
 
 
 def check_threading(t):
+    t = int(t)
     if t > 1:
         try:
             import concurrent.futures  # NOQA
@@ -1243,7 +1244,7 @@ def check_threading(t):
             raise ImportError(
                 "You are using sync workers with " "multiple threads. Install futures"
             )
-    return int(t)
+    return t
 
 
 # DEVELOPMENT_SETTINGS_MAPPINGS - WARNING: For each setting developer MUST open
@@ -1366,8 +1367,9 @@ if not DEBUG:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
 
 
 def report_settings(module):
-    from django.views.debug import cleanse_setting
+    from django.views.debug import SafeExceptionReporterFilter
 
+    setting_filter = SafeExceptionReporterFilter()
     custom_settings_mappings = getattr(module, "CUSTOM_SETTINGS_MAPPINGS", {})
     for key in sorted(custom_settings_mappings):
         values = custom_settings_mappings[key]
@@ -1378,7 +1380,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (source:%s)",
                 global_name,
-                cleanse_setting(global_name, global_value),
+                setting_filter.cleanse_setting(global_name, global_value),
                 source,
             )
 
@@ -1391,7 +1393,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (deprecated:%s, %s)",
                 global_name,
-                cleanse_setting(global_name, global_value),
+                setting_filter.cleanse_setting(global_name, global_value),
                 key,
                 description,
             )

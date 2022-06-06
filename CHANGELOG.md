@@ -1,3 +1,58 @@
+5.14.1 (June 2022)
+------------------
+
+## Bug fixes
+
+- Fix Download of multiple images as png/tiff/jpeg [#369](https://github.com/ome/omero-web/pull/369)
+- Fix type error for `omero.web.wsgi_threads` configuration  [#372](https://github.com/ome/omero-web/pull/372). Thanks to [Michael Barrett](https://github.com/barrettMCW)
+- Update `conda create` instructions in the README [#374](https://github.com/ome/omero-web/pull/374)
+
+5.14.0 (March 2022)
+-------------------
+
+## Documentation
+
+- Add instructions on how to update OMERO.web plugins to Django 3.2.x ([#363](https://github.com/ome/omero-web/pull/363))
+
+
+5.14.0.rc1 (March 2022)
+-----------------------
+
+## Features
+
+- Update to Django 3.2.x ([#356](https://github.com/ome/omero-web/pull/356))
+- Install Django-cors-headers by default ([#359](https://github.com/ome/omero-web/pull/359))
+
+## Documentation
+
+- Fix build year ([#360](https://github.com/ome/omero-web/pull/360))
+
+5.13.0 (February 2022)
+----------------------
+
+## Features
+
+- Handle multiple OMERO.tables on Image or Well containers ([#352](https://github.com/ome/omero-web/pull/352))
+- Show sizeT in table-view of webclient centre panel ([#329](https://github.com/ome/omero-web/pull/329))
+- Improve OMERO.table display, including a link to table as JSON ([#343](https://github.com/ome/omero-web/pull/343))
+- OMERO.table DatasetColumn links to Dataset ([#355](https://github.com/ome/omero-web/pull/355))
+
+## Bug fixes
+
+- Fix non-owned data being shown in user's data usage stats ([#331](https://github.com/ome/omero-web/pull/331))
+- Fix default-group dropdown chooser in User Settings ([#344](https://github.com/ome/omero-web/pull/344))
+- Handle commas in OMERO.table download as CSV ([#342](https://github.com/ome/omero-web/pull/342))
+- Fix link in setting documentation string ([#345](https://github.com/ome/omero-web/pull/345))
+- Fix keep-alive response content-type ([#347](https://github.com/ome/omero-web/pull/347))
+- Fix "Remove all filters" for Key-Value pairs ([#349](https://github.com/ome/omero-web/pull/349))
+
+5.12.1 (December 2021)
+---------------------
+
+## Documentation
+
+- Fix redirected link to Referrer Policy ([#345](https://github.com/ome/omero-web/pull/345))
+
 5.12.0 (November 2021)
 ---------------------
 

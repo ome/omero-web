@@ -168,7 +168,10 @@ Download files
 
             $("#downloadForm").hide();
             $(".downloading").show();
-            window.location.href = "{{ url }}&zipname=" + zipName;
+            let url = "{{ url }}?zipname=" + zipName;
+            url += "{% for id in ids %}&{{id}}{% endfor %}";
+            {% if format %}url += '&format={{ format }}';{% endif %}
+            window.location.href = url;
         }
 
         return false;

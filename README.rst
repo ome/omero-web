@@ -32,7 +32,9 @@ We recommend installing omero-web in a Python virtual environment.
 Here we show the install using `Conda`_. For more details and
 other options, please see `OMERO.py`_.
 
-    conda create -n myenv -c ome python=3.6 zeroc-ice36-python omero-py
+::
+
+    conda create -n myenv -c conda-forge python=3.8 zeroc-ice omero-py
     conda activate myenv
     pip install omero-web
 
@@ -88,6 +90,11 @@ Or, run Django directly::
     python omeroweb/manage.py runserver 4080
     ...
     Starting development server at http://127.0.0.1:4080/
+
+Migration guides
+----------------
+
+* The release of ``OMERO.web 5.14.0`` requires an update of Django to ``3.2.x``.  Plugin developers should read the `Guide <MIGRATION_TO_DJANGO_32_GUIDE.md>`_ detailing how to migrate their plugin(s) to Django 3.2.x.
 
 Running tests
 -------------
@@ -157,7 +164,7 @@ OMERO.web is released under the AGPL.
 Copyright
 ---------
 
-2009-2021, The Open Microscopy Environment, Glencoe Software, Inc.
+2009-2022, The Open Microscopy Environment, Glencoe Software, Inc.
 
 .. _OMERO: https://www.openmicroscopy.org/omero
 .. _OMERO.web install: https://docs.openmicroscopy.org/latest/omero/sysadmins/unix/install-web/web-deployment.html

@@ -1243,9 +1243,14 @@
 	
 	
     /*   Acquisition Details */
+
+    h1.can-collapse {
+        border: 1px solid #bbb;
+        margin:5px 0;
+        padding: 7px;
+    }
     
     .can-collapse {
-        border: 1px solid #bbb;
         -webkit-box-shadow:0 1px 0 rgba(255,255,255,.7);
 		
 		-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.7); /* Saf3.0+, Chrome */
@@ -1271,8 +1276,6 @@
 		   -moz-border-radius:4px; /* FF1+ */
 		        border-radius:4px; /* Opera 10.5, IE 9 */ 
 				position:relative;
-        padding: 7px;
-        margin:5px 0;
     }
 	
 	
@@ -1688,7 +1691,13 @@
         text-align: center;
         float: left;
     }
-    .iconLayout .desc, .iconLayout .date, .iconLayout .thead, .iconLayout .sizeX, .iconLayout .sizeY, .iconLayout .sizeZ{
+    .iconLayout .desc,
+    .iconLayout .date,
+    .iconLayout .thead,
+    .iconLayout .sizeX,
+    .iconLayout .sizeY,
+    .iconLayout .sizeZ,
+    .iconLayout .sizeT {
         display: none;
     }
 
@@ -2187,13 +2196,6 @@ ul.criteria_right input{
 			margin-left:14px;
 		}
 
-	#personal_details {
-		overflow:hidden;
-	}
-	#personal_details label {
-		width: 20%;
-	}
-
     /* improve display of E.g. "group-name (rw----)" */
 	.chzn-results li {
 	    white-space:nowrap;
@@ -2202,11 +2204,6 @@ ul.criteria_right input{
 	    max-height:160px !important;
 	    display: block;
 	}
-	
-	#personal_details select {
-		width:71.5%;
-	}
-	
 	
 	#password {
 		position:relative;

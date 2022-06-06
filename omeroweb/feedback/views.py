@@ -37,7 +37,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.http import HttpResponseServerError, HttpResponseNotFound
 from django.views.defaults import page_not_found
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import render
 
 from django.views.debug import get_exception_reporter_filter

@@ -23,8 +23,10 @@ or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything."""
 
 import copy
+import csv
 import os
 import datetime
+from io import StringIO
 import Ice
 from Ice import Exception as IceException
 import logging
@@ -60,7 +62,7 @@ from django.http import (
 )
 from django.http import HttpResponseServerError, HttpResponseBadRequest
 from django.utils.http import urlencode
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
@@ -340,7 +342,7 @@ def keepalive_ping(request, conn=None, **kwargs):
 
     # login_required handles ping, timeout etc, so we don't need to do
     # anything else
-    return HttpResponse("OK")
+    return HttpResponse("OK", content_type="text/plain")
 
 
 @login_required()
@@ -1736,6 +1738,7 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
             template = "webclient/annotations/metadata_general.html"
             context["canExportAsJpg"] = manager.canExportAsJpg(request)
             context["annotationCounts"] = manager.getAnnotationCounts()
+            context["tableCountsOnParents"] = manager.countTablesOnParents()
             figScripts = manager.listFigureScripts()
     context["manager"] = manager
 
@@ -3212,6 +3215,15 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
     if context.get("error") or not context.get("data"):
         return JsonResponse(context)
 
+    def values_to_csv(rows_2dlist):
+        # Use csv.writer to convert rows of data into csv string
+        csv_string = StringIO()
+        csv_writer = csv.writer(csv_string, delimiter=",", quoting=csv.QUOTE_MINIMAL)
+        for values in rows_2dlist:
+            csv_writer.writerow(values)
+        csv_string.seek(0)
+        return csv_string.read()
+
     # OR, return as csv or html
     if mtype == "csv":
         table_data = context.get("data")
@@ -3219,12 +3231,9 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
 
         def csv_gen():
             if not hide_header:
-                csv_cols = ",".join(table_data.get("columns"))
-                yield csv_cols
+                yield values_to_csv([table_data.get("columns")])
             for rows in table_data.get("lazy_rows"):
-                yield (
-                    "\n" + "\n".join([",".join([str(d) for d in row]) for row in rows])
-                )
+                yield values_to_csv(rows)
 
         downloadName = orig_file.name.replace(" ", "_").replace(",", ".")
         downloadName = downloadName + ".csv"
@@ -3232,8 +3241,6 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
         rsp = TableClosingHttpResponse(csv_gen(), content_type="text/csv")
         rsp.conn = conn
         rsp.table = context.get("table")
-        rsp["Content-Type"] = "application/force-download"
-        # rsp['Content-Length'] = ann.getFileSize()
         rsp["Content-Disposition"] = "attachment; filename=%s" % downloadName
         return rsp
 
@@ -3268,6 +3275,8 @@ def omero_table(request, file_id, mtype=None, conn=None, **kwargs):
             context["well_column_index"] = col_types.index("WellColumn")
         if "RoiColumn" in col_types:
             context["roi_column_index"] = col_types.index("RoiColumn")
+        if "DatasetColumn" in col_types:
+            context["dataset_column_index"] = col_types.index("DatasetColumn")
         # we don't use ShapeColumn type - just check name and LongColumn type...
         # TODO: when ShapeColumn is supported, add handling to this code
         cnames = [n.lower() for n in context["data"]["columns"]]
@@ -3410,14 +3419,13 @@ def download_placeholder(request, conn=None, **kwargs):
         # E.g. JPEG/PNG - 1 file per image
         fileCount = len(ids)
 
-    query = "&".join([_id.replace("-", "=") for _id in ids])
-    download_url = download_url + "?" + query
-    if format is not None:
-        download_url = download_url + "&format=%s" % format
+    ids = [_id.replace("-", "=") for _id in ids]
 
     context = {
         "template": "webclient/annotations/download_placeholder.html",
         "url": download_url,
+        "format": format,
+        "ids": ids,
         "defaultName": defaultName,
         "fileLists": fileLists,
         "fileCount": fileCount,

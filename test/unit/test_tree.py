@@ -142,7 +142,7 @@ class TestTree(object):
             expected = []
             permissions_dict = {"perm": "------"}
             for j in range(len(restrictions)):
-                if i & 2 ** j != 0:
+                if i & 2**j != 0:
                     expected.append(restrictions[j])
                     permissions_dict[restrictions[j]] = True
                 else:

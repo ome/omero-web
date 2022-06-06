@@ -9,6 +9,7 @@
         <div class='sort-numeric'>Size X</div> 
         <div class='sort-numeric'>Size Y</div> 
         <div class='sort-numeric'>Size Z</div>
+        <div class='sort-numeric'>Size T</div>
     </li>
 
     <% _.each(images, function(img) { %>
@@ -38,6 +39,7 @@
             <div class="sizeX" valign="middle"><%- img.data.obj.sizeX %></div>
             <div class="sizeY" valign="middle"><%- img.data.obj.sizeY %></div>
             <div class="sizeZ" valign="middle"><%- img.data.obj.sizeZ %></div>
+            <div class="sizeT" valign="middle"><%- img.data.obj.sizeT %></div>
         </li>
     <% }) %>
 </ul>

@@ -28,7 +28,7 @@ import warnings
 
 from django.test import Client
 from django.test.client import MULTIPART_CONTENT
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from omero.testlib import ITest
 

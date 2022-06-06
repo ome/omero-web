@@ -448,6 +448,11 @@ $(document).ready(function() {
                 $("#dataIcons li.row").removeClass('ratingFilter_hidden');
                 // reset Tag filtering
                 filter_tag_ids = [];
+                // clear filter objects if any exist
+                if (filterObjects.length) {
+                    filterObjects = [];
+                    doFiltering();
+                }
                 renderFilterTags();
             }
 

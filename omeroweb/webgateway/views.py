@@ -40,7 +40,7 @@ from django.http import (
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.conf import settings
 from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
@@ -49,7 +49,7 @@ from .util import points_string_to_XY_list, xy_list_to_bbox
 from .plategrid import PlateGrid
 from omeroweb.version import omeroweb_buildyear as build_year
 from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.templatetags.static import static
 from django.views.generic import View
 from django.shortcuts import render
 from omeroweb.webadmin.forms import LoginForm
@@ -2494,14 +2494,8 @@ def download_as(request, iid=None, conn=None, **kwargs):
         return HttpResponseServerError(msg)
 
     if len(images) == 1:
-        jpeg_data = images[0].renderJpeg()
-        if jpeg_data is None:
-            raise Http404
-        rsp = HttpResponse(jpeg_data, mimetype="image/jpeg")
-        rsp["Content-Length"] = len(jpeg_data)
-        rsp["Content-Disposition"] = "attachment; filename=%s.jpg" % (
-            images[0].getName().replace(" ", "_")
-        )
+        # not expected, as download_placeholder is for multiple images
+        return render_image(request, images[0].id, conn=conn, download=True)
     else:
         temp = tempfile.NamedTemporaryFile(suffix=".download_as")
 
@@ -2894,7 +2888,9 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
         data.append(
             dict(
                 id=annotation.id.val,
+                name=unwrap(annotation.file.name),
                 file=annotation.file.id.val,
+                ns=unwrap(annotation.ns),
                 parentType=objtype[0],
                 parentId=link.parent.id.val,
                 owner=ownerName,

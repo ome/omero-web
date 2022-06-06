@@ -30,8 +30,8 @@ from omero import constants
 
 from django.http import HttpResponse
 from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import reverse
+from django.urls import NoReverseMatch
 
 from omeroweb.webclient.forms import GlobalSearchForm
 from omeroweb.utils import reverse_with_params
