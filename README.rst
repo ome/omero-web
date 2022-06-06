@@ -142,10 +142,12 @@ To complete the release, push the master branch and the release tag to origin::
 
     $ git push origin master v5.8.0
 
-omero-web-docker
-^^^^^^^^^^^^^^^^
+Release follow up
+^^^^^^^^^^^^^^^^^
 
-Following ``omero-web`` release, need to update and release ``omero-web-docker``.
+Following ``omero-web`` release, consider opening a PR to update `omero_web_release` for various
+servers at https://github.com/ome/prod-playbooks and https://github.com/IDR/deployment.
+Also need to update and release ``omero-web-docker``.
 
 License
 -------
