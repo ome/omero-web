@@ -147,7 +147,7 @@ Release follow up
 
 Following ``omero-web`` release, consider opening a PR to update `omero_web_release` for various
 servers at https://github.com/ome/prod-playbooks and https://github.com/IDR/deployment.
-Also need to update and release ``omero-web-docker``.
+Also need to push a tag to https://github.com/ome/omero-web-docker to update to the latest release.
 
 License
 -------
