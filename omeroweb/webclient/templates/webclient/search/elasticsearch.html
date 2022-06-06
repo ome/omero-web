@@ -251,8 +251,8 @@ function displayResults(results) {
 
     let visibleColNames = ["Name", "Study_name"];
     columnNames.sort();
-    if (resources_data.image) {
-        columnNames = columnNames.filter(name => resources_data.image.includes(name));
+    if (searchForm.resources_data.image) {
+        columnNames = columnNames.filter(name => searchForm.resources_data.image.includes(name));
     }
     visibleColNames = visibleColNames.concat(columnNames);
 
@@ -295,7 +295,7 @@ async function postData(url = '', data = {}) {
 
 async function submitQuery() {
     let submitqueryurl = SEARCH_ENGINE_URL + "resources/image/searchannotation/";
-    let searchQuery = get_current_query();
+    let searchQuery = searchForm.get_current_query();
     console.log("searchQuery", searchQuery)
     const data = await postData(submitqueryurl, searchQuery);
     displayResults(data);
@@ -340,15 +340,19 @@ function hideRemoveIfOnlyOneLeft() {
 }
 
 let andClause;
+let searchForm;
 
 $(document).ready(async function() {
 
-    // await loadSearchTerms();
-    resources_data = await load_resources("searchterms");
+    // initiate the OmeroSearchForm class... 
+    searchForm = new OmeroSearchForm(SEARCH_ENGINE_URL);
+    await searchForm.load_resources();
 
     // populate 'Image' common search keys in <select> menu
-    let options = resources_data?.image?.sort().map(term => `<option value="${term}">${term}</option>`).join("\n");
-    $(".keyFields").append($(options));
+    let options = searchForm.resources_data?.image;
+    options.sort();
+    let optionsHtml = options.map(term => `<option value="${term}">${term}</option>`).join("\n");
+    $(".keyFields").append($('<option value="Any">Any</option>' + optionsHtml));
 
     // clone empty form row before any changes
     // used for building form
@@ -360,9 +364,13 @@ $(document).ready(async function() {
         let query = "{{ init.query }}";
         console.log("query", query);
         if (query && query.includes(":")) {
-            let kv = query.split(":");
-            setKeyField($(".and_clause"), kv[0]);
-            $(".valueFields").val(kv[1]);
+            // Use first ":" to split Key:Value...
+            let colonIndex = query.indexOf(":");
+            let key = query.substring(0, colonIndex);
+            let value = query.substring(colonIndex + 1);
+            console.log("Key", key, "Value", value);
+            setKeyField($(".and_clause"), key);
+            $(".valueFields").val(value);
         }
         submitQuery();
     {% endif %}
