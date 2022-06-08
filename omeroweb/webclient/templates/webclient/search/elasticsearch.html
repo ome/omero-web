@@ -160,8 +160,8 @@ function initAutoComplete($parent) {
                     if (key == "Any" && data.data.length > 0) {
                         results = data.data.map(result => {
                             return {
-                                key: result.Attribute,
-                                label: `<b>${result.Value}</b> (${result.Attribute}) <span style="color:#bbb">${result["Number of images"]}</span>`,
+                                key: result.Key,
+                                label: `<b>${result.Value}</b> (${result.Key}) <span style="color:#bbb">${result["Number of images"]}</span>`,
                                 value: `${result.Value}`
                             }
                         })
