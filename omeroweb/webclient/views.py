@@ -579,7 +579,10 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["member_of_groups"] = conn.getEventContext().memberOfGroups
     context["search_default_user"] = settings.SEARCH_DEFAULT_USER
     context["search_default_group"] = settings.SEARCH_DEFAULT_GROUP
-    context["search_engine_url"] = SEARCH_ENGINE_URL
+    search_url = SEARCH_ENGINE_URL
+    if not search_url.startswith("http"):
+        search_url = request.build_absolute_uri(reverse("index")) + search_url
+    context["search_engine_url"] = search_url
 
     return context
 
