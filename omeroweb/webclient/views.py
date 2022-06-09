@@ -145,6 +145,7 @@ SEARCH_ENGINE_URL = None
 if settings.ELASTICSEARCH_ENABLED:
     try:
         from omero_search_engine_client import search_engine_settings
+
         SEARCH_ENGINE_URL = search_engine_settings.SEARCH_ENGINE_URL
     except ImportError:
         logger.debug("Failed to import omero_search_engine_client settings")
