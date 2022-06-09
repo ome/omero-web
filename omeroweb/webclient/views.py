@@ -145,7 +145,6 @@ SEARCH_ENGINE_URL = None
 if settings.ELASTICSEARCH_ENABLED:
     try:
         from omero_search_engine_client import search_engine_settings
-
         SEARCH_ENGINE_URL = search_engine_settings.SEARCH_ENGINE_URL
     except ImportError:
         logger.debug("Failed to import omero_search_engine_client settings")
@@ -580,7 +579,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["search_default_user"] = settings.SEARCH_DEFAULT_USER
     context["search_default_group"] = settings.SEARCH_DEFAULT_GROUP
     search_url = SEARCH_ENGINE_URL
-    if not search_url.startswith("http"):
+    if search_url is not None and not search_url.startswith("http"):
         search_url = request.build_absolute_uri(reverse("index")) + search_url
     context["search_engine_url"] = search_url
 
