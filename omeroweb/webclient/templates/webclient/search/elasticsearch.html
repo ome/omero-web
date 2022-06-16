@@ -26,337 +26,21 @@
 {% block link %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "webgateway/css/ome.table.css"|add:url_suffix %}" type="text/css" media="screen"/>
-    <link rel="stylesheet" href="{% static 'omero_search_engine_client/css/search_form_styles.css' %}">
-    <script src="{% static 'omero_search_engine_client/js/search_form_utils.js' %}"></script>
+    <script src="{% static 'omero_search_engine_client/js/omero_search_form.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'omero_search_engine_client/css/search_form_styles.css' %}" />
 {% endblock %}
 
 {% block script %}
 {{ block.super }}
 
-<style>
-    .and_clause {
-        border: solid #aaa 1px;
-        padding: 5px;
-        border-radius: 5px;
-        margin: 5px 0;
-    }
-    .form-row {
-        display: flex;
-        align-items: end;
-    }
-    .form-row div {
-        flex: 1;
-        padding: 2px;
-    }
-    .search_panel select.keyFields {
-        width: 100%;
-        height: 22px;
-        max-width: 100%;
-    }
-    #dataTable {
-        width: 1200px;
-        position: absolute;
-    }
-    #dataTable td, #dataTable th {
-        font-size: 12px;
-        vertical-align: middle;
-        text-align: center;
-        padding: 2px;
-    }
-    #dataTable td {
-        height: 64px;
-    }
-    #dataTable th {
-        height: 35px;
-        border-width: 0;
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        border-bottom: solid 1px #aaa;
-        background-image: -webkit-linear-gradient(top, hsl(210,10%,90%) 0%,hsl(210,10%,85%) 100%);
-    }
-    #dataTable img {
-        max-height: 64px;
-        max-width: 96px;
-    }
-    #dataTable .browse {
-        position: sticky;
-        right: 0;
-        padding: 8px;
-        background: inherit;
-    }
-    #doElasticSearch {
-        float: right;
-        margin: 13px;
-    }
-    .valueFields {
-        width: calc(100% - 8px);
-    }
-    .no-border {
-        background: none;
-        border: none;
-    }
-    #addAND {
-        margin: 0 10px;
-    }
-    #search_form {
-        padding: 5px;
-    }
-    .filterColumn {
-        position: absolute;
-        right: 0;
-        top: 0;
-        border: solid 1px transparent;
-        background: transparent;
-        padding: 0;
-    }
-    th:hover .filterColumn {
-        border-color: #aaa;
-    }
-    .filterColumn img {
-        width: 14px;
-        height: 12px;
-        opacity: 0.5;
-    }
-</style>
-
 <script type="text/javascript">
 
-// global variables used by search_form_utils.js
-let resources_data;
+// global variables
 let SEARCH_ENGINE_URL = "{{ search_engine_url }}";
-let query_mode = "searchterms";
 
-let thumbUrl = WEBCLIENT.URLS.webindex + "render_thumbnail/";
+$(function() {
 
-// TO RUN LOCALLY
-// thumbUrl = "https://idr-testing.openmicroscopy.org/webclient/render_thumbnail/";
-
-function initAutoComplete($parent) {
-    let $this = $(".valueFields", $parent);
-    // key is updated when user starts typing, also used to handle response and select
-    let key;
-    $this.autocomplete({
-        autoFocus: false,
-        delay: 1000,
-        source: function (request, response) {
-            // Need to know what Attribute is of adjacent <select>
-            key = $(".keyFields", $parent).val();
-            console.log("key...", key);
-            let url = `${SEARCH_ENGINE_URL}resources/image/getannotationvalueskey/?key=${encodeURI(key)}&resource=image`;
-            // 'Any' uses different query
-            if (key == "Any") {
-                url = `${SEARCH_ENGINE_URL}resources/image/searchvalues/?value=${encodeURI(request.term)}&resource=image`;
-            }
-            // showSpinner();
-            $.ajax({
-                dataType: "json",
-                type: 'GET',
-                url: url,
-                success: function (data) {
-                    // hideSpinner();
-                    console.log(data);
-                    let results = [{ label: 'No results found.', value: -1 }]
-                    if (key == "Any" && data.data.length > 0) {
-                        results = data.data.map(result => {
-                            return {
-                                key: result.Key,
-                                label: `<b>${result.Value}</b> (${result.Key}) <span style="color:#bbb">${result["Number of images"]}</span>`,
-                                value: `${result.Value}`
-                            }
-                        })
-                    } else {
-                        // We need to filter by input text
-                        let input = request.term.toLowerCase();
-                        results = data.filter(term => term.toLowerCase().includes(input));
-                    }
-                    response(results);
-                },
-                error: function (data) {
-                    console.log("ERROR", data);
-                    // hideSpinner();
-                    response([{ label: 'Failed to load', value: -1 }]);
-                }
-            });
-        },
-        minLength: 3,
-        open: function () { },
-        close: function () {
-            // $(this).val('');
-            return false;
-        },
-        focus: function (event, ui) { },
-        select: function (event, ui) {
-            console.log("select", ui.item, key == "Any");
-            if (ui.item.value == -1) {
-                // Ignore 'No results found'
-                return false;
-            }
-            if (key == "Any") {
-                // Use 'key' to update KeyField
-                setKeyField($parent, ui.item.key);
-            }
-            return true;
-        }
-    }).data("ui-autocomplete")._renderItem = function (ul, item) {
-        return $("<li>")
-            .append("<a style='font-size:14px; width:245px'>" + item.label + "</a>")
-            .appendTo(ul);
-    }
-}
-
-
-function displayResults(results) {
-    console.log("displayResults", results);
-    // TODO: check how errors are handled
-    // if (results.Error && results.Error != "none") {
-    //     $("#dataTable").html(`<tr><td>${results.Error}</td></tr>`);
-    //     return;
-    // }
-
-    // Need to build columns from each result?
-    // let visibleCols = results.columns_def.filter(col => !col.hide);
-    let results_array = results?.results?.results;
-    if (!results_array) {
-        alert("No results");
-    }
-
-    let columnNames = [];
-    // compile column names from 'key_values' of ALL results
-    results_array.forEach(r => {
-        r.key_values.forEach(kv => {
-            if (columnNames.indexOf(kv.name) === -1) {
-                columnNames.push(kv.name);
-            }
-        });
-    });
-
-    // Build a list of dicts from results...
-    const result_objs = results_array.map(r => {
-        let obj = {
-            id: r.id,
-            Name: r.name,
-            Study_name: r.project_name || r.screen_name
-        };
-        r.key_values.forEach(kv => {
-            if (!obj[kv.name]) {
-                obj[kv.name] = kv.value;
-            } else {
-                // handle duplicates for a column
-                obj[kv.name] = obj[kv.name] + "; " + kv.value;
-            }
-        });
-        return obj;
-    });
-
-    let visibleColNames = ["Name", "Study_name"];
-    columnNames.sort();
-    if (searchForm.resources_data.image) {
-        columnNames = columnNames.filter(name => searchForm.resources_data.image.includes(name));
-    }
-    visibleColNames = visibleColNames.concat(columnNames);
-
-    console.log("visibleColNames", visibleColNames);
-    console.log("result_objs", result_objs);
-
-    let thead = `<th>${new Intl.NumberFormat().format(results.results.size)} Images</th>`;
-    thead += ["Name", "Study_name"].map(col => `<th>${col}</th>`).join("");
-    thead += columnNames.map(col => `<th>
-        <button title="Filter by ${col}" class="filterColumn" data-colname="${col}">
-            <img src="{% static "webclient/image/filter-icon-12.png" %}"/>
-        </button>
-        ${col}</th>`).join("");
-    thead += "<th></th>";
-    let tbody = result_objs.slice(0,100).map(row => {
-        let thumb = `<td><img loading="lazy" src="${thumbUrl}${ row.id }/" /></td>`;
-        let tds = visibleColNames.map(col => `<td>${row[col] || ""}</td>`).join("");
-        let browse = `<td class="browse"><a target="_blank" title="Open this Image in another tab" href="${WEBCLIENT.URLS.webindex}?show=image-${ row.id }">Browse</a></td>`;
-        // let tds = row.key_values.map(kv => `<td>${kv.value}</td>`).join("");
-        return `<tr id="image-${ row.id }">${thumb}${ tds }${browse}</tr>`;
-    }).join('\n');
-
-    let table = `
-        <thead>${thead}</thead>
-        <tbody>${tbody}</tbody>
-    `
-    $("#dataTable").html(table);
-}
-
-async function postData(url = '', data = {}) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  });
-  return response.json();
-}
-
-async function submitQuery() {
-    let submitqueryurl = SEARCH_ENGINE_URL + "resources/image/searchannotation/";
-    let searchQuery = searchForm.get_current_query();
-    console.log("searchQuery", searchQuery)
-    const data = await postData(submitqueryurl, searchQuery);
-    displayResults(data);
-}
-
-async function setKeyField($parent, key) {
-    // Adds the Key as an <option> to the <select> if not there;
-    let $select = $(".keyFields", $parent);
-    if ($(`option[value='${key}']`, $select).length == 0) {
-        $select.append($(`<option value="${key}">${key}</option>`));
-    }
-    $select.val(key);
-}
-
-function addAnd(attribute) {
-    let $form = $("#search_form");
-    if ($form.children().length > 0) {
-        $form.append("<div>AND</div>");
-    }
-    let $newRow = $andClause.clone();
-    $form.append($newRow);
-    hideRemoveIfOnlyOneLeft();
-
-    if (attribute) {
-        setKeyField($newRow, attribute);
-    }
-
-    // enable auto-complete
-    initAutoComplete($newRow);
-
-    return $newRow;
-}
-
-// Hide the X button if there's only 1 in the form
-function hideRemoveIfOnlyOneLeft() {
-    let $btns = $("button.remove");
-    if ($btns.length == 1) {
-        $btns.css('visibility', 'hidden');
-    } else {
-        $btns.css('visibility', 'visible');
-    }
-}
-
-let andClause;
-let searchForm;
-
-$(document).ready(async function() {
-
-    // initiate the OmeroSearchForm class... 
-    searchForm = new OmeroSearchForm(SEARCH_ENGINE_URL);
-    await searchForm.load_resources();
-
-    // populate 'Image' common search keys in <select> menu
-    let options = searchForm.resources_data?.image;
-    options.sort();
-    let optionsHtml = options.map(term => `<option value="${term}">${term}</option>`).join("\n");
-    $(".keyFields").append($('<option value="Any">Any</option>' + optionsHtml));
-
-    // clone empty form row before any changes
-    // used for building form
-    $andClause = $("#search_form .and_clause").clone();
+    const searchForm = new OmeroSearchForm("search_form", SEARCH_ENGINE_URL, "dataTable");
 
     // bind events when page loads...
     {% if init.query %}
@@ -369,54 +53,18 @@ $(document).ready(async function() {
             let key = query.substring(0, colonIndex);
             let value = query.substring(colonIndex + 1);
             console.log("Key", key, "Value", value);
-            setKeyField($(".and_clause"), key);
-            $(".valueFields").val(value);
+            searchForm.on("ready", function(){
+                searchForm.setQuery({key, value});
+                searchForm.submitSearch();
+            });
         }
-        submitQuery();
     {% endif %}
 
-    // single click handler on image (container). Selection then update toolbar & metadata pane
+    // single click handler on table row. Selection then update toolbar & metadata pane
     $("#dataTable").on('click', 'tr', function(event) {
-        // uses <tr id='image-1'> to select corrent images etc.
+        // uses <tr id='image-1'> to select current images etc.
         OME.handleTableClickSelection(event);
     });
-
-    // for the first row in the form
-    initAutoComplete($(".and_clause"));
-
-    // ADD button
-    $("#addAND").on("click", function(){
-        addAnd();
-    });
-    // Remove button(s)
-    // X buttons
-    $("#search_form").on("click", ".remove", function (event) {
-        let $row = $(this).closest(".form-row");
-        let $clause = $row.parent();
-        $row.remove();
-        // If no rows left, remove clause...
-        if ($(".form-row", $clause).length === 0) {
-            let $and = $clause.prev();
-            if ($and.length == 0) {
-                // in case we're removing the first row
-                $and = $clause.next();
-            }
-            $and.remove();
-            $clause.remove();
-        }
-        hideRemoveIfOnlyOneLeft();
-    });
-
-    $("#doElasticSearch").on("click", function() {
-        submitQuery();
-    });
-
-    // Handle click on 'Filter' button
-    $("#dataTable").on("click", ".filterColumn", function() {
-        let $newRow = addAnd(this.dataset.colname);
-        $(".valueFields", $newRow).focus();
-    });
-
 });
 </script>
 
@@ -425,41 +73,16 @@ $(document).ready(async function() {
 {% block left %}
 
 <div id="elastic_search">
-
-    <form id="search_form" class="standard_form">
-
-        {% include "omero_search_engine_client/and_clause.html" %}
-
+    <form id="search_form">
     </form>
-    <button id="addAND" type="button" class="no-border" title="Add an 'AND' clause to the query">
-        add AND...
-    </button>
-    {% include "omero_search_engine_client/case_insensitive_checkbox.html" %}
-    <button id="doElasticSearch">Search</button>
-
 </div>
 
 {% endblock %}
 
 {% block center %}
 
-	<div id="center_panel_header" >
-		
-		<form class="search filtersearch searchresult_filter" id="filtersearch" action="#" style="display:none">
-		    <div>
-		        <label for="id_search">
-		            Filter Results
-		        </label>
-			    <input type="text" id="id_search" size="25" />
-			</div>
-			<!-- <span class="loading">
-				<img class="loader" alt="Loading" src="{% static "webgateway/img/spinner.gif" %}">
-			</span> -->
-		</form>
-		<ul style="position: relative; left: 200px; width: 300px; top: 12px; font-size:110%">
-            <li id="searchResultCount"></li>
-        </ul>
-	</div>
+    <div id="center_panel_header" >
+    </div>
 
 	<div id="content_details" class="center_panel_content">
         <table id="dataTable" class="tablesorter"></table>
