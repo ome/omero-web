@@ -2690,7 +2690,7 @@ def original_file_paths(request, iid, conn=None, **kwargs):
     return {
         "repo": paths["server_paths"],
         "client": paths["client_paths"],
-        "fileset": {"id": fileset_id}
+        "fileset": {"id": fileset_id},
     }
 
 
