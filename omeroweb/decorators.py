@@ -37,7 +37,7 @@ from django.urls import reverse, resolve, NoReverseMatch
 from django.core.cache import cache
 
 from omeroweb.utils import reverse_with_params
-from omeroweb.connector import Connector
+from omeroweb.connector import Connector, Server
 from omero.gateway.utils import propertiesToDict
 from omero import ApiUsageException
 
@@ -416,8 +416,14 @@ class login_required(object):
                 try:
                     server_id = request["server"]
                 except Exception:
-                    logger.debug("No Server ID available.")
-                    return None
+                    # If only 1 server, use server=1
+                    server_keys = list(Server._registry.keys())
+                    if len(server_keys) == 1:
+                        server_id = server_keys[0]
+                        logger.debug("No Server ID available: using %s" % server_id)
+                    else:
+                        logger.debug("No Server ID available.")
+                        return None
 
         # If we have an OMERO session key in our request variables attempt
         # to make a connection based on those credentials.
