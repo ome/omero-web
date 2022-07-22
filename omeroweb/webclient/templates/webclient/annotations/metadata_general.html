@@ -149,7 +149,8 @@
                                 var repo = data.repo,
                                     client = data.client,
                                     html = "";
-                                $panel_title.html(repo.length + " Image file" + (repo.length>1 ? "s:" : ":"));
+                                let title = `Fileset ID: <strong>${data.fileset.id}</strong> contains ${repo.length} Image file${ repo.length>1 ? "s" : ""}:`
+                                $panel_title.html(title);
 
                                 if (importTransfer) {
                                     html += "<p>Imported with <strong>--transfer="+ importTransfer;
