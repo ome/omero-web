@@ -149,11 +149,14 @@
                                 var repo = data.repo,
                                     client = data.client,
                                     html = "";
-                                $panel_title.html(repo.length + " Image file" + (repo.length>1 ? "s:" : ":"));
+                                $panel_title.html("Fileset Info");
+
+                                html += `<p>Fileset ID: <strong>${data.fileset.id}</strong></p>`
+
+                                html += `<p>File count: <strong>${repo.length}</strong></p>`
 
                                 if (importTransfer) {
-                                    html += "<p>Imported with <strong>--transfer="+ importTransfer;
-                                    html += "</strong></p><hr/>";
+                                    html += "<p>Imported with: <strong>--transfer="+ importTransfer + "</strong></p>";
                                 }
 
                                 html += "<p>Imported from:</p>";

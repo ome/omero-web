@@ -2686,7 +2686,12 @@ def original_file_paths(request, iid, conn=None, **kwargs):
     if image is None:
         raise Http404
     paths = image.getImportedImageFilePaths()
-    return {"repo": paths["server_paths"], "client": paths["client_paths"]}
+    fileset_id = image.fileset.id.val
+    return {
+        "repo": paths["server_paths"],
+        "client": paths["client_paths"],
+        "fileset": {"id": fileset_id},
+    }
 
 
 @login_required()
