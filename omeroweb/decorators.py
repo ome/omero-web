@@ -416,10 +416,10 @@ class login_required(object):
                 try:
                     server_id = request["server"]
                 except Exception:
-                    # If only 1 server, use server=1
-                    server_keys = list(Server._registry.keys())
-                    if len(server_keys) == 1:
-                        server_id = server_keys[0]
+                    # If only 1 server, use it
+                    servers = list(Server)
+                    if len(servers) == 1:
+                        server_id = servers[0].id
                         logger.debug("No Server ID available: using %s" % server_id)
                     else:
                         logger.debug("No Server ID available.")
