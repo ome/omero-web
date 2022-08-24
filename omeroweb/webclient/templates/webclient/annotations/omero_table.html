@@ -13,6 +13,14 @@
                 border-collapse: collapse;
                 border-spacing: 0;
             }
+            th {
+                /* border-bottom is lost in scrolling: use gradient instead */
+                background: linear-gradient(to top,#ddd, #ddd 1px, #ffffff 1px, #ffffff 100%);;
+                position: sticky;
+                top: 0;
+                border-bottom: solid #ddd 1px;
+                padding: 5px;
+            }
             td {
                 border: solid #ddd 1px;
                 padding: 5px;
