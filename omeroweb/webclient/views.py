@@ -2802,33 +2802,37 @@ def edit_channel_names(request, imageId, conn=None, **kwargs):
             nameDict[i + 1] = cname
     # If the 'Apply to Dataset' button was used to submit...
     rv = {"channelNames": channelNames}
+    counts = None
     if request.POST.get("confirm_apply", None) is not None:
         # plate-123 OR dataset-234
         parentId = request.POST.get("parentId", None)
         if parentId is not None:
-            ptype = parentId.split("-")[0].title()
+            ptype = parentId.split("-")[0]
             pid = long(parentId.split("-")[1])
             offset = request.POST.get("offset", None)
             limit = request.POST.get("limit", None)
             if offset is not None and limit is not None:
-                opts = {
-                    "dataset": pid,
-                    "order_by": "obj.name",
-                    "limit": limit,
-                    "offset": offset,
-                }
-                img_ids = [img.id for img in conn.getObjects("Image", opts=opts)]
-                print("img_ids", img_ids)
-                counts = conn.setChannelNames(
-                    "Image", img_ids, nameDict, channelCount=sizeC
-                )
-
-                totalImages = get_child_counts(conn, "DatasetImageLink", [pid])[pid]
-                rv["totalImages"] = totalImages
+                limit = int(limit)
+                offset = int(offset)
+                img_ids = []
+                if ptype == "dataset":
+                    # For Dataset, paginate by images (ordered by name)
+                    opts = {"dataset": pid, "order_by": "obj.name", "limit": limit, "offset": offset}
+                    img_ids = [img.id for img in conn.getObjects("Image", opts=opts)]
+                    rv["totalImages"] = get_child_counts(conn, "DatasetImageLink", [pid])[pid]
+                elif ptype == "plate":
+                    # For Plates, paginate by Wells. Load all then slice for page
+                    opts = {"plate": pid, "order_by": "obj.id"}
+                    wells = list(conn.getObjects("Well", opts=opts))
+                    rv["totalImages"] = len(wells)
+                    img_ids = []
+                    for well in wells[offset: offset + limit]:
+                        for ws in well.listChildren():
+                            img_ids.append(ws.getImage().id)
+                if len(img_ids) > 0:
+                    counts = conn.setChannelNames("Image", img_ids, nameDict, channelCount=sizeC)
             else:
-                counts = conn.setChannelNames(
-                    ptype, [pid], nameDict, channelCount=sizeC
-                )
+                counts = conn.setChannelNames(ptype.title(), [pid], nameDict, channelCount=sizeC)
     else:
         counts = conn.setChannelNames("Image", [image.getId()], nameDict)
 
