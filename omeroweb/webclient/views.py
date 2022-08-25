@@ -2817,22 +2817,33 @@ def edit_channel_names(request, imageId, conn=None, **kwargs):
                 img_ids = []
                 if ptype == "dataset":
                     # For Dataset, paginate by images (ordered by name)
-                    opts = {"dataset": pid, "order_by": "obj.name", "limit": limit, "offset": offset}
+                    opts = {
+                        "dataset": pid,
+                        "order_by": "obj.name",
+                        "limit": limit,
+                        "offset": offset,
+                    }
                     img_ids = [img.id for img in conn.getObjects("Image", opts=opts)]
-                    rv["totalImages"] = get_child_counts(conn, "DatasetImageLink", [pid])[pid]
+                    rv["totalImages"] = get_child_counts(
+                        conn, "DatasetImageLink", [pid]
+                    )[pid]
                 elif ptype == "plate":
                     # For Plates, paginate by Wells. Load all then slice for page
                     opts = {"plate": pid, "order_by": "obj.id"}
                     wells = list(conn.getObjects("Well", opts=opts))
                     rv["totalImages"] = len(wells)
                     img_ids = []
-                    for well in wells[offset: offset + limit]:
+                    for well in wells[offset : offset + limit]:
                         for ws in well.listChildren():
                             img_ids.append(ws.getImage().id)
                 if len(img_ids) > 0:
-                    counts = conn.setChannelNames("Image", img_ids, nameDict, channelCount=sizeC)
+                    counts = conn.setChannelNames(
+                        "Image", img_ids, nameDict, channelCount=sizeC
+                    )
             else:
-                counts = conn.setChannelNames(ptype.title(), [pid], nameDict, channelCount=sizeC)
+                counts = conn.setChannelNames(
+                    ptype.title(), [pid], nameDict, channelCount=sizeC
+                )
     else:
         counts = conn.setChannelNames("Image", [image.getId()], nameDict)
 
