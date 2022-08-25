@@ -296,6 +296,8 @@
                     $chNameForm.find(".confirmButtons").hide();
                     $("#channel_names_display").show();
                     $("#editChannelNames").show();
+                    $("#channel_edit_progress").hide();
+                    $("#channel_edit_progress_label").hide();
                     $chNameForm.hide();
                 }
                 // Workflow starts by displaying the form
@@ -318,23 +320,56 @@
                         resetChForm();
                     }
                 });
+
+                function batchChannelEdit(formData, url) {
+                    // recursive function to update images in batches via pagination
+                    formData.limit = 5;
+                    $.ajax({
+                        type: "POST", url: url, data: formData, dataType: 'json',
+                        success: function(rsp){
+                            console.log(rsp);
+                            formData.offset += formData.limit
+                            percent = (formData.offset / rsp.totalImages) * 100;
+                            $("#channel_edit_progress").attr("value", percent)
+                            if (rsp.totalImages && rsp.totalImages > formData.offset) {
+                                // if more to process, go again...
+                                batchChannelEdit(formData, url);
+                            } else {
+                                // udpate channel names when done
+                                $("#channel_names_display span").each(function(i){
+                                    if (formData.hasOwnProperty("channel"+i)) {
+                                        $(this).text(formData["channel"+i]);
+                                    }
+                                });
+                                resetChForm();
+                            }
+                        }
+                    });
+                }
+
                 // Form handled by AJAX
                 $chNameForm.ajaxForm({
                     dataType:  'json',
+                    beforeSubmit: function(data, $form) {
+                        // Show 'in-progress' state...
+                        $chNameForm.find(".originalButtons").hide();
+                        $chNameForm.find(".confirmButtons").hide();
+                        $("#channel_edit_progress_label").show();
+                        $("#channel_edit_progress").show().attr("value", 2)
+
+                        let submitData = {};
+                        data.forEach(keyval => {
+                            submitData[keyval.name] = keyval.value;
+                        })
+                        submitData.offset = 0;
+                        // use this for single Image OR for Dataset/Plate
+                        batchChannelEdit(submitData, $form.attr("action"));
+
+                        // false: cancel submit - since we handle this manually above
+                        return false;
+                    },
                     success: function(data) {
-                        var cnames = data.channelNames;
-                        // update the channel names, and ititial values in form
-                        $("#channel_names_display span").each(function(i){
-                            if (cnames.hasOwnProperty("channel"+i)) {
-                                $(this).text(cnames["channel"+i]);
-                            }
-                        });
-                        $chNameForm.find("input").each(function(i){
-                            if (cnames.hasOwnProperty( $(this).attr('name') )) {
-                                $(this).attr('value', cnames["channel"+i]);
-                            }
-                        });
-                        resetChForm();
+                        // Not used - handled above.
                     }
                 });
 

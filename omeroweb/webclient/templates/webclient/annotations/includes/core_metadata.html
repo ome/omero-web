@@ -96,6 +96,8 @@
                             <button name="confirm_apply" type="submit" value="apply" title="Save and apply to all Images">Continue</button>
                         </span>
                         <button type="reset" name="cancel" title="Cancel">Cancel</button>
+                        <div id="channel_edit_progress_label" style="display:none">Renaming images...</div>
+                        <progress id="channel_edit_progress" max="100" value="20" style="width:100%; display:none">20%</progress>
                     </form>
                     {% if image.canEdit %}
                         <button id="editChannelNames" class="btn silver btn_edit" 

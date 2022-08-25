@@ -91,6 +91,7 @@ from omeroweb.webadmin.forms import LoginForm
 from omeroweb.webgateway import views as webgateway_views
 from omeroweb.webgateway.marshal import graphResponseMarshal
 from omeroweb.webgateway.util import get_longs as webgateway_get_longs
+from omeroweb.api.api_query import get_child_counts
 
 from omeroweb.feedback.views import handlerInternalError
 
@@ -2800,16 +2801,28 @@ def edit_channel_names(request, imageId, conn=None, **kwargs):
             channelNames["channel%d" % i] = cname
             nameDict[i + 1] = cname
     # If the 'Apply to Dataset' button was used to submit...
+    rv = {"channelNames": channelNames}
     if request.POST.get("confirm_apply", None) is not None:
         # plate-123 OR dataset-234
         parentId = request.POST.get("parentId", None)
         if parentId is not None:
             ptype = parentId.split("-")[0].title()
             pid = long(parentId.split("-")[1])
-            counts = conn.setChannelNames(ptype, [pid], nameDict, channelCount=sizeC)
+            offset = request.POST.get("offset", None)
+            limit = request.POST.get("limit", None)
+            if offset is not None and limit is not None:
+                opts = {"dataset": pid, "order_by": "obj.name", "limit": limit, "offset": offset}
+                img_ids = [img.id for img in conn.getObjects("Image", opts=opts)]
+                print("img_ids", img_ids)
+                counts = conn.setChannelNames("Image", img_ids, nameDict, channelCount=sizeC)
+
+                totalImages = get_child_counts(conn, "DatasetImageLink", [pid])[pid]
+                rv["totalImages"] = totalImages
+            else:
+                counts = conn.setChannelNames(ptype, [pid], nameDict, channelCount=sizeC)
     else:
         counts = conn.setChannelNames("Image", [image.getId()], nameDict)
-    rv = {"channelNames": channelNames}
+
     if counts:
         rv["imageCount"] = counts["imageCount"]
         rv["updateCount"] = counts["updateCount"]
