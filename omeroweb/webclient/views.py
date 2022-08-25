@@ -2811,15 +2811,24 @@ def edit_channel_names(request, imageId, conn=None, **kwargs):
             offset = request.POST.get("offset", None)
             limit = request.POST.get("limit", None)
             if offset is not None and limit is not None:
-                opts = {"dataset": pid, "order_by": "obj.name", "limit": limit, "offset": offset}
+                opts = {
+                    "dataset": pid,
+                    "order_by": "obj.name",
+                    "limit": limit,
+                    "offset": offset,
+                }
                 img_ids = [img.id for img in conn.getObjects("Image", opts=opts)]
                 print("img_ids", img_ids)
-                counts = conn.setChannelNames("Image", img_ids, nameDict, channelCount=sizeC)
+                counts = conn.setChannelNames(
+                    "Image", img_ids, nameDict, channelCount=sizeC
+                )
 
                 totalImages = get_child_counts(conn, "DatasetImageLink", [pid])[pid]
                 rv["totalImages"] = totalImages
             else:
-                counts = conn.setChannelNames(ptype, [pid], nameDict, channelCount=sizeC)
+                counts = conn.setChannelNames(
+                    ptype, [pid], nameDict, channelCount=sizeC
+                )
     else:
         counts = conn.setChannelNames("Image", [image.getId()], nameDict)
 
