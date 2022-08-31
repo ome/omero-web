@@ -1,3 +1,18 @@
+5.15.0 (August 2022)
+--------------------
+
+## Minor features
+
+- Show Fileset ID [#385](https://github.com/ome/omero-web/pull/385)
+- Show table header when scrolling OMERO.table [#392](https://github.com/ome/omero-web/pull/392)
+
+## Bug fixes
+
+- Don't need ?server=1 query parameter if only 1 server [#386](https://github.com/ome/omero-web/pull/386)
+- Fix zoom buttons overlaying popup panels [#389](https://github.com/ome/omero-web/pull/389)
+- Fix activities panel display of long messages [#378](https://github.com/ome/omero-web/pull/378)
+
+
 5.14.1 (June 2022)
 ------------------
 
