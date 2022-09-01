@@ -306,6 +306,7 @@
                     $("#editChannelNames").hide();
                     $chNameForm.show();
                 });
+                let cancelChannelRename = false;
                 // Handling of all form buttons. NB: save & apply_confirm buttons submit
                 $chNameForm.find("button").on('click', function(event){
                     var name = $(this).attr('name');
@@ -317,6 +318,7 @@
                         return false;
                     } else if (name === "cancel") {
                         // cancel - hide and don't submit
+                        cancelChannelRename = true;
                         resetChForm();
                     }
                 });
@@ -329,9 +331,16 @@
                         success: function(rsp){
                             console.log(rsp);
                             formData.offset += formData.limit
+                            let msg = `Editing channels... (${formData.offset}/${rsp.totalImages}`;
+                            if (formData?.parentId.includes('dataset')) {
+                                msg += " images)";
+                            } else if (formData?.parentId.includes('plate')) {
+                                msg += " wells)";
+                            }
+                            $("#channel_edit_progress_label").html(msg);
                             percent = (formData.offset / rsp.totalImages) * 100;
                             $("#channel_edit_progress").attr("value", percent)
-                            if (rsp.totalImages && rsp.totalImages > formData.offset) {
+                            if (!cancelChannelRename && rsp.totalImages && rsp.totalImages > formData.offset) {
                                 // if more to process, go again...
                                 batchChannelEdit(formData, url);
                             } else {
@@ -354,7 +363,7 @@
                         // Show 'in-progress' state...
                         $chNameForm.find(".originalButtons").hide();
                         $chNameForm.find(".confirmButtons").hide();
-                        $("#channel_edit_progress_label").show();
+                        $("#channel_edit_progress_label").html("Editing channels...").show();
                         $("#channel_edit_progress").show().attr("value", 2)
 
                         let submitData = {};
@@ -363,6 +372,7 @@
                         })
                         submitData.offset = 0;
                         // use this for single Image OR for Dataset/Plate
+                        cancelChannelRename = false;
                         batchChannelEdit(submitData, $form.attr("action"));
 
                         // false: cancel submit - since we handle this manually above
