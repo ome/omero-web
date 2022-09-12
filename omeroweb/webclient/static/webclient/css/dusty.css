@@ -217,7 +217,25 @@ button::-moz-focus-inner {
         left: 2%;
     }
 
-	
+	/* Channel edit form */
+    #channel_names_edit button {
+        height: 20px;
+    }
+    .confirmButtons {
+        display: none;
+    }
+	#channel_names_edit.in_progress button[type='submit'] {
+		background: url('../../webgateway/img/spinner.gif') center center no-repeat;
+		color: transparent;
+	}
+
+    .channel_rename_spinner {
+        height: 12px;
+        vertical-align: middle;
+        /* hide initially */
+        display: none;
+    }
+        
 
 /*
 	------------------------------------------------
