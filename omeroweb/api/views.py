@@ -22,7 +22,7 @@
 from django.views.generic import View
 from django.middleware import csrf
 from django.utils.decorators import method_decorator
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from . import api_settings
 
 import traceback
@@ -165,12 +165,15 @@ class ObjectView(ApiView):
         query, params, wrapper = conn.buildQuery(
             self.OMERO_TYPE, [object_id], opts=opts
         )
-        result = conn.getQueryService().findByQuery(query, params, conn.SERVICE_OPTS)
+        # Allow subclasses to access the result object
+        self.result = conn.getQueryService().findByQuery(
+            query, params, conn.SERVICE_OPTS
+        )
 
-        if result is None:
+        if self.result is None:
             raise NotFoundError("%s %s not found" % (self.OMERO_TYPE, object_id))
-        encoder = get_encoder(result.__class__)
-        marshalled = encoder.encode(result)
+        encoder = get_encoder(self.result.__class__)
+        marshalled = encoder.encode(self.result)
 
         # Optionally lookup child counts
         child_count = request.GET.get("childCount", False) == "true"
@@ -388,6 +391,23 @@ class RoiView(ObjectView):
         opts = super(RoiView, self).get_opts(request, **kwargs)
         opts["load_shapes"] = True
         return opts
+
+
+class ShapeView(ObjectView):
+    """Handle access to an individual Shape to GET or DELETE it."""
+
+    OMERO_TYPE = "Shape"
+
+    def add_data(self, marshalled, request, conn, urls=None, **kwargs):
+        """Add 'url:roi' to Shape."""
+        marshalled = super(ShapeView, self).add_data(
+            marshalled, request, conn, urls=urls, **kwargs
+        )
+
+        version = kwargs["api_version"]
+        roi_id = self.result.roi.id.val
+        marshalled["url:roi"] = build_url(request, "api_roi", version, object_id=roi_id)
+        return marshalled
 
 
 class ExperimenterView(ObjectView):
@@ -747,6 +767,26 @@ class RoisView(ObjectsView):
                 opts["image"] = image
 
         return opts
+
+
+class ShapesView(ObjectsView):
+    """Handles GET for /shapes/ to list available Shapes."""
+
+    OMERO_TYPE = "Shape"
+
+    def add_data(self, marshalled, request, conn, urls=None, **kwargs):
+        """Add url:roi to each Shape"""
+        marshalled = super(ShapesView, self).add_data(
+            marshalled, request, conn, urls=urls, **kwargs
+        )
+
+        # We need the shape.roi (if it's been added by omero-marshal)
+        if "roi" in marshalled:
+            roi_id = marshalled["roi"]["@id"]
+            url = build_url(request, "api_roi", kwargs["api_version"], object_id=roi_id)
+            marshalled["url:roi"] = url
+
+        return marshalled
 
 
 class ExperimentersView(ObjectsView):

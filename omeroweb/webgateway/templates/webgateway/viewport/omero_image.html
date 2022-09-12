@@ -94,7 +94,7 @@
     <script type="text/javascript" src="{% static "3rdparty/raphael-2.1.0/raphael-min.js" %}"></script>
     <script type="text/javascript" src="{% static "3rdparty/raphael-2.1.0/scale.raphael.js" %}"></script>
 
-    <script type="text/javascript" src="{% static '3rdparty/underscore/underscore-1.8.3-min.js' %}"></script>
+    <script type="text/javascript" src="{% static '3rdparty/underscore/underscore-1.13.1-umd-min.js' %}"></script>
     <script type="text/javascript" src="{% static "3rdparty/d3-3.5.17/d3.min.js" %}"></script>
     <script type="text/javascript" src="{% static "webgateway/js/ome.histogram.js"|add:url_suffix %}"></script>
 
@@ -220,8 +220,8 @@
       css: {width: '50%', left: '25%', top: '20%'}
 {% endif %}
     });
-    $('.blockMsg').attr('title','Click to close').click($.unblockUI);
-    $('.blockOverlay').attr('title','Click to close').click($.unblockUI);
+    $('.blockMsg').attr('title','Click to close').on('click', $.unblockUI);
+    $('.blockOverlay').attr('title','Click to close').on('click', $.unblockUI);
     return false;
   }
 
@@ -248,7 +248,7 @@
     var p = viewport.getProjection();
     if (p) {
       $('[name="wblitz-proj"]').parent().removeClass('selected');
-      $('[name="wblitz-proj"][value='+p+']').click().parent().addClass('selected');
+      $('[name="wblitz-proj"][value='+p+']').on('click', ).parent().addClass('selected');
 //    if (p) {
 //      var pr = $('#wblitz-proj > [value='+p+']');
 //      if (pr.length) {
@@ -544,7 +544,7 @@
               var theT =
                   typeof shape.theT === "undefined"? NOZT : shape.theT + 1;
               shapesHtml += "<td class='shape_cell'>" + theT + "</td>";
-              shapesHtml += "<td class='shape_cell shape_text' title=\""+ text +"\"><p>"+ truncate_text(text.escapeHTML()) + "</p></td>";
+              shapesHtml += "<td class='shape_cell shape_text' title=\""+ text.escapeHTML() +"\"><p>"+ truncate_text(text.escapeHTML()) + "</p></td>";
               shapesHtml += "<td class='shape_cell'>" + shapeThumbHtml + "</td>";
               shapesHtml += "<td class='shape_cell'>" + shapeVisibilityHtml + "</td>";
               shapesHtml += "</tr>";
@@ -563,7 +563,7 @@
           roi_html += "<th>" + roi['id'] + "</th>";
           roi_html += "<th style='white-space: nowrap'> "+ tRange +" </th>"; // no Z for ROI
           roi_html += "<th style='white-space: nowrap'> "+ zRange +" </th>"; // no T for ROI
-          roi_html += "<th class='shape_text' title=\""+ roiText +"\"><p>"+ truncate_text(roiText) +"</p></th>";
+          roi_html += "<th class='shape_text' title=\""+ roiText.escapeHTML() +"\"><p>"+ truncate_text(roiText).escapeHTML() +"</p></th>";
           roi_html += "<th>"+ roiThumbHtml +"</th>";
           roi_html += "<th>" + roiVisibilityHtml + "</th>";
           roi_html += "</tr></thead>";
@@ -1101,7 +1101,7 @@
                     .attr('title', 'Copied settings are not compatible with this image');
                   return;
                 }
-                $("#rdef-paste-btn").removeAttr('disabled').removeClass("button-disabled");
+                $("#rdef-paste-btn").prop('disabled', false).removeClass("button-disabled");
             }
         }
       );
@@ -1129,14 +1129,14 @@
     });
 
     // 'Color' checkbox to left of image
-    $("#wblitz-rmodel").click(function(){
+    $("#wblitz-rmodel").on('click', function(){
       setModel(viewport, $(this).get(0).checked?'g':'c');
     });
 
     /* Prepare pop tools */
     $(".popover > h1")
       .prepend('<div class="drop-img drop-left"></div><div class="drop-img drop-right"></div>')
-      .click(function () {
+      .on('click', function () {
         var this_popped = $(this).parent().is('.popped');
         $(".popped").removeClass('popped');
         if (this_popped) {
@@ -1147,15 +1147,15 @@
         return false;
       });
 
-    $(".popclose").click(function () {
+    $(".popclose").on('click', function () {
       $(".popped").removeClass('popped');
     });
 
-    $("#weblitz-viewport").click(function () {
+    $("#weblitz-viewport").on('click', function () {
       $(".popped").removeClass('popped');
       return false;
     })
-    .bind("imageChange", function () {
+    .on("imageChange", function () {
       $(".popped").removeClass('popped');
     });
 
@@ -1178,12 +1178,12 @@
     });
 
     // Create Histogram - displayed when #showhistogram checkbox is checked
-    // NB: we do this AFTER the postit init above, otherwise $("#showhistogram").click() gets unbound!
+    // NB: we do this AFTER the postit init above, otherwise $("#showhistogram").on('click', ) gets unbound!
     OME.createViewportHistogram(viewport, "#histogram", "#showhistogram", "{% url 'webgateway' %}");
 
     var legend_open = function () {
       var d = $(this);
-      d.unbind('opening', legend_open);
+      d.off('opening', legend_open);
       /* Calculate the size for legend post-it */
       var h = $('#weblitz-viewport-vp').height();
       var w = ($('#weblitz-viewport-vp').width() - h) /2;
@@ -1193,17 +1193,17 @@
       }
       d.trigger('jqResize');
     };
-    $("#legend-postit").bind('opening', legend_open);
+    $("#legend-postit").on('opening', legend_open);
 
     zindex_automator('.postit', 210);
 
     /* Make (kind of) sure that closing the rendering defs window closes an eventually opened color picker */
-    $("#rdef-postit").bind('closed',
+    $("#rdef-postit").on('closed',
       function () {
                     hidePicker();
                   });
 
-    $('.can-collapse').click(function () {
+    $('.can-collapse').on('click', function () {
       $(this).toggleClass('closed').next().slideToggle();
     });
 
@@ -1219,9 +1219,9 @@
     viewport.load({{ image.id }}, did.length ? parseInt(did) : null, location.search);
 
     /* Bind actions needed on window resize */
-    $(window).resize(calcResize);
+    $(window).on('resize', calcResize);
 
-    $('input[name=wblitz-quality]').click(function () {
+    $('input[name=wblitz-quality]').on('click', function () {
       viewport.setQuality(this.value);
     });
 
@@ -1238,14 +1238,14 @@
     var copy_paste_rdef_url = "{% url 'webgateway_copy_image_rdef_json' %}";
     // Handle clicks on Copy/paste in toolbar and left of main viewer
     // NB: Need to use IDs for robot tests
-    $("#rdef-copy-btn, #rdef-copy-btn-viewer").click(function() {
+    $("#rdef-copy-btn, #rdef-copy-btn-viewer").on('click', function() {
         copyRdefs(viewport);
     });
-    $("#rdef-paste-btn, #rdef-paste-btn-viewer").click(function() {
+    $("#rdef-paste-btn, #rdef-paste-btn-viewer").on('click', function() {
         pasteRdefs(viewport);
     });
 
-    $("#wblitz-interpolate").click(function(event){
+    $("#wblitz-interpolate").on('click', function(event){
       var interpolate = $(this).is(":checked");
       if (viewport) {
         viewport.setPixelated(!interpolate);
@@ -1253,18 +1253,18 @@
     });
 
     // Reset defaults without saving
-    $("#rdef-reset-btn").click(function(){
+    $("#rdef-reset-btn").on('click', function(){
       resetImageDefaults(viewport);
     });
 
-    $("#rdef-minmax-btn").click(function(){
+    $("#rdef-minmax-btn").on('click', function(){
       viewport.setChannelMinMax();
       syncRDCW(viewport);
       viewport.save_channels();
       updateUndoRedo(viewport);
     });
 
-    $("#rdef-fullrange-btn").click(function(){
+    $("#rdef-fullrange-btn").on('click', function(){
       viewport.setChannelFullRange();
       syncRDCW(viewport);
       viewport.save_channels();
@@ -1322,7 +1322,7 @@
         }
     }
 
-    $("#roi_small_table").click(function(event) {
+    $("#roi_small_table").on('click', function(event) {
         var $target = $(event.target);
         if ($target.attr('id') == "toggle_roi_thumbs") {
             update_roi_thumbs();
@@ -1453,10 +1453,10 @@
       }
       // Enable Prev / Next buttons if available (disabled by default)
       if (prevImgId) {
-        $("#prevImage").removeAttr('disabled').prop('disabled', false);
+        $("#prevImage").prop('disabled', false);
       }
       if (nextImgId) {
-        $("#nextImage").removeAttr('disabled').prop('disabled', false);
+        $("#nextImage").prop('disabled', false);
       }
 
       // Handle Prev / Next button clicks or keys
@@ -1473,7 +1473,7 @@
       }
 
       // Prev / Next keys
-      $(document).keydown(function(e) {
+      $(document).on('keydown', function(e) {
 
           // ignore keystrokes on other inputs, sliders etc.
           if ($(e.target).prop("tagName") !== "BODY") return;
@@ -1492,20 +1492,20 @@
           e.preventDefault();
       });
 
-      $("#prevImage").click(function(){
+      $("#prevImage").on('click', function(){
         nextPrevImage(-1);
       });
-      $("#nextImage").click(function(){
+      $("#nextImage").on('click', function(){
         nextPrevImage(1);
       });
     }
     
     // we can bind events to viewportimg for roi_display-plugin to trigger (plugin not created yet)
-    viewport.viewportimg.bind("shape_click", handle_shape_selection);
-    viewport.viewportimg.bind("rois_loaded", handle_rois_loaded);
+    viewport.viewportimg.on("shape_click", handle_shape_selection);
+    viewport.viewportimg.on("rois_loaded", handle_rois_loaded);
     
     // 'Scalebar' checkbox to left of image
-    $("#wblitz-scalebar").change(function() {
+    $("#wblitz-scalebar").on('change', function() {
         if(this.checked) {
             show_scalebar();
         } else {
@@ -1514,7 +1514,7 @@
     });
   
     // set up handlers for 'Save' button
-    $("#rdef-setdef-btn").click(function(){
+    $("#rdef-setdef-btn").on('click', function(){
       setImageDefaults(viewport, this, function() {
         if (window.opener && window.opener.OME.refreshThumbnails) {
             window.opener.OME.refreshThumbnails({'imageId':{{ image.id }},

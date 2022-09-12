@@ -56,7 +56,7 @@ class CacheBase(object):  # pragma: nocover
     """
 
     def __init__(self):
-        """ not implemented """
+        """not implemented"""
         pass
 
     def get(self, k):
@@ -211,7 +211,7 @@ class FileCache(CacheBase):
                 pass
 
     def wipe(self):
-        """ Deletes everything in the cache """
+        """Deletes everything in the cache"""
 
         shutil.rmtree(self._dir)
         self._createdir()
@@ -520,13 +520,13 @@ class WebGatewayCache(object):
         self._thumb_cache.wipe()
 
     def _cache_set(self, cache, key, obj):
-        """ Calls cache.set(key, obj) """
+        """Calls cache.set(key, obj)"""
 
         logger.debug("   set: %s" % key)
         cache.set(key, obj)
 
     def _cache_clear(self, cache, key):
-        """ Calls cache.delete(key) """
+        """Calls cache.delete(key)"""
 
         logger.debug(" clear: %s" % key)
         cache.delete(key)
@@ -750,7 +750,7 @@ class WebGatewayCache(object):
         return True
 
     def setSplitChannelImage(self, r, client_base, img, z, t, obj):
-        """ Calls L{setImage} with '-sc' context """
+        """Calls L{setImage} with '-sc' context"""
         return self.setImage(r, client_base, img, z, t, obj, "-sc")
 
     def getSplitChannelImage(self, r, client_base, img, z, t):
@@ -761,7 +761,7 @@ class WebGatewayCache(object):
         return self.getImage(r, client_base, img, z, t, "-sc")
 
     def setOmeTiffImage(self, r, client_base, img, obj):
-        """ Calls L{setImage} with '-ometiff' context """
+        """Calls L{setImage} with '-ometiff' context"""
         return self.setImage(r, client_base, img, 0, 0, obj, "-ometiff")
 
     def getOmeTiffImage(self, r, client_base, img):
@@ -883,21 +883,21 @@ class AutoLockFile:
     """
 
     def __init__(self, fn, mode):
-        """ creates a '.lock' file with the specified file name and mode """
+        """creates a '.lock' file with the specified file name and mode"""
         # FIXME: AutoLockFile previously extended file object
         # super(AutoLockFile, self).__init__(fn, mode)
         self._lock = os.path.join(os.path.dirname(fn), ".lock")
         open(self._lock, "a").close()
 
     def __del__(self):
-        """ tries to delete the lock file """
+        """tries to delete the lock file"""
         try:
             os.remove(self._lock)
         except Exception:
             pass
 
     def close(self):
-        """ tries to delete the lock file and close the file """
+        """tries to delete the lock file and close the file"""
         try:
             os.remove(self._lock)
         except Exception:

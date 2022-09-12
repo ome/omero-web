@@ -24,6 +24,29 @@ $(function() {
     // Flag holding curent single / multi selection status
     var multiselection = false;
 
+    $.jstree.core.prototype._create_prototype_node = function () {
+        var document = window.document;
+        var _node = document.createElement('LI'), _temp1, _temp2;
+        _node.setAttribute('role', 'presentation');
+        _temp1 = document.createElement('I');
+        _temp1.className = 'jstree-icon jstree-ocl';
+        _temp1.setAttribute('role', 'presentation');
+        _node.appendChild(_temp1);
+        // Use a 'span' instead of 'a' to avoid link showing on hover
+        // see https://github.com/ome/omero-web/pull/257
+        _temp1 = document.createElement('span');
+        _temp1.className = 'jstree-anchor';
+        _temp1.setAttribute('tabindex', '-1');
+        _temp1.setAttribute('role', 'treeitem');
+        _temp2 = document.createElement('I');
+        _temp2.className = 'jstree-icon jstree-themeicon';
+        _temp2.setAttribute('role', 'presentation');
+        _temp1.appendChild(_temp2);
+        _node.appendChild(_temp1);
+        _temp1 = _temp2 = null;
+        return _node;
+    };
+
     // Select jstree and then cascade handle events and setup the tree.
     var jstree = $("#dataTree")
     .on('changed.jstree', function (e, data) {
@@ -206,7 +229,7 @@ $(function() {
                                 inst.select_node(node);
                                 inst.open_node(node);
                                 // we also focus the node, to scroll to it and setup hotkey events
-                                $("#" + node.id).children('.jstree-anchor').focus();
+                                $("#" + node.id).children('.jstree-anchor').trigger('focus');
                                 // Handle multiple selection. E.g. extra images in same dataset
                                 for(var n=1; n<WEBCLIENT.initially_select.length; n++) {
                                     node = inst.locate_node(WEBCLIENT.initially_select[n], parentNode)[0];
@@ -354,7 +377,7 @@ $(function() {
         // Re-enable the refresh button as it may have been disabled to
         // prevent race conditions occurring from multiple clicks in quick
         // succession.
-        $('#refreshButton').removeAttr("disabled");
+        $('#refreshButton').prop("disabled", false);
     })
 
     // Setup jstree
@@ -958,6 +981,17 @@ $(function() {
                         OME.handleChgrp(WEBCLIENT.URLS.webindex, WEBCLIENT.URLS.static_webclient);
                     }
                 };
+
+                config["chown"] = {
+                    // title support needs js-tree patch: 5317ad21c
+                    "title": "Only Admins or Group Owners can change ownership",
+                    "label" : "Change Owner...",
+                    "_disabled": true,
+                    "icon"  : WEBCLIENT.URLS.static_webclient + 'image/icon_basic_user_16.png',
+                    "action": function() {
+                        OME.handleChown(WEBCLIENT.URLS.webindex, WEBCLIENT.URLS.static_webclient);
+                    }
+                };
                 
                 config["share"] = {
                     "label" : "Create share",
@@ -1031,8 +1065,9 @@ $(function() {
                 if (WEBCLIENT.OPEN_WITH.length > 0) {
                     // build a submenu of viewers...
                     var viewers = WEBCLIENT.OPEN_WITH.map(function(v){
+                        let label = v.label || v.id;
                         return {
-                            "label": v.label || v.id,
+                            "label": label,
                             "action": function() {
                                 var inst = $.jstree.reference('#dataTree'),
                                     sel = inst.get_selected(true),
@@ -1064,6 +1099,9 @@ $(function() {
                                 window.open(url, '_blank');
                             },
                             "_disabled": function() {
+                                if (!OME.openWithDisabledByAjax) {
+                                    OME.openWithDisabledByAjax = {};
+                                }
                                 var sel = $.jstree.reference('#dataTree').get_selected(true),
                                     // selType = 'image' or 'images' or 'dataset'
                                     selType = sel.reduce(function(prev, s){
@@ -1079,7 +1117,35 @@ $(function() {
                                                  'type': s.type};
                                         return o;
                                     });
-                                    enabled = v.isEnabled(selJson);
+                                    let selKey = selJson.map(s => s.type + '-' + s.id).join(',');
+                                    if (OME.openWithDisabledByAjax[v.id] && OME.openWithDisabledByAjax[v.id][selKey] !== undefined) {
+                                        return OME.openWithDisabledByAjax[v.id][selKey];
+                                    }
+                                    // The callback function allows openwith to do an async call to establish enabled state
+                                    // and then call the callback with 'enable' true/false 
+                                    enabled = v.isEnabled(selJson, function(enable) {
+                                        // If disabled, we change appearance of the menu-item (below), but we also need to make sure it
+                                        // is actually disabled. We can do this by returning 'true' from the _disabled function next
+                                        // time it is called for this open-with option with the same selected items. Set a disabled flag...
+                                        OME.openWithDisabledByAjax[v.id] = {}
+                                        OME.openWithDisabledByAjax[v.id][selKey] = !enable;
+                                        // the openwith script can use this callback to update the enabled state, eg. after an async ajax call.
+                                        // have to find the correct menu-item and disable
+                                        $(".jstree-contextmenu").find('li').each(function () {
+                                            let $li = $(this);
+                                            let itemText = $li.text();
+                                            // Find the child <li> with label
+                                            if (itemText.trim() === label) {
+                                                if (enable) {
+                                                    $li.removeClass('vakata-contextmenu-disabled');
+                                                } else {
+                                                    $li.addClass('vakata-contextmenu-disabled');
+                                                }
+                                            }
+                                        });
+
+                                    });
+                                    // OME.openWithDisabledByAjax[v.id] = !enabled;
                                     return !enabled;
                                 }
                                 // ...Otherwise if supported_objects list is configured...
@@ -1108,8 +1174,8 @@ $(function() {
 
                 var userId = WEBCLIENT.active_user.id,
                     // admin may be viewing a Group that they are not a member of
-                    memberOfGroup = WEBCLIENT.eventContext.memberOfGroups.indexOf(WEBCLIENT.active_group_id) > -1,
-                    writeOwned = WEBCLIENT.eventContext.adminPrivileges.indexOf("WriteOwned") > -1,
+                    memberOfGroup = WEBCLIENT.member_of_groups.indexOf(WEBCLIENT.active_group_id) > -1,
+                    writeOwned = WEBCLIENT.current_admin_privileges.indexOf("WriteOwned") > -1,
                     allMembers = userId === -1,
                     // canCreate if looking at your own data or 'All Members' OR User's data && writeOwned
                     canCreate = (userId === WEBCLIENT.USER.id || (allMembers && memberOfGroup) ||
@@ -1148,6 +1214,13 @@ $(function() {
                     if (["acquisition", "tag", "tagset"].indexOf(node.type) === -1) {
                         config["chgrp"]["_disabled"] = false;
                     }
+                }
+
+                // Can chown if Admin (with 'Chown' privilege) or Group owner
+                if (WEBCLIENT.current_admin_privileges.indexOf("Chown") > -1 || 
+                    WEBCLIENT.leader_of_groups.indexOf(WEBCLIENT.active_group_id) > -1) {
+                        config["chown"]["title"] = false;
+                        config["chown"]["_disabled"] = false;
                 }
 
                 if (canLink) {

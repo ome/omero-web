@@ -55,12 +55,12 @@
                 }
 
                 // Choose group, then pick a user from that group
-                $("#searchGroup").change(function() {
+                $("#searchGroup").on('change', function() {
                     var gid = $(this).val();
                     selectUsersFromGroup(gid);
                 });
 
-                var gid = -1;
+                var gid = {{ search_default_group|default:-1 }};
                 $("#searchGroup").val(gid);
                 selectUsersFromGroup(gid);
 
@@ -108,7 +108,7 @@
                     }
                 });
                 // removing dates - clear fields and reset ranges.
-                $(".clearDate").click(function() {
+                $(".clearDate").on('click', function() {
                     $(this).hide().prev("input").val("");
                     var end = $( "#enddateinput" ).datepicker( "getDate" ) || 0;
                     $( "#startdateinput" ).datepicker( "option", "maxDate", end);
@@ -143,7 +143,7 @@
                             q = $("input[name='query']").val();
                         }
                         // check we have some search query...
-                        q = $.trim(q);
+                        q = q.trim();
                         if (q.length <= 0) {
                             OME.alert_dialog("Search must contain some text.");
                             return false;
@@ -190,19 +190,19 @@
 
                 {% if init.query %}
                     // query field is already populated with init.query
-                    $("#searching_form").submit();
+                    $("#searching_form").trigger('submit');
                 {% endif %}
 
 
                 OME.table_selection_changed();     // clear selection (hides acquisition & preview tabs)
 
-                $("#showSearchHints").click(function(event){
+                $("#showSearchHints").on('click', function(event){
                     event.preventDefault();
                     $("#searchHints").toggle();
                     return false;
                 });
 
-                $("#show_annotations").click(function(){
+                $("#show_annotations").on('click', function(){
                     $("#search_ann_type").toggleClass("hide");
 
                     if ($(this).is(':checked')) {
@@ -367,7 +367,7 @@
             <select name="ownedBy" id="searchByGroupMember--1">
                 <option value="-1">All Users</option>
                 {% for user in myColleagues %}}
-                    <option value="{{ user.id }}" {% ifequal user.id ome.user.id %}selected="selected"{% endifequal %}>
+                    <option value="{{ user.id }}" {% ifequal user.id search_default_user|default:ome.user.id %}selected="selected"{% endifequal %}>
                         {{ user.getFullName|truncateafter:"50" }}
                     </option>
                 {% endfor %}
@@ -378,12 +378,12 @@
             <select name="ownedBy" id="searchByGroupMember-{{ grp.id }}">
                 <option value="-1">All Members</option>
                 {% for user in grp.leaders %}}
-                    <option value="{{ user.id }}" {% ifequal user.id ome.user.id %}selected="selected"{% endifequal %}>
+                    <option value="{{ user.id }}" {% ifequal user.id search_default_user|default:ome.user.id %}selected="selected"{% endifequal %}>
                         {{ user.getFullName|truncateafter:"50" }}
                     </option>
                 {% endfor %}
                 {% for user in grp.colleagues %}}
-                    <option value="{{ user.id }}" {% ifequal user.id ome.user.id %}selected="selected"{% endifequal %}>
+                    <option value="{{ user.id }}" {% ifequal user.id search_default_user|default:ome.user.id %}selected="selected"{% endifequal %}>
                         {{ user.getFullName|truncateafter:"50" }}
                     </option>
                 {% endfor %}

@@ -31,7 +31,7 @@
             DROPDOWN_HEIGHT = $(document).height()-110;
 
         // Button toggles visibility of group chooser dropdown
-        $("#groupsUsersButton").click(function(event){
+        $("#groupsUsersButton").on('click', function(event){
             event.preventDefault();
 
             if ($listViewPort.is(":visible")) {
@@ -66,7 +66,7 @@
         });
 
         // Any clicks that bubble up to body hide list...
-        $('body').click(function(event) {
+        $('body').on('click', function(event) {
             $listViewPort.hide();
         });
 

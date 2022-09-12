@@ -40,20 +40,20 @@
         
         this.each( function( ) {
             var self = this;
-            $(this).bind( opt.edit_event, function( e ) {
+            $(this).on( opt.edit_event, function( e ) {
                 _editMode(this);
             } );
         } ); // this.each
 
         // Private functions
         var _editMode = function( self ) {
-            $( self ).unbind( opt.edit_event );
+            $( self ).off( opt.edit_event );
 
             $.ajax({
                 type: "GET",
                 url: form_url,
                 success: function(html) {
-                    html = $.trim(html);
+                    html = html.trim();
                     $( self ).parent().fadeOut('fast', function(){                    
                         
                         $( self ).parent().hide();
@@ -67,7 +67,7 @@
                         .appendTo($("#form-"+field_id));            
                         
                         $('<input id="cancel-'+field_id+'" type="button" value="Cancel" />')
-                        .bind( "click", function( e ) {
+                        .on( "click", function( e ) {
                             _cancelEdit( self );
                         } )
                         .appendTo($("#form-"+field_id));
@@ -127,7 +127,7 @@
                                         }); // this.each
                                         
                                         $("#form-"+field_id).remove( ).fadeOut( "fast" );
-                                        $( self ).bind( opt.edit_event, function( e ) {
+                                        $( self ).on( opt.edit_event, function( e ) {
                                             _editMode( self );
                                         } );
                                         $( self ).parent().show().fadeIn( "fast" );
@@ -144,7 +144,7 @@
                                 return true;
                             },
                             error: function(responce) {
-                                $( self ).bind( opt.edit_event, function( e ) {
+                                $( self ).on( opt.edit_event, function( e ) {
                                     _editMode( self );
                                 } );
                             }
@@ -153,7 +153,7 @@
                     });
                 },
                 error: function(responce) {
-                    $( self ).bind( opt.edit_event, function( e ) {
+                    $( self ).on( opt.edit_event, function( e ) {
                         _editMode( self );
                     } );
                 }
@@ -163,7 +163,7 @@
         
         var _cancelEdit = function( self ) {
             $("#form-"+field_id).remove().fadeOut( "fast" );
-            $( self ).bind( opt.edit_event, function( e ) {
+            $( self ).on( opt.edit_event, function( e ) {
                 _editMode( self );
             } );
             $( self ).parent().show().fadeIn( "fast" );        

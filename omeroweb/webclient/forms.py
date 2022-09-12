@@ -30,14 +30,13 @@ import logging
 from django.conf import settings
 from django import forms
 from django.forms.formsets import formset_factory
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from omeroweb.custom_forms import NonASCIIForm
 from .custom_forms import MetadataModelChoiceField
 from .custom_forms import AnnotationModelMultipleChoiceField
 from .custom_forms import ObjectModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import ExperimenterModelMultipleChoiceField
-from omeroweb.webadmin.custom_forms import GroupModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import GroupModelChoiceField
 from omeroweb.webclient.webclient_utils import formatPercentFraction
 
@@ -89,7 +88,7 @@ class ShareForm(NonASCIIForm):
                 queryset=kwargs["initial"]["experimenters"],
                 widget=forms.SelectMultiple(attrs={"size": 28}),
             )
-        self.fields.keyOrder = [
+        self.field_order = [
             "message",
             "expiration",
             "enable",
@@ -125,23 +124,6 @@ class ShareForm(NonASCIIForm):
             if time.mktime(date.timetuple()) <= time.time():
                 raise forms.ValidationError("Expiry date must be in the future.")
         return self.cleaned_data["expiration"]
-
-
-class BasketShareForm(ShareForm):
-    def __init__(self, *args, **kwargs):
-        super(BasketShareForm, self).__init__(*args, **kwargs)
-
-        try:
-            self.fields["image"] = GroupModelMultipleChoiceField(
-                queryset=kwargs["initial"]["images"],
-                initial=kwargs["initial"]["selected"],
-                widget=forms.SelectMultiple(attrs={"size": 10}),
-            )
-        except Exception:
-            self.fields["image"] = GroupModelMultipleChoiceField(
-                queryset=kwargs["initial"]["images"],
-                widget=forms.SelectMultiple(attrs={"size": 10}),
-            )
 
 
 class ContainerForm(NonASCIIForm):
@@ -337,7 +319,7 @@ class TagsAnnotationForm(BaseAnnotationForm):
 
 
 class NewTagsAnnotationForm(forms.Form):
-    """ Helper form for new tags """
+    """Helper form for new tags"""
 
     tag = forms.CharField(required=True, widget=forms.HiddenInput)
     description = forms.CharField(required=False, widget=forms.HiddenInput)
@@ -400,7 +382,7 @@ class ActiveGroupForm(forms.Form):
                     }
                 ),
             )
-        self.fields.keyOrder = ["active_group"]
+        self.field_order = ["active_group"]
 
 
 class WellIndexForm(forms.Form):
@@ -416,7 +398,7 @@ class WellIndexForm(forms.Form):
                 }
             ),
         )
-        self.fields.keyOrder = ["index"]
+        self.field_order = ["index"]
 
 
 ###############################
@@ -823,7 +805,7 @@ class MetadataChannelForm(forms.Form):
             )
             set_widget_attrs(self.fields["pockelCellSetting"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "name",
             "excitationWave",
             "emissionWave",
@@ -1005,7 +987,7 @@ class MetadataDichroicForm(forms.Form):
             )
             set_widget_attrs(self.fields["lotNumber"])
 
-        self.fields.keyOrder = ["model", "manufacturer", "serialNumber", "lotNumber"]
+        self.field_order = ["model", "manufacturer", "serialNumber", "lotNumber"]
 
 
 class MetadataMicroscopeForm(forms.Form):
@@ -1213,7 +1195,7 @@ class MetadataMicroscopeForm(forms.Form):
             )
             set_widget_attrs(self.fields["type"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -1689,7 +1671,7 @@ class MetadataObjectiveForm(forms.Form):
             )
             set_widget_attrs(self.fields["iris"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -1848,7 +1830,7 @@ class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
             )
             set_widget_attrs(self.fields["refractiveIndex"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -2330,7 +2312,7 @@ class MetadataFilterForm(forms.Form):
             )
             set_widget_attrs(self.fields["transmittance"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -2815,7 +2797,7 @@ class MetadataDetectorForm(forms.Form):
             )
             set_widget_attrs(self.fields["binning"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -3418,7 +3400,7 @@ class MetadataLightSourceForm(forms.Form):
             )
         set_widget_attrs(self.fields["attenuation"])
 
-        self.fields.keyOrder = [
+        self.field_order = [
             "model",
             "manufacturer",
             "serialNumber",
@@ -3607,7 +3589,7 @@ class MetadataEnvironmentForm(forms.Form):
             )
             set_widget_attrs(self.fields["co2percent"])
 
-        self.fields.keyOrder = ["airPressure", "co2percent", "humidity", "temperature"]
+        self.field_order = ["airPressure", "co2percent", "humidity", "temperature"]
 
 
 class MetadataStageLabelForm(forms.Form):
@@ -3742,4 +3724,4 @@ class MetadataStageLabelForm(forms.Form):
             )
             set_widget_attrs(self.fields["positionz"])
 
-        self.fields.keyOrder = ["positionx", "positiony", "positionz"]
+        self.field_order = ["positionx", "positiony", "positionz"]

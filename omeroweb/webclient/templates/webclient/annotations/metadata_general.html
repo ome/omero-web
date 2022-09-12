@@ -46,7 +46,7 @@
                 
                 // Most panes are expanded and collapsed in the Pane classes above.
                 // Manually add that behaviour for Details
-                $('.can-collapse[data-name="details"]').click(function(){
+                $('.can-collapse[data-name="details"]').on('click', function(){
                     var $this = $(this),
                         expanded = $this.hasClass('closed');
                     $this.toggleClass('closed')
@@ -83,7 +83,7 @@
                 
                 {% if manager.image %}
                 // handle loading of image hierarchy by ajax
-                $("#hierarchy-link").click(function(e){
+                $("#hierarchy-link").on('click', function(e){
                     var hierarchy_url = $(this).attr('href');
                     $("#hierarchy-spinner").show();  // waiting...
                     $("#hierarchy-pane").load(hierarchy_url);
@@ -93,7 +93,7 @@
                 {% endif %}
 
                 // show a link to the current object
-                $("#show_link_btn").click(function(){
+                $("#show_link_btn").on('click', function(){
                     $("#link_info_popup").show();
                     var lnk = location.protocol + "//" + location.host + "{{ webclient_path }}";
                     var obj_type = "{{manager.obj_type}}";
@@ -106,7 +106,7 @@
                     link_input.get(0).focus();
                     link_input.get(0).select();
                 });
-                $("#link_info_popup img").click(function(){
+                $("#link_info_popup img").on('click', function(){
                     $("#link_info_popup").hide();
                 });
 
@@ -132,7 +132,7 @@
                     return false;
                 });
 
-                $("#show_fs_files_btn").click(function(){
+                $("#show_fs_files_btn").on('click', function(){
 
                     // If we're already showing Image file info, toggle hide
                     if ($toolbar_info_panel.is(":visible") && 
@@ -149,11 +149,14 @@
                                 var repo = data.repo,
                                     client = data.client,
                                     html = "";
-                                $panel_title.html(repo.length + " Image file" + (repo.length>1 ? "s:" : ":"));
+                                $panel_title.html("Fileset Info");
+
+                                html += `<p>Fileset ID: <strong>${data.fileset.id}</strong></p>`
+
+                                html += `<p>File count: <strong>${repo.length}</strong></p>`
 
                                 if (importTransfer) {
-                                    html += "<p>Imported with <strong>--transfer="+ importTransfer;
-                                    html += "</strong></p><hr/>";
+                                    html += "<p>Imported with: <strong>--transfer="+ importTransfer + "</strong></p>";
                                 }
 
                                 html += "<p>Imported from:</p>";
@@ -186,7 +189,7 @@
                 {% endif %}
                 
                 // show Image hierarchy Project/Dataset tree.
-                $("#show_image_hierarchy").click(function(){
+                $("#show_image_hierarchy").on('click', function(){
 
                     // If we're already showing Image file info, toggle hide
                     if ($toolbar_info_panel.is(":visible") && 
@@ -208,12 +211,12 @@
                 });
 
 
-                $("#toolbar_info_panel img").click(function(){
+                $("#toolbar_info_panel img").on('click', function(){
                     $("#toolbar_info_panel").hide();
                 });
 
                 // Handle Download actions
-                $("#create-ometiff").click(function(e){
+                $("#create-ometiff").on('click', function(e){
                     
                     var url = $(this).attr('href');
                     $("#download_dropdown ul").css('visibility', 'hidden');// hide dropdown menu
@@ -259,7 +262,7 @@
                 });
 
                 // Filtering annotations added by 'me' or 'others' or 'all'
-                $("#annotationFilter").change(function(){
+                $("#annotationFilter").on('change', function(){
                     OME.filterAnnotationsAddedBy();
                 });
 
@@ -296,13 +299,13 @@
                     $chNameForm.hide();
                 }
                 // Workflow starts by displaying the form
-                $("#editChannelNames").click(function(){
+                $("#editChannelNames").on('click', function(){
                     $("#channel_names_display").hide();
                     $("#editChannelNames").hide();
                     $chNameForm.show();
                 });
                 // Handling of all form buttons. NB: save & apply_confirm buttons submit
-                $chNameForm.find("button").click(function(event){
+                $chNameForm.find("button").on('click', function(event){
                     var name = $(this).attr('name');
                     if (name === "apply") {
                         // Ask users to confirm:
@@ -343,31 +346,60 @@
                 // loading just the row we need for the current well.
                 {% if manager.well or manager.image %}
                     {% if manager.well %}
-                    var screenQuery = "{% url 'webgateway_object_table_query' 'Screen.plateLinks.child.wells' manager.well.id %}";
-                    var plateQuery = "{% url 'webgateway_object_table_query' 'Plate.wells' manager.well.id %}";
+                    var screenQuery = "{% url 'webgateway_annotations' 'Screen.plateLinks.child.wells' manager.well.id %}";
+                    var plateQuery = "{% url 'webgateway_annotations' 'Plate.wells' manager.well.id %}";
                     var query = "Well-{{ manager.well.id }}";
                     {% elif manager.image %}
-                    var screenQuery = "{% url 'webgateway_object_table_query' 'Screen.plateLinks.child.wells.wellSamples.image' manager.image.id %}";
-                    var plateQuery = "{% url 'webgateway_object_table_query' 'Plate.wells.wellSamples.image' manager.image.id %}";
-                    var projectQuery = "{% url 'webgateway_object_table_query' 'Project.datasetLinks.child.imageLinks.child' manager.image.id %}";
-                    var datasetQuery = "{% url 'webgateway_object_table_query' 'Dataset.imageLinks.child' manager.image.id %}";
+                    var screenQuery = "{% url 'webgateway_annotations' 'Screen.plateLinks.child.wells.wellSamples.image' manager.image.id %}";
+                    var plateQuery = "{% url 'webgateway_annotations' 'Plate.wells.wellSamples.image' manager.image.id %}";
+                    var projectQuery = "{% url 'webgateway_annotations' 'Project.datasetLinks.child.imageLinks.child' manager.image.id %}";
+                    var datasetQuery = "{% url 'webgateway_annotations' 'Dataset.imageLinks.child' manager.image.id %}";
                     var query = "Image-{{ manager.image.id }}";
-                    var query2 = "image-{{ manager.image.id }}";
                     {% endif %}
 
-                    var showBulkAnnTooltip = function(data) {
-                        if (!data || !data.id) return;
-                        var bulkAnnTooltip = "<span class='tooltip_html' style='display:none'>" +
-                            "Data from tables file:<br />" +
-                            "<b>File ID:</b> " + data.id + "<br />" +
-                            "<b>Owner:</b> " + data.owner + " <br />" +
-                            "<b>Annotation ID:</b> " + data.annId + "<br />" +
-                            "<b>Linked to:</b> " + data.parentType + " " + data.parentId + "<br />" +
-                            "<b>Linked by:</b> " + data.addedBy + " <br />" +
-                            "<b>On:</b> " + OME.formatDate(data.addedOn) + "</span>";
-                        $("#bulk-annotations").append(bulkAnnTooltip);
-                        $("#bulk-annotations").parent().tooltip({
-                                items: '.bulk_annotation',
+                    async function loadTablesOnParents() {
+                        let urls = [screenQuery, plateQuery];
+                            {% if manager.image %}
+                                urls = urls.concat([projectQuery, datasetQuery]);
+                            {% endif %}
+                        let promises = urls.map(url => fetch(url).then(rsp => rsp.json()));
+                        let results = await Promise.all(promises);
+
+                        var compareNameDate = function (a, b) {
+                            if (a.name == b.name) {
+                                return a.addedOn > b.addedOn ? 1 : -1;
+                            }
+                            return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
+                        };
+
+                        // Show list of tables, allow user to expand...
+                        let html = results.flatMap(tables => {
+                            tables.data.sort(compareNameDate);
+                            return tables.data.map(ann => `
+                                <ul class="lnfiles">
+                                    <li class="can-collapse closed" data-tableid="${ann.file}">
+                                        <a class="tooltip" href="#">${ann.name.escapeHTML()}
+                                            <span class="tooltip_html" style="display: none">
+                                                <b>Annotation ID:</b> ${ann.id}<br>
+                                                <b>Owner:</b> ${ann.owner.escapeHTML()}<br>
+                                                <b>Linked by:</b> ${ann.addedBy.escapeHTML()}<br>
+                                                <b>On</b> ${OME.formatDate(ann.addedOn)}</br>
+                                                <b>Namespace:</b> ${(ann.ns || "").escapeHTML()}<br>
+                                                <b>File ID:</b> ${ann.file}
+                                            </span>
+                                        </a>
+                                        <span>(linked to
+                                            <a title="Open ${ann.parentType} in new tab" target="_blank" href="${WEBCLIENT.URLS.webindex}?show=${ann.parentType.toLowerCase()}-${ann.parentId}">
+                                                ${ann.parentType}: ${ann.parentId}</a>)
+                                        </span>
+                                    </li>
+                                </ul>
+                                <table id="bulk_annotations_table_${ann.file}" style="display: none; margin: 10px"></table>
+                                `);
+                        });
+                        $("#bulk_annotations_list").html(html.join("\n"));
+                        $("#bulk_annotations_list").tooltip({
+                                items: 'li a.tooltip',
                                 content: function() {
                                     return $("span.tooltip_html", this).html();
                                 },
@@ -375,10 +407,14 @@
                                 show: false,
                                 hide: false
                             });
+                        // If only a single table was found - expand it automatically:
+                        if (html.length == 1) {
+                            $("#bulk_annotations_list li").click();
+                        }
                     }
 
                     // If user opens tables tab, also load tables
-                    $('.can-collapse.closed[data-name="tables"]').click(function(){
+                    $('.can-collapse.closed[data-name="tables"]').on('click', function(){
                         var $header = $(this),
                             $body = $header.next();
 
@@ -388,29 +424,8 @@
                         var expanded = !$header.hasClass('closed');
                         OME.setPaneExpanded('tables', expanded);
 
-                        if (expanded && $("#bulk_annotations_table").is(":empty")) {
-                            loadBulkAnnotations(screenQuery, query, showBulkAnnTooltip);
-                            loadBulkAnnotations(plateQuery, query, showBulkAnnTooltip);
-                            {% if manager.image %}
-                                // Try query1 and query2 in *series* (not at the same time on same OMERO.table)
-                                // to avoid the table.close() causing errors if in parallel
-                                loadBulkAnnotations(projectQuery, query, function(data) {
-                                    if (data && data.id) {
-                                        showBulkAnnTooltip(data);
-                                    } else {
-                                        // If query1 didn't work, try query2 on the same OMERO.table
-                                        loadBulkAnnotations(projectQuery, query2, showBulkAnnTooltip);
-                                    }
-                                });
-                                loadBulkAnnotations(datasetQuery, query, function(data) {
-                                    if (data && data.id) {
-                                        showBulkAnnTooltip(data);
-                                    } else {
-                                        // If query1 didn't work, try query2 on the same OMERO.table
-                                        loadBulkAnnotations(datasetQuery, query2, showBulkAnnTooltip);
-                                    }
-                                });
-                            {% endif %}
+                        if (expanded && $("#bulk_annotations_list").is(":empty")) {
+                            loadTablesOnParents();
                         }
                     });
 
@@ -419,31 +434,46 @@
                         $('.can-collapse.closed[data-name="tables"]')
                             .toggleClass('closed')
                             .next().slideToggle();
-                        if ($("#bulk_annotations_table").is(":empty")) {
-                            loadBulkAnnotations(screenQuery, query, showBulkAnnTooltip);
-                            loadBulkAnnotations(plateQuery, query, showBulkAnnTooltip);
-                            {% if manager.image %}
-                                loadBulkAnnotations(projectQuery, query, function(data) {
-                                    if (data && data.id) {
-                                        showBulkAnnTooltip(data);
-                                    } else {
-                                        // If query1 didn't work, try query2 on the same OMERO.table
-                                        loadBulkAnnotations(projectQuery, query2, showBulkAnnTooltip);
-                                    }
-                                });
-                                loadBulkAnnotations(datasetQuery, query, function(data) {
-                                    if (data && data.id) {
-                                        showBulkAnnTooltip(data);
-                                    } else {
-                                        // If query1 didn't work, try query2 on the same OMERO.table
-                                        loadBulkAnnotations(datasetQuery, query2, showBulkAnnTooltip);
-                                    }
-                                });
-                            {% endif %}
+                        if ($("#bulk_annotations_list").is(":empty")) {
+                            loadTablesOnParents();
                         }
                     }
 
+                    // Handle clicking on a table: load data for this Image or Well
+                    $("#bulk_annotations_list").on("click", "li", function (event) {
+                        // toggle collapse/expand and show/hide table
+                        let $li = $(this);
+                        $li.toggleClass('closed');
+                        let tableId = $li.data("tableid");
+                        let $table = $(`#bulk_annotations_table_${tableId}`);
+                        $table.toggle();
+
+                        // Don't need to load if table populated already
+                        if (!$table.is(":empty")) return;
+                        let url = `{% url 'webgateway' %}table/${tableId}/query/?query=${query}`;
+                        $.getJSON(url, function(result) {
+                            if (result.data && result.data.rows) {
+                                var html = result.data.columns.map(function (col, colIdx) {
+                                    var label = col.escapeHTML();
+                                    var values = result.data.rows.map(function (row) {
+                                        return ("" + row[colIdx]).escapeHTML();
+                                    });
+                                    values = values.join('<br />');
+                                    var oddEvenClass = col % 2 == 1 ? 'odd' : 'even';
+                                    return '<tr><td class="title ' + oddEvenClass + '">' + label + ':&nbsp;</td><td>' + values + '</td></tr>';
+                                }).join("");
+                                $table.html(html);
+                            }
+                        });
+                    });
+
                 {% endif %}
+
+
+                $('[data-isodate]').each(function() {
+                    $(this).text(OME.formatDate($(this).data('isodate')));
+                });
+
             });
             
     </script>
@@ -519,8 +549,8 @@
                 <table>
                     <tr>
                         <th>Creation Date:</th>
-                        <td id='creation_date'>{{ manager.dataset.getDate|date:"Y-m-d H:i:s" }}</td>
-                    </tr>                    
+                        <td id='creation_date' data-isodate='{{ manager.dataset.getDate|date:"r" }}'></td>
+                    </tr>
                 </table>
                 </div>
             {% else %}
@@ -546,7 +576,7 @@
                     <table>
                         <tr>
                             <th>Creation Date:</th>
-                            <td id='creation_date'>{{ manager.project.getDate|date:"Y-m-d H:i:s" }}</td>
+                            <td id='creation_date' data-isodate='{{ manager.project.getDate|date:"r" }}'></td>
                         </tr>
                     </table>
                     </div>
@@ -587,15 +617,15 @@
                 <table>
                     <tr>
                         <th>Creation Date:</th>
-                        <td id='creation_date'>{{ manager.acquisition.getDate|date:"Y-m-d H:i:s" }}</td>
+                        <td id='creation_date' data-isodate='{{ manager.acquisition.getDate|date:"r" }}'></td>
                     </tr>
                     <tr>
                         <th>Start Time:</th>
-                        <td>{{ manager.acquisition.getStartTime|date:"Y-m-d H:i:s" }}</td>
+                        <td data-isodate='{{ manager.acquisition.getStartTime|date:"r" }}'></td>
                     </tr>
                     <tr>
                         <th>End Time:</th>
-                        <td>{{ manager.acquisition.getEndTime|date:"Y-m-d H:i:s" }}</td>
+                        <td data-isodate='{{ manager.acquisition.getEndTime|date:"r" }}'></td>
                     </tr>
                 </table>
                 </div>
@@ -624,7 +654,7 @@
                     <table>
                         <tr>
                             <th>Creation Date:</th>
-                            <td id='creation_date'>{{ manager.plate.getDate|date:"Y-m-d H:i:s" }}</td>
+                            <td id='creation_date' data-isodate='{{ manager.plate.getDate|date:"r" }}'></td>
                         </tr>
                         <!--{% comment %}
                         <tr>
@@ -658,8 +688,8 @@
                         <table>
                             <tr>
                                 <th>Creation Date:</th>
-                                <td id='creation_date'>{{ manager.screen.getDate|date:"Y-m-d H:i:s" }}</td>
-                            </tr>                    
+                                <td id='creation_date' data-isodate='{{ manager.screen.getDate|date:"r" }}'></td>
+                            </tr>
                             <tr>
                                 <th>Plate Count:</th>
                                 <td id='child_count'>{{ manager.screen.countChildren }} {% plural manager.screen.countChildren 'plate' 'plates' %}</td>
@@ -726,7 +756,7 @@
                     </tr>
                     <tr>
                         <th>Creation Date:</th>
-                        <td id='creation_date'>{{ manager.tag.getDate|date:"Y-m-d H:i:s" }}</td>
+                        <td id='creation_date' data-isodate='{{ manager.tag.getDate|date:"r" }}'></td>
                     </tr>
                     <tr>
                         <th>Image Count:</th>

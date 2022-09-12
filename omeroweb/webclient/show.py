@@ -28,7 +28,7 @@ import omero
 import re
 
 from omero.rtypes import rint, rlong
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from copy import deepcopy
 from django.conf import settings
 
@@ -184,7 +184,7 @@ class Show(object):
         n = 0
         column = 0
         for character in reversed(a):
-            column += (ord(character) - ord("A") + 1) * (26 ** n)
+            column += (ord(character) - ord("A") + 1) * (26**n)
             n += 1
 
         # Convert 1-index to zero-index

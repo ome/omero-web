@@ -33,11 +33,11 @@ from django.http import HttpResponseForbidden, StreamingHttpResponse
 from django.conf import settings
 from django.utils.http import urlencode
 from functools import update_wrapper
-from django.core.urlresolvers import reverse, resolve, NoReverseMatch
+from django.urls import reverse, resolve, NoReverseMatch
 from django.core.cache import cache
 
 from omeroweb.utils import reverse_with_params
-from omeroweb.connector import Connector
+from omeroweb.connector import Connector, Server
 from omero.gateway.utils import propertiesToDict
 from omero import ApiUsageException
 
@@ -416,8 +416,14 @@ class login_required(object):
                 try:
                     server_id = request["server"]
                 except Exception:
-                    logger.debug("No Server ID available.")
-                    return None
+                    # If only 1 server, use it
+                    servers = list(Server)
+                    if len(servers) == 1:
+                        server_id = servers[0].id
+                        logger.debug("No Server ID available: using %s" % server_id)
+                    else:
+                        logger.debug("No Server ID available.")
+                        return None
 
         # If we have an OMERO session key in our request variables attempt
         # to make a connection based on those credentials.
@@ -581,11 +587,12 @@ class render_response(object):
             return super(render_response, self).getattr(name)
 
     def prepare_context(self, request, context, *args, **kwargs):
-        """ Hook for adding additional data to the context dict """
-        pass
+        """Hook for adding additional data to the context dict"""
+        context["html"] = context.get("html", {})
+        context["html"]["meta_referrer"] = settings.HTML_META_REFERRER
 
     def __call__(ctx, f):
-        """ Here we wrap the view method f and return the wrapped method """
+        """Here we wrap the view method f and return the wrapped method"""
 
         def wrapper(request, *args, **kwargs):
             """

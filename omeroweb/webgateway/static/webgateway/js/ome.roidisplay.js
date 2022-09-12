@@ -796,12 +796,12 @@ $.fn.roi_display = function(options) {
                                     var bb = newShape.getBBox();
                                     var textx = bb.x + (bb.width/2);
                                     var texty = bb.y + (bb.height/2);
-                                    var text_string = formatShapeText(shape['textValue'].escapeHTML())
+                                    var text_string = formatShapeText(shape['textValue'])
                                     var txt = paper.text(textx, texty, text_string);    // draw a 'dummy' paragraph to work out it's dimensions
                                     var newY = (texty-txt.getBBox().height/2)+9;
                                     // moving the existing text to newY doesn't seem to work - instead, remove and draw a new one
                                     txt.remove();
-                                    txt = paper.text(textx, newY, formatShapeText(shape['textValue'].escapeHTML()))
+                                    txt = paper.text(textx, newY, formatShapeText(shape['textValue']))
                                                .attr({'cursor':'default', 'fill': shape['strokeColor']}); // this is Insight's behavior
                                     txt_box = txt.getBBox();
                                     var txt_w = txt_box.width*1.3;

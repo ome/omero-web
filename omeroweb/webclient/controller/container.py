@@ -29,6 +29,7 @@ from django.utils.encoding import smart_str
 import logging
 
 from omeroweb.webclient.controller import BaseController
+from omeroweb.webgateway.views import _bulk_file_annotations
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +184,12 @@ class BaseContainer(BaseController):
         if self.file is not None:
             return self.file
 
+    def obj_name(self):
+        if self.well:
+            return self.well.getImage().name
+        obj = self._get_object()
+        return obj is not None and obj.name or None
+
     def obj_id(self):
         obj = self._get_object()
         return obj is not None and obj.id or None
@@ -206,11 +213,11 @@ class BaseContainer(BaseController):
         return obj is not None and obj.canEdit() or None
 
     def getPermsCss(self):
-        """ Shortcut to get permissions flags, E.g. for css """
+        """Shortcut to get permissions flags, E.g. for css"""
         return self._get_object().getPermsCss()
 
     def getNumberOfFields(self):
-        """ Applies to Plates (all fields) or PlateAcquisitions"""
+        """Applies to Plates (all fields) or PlateAcquisitions"""
         if self.plate is not None:
             return self.plate.getNumberOfFields()
         elif self.acquisition:
@@ -218,7 +225,7 @@ class BaseContainer(BaseController):
             return p.getNumberOfFields(self.acquisition.getId())
 
     def getPlateId(self):
-        """ Used by templates that display Plates or PlateAcquisitions """
+        """Used by templates that display Plates or PlateAcquisitions"""
         if self.plate is not None:
             return self.plate.getId()
         elif self.acquisition:
@@ -241,6 +248,31 @@ class BaseContainer(BaseController):
             # e.g. for select different objects in search results
             return None
         return self.conn.getAnnotationCounts(objDict)
+
+    def countTablesOnParents(self):
+        """
+        For Wells or Images, query parents for any OMERO.tables
+        """
+        img_queries = [
+            "Screen.plateLinks.child.wells.wellSamples.image",
+            "Plate.wells.wellSamples.image",
+            "Project.datasetLinks.child.imageLinks.child",
+            "Dataset.imageLinks.child",
+        ]
+        well_queries = ["Screen.plateLinks.child.wells", "Plate.wells"]
+        total = 0
+        if self.image is not None:
+            for query in img_queries:
+                result = _bulk_file_annotations(None, query, self.image.id, self.conn)
+                if "data" in result:
+                    total += len(result["data"])
+        elif self.well is not None:
+            for query in well_queries:
+                result = _bulk_file_annotations(None, query, self.well.id, self.conn)
+                if "data" in result:
+                    total += len(result["data"])
+
+        return total
 
     def canExportAsJpg(self, request, objDict=None):
         """

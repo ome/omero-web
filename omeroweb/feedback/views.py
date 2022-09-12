@@ -37,7 +37,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.http import HttpResponseServerError, HttpResponseNotFound
 from django.views.defaults import page_not_found
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import render
 
 from django.views.debug import get_exception_reporter_filter
@@ -200,8 +200,7 @@ def handler404(request, exception=None):
         "Not Found: %s" % request.path, extra={"status_code": 404, "request": request}
     )
     if request.is_ajax():
-        msg = traceback.format_exception(*sys.exc_info())[-1]
-        return HttpResponseNotFound(msg)
+        return HttpResponseNotFound()
 
     return page_not_found(request, "404.html")
 

@@ -19,16 +19,20 @@
 
 """ Helper functions for views that handle object trees """
 
+import logging
 import time
+import pytz
 import omero
 from builtins import bytes
-from past.utils import old_div
 
 from omero.rtypes import rlong, unwrap, wrap
 from django.conf import settings
 from datetime import datetime
 from copy import deepcopy
 from omero.gateway import _letterGridLabel
+
+
+logger = logging.getLogger(__name__)
 
 
 def unwrap_to_str(rstr):
@@ -504,8 +508,14 @@ def marshal_datasets(
 
 def _marshal_date(time):
     try:
-        d = datetime.fromtimestamp(old_div(time, 1000))
-        return d.isoformat() + "Z"
+        d = datetime.fromtimestamp(time // 1000)
+        try:
+            # Add time-zone awareness
+            tz = pytz.timezone(settings.TIME_ZONE)
+            d = tz.localize(d)
+        except pytz.exceptions.UnknownTimeZoneError:
+            logger.debug("UnknownTimeZoneError: " + settings.TIME_ZONE)
+        return d.isoformat()
     except ValueError:
         return ""
 
@@ -527,10 +537,11 @@ def _marshal_image(
       * details.permissions (dict)
       * fileset_id (rlong)
 
-    May also take a row_pixels (list) if X,Y,Z dimensions are loaded
+    May also take a row_pixels (list) if X,Y,Z,T dimensions are loaded
       * pixels.sizeX (rlong)
       * pixels.sizeY (rlong)
       * pixels.sizeZ (rlong)
+      * pixels.sizeT (rlong)
 
     @param conn OMERO gateway.
     @type conn L{omero.gateway.BlitzGateway}
@@ -549,10 +560,11 @@ def _marshal_image(
     if fileset_id_val is not None:
         image["filesetId"] = fileset_id_val
     if row_pixels:
-        sizeX, sizeY, sizeZ = row_pixels
+        sizeX, sizeY, sizeZ, sizeT = row_pixels
         image["sizeX"] = unwrap(sizeX)
         image["sizeY"] = unwrap(sizeY)
         image["sizeZ"] = unwrap(sizeZ)
+        image["sizeT"] = unwrap(sizeT)
     if share_id is not None:
         image["shareId"] = share_id
     if date is not None:
@@ -647,6 +659,7 @@ def marshal_images(
              ,
              pix.sizeX as sizeX,
              pix.sizeY as sizeY,
+             pix.sizeT as sizeT,
              pix.sizeZ as sizeZ
              """
 
@@ -749,7 +762,7 @@ def marshal_images(
         ]
         kwargs = {"conn": conn, "row": d[0:5]}
         if load_pixels:
-            d = [e["sizeX"], e["sizeY"], e["sizeZ"]]
+            d = [e["sizeX"], e["sizeY"], e["sizeZ"], e["sizeT"]]
             kwargs["row_pixels"] = d
         if date:
             kwargs["acqDate"] = e["acqDate"]
@@ -1492,6 +1505,7 @@ def marshal_tagged(
              ,
              pix.sizeX as sizeX,
              pix.sizeY as sizeY,
+             pix.sizeT as sizeT,
              pix.sizeZ as sizeZ
              """
         extraObjs = " left outer join obj.pixels pix"
@@ -1530,7 +1544,7 @@ def marshal_tagged(
         ]
         kwargs = {}
         if load_pixels:
-            d = [e[0]["sizeX"], e[0]["sizeY"], e[0]["sizeZ"]]
+            d = [e[0]["sizeX"], e[0]["sizeY"], e[0]["sizeZ"], e[0]["sizeT"]]
             kwargs["row_pixels"] = d
         if date:
             kwargs["acqDate"] = e[0]["acqDate"]

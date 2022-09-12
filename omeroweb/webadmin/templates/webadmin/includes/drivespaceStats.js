@@ -18,8 +18,15 @@
                 for(i=0; i<chart_data.length; i++) {
                     rowData = chart_data[i];
                     rowId = typeof rowData.userId != 'undefined' ? rowData.userId : rowData.groupId;
-                    tableRows.push('<tr><td class="link">' + rowData.label + '(id:'+ rowId +')</td>');
-                    tableRows.push('<td class="link">' + rowData.data.filesizeformat() + '</td></tr>');
+                    notMember = ""
+                    if (rowData.hasOwnProperty("memberOfGroup") && !rowData.memberOfGroup) {
+                        notMember = "<span style='color: red'> Not a member of this group</span>"
+                    }
+                    tableRows.push(`
+                        <tr>
+                            <td class="link">${ rowData.label.escapeHTML()} (id:${rowId}) ${ notMember}</td>
+                            <td class="link">${ rowData.data.filesizeformat()}</td>
+                        </tr>`);
                 }
                 
                 $('#drivespaceTable tbody').html(tableRows.join(""));
@@ -50,6 +57,7 @@
 
                     for(i=0; i<data.length; i++) {
                         var slice = data[i];
+                        slice.label = slice.label.escapeHTML();
                         if(i === MAX_SLICES){
                             chart_data.push({label:'Others', data:slice.data});
                         } else if (i > MAX_SLICES) {

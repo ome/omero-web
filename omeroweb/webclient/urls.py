@@ -29,7 +29,7 @@ from django.conf.urls import url
 from omeroweb.webclient import views
 from omeroweb.webgateway import views as webgateway
 from omeroweb.webclient.webclient_gateway import defaultThumbnail
-from django.core.urlresolvers import get_callable
+from django.urls import get_callable
 
 viewer_view = get_callable(settings.VIEWER_VIEW)
 
@@ -38,7 +38,7 @@ urlpatterns = [
     url(r"^$", views.load_template, {"menu": "userdata"}, name="webindex"),
     # render main template
     url(
-        r"^(?P<menu>((?i)userdata|public|history|search|help|usertags))/$",
+        r"^(?P<menu>(userdata|public|history|search|help|usertags))/$",
         views.load_template,
         name="load_template",
     ),
@@ -65,7 +65,7 @@ urlpatterns = [
     # loading data
     url(
         r"^load_plate/(?:(?P<o1_type>"
-        r"((?i)plate|acquisition))/)"
+        r"(plate|acquisition))/)"
         r"?(?:(?P<o1_id>[0-9]+)/)?$",
         views.load_plate,
         name="load_plate",
@@ -77,7 +77,7 @@ urlpatterns = [
     ),  # Query E.g. ?Image=1,2&Dataset=3
     url(
         r"^load_chgrp_target/(?P<group_id>[0-9]+)/"
-        r"(?P<target_type>((?i)project|dataset|screen))/$",
+        r"(?P<target_type>(project|dataset|screen))/$",
         views.load_chgrp_target,
         name="load_chgrp_target",
     ),
@@ -94,7 +94,7 @@ urlpatterns = [
     ),
     # load search
     url(
-        r"^load_searching/(?:(?P<form>((?i)form))/)?$",
+        r"^load_searching/(?:(?P<form>(form))/)?$",
         views.load_searching,
         name="load_searching",
     ),
@@ -112,7 +112,7 @@ urlpatterns = [
         name="load_metadata_acquisition",
     ),
     url(
-        r"^metadata_preview/(?P<c_type>((?i)image|well))/"
+        r"^metadata_preview/(?P<c_type>(image|well))/"
         r"(?P<c_id>[0-9]+)/(?:(?P<share_id>[0-9]+)/)?$",
         views.load_metadata_preview,
         name="load_metadata_preview",
@@ -161,19 +161,19 @@ urlpatterns = [
     ),
     url(
         r"^(?:(?P<share_id>[0-9]+)/)?render_birds_eye_view/"
-        r"(?P<iid>[^/]+)/(?:(?P<size>[^/]+)/)?$",
+        r"(?P<iid>[0-9]+)/(?:(?P<size>[0-9]+)/)?$",
         webgateway.render_birds_eye_view,
         name="web_render_birds_eye_view",
     ),
     url(
-        r"^(?:(?P<share_id>[0-9]+)/)?render_image/(?P<iid>[^/]+)/"
-        r"(?:(?P<z>[^/]+)/)?(?:(?P<t>[^/]+)/)?$",
+        r"^(?:(?P<share_id>[0-9]+)/)?render_image/(?P<iid>[0-9]+)/"
+        r"(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$",
         webgateway.render_image,
         name="web_render_image",
     ),
     url(
         r"^(?:(?P<share_id>[0-9]+)/)?render_image_download/"
-        r"(?P<iid>[^/]+)/(?:(?P<z>[^/]+)/)?(?:(?P<t>[^/]+)/)?$",
+        r"(?P<iid>[0-9]+)/(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$",
         webgateway.render_image,
         {"download": True},
         name="web_render_image_download",
@@ -189,25 +189,25 @@ urlpatterns = [
         name="web_imageData_json",
     ),
     url(
-        r"^(?:(?P<share_id>[0-9]+)/)?render_row_plot/(?P<iid>[^/]+)/"
-        r"(?P<z>[^/]+)/(?P<t>[^/]+)/(?P<y>[^/]+)/(?:(?P<w>[^/]+)/)?$",
+        r"^(?:(?P<share_id>[0-9]+)/)?render_row_plot/(?P<iid>[0-9]+)/"
+        r"(?P<z>[0-9]+)/(?P<t>[0-9]+)/(?P<y>[0-9]+)/(?:(?P<w>[0-9]+)/)?$",
         webgateway.render_row_plot,
         name="web_render_row_plot",
     ),
     url(
-        r"^(?:(?P<share_id>[0-9]+)/)?render_col_plot/(?P<iid>[^/]+)/"
-        r"(?P<z>[^/]+)/(?P<t>[^/]+)/(?P<x>[^/]+)/(?:(?P<w>[^/]+)/)?$",
+        r"^(?:(?P<share_id>[0-9]+)/)?render_col_plot/(?P<iid>[0-9]+)/"
+        r"(?P<z>[0-9]+)/(?P<t>[0-9]+)/(?P<x>[0-9]+)/(?:(?P<w>[0-9]+)/)?$",
         webgateway.render_col_plot,
         name="web_render_col_plot",
     ),
     url(
         r"^(?:(?P<share_id>[0-9]+)/)?render_split_channel/"
-        r"(?P<iid>[^/]+)/(?P<z>[^/]+)/(?P<t>[^/]+)/$",
+        r"(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$",
         webgateway.render_split_channel,
         name="web_render_split_channel",
     ),
     url(
-        r"^saveImgRDef/(?P<iid>[^/]+)/$",
+        r"^saveImgRDef/(?P<iid>[0-9]+)/$",
         webgateway.save_image_rdef_json,
         name="web_save_image_rdef_json",
     ),
@@ -229,9 +229,23 @@ urlpatterns = [
     # Fileset query (for delete or chgrp dialogs) obj-types and ids in REQUEST
     # data
     url(
-        r"^fileset_check/(?P<action>((?i)delete|chgrp))/$",
+        r"^fileset_check/(?P<action>(delete|chgrp))/$",
         views.fileset_check,
         name="fileset_check",
+    ),
+    # chgrp/chown dry run - 'group/owner_id', obj-types and ids in POST data.
+    # E.g. Dataset=1,2,3 & Fileset=4. Multiple datatypes in one chgrp.
+    url(
+        r"^chgrpDryRun/$",
+        views.dryRun,
+        {"action": "chgrp"},
+        name="chgrpDryRun",
+    ),
+    url(
+        r"^chownDryRun/$",
+        views.dryRun,
+        {"action": "chown"},
+        name="chownDryRun",
     ),
     # chgrp dry run - 'group_id', obj-types and ids in POST data.
     # E.g. Dataset=1,2,3 & Fileset=4. Multiple datatypes in one chgrp.
@@ -244,6 +258,8 @@ urlpatterns = [
     ),
     # chgrp - 'group_id', obj-types and ids in POST data
     url(r"^chgrp/$", views.chgrp, name="chgrp"),
+    # chown - 'owner_id', obj-types and ids in POST data
+    url(r"^chown/$", views.chown, name="chown"),
     # annotations
     url(
         r"^action/(?P<action>[a-zA-Z]+)/(?:(?P<o_type>[a-zA-Z]+)/)"
@@ -278,7 +294,7 @@ urlpatterns = [
         name="download_orig_metadata",
     ),
     url(
-        r"^omero_table/(?P<file_id>[0-9]+)/(?:(?P<mtype>((?i)json|csv))/)?$",
+        r"^omero_table/(?P<file_id>[0-9]+)/(?:(?P<mtype>(json|csv))/)?$",
         views.omero_table,
         name="omero_table",
     ),
@@ -306,7 +322,7 @@ urlpatterns = [
         name="download_original_file",
     ),  # for stderr, stdout etc
     url(
-        r"^figure_script/(?P<scriptName>" r"((?i)SplitView|Thumbnail|MakeMovie))/$",
+        r"^figure_script/(?P<scriptName>" r"(SplitView|Thumbnail|MakeMovie))/$",
         views.figure_script,
         name="figure_script",
     ),  # shows a form for running a script

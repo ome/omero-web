@@ -53,12 +53,16 @@ setup(
         # requires Ice (use wheel for faster installs)
         "omero-py>=5.7.0",
         # minimum requirements for `omero web start`
-        "Django>=1.11,<2.0",
-        "django-pipeline==1.6.14",
+        "Django>=3.2,<4.0",
+        "django-pipeline==2.0.7",
+        "django-cors-headers==3.7.0",
         "gunicorn>=19.3",
         "omero-marshal>=0.7.0",
         "Pillow",
     ],
     include_package_data=True,
     tests_require=["pytest"],
+    extras_require={
+        "redis": ["django-redis==5.0.0"],
+    },
 )

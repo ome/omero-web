@@ -36,6 +36,7 @@ import omero.clients
 import tempfile
 import re
 import json
+import pytz
 import random
 import string
 from builtins import str as text
@@ -225,6 +226,14 @@ def check_session_engine(s):
 
 def identity(x):
     return x
+
+
+def check_timezone(s):
+    """
+    Checks that string is a valid time-zone. If not, raise Exception
+    """
+    pytz.timezone(s)
+    return s
 
 
 def str_slash(s):
@@ -508,6 +517,12 @@ CUSTOM_SETTINGS_MAPPINGS = {
         leave_none_unset,
         "The name to use for session cookies",
     ],
+    "omero.web.session_cookie_path": [
+        "SESSION_COOKIE_PATH",
+        None,
+        leave_none_unset,
+        "The path to use for session cookies",
+    ],
     "omero.web.session_cookie_secure": [
         "SESSION_COOKIE_SECURE",
         "false",
@@ -676,10 +691,17 @@ CUSTOM_SETTINGS_MAPPINGS = {
     "omero.web.webgateway_cache": ["WEBGATEWAY_CACHE", None, leave_none_unset, None],
     "omero.web.maximum_multifile_download_size": [
         "MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE",
-        1024 ** 3,
+        1024**3,
         int,
         "Prevent multiple files with total aggregate size greater than this "
         "value in bytes from being downloaded as a zip archive.",
+    ],
+    "omero.web.max_table_download_rows": [
+        "MAX_TABLE_DOWNLOAD_ROWS",
+        10000,
+        int,
+        "Prevent download of OMERO.tables exceeding this number of rows "
+        "in a single request.",
     ],
     # VIEWER
     "omero.web.viewer.view": [
@@ -817,6 +839,21 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "(OME team by default)."
         ),
     ],
+    "omero.web.show_forgot_password": [
+        "SHOW_FORGOT_PASSWORD",
+        "true",
+        parse_boolean,
+        (
+            "Allows to hide 'Forgot password' from the login view"
+            " - useful for LDAP/ActiveDir installations"
+        ),
+    ],
+    "omero.web.favicon_url": [
+        "FAVICON_URL",
+        "webgateway/img/ome.ico",
+        str,
+        ("Favicon URL, specifies the path relative to django's static file dirs."),
+    ],
     "omero.web.staticfile_dirs": [
         "STATICFILES_DIRS",
         "[]",
@@ -864,6 +901,16 @@ CUSTOM_SETTINGS_MAPPINGS = {
             'For example: ``\'{"redirect": ["webindex"], "viewname":'
             ' "load_template", "args":["userdata"], "query_string":'
             ' {"experimenter": -1}}\'``'
+        ),
+    ],
+    "omero.web.redirect_allowed_hosts": [
+        "REDIRECT_ALLOWED_HOSTS",
+        "[]",
+        json.loads,
+        (
+            "If you wish to allow redirects to an external site, "
+            "the domains must be listed here. "
+            'For example ["openmicroscopy.org"].'
         ),
     ],
     "omero.web.login.show_client_downloads": [
@@ -920,6 +967,18 @@ CUSTOM_SETTINGS_MAPPINGS = {
             " https://docs.gunicorn.org/en/latest/settings.html"
             "?highlight=limit_request_line"
         ),
+    ],
+    "omero.web.search.default_user": [
+        "SEARCH_DEFAULT_USER",
+        0,
+        int,
+        ("ID of user to pre-select in search form."),
+    ],
+    "omero.web.search.default_group": [
+        "SEARCH_DEFAULT_GROUP",
+        0,
+        int,
+        ("ID of group to pre-select in search form."),
     ],
     "omero.web.ui.top_links": [
         "TOP_LINKS",
@@ -1001,6 +1060,19 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "The javascript loads data into ``$('#div_id')``."
         ),
     ],
+    "omero.web.plate_layout": [
+        "PLATE_LAYOUT",
+        "expand",
+        str,
+        (
+            "If 'shrink', the plate will not display rows and columns "
+            "before the first Well, or after the last Well. "
+            "If 'trim', the plate will only show Wells "
+            "from A1 to the last Well. "
+            "If 'expand' (default), the plate will expand from A1 to a "
+            "multiple of 12 columns x 8 rows after the last Well."
+        ),
+    ],
     # CORS
     "omero.web.cors_origin_whitelist": [
         "CORS_ORIGIN_WHITELIST",
@@ -1022,11 +1094,36 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "will be authorized to make cross-site HTTP requests."
         ),
     ],
+    "omero.web.html_meta_referrer": [
+        "HTML_META_REFERRER",
+        "origin-when-crossorigin",
+        str,
+        (
+            "Default content for the HTML Meta referrer tag. "
+            "See https://www.w3.org/TR/referrer-policy/#referrer-policies for "
+            "allowed values and https://caniuse.com/referrer-policy for "
+            "browser compatibility. "
+            "Warning: Internet Explorer 11 does not support the default value "
+            'of this setting, you may want to change this to "origin" after '
+            "reviewing the linked documentation."
+        ),
+    ],
     "omero.web.x_frame_options": [
         "X_FRAME_OPTIONS",
         "SAMEORIGIN",
         str,
         "Whether to allow OMERO.web to be loaded in a frame.",
+    ],
+    "omero.web.time_zone": [
+        "TIME_ZONE",
+        "Europe/London",
+        check_timezone,
+        (
+            "Time zone for this installation. Choices can be found in the "
+            "``TZ database name`` column of: "
+            "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones "
+            'Default ``"Europe/London"``'
+        ),
     ],
     "omero.web.django_additional_settings": [
         "DJANGO_ADDITIONAL_SETTINGS",
@@ -1139,6 +1236,7 @@ def check_worker_class(c):
 
 
 def check_threading(t):
+    t = int(t)
     if t > 1:
         try:
             import concurrent.futures  # NOQA
@@ -1146,7 +1244,7 @@ def check_threading(t):
             raise ImportError(
                 "You are using sync workers with " "multiple threads. Install futures"
             )
-    return int(t)
+    return t
 
 
 # DEVELOPMENT_SETTINGS_MAPPINGS - WARNING: For each setting developer MUST open
@@ -1269,8 +1367,9 @@ if not DEBUG:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
 
 
 def report_settings(module):
-    from django.views.debug import cleanse_setting
+    from django.views.debug import SafeExceptionReporterFilter
 
+    setting_filter = SafeExceptionReporterFilter()
     custom_settings_mappings = getattr(module, "CUSTOM_SETTINGS_MAPPINGS", {})
     for key in sorted(custom_settings_mappings):
         values = custom_settings_mappings[key]
@@ -1281,7 +1380,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (source:%s)",
                 global_name,
-                cleanse_setting(global_name, global_value),
+                setting_filter.cleanse_setting(global_name, global_value),
                 source,
             )
 
@@ -1294,7 +1393,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (deprecated:%s, %s)",
                 global_name,
-                cleanse_setting(global_name, global_value),
+                setting_filter.cleanse_setting(global_name, global_value),
                 key,
                 description,
             )
@@ -1304,10 +1403,6 @@ report_settings(sys.modules[__name__])
 
 SITE_ID = 1
 
-# Local time zone for this installation. Choices can be found here:
-# http://www.postgresql.org/docs/8.1/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE
-# although not all variations may be possible on all operating systems.
-TIME_ZONE = "Europe/London"
 FIRST_DAY_OF_WEEK = 0  # 0-Monday, ... 6-Sunday
 
 # LANGUAGE_CODE: A string representing the language code for this

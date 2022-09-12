@@ -25,7 +25,7 @@ Simple unit tests for the "webclient_utils" module.
 import pytest
 import json
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from omeroweb.utils import reverse_with_params, sort_properties_to_tuple
 from omeroweb.webclient.webclient_utils import formatPercentFraction
@@ -50,7 +50,7 @@ class TestUtil(object):
         assert formatPercentFraction(0.00) == "0.0"
 
     def test_get_date_time(self):
-        """ Tests that only a full date-time string is valid """
+        """Tests that only a full date-time string is valid"""
         assert getDateTime("2015-12-01 00:00:00") is not None
         assert getDateTime("2015-12-01 23:59:59") is not None
         with pytest.raises(ValueError):

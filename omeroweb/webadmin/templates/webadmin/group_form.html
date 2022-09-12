@@ -26,7 +26,7 @@
 {% block link %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "webadmin/css/picklist.css"|add:url_suffix %}" type="text/css" media="screen"/>
-    <link rel="stylesheet" href="{% static '3rdparty/jquery.chosen-1.2.0/chosen.css' %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static '3rdparty/jquery.chosen-1.8.7/chosen.css' %}" type="text/css" media="screen"/>
     <link rel="stylesheet" href="{% static 'webadmin/css/chosen.css'|add:url_suffix %}" type="text/css" media="screen"/>
 {% endblock %}
 
@@ -40,7 +40,7 @@
 
 {% block script %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static '3rdparty/jquery.chosen-1.2.0/chosen.jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static '3rdparty/jquery.chosen-1.8.7/chosen.jquery.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function() 
             {
@@ -65,7 +65,7 @@
                 }
                 
                 $("#id_owners").chosen({placeholder_text:'Type owner names to add...'});
-                $("#id_members").chosen({placeholder_text:'Type member names to add...'}).change(function(evt, data) {
+                $("#id_members").chosen({placeholder_text:'Type member names to add...'}).on('change', function(evt, data) {
                     if (data && data.deselected) {
                         var selected = $.grep($('#id_owners').data('chosen').results_data, function(item){
                             if(item.selected && item.value === data.deselected) {
@@ -81,14 +81,14 @@
                 highlightCurrent();
                 hideSystemUserX();
                 
-                $('#id_permissions_0').click(function(){
+                $('#id_permissions_0').on('click', function(){
                     OME.confirm_dialog("Changing group to Private unlinks data from other users'" +
                                     " containers and unlinks other users' annotations from data." +
                                     " The change to Private will abort if different users' data" +
                                     " is too closely related to be separated.",
                         null, "WARNING", ['OK'], null, 200);
                 });
-                $('#id_permissions_3').click(function(){
+                $('#id_permissions_3').on('click', function(){
                     OME.confirm_dialog("Read-Write groups allow members to delete other members' data. " +
                         "Follow the 'OMERO permissions' link below for full details.",
                         null, "WARNING", ['OK'], null, 180);

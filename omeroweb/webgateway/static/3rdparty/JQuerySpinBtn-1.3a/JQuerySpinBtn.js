@@ -107,13 +107,13 @@ $.fn.SpinButton = function(cfg){
 			}
 		})
 		
-		.mouseout(function(){
+		.on('mouseout', function(){
 			// Reset up/down buttons to their normal appearance when mouse moves away:
 			$(this).removeClass(this.spinCfg.upClass).removeClass(this.spinCfg.downClass);
 			this.spinCfg._direction = null;
 		})
 		
-		.mousedown(function(e){
+		.on('mousedown', function(e){
 			if (this.spinCfg._direction != 0) {
 				// Respond to click on one of the buttons:
 				var self = this;
@@ -132,13 +132,13 @@ $.fn.SpinButton = function(cfg){
 			}
 		})
 		
-		.mouseup(function(e){
+		.on('mouseup', function(e){
 			// Cancel repeating adjustment
 			window.clearInterval(this.spinCfg._repeat);
 			window.clearTimeout(this.spinCfg._delay);
 		})
 		
-		.dblclick(function(e) {
+		.on('dblclick', function(e) {
 			if ($.browser.msie)
 				this.adjustValue(this.spinCfg._direction * this.spinCfg.step);
 		})
@@ -163,11 +163,7 @@ $.fn.SpinButton = function(cfg){
 			
 			e.preventDefault();
 		})
-          /*		
-		.change(function(e){
-			this.adjustValue(0);
-		});
-          */
+
 		if (this.addEventListener) {
 			// Respond to mouse wheel in Firefox
 			this.addEventListener('DOMMouseScroll', function(e) {

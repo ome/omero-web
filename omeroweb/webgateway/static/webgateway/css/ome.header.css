@@ -765,6 +765,9 @@ li.menu_back a {
 				color: #333;
 				color: rgba(0,0,0,.7);
 				text-shadow:0 1px 0 white;
+				/* https://github.com/ome/omero-web/issues/377 */
+				word-wrap: break-word;
+				max-width: 330px;
 			}
 		
 			.notifier {

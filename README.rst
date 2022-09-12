@@ -1,11 +1,13 @@
 OMERO.web
 =========
-.. image:: https://travis-ci.org/ome/omero-web.svg?branch=master
-    :target: https://travis-ci.org/ome/omero-web
+.. image::  https://github.com/ome/omero-web/workflows/Tox/badge.svg
+    :target: https://github.com/ome/omero-web/actions
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
+.. image:: https://badge.fury.io/py/omero-web.svg
+    :target: https://badge.fury.io/py/omero-web
 
 Introduction
 ------------
@@ -26,12 +28,27 @@ Direct dependencies of OMERO.web are:
 Installation
 ------------
 
-See: `OMERO`_ documentation
+We recommend installing omero-web in a Python virtual environment.
+Here we show the install using `Conda`_. For more details and
+other options, please see `OMERO.py`_.
+
+::
+
+    conda create -n myenv -c conda-forge python=3.8 zeroc-ice omero-py
+    conda activate myenv
+    pip install omero-web
+
+Setting of the environment variable ``OMERODIR`` is required.
+``$OMERODIR/var/log/`` directory will contain log files.
+``$OMERODIR/etc/grid/config.xml`` is used to store config::
+
+    export OMERODIR=$(pwd)
 
 Usage
 -----
 
-See: `OMERO`_ documentation
+For running omero-web in production with nginx, see See: `OMERO.web install`_ documentation.
+To run in development mode, see below.
 
 Contributing
 ------------
@@ -41,24 +58,43 @@ See: `OMERO`_ documentation
 Developer installation
 ----------------------
 
-OMERO.web depends on OMERO.py. If you want a developer installation of OMERO.py, replace ``pip install omero-py``
-with instructions at https://github.com/ome/omero-py.
-
-For a development installation we recommend creating a virtualenv with the following setup (example assumes ``python3.6`` but you can create and activate the virtualenv using any compatible Python):
+For a development installation we recommend creating a virtual environment as described above.
+Then install OMERO.web into your virtual environment as an editable package, so that any edits
+to source files will be reflected in your installation.
 
 ::
 
-    python3.6 -mvenv venv
-    . venv/bin/activate
-    pip install zeroc-ice==3.6.5
-    pip install omero-py          # OR dev install (see above)
     git clone https://github.com/ome/omero-web
     cd omero-web
     pip install -e .
 
-This will install OMERO.web into your virtualenv as an editable package, so any edits to source files should be reflected in your installation.
-
 Note some omero-web tests may not run when this module and/or omero-py are installed in editable mode.
+
+Configuration for developer usage::
+
+    omero config set omero.web.debug True
+    omero config set omero.web.application_server development
+
+    # If you want to connect to OMERO.server other than 'localhost'
+    omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
+
+Then run omero-web in the foreground with::
+
+    omero web start
+    ...
+    Starting development server at http://127.0.0.1:4080/
+
+Or, run Django directly::
+
+    cd omero-web
+    python omeroweb/manage.py runserver 4080
+    ...
+    Starting development server at http://127.0.0.1:4080/
+
+Migration guides
+----------------
+
+* The release of ``OMERO.web 5.14.0`` requires an update of Django to ``3.2.x``.  Plugin developers should read the `Guide <MIGRATION_TO_DJANGO_32_GUIDE.md>`_ detailing how to migrate their plugin(s) to Django 3.2.x.
 
 Running tests
 -------------
@@ -114,11 +150,13 @@ OMERO.web is released under the AGPL.
 Copyright
 ---------
 
-2009-2020, The Open Microscopy Environment, Glencoe Software, Inc.
+2009-2022, The Open Microscopy Environment, Glencoe Software, Inc.
 
 .. _OMERO: https://www.openmicroscopy.org/omero
+.. _OMERO.web install: https://docs.openmicroscopy.org/latest/omero/sysadmins/unix/install-web/web-deployment.html
 .. _OMERO.py: https://pypi.python.org/pypi/omero-py
 .. _ZeroC IcePy: https://zeroc.com/
 .. _Pillow: https://python-pillow.org/
 .. _NumPy: http://matplotlib.org/
 .. _Running and writing tests: https://docs.openmicroscopy.org/latest/omero/developers/testing.html
+.. _Conda: https://docs.conda.io/en/latest/

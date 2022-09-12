@@ -39,7 +39,7 @@
 
 {% block link %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static "3rdparty/jquery.chosen-1.2.0/chosen.css" %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static "3rdparty/jquery.chosen-1.8.7/chosen.css" %}" type="text/css" media="screen"/>
 
 {% endblock %}
 
@@ -53,7 +53,7 @@
     <script src="{% static 'webclient/javascript/jquery.infieldlabel-0.1.js' %}" type="text/javascript"></script>
 
     <!-- Centre panel templating -->
-    <script type="text/javascript" src="{% static '3rdparty/underscore/underscore-1.8.3-min.js' %}"></script>
+    <script type="text/javascript" src="{% static '3rdparty/underscore/underscore-1.13.1-umd-min.js' %}"></script>
     <!-- Include the underscore html templates -->
     <script id="icon_thumbnails_template" type="text/template">
         {% include "webclient/data/icon_thumbnails_underscore.html" %}
@@ -81,12 +81,12 @@
     </script>
 
     <!-- Toolbar -->
-    <script type="text/javascript" src="{% static "3rdparty/jquery.chosen-1.2.0/chosen.jquery.js" %}"></script>
+    <script type="text/javascript" src="{% static "3rdparty/jquery.chosen-1.8.7/chosen.jquery.js" %}"></script>
 
     <!-- The following are required by the right-hand panel, E.g. annotations/metadata_general.html -->
     <script type="text/javascript" src="{% static "3rdparty/jquery.quicksearch-1.0.js" %}"></script>
     <script type="text/javascript" src="{% static "webclient/javascript/jquery.editinplace-0.1.2.js" %}"></script>
-    <script type="text/javascript" src="{% static "webclient/javascript/jquery.form-3.51.js" %}"></script>
+    <script type="text/javascript" src="{% static "3rdparty/jquery.form-4.3.0.js" %}"></script>
     <script type="text/javascript" src="{% static "webclient/javascript/ome.tagging_form.js"|add:url_suffix %}"></script>
     <script type="text/javascript" src="{% static "webclient/javascript/ome.right_panel_tags_pane.js"|add:url_suffix %}"></script>
     <script type="text/javascript" src="{% static "webclient/javascript/ome.right_panel_fileanns_pane.js"|add:url_suffix %}"></script>
@@ -165,11 +165,12 @@
 
         WEBCLIENT.active_group_id = {{ active_group.id }};
         WEBCLIENT.USER = {'id': {{ ome.user.id }}, 'fullName': "{{ ome.user.getFullName }}"};
-        WEBCLIENT.active_user = {'id': {{ ome.user_id }}, 'fullName': "{{ active_user.getFullName }}"};
-        WEBCLIENT.eventContext = {{ ome.eventContext|json_dumps|safe }};
+        WEBCLIENT.active_user = {'id': {{ ome.active_user }}, 'fullName': "{{ active_user.getFullName }}"};
+        WEBCLIENT.member_of_groups = {{ member_of_groups|json_dumps|safe }};
         WEBCLIENT.isAdmin = {% if ome.user.isAdmin %}true{% else %}false{% endif %};
         WEBCLIENT.CAN_CREATE = {{ ome.can_create|json_dumps|safe }};
         WEBCLIENT.current_admin_privileges = {{ current_admin_privileges|json_dumps|safe }};
+        WEBCLIENT.leader_of_groups = {{ leader_of_groups|json_dumps|safe }};
 
         WEBCLIENT.URLS = {};
         WEBCLIENT.URLS.webindex = "{% url 'webindex' %}";
@@ -179,6 +180,7 @@
         WEBCLIENT.URLS.api_images = "{% url 'api_images' %}";
         WEBCLIENT.URLS.api_plates = "{% url 'api_plates' %}";
         WEBCLIENT.URLS.api_plate_acquisitions = "{% url 'api_plate_acquisitions' %}";
+        WEBCLIENT.URLS.api_base = "{% url 'api_base' 0 %}";
         WEBCLIENT.URLS.static_webclient = "{% static 'webclient' %}/";
         WEBCLIENT.URLS.static_webgateway = "{% static 'webgateway' %}/";
         WEBCLIENT.URLS.api_tags_and_tagged = "{% url 'api_tags_and_tagged' %}";
@@ -202,7 +204,7 @@
             WEBCLIENT.URLS.tree_top_level = WEBCLIENT.URLS.api_containers;
         {% endifequal %}
 
-        WEBCLIENT.URLS.api_experimenter = "{% url 'api_experimenter' ome.user_id %}";
+        WEBCLIENT.URLS.api_experimenter = "{% url 'api_experimenter' ome.active_user %}";
 
         WEBCLIENT.UI = {};
         WEBCLIENT.UI.TREE = {};
@@ -238,7 +240,7 @@
             // initially hidden
             $("#user_dropdown ul").css('visibility', 'hidden');
             // show on click
-            $("#show_user_dropdown").click(function(e) {
+            $("#show_user_dropdown").on('click', function(e) {
                 
                 $("ul", $(this).parent()).css('visibility', 'visible');
                 e.preventDefault();
@@ -257,7 +259,7 @@
         // The shown user's ID. This is located here because static javascript files
         // are not preprocessed by django
         function activeUserId() {
-            return {{ ome.user_id }};
+            return {{ ome.active_user }};
         };
 
         // The currently logged in user ID

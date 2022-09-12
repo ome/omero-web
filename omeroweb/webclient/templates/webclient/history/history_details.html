@@ -29,13 +29,18 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
+            // Format all dates according to local time
+            $('[data-isodate]').each(function () {
+                $(this).text(OME.formatDate($(this).data('isodate')));
+            });
+
             // double-click handler on image - launches image viewer
             //$("table#dataTable tbody tr").dblclick(function(event) {
                 // TODO: path to the object should be rendered on the server side
             //});
 
             // single click handler on image (container). Selection then update toolbar & metadata pane
-            $("table#dataTable tbody tr").click(function(event) {
+            $("table#dataTable tbody tr").on('click', function(event) {
                 OME.handleTableClickSelection(event);
             });
             
@@ -98,7 +103,7 @@
                         <input type="checkbox" name="project" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>
+                    <td class="date" data-isodate="{{ c.getDate|date:'r' }}"></td>
                     <td><a href="{% url 'webindex' %}?show=project-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
                     </a></td>
@@ -111,7 +116,7 @@
                         <input type="checkbox" name="screen" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>
+                    <td class="date" data-isodate="{{ c.getDate|date:'r' }}"></td>
                     <td><a href="{% url 'webindex' %}?show=screen-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
                     </a></td>
@@ -124,7 +129,7 @@
                         <input type="checkbox" name="dataset" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>
+                    <td class="date" data-isodate="{{ c.getDate|date:'r' }}"></td>
                     <td><a href="{% url 'webindex' %}?show=dataset-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
                     </a></td>
@@ -137,7 +142,7 @@
                         <input type="checkbox" name="plate" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>
+                    <td class="date" data-isodate="{{ c.getDate|date:'r' }}"></td>
                     <td><a href="{% url 'webindex' %}?show=plate-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
                     </a></td>
@@ -152,7 +157,7 @@
                         <input type="checkbox" name="image" id="{{ c.id }}" class="hide">      
                     </td>
                     <td class="desc"><a>{{ c.name|truncatebefor:"65" }}</a></td>
-                    <td class="date">{{ c.getDate }}</td>
+                    <td class="date" data-isodate="{{ c.getDate|date:'r' }}"></td>
                     <td><a href="{% url 'webindex' %}?show=image-{{ c.id }}" title="{% trans 'Show in hierarchy view' %}">
                         {% trans "Browse" %}
                     </a></td>

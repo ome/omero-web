@@ -29,19 +29,23 @@ class PlateGrid(object):
     methods useful for displaying the contents of the plate as a grid.
     """
 
-    def __init__(self, conn, pid, fid, thumbprefix=""):
+    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None):
+        """
+        Constructor
+
+        param:  plate_layout is "expand" to expand plate to multiple of 8 x 12
+                or "shrink" to ignore all wells before the first row/column
+        """
         self.plate = conn.getObject("plate", long(pid))
         self._conn = conn
         self.field = fid
         self._thumbprefix = thumbprefix
         self._metadata = None
+        self.plate_layout = plate_layout
 
     @property
     def metadata(self):
         if self._metadata is None:
-            self.plate.setGridSizeConstraints(8, 12)
-            size = self.plate.getGridSize()
-            grid = [[None] * size["columns"] for _ in range(size["rows"])]
 
             q = self._conn.getQueryService()
             params = omero.sys.ParametersI()
@@ -61,7 +65,28 @@ class PlateGrid(object):
                 "and index(ws) = :wsidx"
             )
 
-            for res in q.projection(query, params, self._conn.SERVICE_OPTS):
+            results = q.projection(query, params, self._conn.SERVICE_OPTS)
+            min_row = 0
+            min_col = 0
+            if self.plate_layout == "expand":
+                self.plate.setGridSizeConstraints(8, 12)
+            elif self.plate_layout == "shrink":
+                # need to know min row/col, regardless of field index
+                params = omero.sys.ParametersI()
+                params.addId(self.plate.id)
+                query = (
+                    "select min(well.row), min(well.column) "
+                    "from Well well "
+                    "where well.plate.id = :id"
+                )
+                min_vals = q.projection(query, params, self._conn.SERVICE_OPTS)
+                min_row = min_vals[0][0].val
+                min_col = min_vals[0][1].val
+            collabels = self.plate.getColumnLabels()[min_col:]
+            rowlabels = self.plate.getRowLabels()[min_row:]
+            grid = [[None] * len(collabels) for _ in range(len(rowlabels))]
+
+            for res in results:
                 (
                     row,
                     col,
@@ -96,11 +121,29 @@ class PlateGrid(object):
                 else:
                     wellmeta["thumb_url"] = self._thumbprefix + str(img_id.val)
 
-                grid[row.val][col.val] = wellmeta
+                grid[row.val - min_row][col.val - min_col] = wellmeta
+
+            # find dimensions of first image, to help in layout
+            img_sizes = []
+            if len(results) > 0:
+                image_id = results[0][2].val
+                params = omero.sys.ParametersI()
+                params.addId(image_id)
+                query = (
+                    "select pixels.sizeX, pixels.sizeY "
+                    "from Pixels pixels "
+                    "where pixels.image.id = :id"
+                )
+                sizes = q.projection(query, params, self._conn.SERVICE_OPTS)
+                if len(sizes) > 0:
+                    size_x = sizes[0][0].val
+                    size_y = sizes[0][1].val
+                    img_sizes.append({"x": size_x, "y": size_y, "image_id": image_id})
 
             self._metadata = {
                 "grid": grid,
-                "collabels": self.plate.getColumnLabels(),
-                "rowlabels": self.plate.getRowLabels(),
+                "collabels": collabels,
+                "rowlabels": rowlabels,
+                "image_sizes": img_sizes,
             }
         return self._metadata
