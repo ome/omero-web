@@ -152,6 +152,18 @@ urlpatterns = [
         views.edit_channel_names,
         name="edit_channel_names",
     ),
+    url(
+        r"^logical_channel/(?P<id>[0-9]+)/images/$",
+        views.logical_channel_images,
+        name="logical_channel"
+    ),
+    url(
+        r"^logical_channel/(?P<id>[0-9]+)/$",
+        views.logical_channel_images,
+        {"template": "webclient/activities/logical_channel.html"},
+        name="logical_channel"
+    ),
+
     # image webgateway extention
     url(
         r"^(?:(?P<share_id>[0-9]+)/)?render_image_region/"

@@ -1,0 +1,25 @@
+
+<html>
+    <head>
+        <style>
+            body {
+                font-family: 'Arial';
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <h1>Logical Channel linked to the following Images:</h1>
+
+        <ul>
+        {% for image in data %}
+            <li>
+                <a target="_blank" href="{% url 'webindex' %}?show=image-{{ image.id }}">
+                    {{ image.Name }}
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    </body>
+</html>

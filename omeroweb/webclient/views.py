@@ -42,6 +42,8 @@ from django.utils.http import is_safe_url
 
 from time import time
 
+from omero_marshal import get_encoder
+
 from omeroweb.version import omeroweb_buildyear as build_year
 from omeroweb.version import omeroweb_version as omero_version
 
@@ -2816,6 +2818,34 @@ def edit_channel_names(request, imageId, conn=None, **kwargs):
         return rv
     else:
         return {"error": "No parent found to apply Channel Names"}
+
+
+@login_required()
+@render_response()
+def logical_channel_images(request, id, conn=None, **kwargs):
+    """Return logical channel metadata as JSON"""
+
+    params = omero.sys.ParametersI()
+    params.addId(id)
+    
+    queryService = conn.getQueryService()
+    query = ("select i from Image i "
+                 "left outer join fetch i.pixels as p "
+                 "join fetch p.channels as c "
+                 "join fetch c.logicalChannel as lc "
+                 "where lc.id = :id")
+    result = queryService.findAllByQuery(query, params, conn.SERVICE_OPTS)
+
+    json_rsp = []
+    for image in result:
+        encoder = get_encoder(image.__class__)
+        if encoder is not None:
+            img_json = encoder.encode(image)
+            if kwargs.get('template') is not None:
+                img_json['id'] = img_json['@id']
+            json_rsp.append(img_json)
+
+    return {"data": json_rsp}
 
 
 @login_required(setGroupContext=True)
