@@ -225,8 +225,14 @@ button::-moz-focus-inner {
         display: none;
     }
 	#channel_names_edit.in_progress button[type='submit'] {
+		/* Show a spinner while saving channels */
 		background: url('../../webgateway/img/spinner.gif') center center no-repeat;
 		color: transparent;
+	}
+
+	#channel_names_edit.in_progress button[type='reset'] {
+		/* Don't show Cancel button during Save as it does nothing */
+		visibility: hidden;
 	}
 
     .channel_rename_spinner {
