@@ -2827,13 +2827,15 @@ def logical_channel_images(request, id, conn=None, **kwargs):
 
     params = omero.sys.ParametersI()
     params.addId(id)
-    
+
     queryService = conn.getQueryService()
-    query = ("select i from Image i "
-                 "left outer join fetch i.pixels as p "
-                 "join fetch p.channels as c "
-                 "join fetch c.logicalChannel as lc "
-                 "where lc.id = :id")
+    query = (
+        "select i from Image i "
+        "left outer join fetch i.pixels as p "
+        "join fetch p.channels as c "
+        "join fetch c.logicalChannel as lc "
+        "where lc.id = :id"
+    )
     result = queryService.findAllByQuery(query, params, conn.SERVICE_OPTS)
 
     json_rsp = []
@@ -2841,8 +2843,8 @@ def logical_channel_images(request, id, conn=None, **kwargs):
         encoder = get_encoder(image.__class__)
         if encoder is not None:
             img_json = encoder.encode(image)
-            if kwargs.get('template') is not None:
-                img_json['id'] = img_json['@id']
+            if kwargs.get("template") is not None:
+                img_json["id"] = img_json["@id"]
             json_rsp.append(img_json)
 
     return {"data": json_rsp}
