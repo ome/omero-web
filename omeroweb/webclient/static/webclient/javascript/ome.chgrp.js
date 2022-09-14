@@ -62,7 +62,7 @@ $(function() {
             data_owners = data.owners;  // save for later
             var ownernames = [];
             for (var o=0; o<data.owners.length; o++) {ownernames.push(data.owners[o][1]);}
-            var headerTxt = "<p>Move data owned by " + ownernames.join(", ") + ".</p>" +
+            var headerTxt = "<p>Move data owned by " + ownernames.join(", ").escapeHTML() + ".</p>" +
                             "<h1>Please choose target group below:</h1>";
             $group_chooser.append(headerTxt);
 
@@ -72,7 +72,7 @@ $(function() {
                 var g = data.groups[i];
                 html += "<div class='chgrpGroup' data-gid='"+ g.id + "'>";
                 html += "<img src='" + permsIcon(g.perms) + "'/>";
-                html += g.name + "<hr></div>";
+                html += g.name.escapeHTML() + "<hr></div>";
             }
             // If no target groups found...
             if (data.groups.length === 0) {
@@ -105,10 +105,10 @@ $(function() {
         dryRunTargetObjects = {};
         dryRunTargetObjects[dtype] = ids;
         $.get(webindex_url + "fileset_check/chgrp/?" + sel, function(html){
-            html = $.trim(html);
+            html = html.trim();
             if($('div.split_fileset', html).length > 0) {
                 $(html).appendTo($chgrpform);
-                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span').text("Move All");
+                $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)').text("Move All");
                 var filesetIds = [];
                 $('input[name="fileset"]', html).each(function(){
                     filesetIds.push(parseInt($(this).val(), 10));
@@ -156,45 +156,9 @@ $(function() {
                             $okbtn.hide();
                             return;
                         }
-                        var html = "<b style='font-weight: bold'>Move:</b> ",
-                            move = [], count,
-                            unlink = [], unlinked;
-                        ["Projects", "Datasets", "Screens",
-                         "Plates", "Wells", "Images"].forEach(function(otype){
-                            if (otype in dryRunData.includedObjects) {
-                                count = dryRunData.includedObjects[otype].length;
-                                if (count === 1) otype = otype.slice(0, -1);  // remove s
-                                move.push(count + " " + otype);
-                            }
-                        });
-                        html += move.join(", ");
 
-                        ["Datasets", "Plates", "Images", "Tags", "Files"].forEach(function(otype){
-                            if (otype in dryRunData.unlinkedDetails) {
-                                unlinked = dryRunData.unlinkedDetails[otype];
-                                count = unlinked.length;
-                                if (count === 0) return;
-                                if (count === 1) otype = otype.slice(0, -1);  // remove s
-                                var namesList = [], names;
-                                unlinked.forEach(function(u){
-                                    namesList.push(u.name);
-                                });
-                                names = namesList.join(", ");
-                                names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";
-                                unlink.push(count + " " + otype + names);
-                            }
-                        });
-                        if (dryRunData.unlinkedDetails.Comments > 0) {
-                            count = dryRunData.unlinkedDetails.Comments;
-                            unlink.push(count + " Comment" + (count > 1 ? "s" : ""));
-                        }
-                        if (dryRunData.unlinkedDetails.Others > 0) {
-                            count = dryRunData.unlinkedDetails.Others;
-                            unlink.push(count + " Other" + (count > 1 ? "s" : ""));
-                        }
-                        if (unlink.length > 0) {
-                            html += "<br><b style='font-weight: bold'>Not included:</b> " + unlink.join(", ");
-                        }
+                        let html = OME.formatDryRun(dryRunData);
+                        html = "<b style='font-weight: bold'>Move:</b> " + html;
                         $dryRunSpinner.html(html);
                     } else {
                         // try again...
@@ -215,7 +179,7 @@ $(function() {
         var ownerId = data_owners[0][0];
         $move_group_tree.hide();
         $("<p>New " + target_type.capitalize() + " name: <input name='new_container_name'/></p>")
-                .appendTo($chgrpform).click();
+                .appendTo($chgrpform).trigger('click');
         // Hidden input
         $("<input name='new_container_type' value='" + target_type + "'/>")
                 .appendTo($chgrpform).hide();
@@ -271,8 +235,8 @@ $(function() {
                     // toggle any children
                     $("ul" ,$(this).parent()).toggle();
                 };
-                $("#move_group_tree a").click(node_click);
-                $("#move_group_tree ins").click(node_click);
+                $("#move_group_tree a").on('click', node_click);
+                $("#move_group_tree ins").on('click', node_click);
                 $newbtn.show();
             });
         }
@@ -304,7 +268,7 @@ $(function() {
                 newContainer();
             },
             "OK": function() {
-                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span');
+                var $thisBtn = $('.chgrp_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
                 // If we have split filesets, first submission is to confirm 'Move All'?
                 // We hide the split_filesets info panel and rename submit button to 'OK'
                 if ($(".split_filesets_info .split_fileset", $chgrpform).length > 0 && $thisBtn.text() == 'Move All') {
@@ -313,7 +277,7 @@ $(function() {
                     $thisBtn.text('OK');
                     return false;
                 }
-                $chgrpform.submit();
+                $chgrpform.trigger('submit');
             },
             "Cancel": function() {
                 resetChgrpForm();
@@ -421,4 +385,58 @@ $(function() {
         }
     });
 
+    window.OME.formatDryRun = function (dryRunData, showParents) {
+        var html = "",
+            move = [], count,
+            unlink = [];
+        ["Projects", "Datasets", "Screens",
+            "Plates", "Wells", "Images"].forEach(function (otype) {
+                if (otype in dryRunData.includedObjects) {
+                    count = dryRunData.includedObjects[otype].length;
+                    if (count === 1) otype = otype.slice(0, -1);  // remove s
+                    move.push(count + " " + otype);
+                }
+            });
+        html += move.join(", ");
+
+        function formatObjects(item) {
+            otype = item[0];
+            unlinked = item[1];
+            count = unlinked.length;
+            if (count === 0) return '';
+            if (count === 1) otype = otype.slice(0, -1);  // remove s
+            var namesList = [], names;
+            unlinked.forEach(function (u) {
+                namesList.push(u.name.escapeHTML());
+            });
+            names = namesList.join(", ");
+            names = " <i title='" + namesList.join("\n") + "'>(" + names.slice(0, 40) + (names.length > 40 ? "..." : "") + ")</i>";
+            return count + " " + otype + names;
+        }
+
+        if (showParents) {
+            parents = Object.entries(dryRunData.unlinkedParents).map(formatObjects);
+            html += "<br/><b style='font-weight: bold'>Will be removed from:</b> " + parents.join(", ");
+        }
+
+        unlink = Object.entries(dryRunData.unlinkedChildren).map(formatObjects);
+        anns = dryRunData.unlinkedAnnotations;
+        // Format Tags, Files
+        unlink = unlink.concat(Object.entries({'Tags': anns.Tags, 'Files': anns.Files}).map(formatObjects));
+        unlink = unlink.filter(l => l.length > 0);
+
+        if (anns.Comments.length > 0) {
+            count = anns.Comments.length;
+            unlink.push(count + " Comment" + (count > 1 ? "s" : ""));
+        }
+        if (anns.Others > 0) {
+            count = anns.Others;
+            unlink.push(count + " Other" + (count > 1 ? "s" : ""));
+        }
+
+        if (unlink.length > 0) {
+            html += "<br/><b style='font-weight: bold'>Not included:</b> " + unlink.join(", ");
+        }
+        return html;
+    }
 });

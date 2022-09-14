@@ -449,7 +449,7 @@
 			position: absolute;
 		    visibility: hidden;
 			padding: 5px 0;
-			z-index: 2;
+			z-index: 100;
 		}
 			
 			.dropdown li {
@@ -663,6 +663,11 @@ li.menu_back a {
 	background:url(../img/dropdown_left_arrow_hover.png) 0% center no-repeat !important;
 }
 
+.menulist .upload_script {
+	background: url(../img/upload_grey.png) 8px center no-repeat;
+    padding-left: 30px;
+}
+
 #runningStatus {
 	 position:absolute; 
 	 bottom:1px; 
@@ -760,6 +765,9 @@ li.menu_back a {
 				color: #333;
 				color: rgba(0,0,0,.7);
 				text-shadow:0 1px 0 white;
+				/* https://github.com/ome/omero-web/issues/377 */
+				word-wrap: break-word;
+				max-width: 330px;
 			}
 		
 			.notifier {

@@ -140,7 +140,7 @@ div.weblitz-viewport-tiles img {
 
 .wb_zoomIn, .wb_zoom11, .wb_zoomOut {
   position: absolute;
-  z-index: 10;
+  z-index: 1;
   left: 10px;
   width: 20px;
 }

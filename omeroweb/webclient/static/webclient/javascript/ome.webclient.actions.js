@@ -62,7 +62,14 @@ OME.getURLParameter = function(key) {
 
 var linkify = function(input) {
     var regex = /(https?|ftp|file):\/\/[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]/g;
-    return input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
+    input = input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
+    return linkObjects(input);
+};
+var linkObjects = function(input) {
+    var regex = /(Project|Dataset|Image|Screen|Plate|Well|ROI)(?: ID)*:(?: )*([0-9]+)/ig;
+    return input.replace(regex, function($0, $1, $2) {
+        return "<a title='Go to " + $1 + "' href='" + WEBCLIENT.URLS.webindex + "?show=" + $1.toLowerCase() + "-" + $2 + "'>" + $0 + "</a>"
+    });
 };
 OME.linkify_element = function(elements) {
     elements.each(function() {
@@ -338,7 +345,7 @@ OME.initToolbarDropdowns = function() {
     $(".toolbar_dropdown ul").css('visibility', 'hidden');
     // show on click
     var $toolbar_dropdownlists = $(".toolbar_dropdown ul");
-    $(".toolbar_dropdown button").click(function(e) {
+    $(".toolbar_dropdown button").on('click', function(e) {
         // hide any other lists that might be showing...
         $toolbar_dropdownlists.css('visibility', 'hidden');
         // then show this one...
@@ -352,7 +359,7 @@ OME.initToolbarDropdowns = function() {
     });
 
     // For Figure scripts, we need a popup:
-    $("#figScriptList li a").click(function(event){
+    $("#figScriptList li a").on('click', function(event){
         if (!$(this).parent().hasClass("disabled")) {
             OME.openScriptWindow(event, 800, 600);
         }
@@ -513,6 +520,29 @@ OME.truncateNames = (function(){
     return truncateNames;
 }());
 
+OME.checkForMultipleParents = function(objList, callback) {
+    // objList is list of ['image=1'] etc.
+    var url = WEBCLIENT.URLS.api_parent_links + '?' + objList.join('&');
+
+    $.getJSON(url, function(data){
+        // look for any child that has > 1 parent:
+        var multiple = false;
+        var links = {};
+        data.data.forEach(function(link){
+            var childId = link.child.type + link.child.id;
+            var parentId = link.parent.type + link.parent.id;
+            // do we already have a parent link for that child?
+            if (links[childId]) {
+                multiple = true;
+            }
+            links[childId] = parentId;
+        });
+        if (callback) {
+            callback(multiple);
+        }
+    });
+}
+
 // Handle deletion of selected objects in jsTree in containers.html
 OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     var datatree = $.jstree.reference($('#dataTree'));
@@ -524,7 +554,7 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     // clear previous stuff from form
     $.removeData(del_form, "clicked_button");
     $("#delete_contents_form").show();
-    del_form.unbind("dialogclose");
+    del_form.off("dialogclose");
     del_form.find("input[type='checkbox']").prop('checked', false);
 
     // set up form - process all the objects for data-types and children
@@ -536,19 +566,6 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
 
     var disabledNodes = [];
 
-    function traverse(state) {
-        // Check if this state is one that we are looking for
-        var n = datatree.get_node(state);
-        disabledNodes.push(n);
-
-        if (n.children) {
-            $.each(n.children, function(index, child) {
-                 traverse(child);
-            });
-        }
-        datatree.disable_node(n);
-
-    }
     var notOwned = false;
     $.each(selected, function(index, node) {
         // What types are being deleted and how many (for pluralization)
@@ -571,13 +588,19 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
         // Disable the nodes marked for deletion
         // Record them so they can easily be removed/re-enabled later
         disabledNodes.push(node);
-        if (node.children) {
-            $.each(node.children, function(index, child) {
-                 traverse(child);
-            });
-        }
         datatree.disable_node(node);
     });
+
+    // Hide warning, show it if e.g Image is in multiple groups
+    // https://forum.image.sc/t/caution-with-copy-links-in-omero/33680
+    $("#deleteCopyWarning").hide();
+    $("#delete-dialog-form").css('height', '92px');
+    OME.checkForMultipleParents(ajax_data, function(multiple){
+        if (multiple) {
+            $("#deleteCopyWarning").show();
+            $("#delete-dialog-form").css('height', '192px');
+        }
+    })
 
     if (notOwned) {
         $("#deleteOthersWarning").show();
@@ -586,15 +609,21 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
     }
 
     var type_strings = [];
+    var parent_types = {image:'dataset', dataset:'project', plate:'screen'};
+    var parent_strings = [];
     for (var key in dtypes) {
+        if (parent_types[key]) {
+            parent_strings.push(parent_types[key].capitalize());
+        }
         type_strings.push(key.replace("acquisition", "Run").capitalize() + (dtypes[key]>1 && "s" || ""));
     }
     var type_str = type_strings.join(" & ");    // For delete dialog: E.g. 'Project & Datasets'
-    $("#delete_type").text(type_str);
+    $(".delete_type").text(type_str);
+    $(".delete_parent_type").text(parent_strings.join(" or "));
     if (!askDeleteContents) $("#delete_contents_form").hide();  // don't ask about deleting contents
 
     // callback when delete dialog is closed
-    del_form.bind("dialogclose", function(event, ui) {
+    del_form.on("dialogclose", function(event, ui) {
         if (del_form.data("clicked_button") == "Yes") {
             var delete_anns = $("#delete_anns").prop('checked');
             var delete_content = true;      // $("#delete_content").prop('checked');
@@ -682,16 +711,16 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
 
     // Check if delete will attempt to partially delete a Fileset.
     var $deleteYesBtn = $('.delete_confirm_dialog .ui-dialog-buttonset button:nth-child(1)'),
-        $deleteNoBtn = $('.delete_confirm_dialog .ui-dialog-buttonset button:nth-child(2) span');
+        $deleteNoBtn = $('.delete_confirm_dialog .ui-dialog-buttonset button:nth-child(2)');
     $.get(filesetCheckUrl + "?" + OME.get_tree_selection(), function(html){
-        html = $.trim(html);
+        html = html.trim();
         if($('div.split_fileset', html).length > 0) {
             var $del_form_content = del_form.children().hide();
             del_form.append(html);
             $deleteYesBtn.hide();
             $deleteNoBtn.text("Cancel");
             // On dialog close, clean-up what we changed above
-            del_form.bind("dialogclose", function(event, ui) {
+            del_form.on("dialogclose", function(event, ui) {
                 $deleteYesBtn.show();
                 $deleteNoBtn.text("No");
                 $(".split_filesets_info", del_form).remove();
@@ -710,13 +739,10 @@ OME.formatDate = function formatDate(date) {
         }
         return n;
     }
-    // For consistency with the datetimes in metadata_general.html we have to
-    // assume dates should not be converted using the local timezone. This is
-    // because the datetime returned by OMERO may already be in "localtime",
-    // treating it as UTC ensures no local timezone adjustment is made.
+    // We format for localtime.
     var d = new Date(date),
-        dt = [d.getUTCFullYear(), padZero(d.getUTCMonth()+1), padZero(d.getUTCDate())].join("-"),
-        tm = [padZero(d.getUTCHours()), padZero(d.getUTCMinutes()), padZero(d.getUTCSeconds())].join(":");
+        dt = [d.getFullYear(), padZero(d.getMonth()+1), padZero(d.getDate())].join("-"),
+        tm = [padZero(d.getHours()), padZero(d.getMinutes()), padZero(d.getSeconds())].join(":");
     return dt + " " + tm;
 };
 
@@ -726,7 +752,7 @@ OME.nodeHasPermission = function(node, permission) {
     */
 
     // Require that all nodes have the necessary permissions
-    if ($.isArray(node)) {
+    if (Array.isArray(node)) {
         for (var index in node) {
             if (!OME.nodeHasPermission(node[index], permission)) {
                 return false;
@@ -993,7 +1019,13 @@ OME.showScriptList = function(event) {
                 return html;
             };
 
-            var html = "<ul class='menulist'>" + build_ul(data) + "</ul>";
+            var html = build_ul(data);
+
+            // For Admins, add a 'Upload Script' option.
+            if (WEBCLIENT.current_admin_privileges.indexOf("WriteScriptRepo") > -1) {
+                html += "<li><a class='upload_script' href='" + WEBCLIENT.URLS.script_upload + "'>Upload Script</a></li>";
+            }
+            html = "<ul class='menulist'>" + html + "</ul>";
 
             // In case multiple requests are sent at once, don't duplicate menu
             if ($("#scriptList li").length === 0) {
@@ -1012,10 +1044,9 @@ OME.hideScriptList = function() {
 
 // Helper can be used by 'open with' plugins to add isEnabled()
 // handlers to the OPEN_WITH object.
-OME.setOpenWithEnabledHandler = function(label, fn) {
-    // look for label in OPEN_WITH
+OME.setOpenWithEnabledHandler = function(id, fn) {
     WEBCLIENT.OPEN_WITH.forEach(function(ow){
-        if (ow.label === label) {
+        if (ow.id === id) {
             ow.isEnabled = function() {
                 // wrap fn with try/catch, since error here will break jsTree menu
                 var args = Array.from(arguments);
@@ -1024,7 +1055,7 @@ OME.setOpenWithEnabledHandler = function(label, fn) {
                     enabled = fn.apply(this, args);
                 } catch (e) {
                     // Give user a clue as to what went wrong
-                    console.log("Open with " + label + ": " + e);
+                    console.log("Open with " + id + ": " + e);
                 }
                 return enabled;
             }

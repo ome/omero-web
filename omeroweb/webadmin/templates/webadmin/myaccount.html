@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="{% static "webgateway/css/ome.table.css"|add:url_suffix %}" type="text/css" media="screen"/>
     <link rel="stylesheet" href="{% static "3rdparty/jquery.tablesorter-2.0.3/jquery.tablesorter.css" %}" type="text/css" media="screen"/>
     
-    <link rel="stylesheet" href="{% static "3rdparty/jquery.chosen-1.2.0/chosen.css" %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static "3rdparty/jquery.chosen-1.8.7/chosen.css" %}" type="text/css" media="screen"/>
     <link rel="stylesheet" href="{% static "webadmin/css/chosen.css"|add:url_suffix %}" type="text/css" media="screen"/>
     <link rel="stylesheet" href="{% static "webadmin/css/drivespace.css"|add:url_suffix %}" type="text/css"/>
 {% endblock %}
@@ -38,14 +38,32 @@
 
     <script type="text/javascript" src="{% static "3rdparty/jquery.tablesorter-2.0.3/jquery.tablesorter.js" %}"></script>
     <script type="text/javascript" src="{% static "3rdparty/jquery.quicksearch-1.0.js" %}"></script>
-    <script type="text/javascript" src="{% static "webclient/javascript/jquery.form-3.51.js" %}"></script>
-    <script type="text/javascript" src="{% static "3rdparty/jquery.flot-0.7/jquery.flot.js" %}"></script>
-    <script type="text/javascript" src="{% static "3rdparty/jquery.flot-0.7/jquery.flot.pie.js" %}"></script>
+    <script type="text/javascript" src="{% static "3rdparty/jquery.form-4.3.0.js" %}"></script>
+    <script type="text/javascript" src="{% static "3rdparty/jquery.flot-0.8.3/jquery.flot.js" %}"></script>
+    <script type="text/javascript" src="{% static "3rdparty/jquery.flot-0.8.3/jquery.flot.pie.js" %}"></script>
+
+    <script type="text/javascript" src="{% static "3rdparty/jquery.chosen-1.8.7/chosen.jquery.js" %}"></script>
     
-    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="{% static "3rdparty/jquery.flot-0.7/excanvas.js" %}"></script><![endif]-->
-    
-    <script type="text/javascript" src="{% static "3rdparty/jquery.chosen-1.2.0/chosen.jquery.js" %}"></script>
-    
+    <style>
+        #personal_details {
+            overflow: visible;
+            width: 450px;
+            float: right;
+        }
+        #personal_details input {
+            width: 320px;
+        }
+        #personal_details label {
+            width: 100px;
+        }
+        #personal_details select {
+            width: 250px;
+        }
+        #personal_details input[type='submit'] {
+            width: 75px;
+        }
+
+    </style>
     <script type="text/javascript">
     
     $(document).ready(function () {
@@ -62,7 +80,7 @@
         });
         
         {% if edit_mode %}
-        $('#save_thumb').click(function() {
+        $('#save_thumb').on('click', function() {
             var x1 = $('#x1').val();
             var y1 = $('#y1').val();
             var x2 = $('#x2').val();
@@ -96,7 +114,7 @@
                 buttons: {
                     "OK": function() {
                         // simply submit the form (AJAX handling set-up above)
-                        $("#change_password_form").submit();
+                        $("#change_password_form").trigger('submit');
                     },
                     "Cancel": function() {
                         $( this ).dialog( "close" );
@@ -111,7 +129,7 @@
                 }
             });
             
-            $( "#change_password" ).click(function() {
+            $( "#change_password" ).on('click', function() {
                 // clear fields
                 var $pw_form = $("#change_password_form");
                 $("div.error", $pw_form).text("");
@@ -122,7 +140,7 @@
                 $( "#password_change_dialog" ).dialog( "open" );
                 return false;
             });
-            $("#password_cancel").click(function() {
+            $("#password_cancel").on('click', function() {
                 $( "#password_change_dialog" ).dialog( "close" );
                 return false;
             });
@@ -135,7 +153,7 @@
                     var new_pw = $("input[name='password']", $pw_form).val();
                     var conf_pw = $("input[name='confirmation']", $pw_form).val();
                     var old_pw = $("input[name='old_password']", $pw_form).val();
-                    if ($.trim(new_pw).length==0 || $.trim(conf_pw).length==0 || $.trim(old_pw).length==0) {
+                    if (new_pw.trim().length==0 || conf_pw.trim().length==0 || old_pw.trim().length==0) {
                         $("div.error", $pw_form).text("All fields must be filled in.");
                         return false;
                     }
@@ -147,7 +165,7 @@
                         $("div.error", $pw_form).text("New password is the same as Old password");
                         return false;
                     }
-                    if ($.trim(new_pw).length<3 || $.trim(conf_pw).length<3 || $.trim(old_pw).length==0) {
+                    if (new_pw.trim().length<3 || conf_pw.trim().length<3 || old_pw.trim().length==0) {
                         $("div.error", $pw_form).text("Passwords should be at least 3 characters long.");
                         return false;
                     }
@@ -186,7 +204,7 @@
                 }
             });
 
-            $(".usageByGroup").click(function() {
+            $(".usageByGroup").on('click', function() {
               $(".usageBy").removeClass('selected');
               $(this).addClass('selected');
               var gid = $(this).attr("data-groupid");
@@ -198,7 +216,7 @@
                   }
               });
             });
-            $("#myUsage").click(function() {
+            $("#myUsage").on('click', function() {
               $(".usageBy").removeClass('selected');
               $(this).addClass('selected');
               var url = "{% url 'waloaddrivespace_user' experimenter.id %}";
@@ -207,6 +225,12 @@
                       $(".totalUsage").text('My');
                   }
               });
+            });
+
+            // Toggle 'Confirm Delete' button visibility
+            $("#delete_photo").click(function(event){
+                event.preventDefault();
+                $("#delete_photo_submit").toggle();
             });
 
         });
@@ -233,26 +257,30 @@
      <!-- Personal Settings -->
     <div id="personal_settings" class="settings_content">
 
-
-       <form class="standard_form settings_form" action="{% url 'wamyaccount' "save" %}" method="POST">{% csrf_token %}
-
            <p>{% trans "Fields marked in red are mandatory." %}</p>
            <br/>
            
            <div id="avatar">
-               <img src="{% url 'wamyphoto' %}" class="imgzoom"/>                 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.eventContext.userId %}">
-                   <span>Change</span>
-               </a> 
+                <img src="{% url 'wamyphoto' %}" class="imgzoom"/>
 
-               {% if myaccount.hasAvatar %} 
-               <a class="btn btn_text silver" href="{% url 'wamanageavatar' ome.eventContext.userId "deletephoto" %}">
-                   <span>Delete</span>
-               </a>
-               {% endif %}
+                <form class="standard_form settings_form" action="{% url 'wamanageavatar' action='deletephoto' %}"
+                    style="padding: 0; margin: 0; border: none" method="POST">
+                    <a class="btn btn_text silver" href="{% url 'wamanageavatar' %}">
+                        <span>Change</span>
+                    </a> 
+
+                {% if hasAvatar %}
+                    {% csrf_token %}
+                    <a id="delete_photo" class="btn btn_text silver" href="#">
+                        <span>Delete Photo</span>
+                    </a>
+                    <input id="delete_photo_submit" type="submit" style="margin: 10px; display: none" value="Confirm Delete" />
+                {% endif %}
+                </form>
             </div>
 
 
+        <form class="standard_form settings_form" action="{% url 'wamyaccount' "save" %}" method="POST">{% csrf_token %}
 
            <div id="personal_details">
 
@@ -283,14 +311,14 @@
 
                <input type="submit" value="{% trans 'Save' %}" />
              </div>
-
+            <div style="clear:both"></div>
        </form>
 
 
            <!-- hidden dialog for password change -->
            <div id="password_change_dialog" title="Change Password">
 
-               <form id="change_password_form" action="{% url 'wamanagechangepasswordid' ome.eventContext.userId %}" method="POST">{% csrf_token %}
+               <form id="change_password_form" action="{% url 'wamanagechangepasswordid' ome.user_id %}" method="POST">{% csrf_token %}
 
                    <table>
                        <tbody>

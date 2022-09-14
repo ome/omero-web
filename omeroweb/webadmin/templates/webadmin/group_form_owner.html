@@ -24,7 +24,7 @@
 
 {% block link %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static '3rdparty/jquery.chosen-1.2.0/chosen.css' %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static '3rdparty/jquery.chosen-1.8.7/chosen.css' %}" type="text/css" media="screen"/>
     <link rel="stylesheet" href="{% static 'webadmin/css/chosen.css'|add:url_suffix %}" type="text/css" media="screen"/>
 {% endblock %}
 
@@ -34,7 +34,7 @@
 
 {% block script %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static '3rdparty/jquery.chosen-1.2.0/chosen.jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static '3rdparty/jquery.chosen-1.8.7/chosen.jquery.js' %}"></script>
     
     <script type="text/javascript">
         $(document).ready(function() 
@@ -45,12 +45,12 @@
                     var selected = $.grep($('#id_members').data('chosen').results_data, function(item){
                         return item.value == userId;
                     });
-                    $("#id_owners_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().unbind("click").remove();
-                    $("#id_members_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().unbind("click").remove();
+                    $("#id_owners_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().off("click").remove();
+                    $("#id_members_chosen a[data-option-array-index='"+selected[0].options_index+"']").parent().addClass('search-choice-current').find("a").first().off("click").remove();
                 }
                 
                 $("#id_owners").chosen({placeholder_text:'Type owners names to add...'});
-                $("#id_members").chosen({placeholder_text:'Type members names to add...'}).change(function(evt, data) {
+                $("#id_members").chosen({placeholder_text:'Type members names to add...'}).on('change', function(evt, data) {
                     if (data && data.deselected) {
                         $.grep($('#id_owners').data('chosen').results_data, function(item){
                             if(item.selected && item.value === data.deselected) {
@@ -65,7 +65,7 @@
                 
                 highlightCurrent();
                 
-                $('#id_permissions_0').click(function(){
+                $('#id_permissions_0').on('click', function(){
                     OME.confirm_dialog("Changing group to Private unlinks data from other users'" +
                                     " containers and unlinks other users' annotations from data." +
                                     " The change to Private will abort if different users' data" +

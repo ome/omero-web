@@ -21,7 +21,7 @@
 {% if ome.user_dropdown %}
 {% if ome.is_public_user %}
     <div id="public_login_button">
-        <a href="{% url 'weblogin' %}">
+        <a href="{% url ome.login_view %}">
             <div id="show_public_login_button">
                 <img src="{% static 'webclient/image/personal32.png' %}"/>
                 <span>Login</span>

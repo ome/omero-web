@@ -21,14 +21,12 @@
     <!-- TABLES -->
     {% if manager.well or manager.image %}
     <h1 class="can-collapse closed" data-name="tables">
-        {{ label|default:"Tables" }}
+        {{ label|default:"Tables" }} <span class="annotationCount">{{ tableCountsOnParents }}</span>
     </h1>
     <div class="annotations_section" style="display:none">
 
-        <h2 id="bulk-annotations" class="bulk_annotation" style="display: none;">Info</h2>
-        <div style="display: none;">
-            <table id="bulk_annotations_table" class="bulk_annotations_table"></table>
-        </div>
+        <div id="bulk_annotations_list"></div>
+
         <div style="clear:both; margin:8px"></div>
     </div>
     {% endif %}

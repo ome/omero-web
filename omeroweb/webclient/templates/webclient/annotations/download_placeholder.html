@@ -101,6 +101,16 @@ Download files
     <p>Create and download a zip file which will contain these
         {% if fileLists %} files{% else %} images{% endif %}:</p>
 
+    {% if downloadTooLarge %}
+
+    <p class="error">
+        Not available:
+        Total size of files {{ filesTotalSize|filesizeformat }}
+        is larger than {{ downloadTooLarge|filesizeformat }}.
+    </p>
+
+    {% else %}
+
     <div style="padding: 15px; float: right">
         <input type="submit" value="Create Zip"/>
     </div>
@@ -109,6 +119,7 @@ Download files
         Zip file name:
         <input id="zipName" value="{{ defaultName }}.zip"/>
     </p>
+    {% endif %}
 
     <div style="clear:both"></div>
 
@@ -149,7 +160,7 @@ Download files
 <script>
 
 
-    $("#downloadForm").submit(function(event){
+    $("#downloadForm").on('submit', function(event){
         event.preventDefault();
 
         var zipName = $("#zipName").val();
@@ -157,15 +168,18 @@ Download files
 
             $("#downloadForm").hide();
             $(".downloading").show();
-            window.location.href = "{{ url }}&zipname=" + zipName;
+            let url = "{{ url }}?zipname=" + zipName;
+            url += "{% for id in ids %}&{{id}}{% endfor %}";
+            {% if format %}url += '&format={{ format }}';{% endif %}
+            window.location.href = url;
         }
 
         return false;
     });
 
-    $("#zipName").focus().select();
+    $("#zipName").trigger('focus').trigger('select');
 
-    $("#reset").click(function(){
+    $("#reset").on('click', function(){
         window.close();
     });
 

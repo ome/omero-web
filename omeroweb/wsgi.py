@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2014 Glencoe Software, Inc.
+# All rights reserved.
+#
+# Use is subject to license terms supplied in LICENSE.txt
 
-"""
-   WSGI config for the OMERO.web project.
-
-   Copyright 2014 Glencoe Software, Inc. All rights reserved.
-   Use is subject to license terms supplied in LICENSE.txt
-
-"""
 
 """
 This module contains the WSGI application used by Django's development server
@@ -25,6 +23,10 @@ framework.
 import os
 import sys
 
+
+from django.core.wsgi import get_wsgi_application
+
+
 # OMERO.web is set up with the "omeroweb" package also on the PYTHONPATH
 sys.path.append(os.path.dirname(__file__))
 
@@ -37,7 +39,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "omeroweb.settings")
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
-from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 # Apply WSGI middleware here.

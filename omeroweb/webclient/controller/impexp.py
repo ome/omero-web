@@ -23,10 +23,9 @@
 # Version: 1.0
 #
 
-from webclient.controller import BaseController
+from omeroweb.webclient.controller import BaseController
 
 
 class BaseImpexp(BaseController):
-
     def __init__(self, conn, **kw):
         BaseController.__init__(self, conn)

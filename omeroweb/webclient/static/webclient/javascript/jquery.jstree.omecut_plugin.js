@@ -48,7 +48,7 @@
         this.cut = function (obj) {
             // Copied from jstree.js
             if(!obj) { obj = this._data.core.selected.concat(); }
-            if(!$.isArray(obj)) { obj = [obj]; }
+            if(!Array.isArray(obj)) { obj = [obj]; }
             if(!obj.length) { return false; }
             var tmp = [], o, t1, t2;
             for(t1 = 0, t2 = obj.length; t1 < t2; t1++) {

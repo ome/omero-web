@@ -34,6 +34,8 @@ http {
         sendfile on;
         client_max_body_size %(MAX_BODY_SIZE)s;
 
+%(NGINX_SERVER_EXTRA_CONFIG)s
+
         # maintenance page serve from here
         location @maintenance%(PREFIX_NAME)s {
             root %(ROOT)s/etc/templates/error;

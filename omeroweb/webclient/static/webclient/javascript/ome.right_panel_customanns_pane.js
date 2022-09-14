@@ -28,7 +28,7 @@ var CustomAnnsPane = function CustomAnnsPane($element, opts) {
 
     var initEvents = (function initEvents() {
 
-        $header.click(function(){
+        $header.on('click', function(){
             $header.toggleClass('closed');
             $body.slideToggle();
 
@@ -88,7 +88,7 @@ var CustomAnnsPane = function CustomAnnsPane($element, opts) {
                     var attrs = ['textValue', 'timeValue', 'termValue', 'longValue', 'doubleValue', 'boolValue'];
                     attrs.forEach(function(a){
                         if (ann[a] !== undefined){
-                            ann.value = _.escape(ann[a]);
+                            ann.value = ann[a];
                         }
                     });
                     if (objects.length > 1) {

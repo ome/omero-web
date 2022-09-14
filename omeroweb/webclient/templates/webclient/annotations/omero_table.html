@@ -1,0 +1,285 @@
+
+{% load common_filters %}
+<html>
+    <head>
+        <style>
+            body {
+                font-family: 'Arial';
+            }
+            h2, p {
+                text-align: center;
+            }
+            table {
+                border-collapse: collapse;
+                border-spacing: 0;
+            }
+            th {
+                /* border-bottom is lost in scrolling: use gradient instead */
+                background: linear-gradient(to top,#ddd, #ddd 1px, #ffffff 1px, #ffffff 100%);;
+                position: sticky;
+                top: 0;
+                border-bottom: solid #ddd 1px;
+                padding: 5px;
+            }
+            td {
+                border: solid #ddd 1px;
+                padding: 5px;
+            }
+            .download {
+                position: absolute;
+                top: 10px;
+                right: 20px;
+                text-align: right;
+                line-height: 150%;
+            }
+            .back {
+                position: absolute;
+                top: 10px;
+                left: 20px;
+            }
+            #cancel_btn {
+                border: solid black 1px;
+                border-radius: 10px;
+            }
+            #progress_display {
+                position: absolute;
+                top: 70px;
+                right: 20px;
+                background: #eee;
+                padding: 20px;
+                width: fit-content;
+                border-radius: 10px;
+            }
+        </style>
+    </head>
+    <body>
+
+    <div class="download">
+        Download as CSV:
+        <button class="download_btn" id="download_csv" title="Download the whole table as CSV">Whole Table</button>
+        {% if meta.query != '*' %}
+            <button class="download_btn" id="download_filtered_csv" title="Download the whole table filtered with: {{meta.query}}">
+                With Filter
+            </button>
+        {% endif %}
+        <br>
+        Show current page as:
+        <a href="{% url 'omero_table' data.id 'csv' %}?limit={{ meta.limit }}&offset={{ meta.offset }}{% if meta.query != '*' %}&query={{ meta.query|urlencode }}{% endif %}">CSV</a> |
+        <a href="{% url 'omero_table' data.id 'json' %}?limit={{ meta.limit }}&offset={{ meta.offset }}{% if meta.query != '*' %}&query={{ meta.query|urlencode }}{% endif %}">JSON</a>
+    </div>
+
+    <div id="progress_display" style="visibility:hidden">
+        Downloading: <span id="download_percent">0 MB</span>
+        <br />
+        <progress id="download_progress" value="50" max="100">50%</progress>
+        <button title="Cancel Download" id="cancel_btn">X</button>
+    </div>
+
+    {% if meta.query != '*' %}
+        <div class="back">
+            <a href="{{ meta.url }}">< Remove filter</a>
+        </div>
+    {% endif %}
+    <h2>{{ data.name }}</h2>
+    {% if example_column %}
+        <p style="margin:0 250px">
+            To filter rows you can use a query based on named columns.
+            For example, to filter for rows where <b>{{ example_column }}</b>
+            is greater than <b>{{ example_min_value }}</b> add 
+            <a href="{{ meta.url }}?query={{ example_column }}>{{ example_min_value }}">
+                ?query={{ example_column }}>{{ example_min_value }}
+            </a> to the URL. <br>
+            For a more complex example, try
+            <a href="{{ meta.url }}?query=({{ example_column }}>{{ example_min_value }})%26({{ example_column }}<{{ example_max_value }})">
+                ?query=({{ example_column }}>{{ example_min_value }})&({{ example_column }}<{{ example_max_value }})
+            </a>
+        </p>
+    {% endif %}
+    <p>
+        {% if meta.query == '*' %}
+            Table rows: <b>{{ meta.rowCount }}</b>.
+        {% else %}
+            Query "<b>{{ meta.query }}</b>" returned
+            <b>{{ meta.totalCount }}</b>/<b>{{ meta.rowCount }}</b> rows.
+        {% endif %}
+
+        <!-- Only show pagination if needed -->
+        <br>
+        {% if meta.prev or meta.next %}
+            {% if meta.page %}
+                Showing page <b>{{ meta.page }}</b> (<b>{{ data.rows | length }}</b> rows).
+            {% else %}
+                Pagination offset: <b>{{ meta.offset }}</b> limit: <b>{{ meta.limit }}</b>.
+            {% endif %}
+            {% if meta.prev %}
+                <a href="{{ meta.prev }}">Prev</a>
+            {% else %}
+                Prev
+            {% endif %}
+            |
+            {% if meta.next %}
+                <a href="{{ meta.next }}">Next</a>
+            {% else %}
+                Next
+            {% endif %}
+        {% endif %}
+    </p>
+    <table>
+        <tr>
+        {% for col, col_type in data.columns|zip:data.column_types  %}
+            <th title="{{col_type}}">{{ col }}</th>
+        {% endfor %}
+        </tr>
+
+        {% for row in data.rows %}
+        <tr>
+            {% for col in row %}
+                {% if image_column_index == forloop.counter0 %}
+                <td><a target="_blank" href="{% url 'webindex' %}?show=image-{{ col }}">{{ col }}</a></td>
+                {% elif well_column_index == forloop.counter0 %}
+                <td><a target="_blank" href="{% url 'webindex' %}?show=well-{{ col }}">{{ col }}</a></td>
+                {% elif dataset_column_index == forloop.counter0 %}
+                <td><a target="_blank" href="{% url 'webindex' %}?show=dataset-{{ col }}">{{ col }}</a></td>
+                {% elif roi_column_index == forloop.counter0 and iviewer_url != None %}
+                <td><a target="_blank" href="{{ iviewer_url }}?roi={{ col }}">{{ col }}</a></td>
+                {% elif shape_column_index == forloop.counter0 and iviewer_url != None %}
+                <td><a target="_blank" href="{{ iviewer_url }}?shape={{ col }}">{{ col }}</a></td>
+                {% else %}
+                <td>{{ col }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </body>
+
+    <script>
+
+    function downloadString(array, fileType, fileName) {
+      // https://gist.github.com/danallison/3ec9d5314788b337b682
+      var blob = new Blob(array, { type: fileType });
+      var a = document.createElement('a');
+      a.download = fileName;
+      a.href = URL.createObjectURL(blob);
+      a.dataset.downloadurl = [fileType, a.download, a.href].join(':');
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+    }
+
+    async function readData(reader) {
+        const decoder = new TextDecoder();
+        let result = "";
+        while (true) {
+            const { value, done } = await reader.read();
+            const str = decoder.decode(value);
+            result = result + str;
+            if (done) break;
+        }
+        return result;
+    }
+
+    function bytesToSize(bytes) {
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes == 0) return '0 Byte';
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    }
+
+    function showProgress(value, bytes, hide) {
+        document.getElementById("progress_display").style.visibility = hide ? 'hidden' : 'visible';
+        document.getElementById("download_percent").innerHTML = bytesToSize(bytes);
+        document.getElementById("download_progress").value = value;
+    }
+
+    function enableDownloadButtons(enable) {
+        document.querySelectorAll(".download_btn").forEach(function(el){
+            el.disabled = !enable;
+        });
+    }
+
+    var cancelled = false;
+
+    function cancel_download() {
+        // This will interrupt the download of chunks
+        cancelled = true;
+        // hide progress
+        showProgress(0, 0, true);
+        enableDownloadButtons(true);
+    }
+
+    async function download_csv(filter){
+        enableDownloadButtons(false);
+        const rowCount = filter ? parseInt("{{ meta.totalCount }}") : parseInt("{{ meta.rowCount }}");
+        const tableName = "{{ data.name }}.csv";
+        // Use 10 batches, or max 3000 rows per batch
+        const MAX_BATCH_ROWS = 3000;
+        const MAX_FAILED_CALLS = 5;
+        const batchSize = Math.min(parseInt(rowCount/10), MAX_BATCH_ROWS);
+
+        // load csv in batches...
+        const csvUrl = "{% url 'omero_table' data.id 'csv' %}";
+        const query = "{{ meta.query|urlencode }}";
+
+        let count = 0;
+        let bytes = 0;
+        let blobData = [];
+        cancelled = false;
+        showProgress(0, 0);
+        failedChunks = 0;
+        while(count <= rowCount && !cancelled) {
+            let url = `${csvUrl}?&limit=${batchSize}&offset=${count}&header=${count===0 ? 'true' : 'false'}`;
+            if (filter) {
+                url += `&query=${query}`;
+            }
+            const csvString = await fetch(url)
+            .then(rsp => {
+                if (rsp.status != 200) {
+                    throw rsp;
+                }
+                return rsp.body.getReader();
+            })
+            .then(reader => readData(reader))
+            .catch(rsp => {
+                console.log("FAILED to load chunk:", url);
+                failedChunks += 1;
+                if (failedChunks >= MAX_FAILED_CALLS){
+                    cancelled = true;
+                }
+            });
+            if (csvString !== undefined) {
+                console.log("csvString.length", csvString.length);
+                blobData.push(csvString);
+                bytes += csvString.length;
+                count += batchSize;
+            }
+            showProgress((count/rowCount) * 100, bytes);
+        }
+        showProgress(100, bytes);
+
+        if (!cancelled) {
+            downloadString(blobData, "text/csv", tableName);
+        } else if (failedChunks >= MAX_FAILED_CALLS) {
+            alert(`Downloading cancelled due to ${failedChunks} failed reads of table data.`)
+        }
+
+        // hide progress
+        showProgress(100, bytes, true);
+        enableDownloadButtons(true);
+    };
+
+    // Bind Event Listeners to buttons...
+    document.getElementById("download_csv").addEventListener("click", function(){
+        download_csv(false);
+    });
+    document.getElementById("download_filtered_csv")?.addEventListener("click", function(){
+        download_csv(true);
+    });
+
+    document.getElementById("cancel_btn").addEventListener("click", function() {
+        cancel_download();
+    });
+
+    </script>
+</html>

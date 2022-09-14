@@ -27,9 +27,21 @@ import sys
 import platform
 import traceback
 import logging
-import urllib
-import urllib2
-import urlparse
+from urllib.parse import urlencode
+
+try:
+    # python2
+    from urllib2 import urlopen, Request, HTTPError, URLError
+except ImportError:
+    # python3
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError, URLError
+try:
+    # python2
+    from urlparse import urljoin
+except ImportError:
+    # python3
+    from urllib.parse import urljoin
 
 from omeroweb.version import omeroweb_version as omero_version
 
@@ -43,10 +55,9 @@ class SendFeedback(object):
     conn = None
 
     def __init__(self, feedback_url):
-        self.url = urlparse.urljoin(feedback_url, "/qa/initial/")
+        self.url = urljoin(feedback_url, "/qa/initial/")
 
-    def send_feedback(self, error=None, comment=None, email=None,
-                      user_agent=""):
+    def send_feedback(self, error=None, comment=None, email=None, user_agent=""):
         try:
             p = {
                 "app_name": settings.FEEDBACK_APP,
@@ -54,55 +65,53 @@ class SendFeedback(object):
                 "extra": "",
                 "error": (error or ""),
                 "email": (email or ""),
-                "comment": comment
-                }
+                "comment": comment,
+            }
             try:
-                p['python_classpath'] = sys.path
-            except:
+                p["python_classpath"] = sys.path
+            except Exception:
                 pass
             try:
-                p['python_version'] = platform.python_version()
-            except:
+                p["python_version"] = platform.python_version()
+            except Exception:
                 pass
             try:
-                p['os_name'] = platform.platform()
-            except:
+                p["os_name"] = platform.platform()
+            except Exception:
                 pass
             try:
-                p['os_arch'] = platform.machine()
-            except:
+                p["os_arch"] = platform.machine()
+            except Exception:
                 pass
             try:
-                p['os_version'] = platform.release()
-            except:
+                p["os_version"] = platform.release()
+            except Exception:
                 pass
-            data = urllib.urlencode(p)
+            data = urlencode(p)
+            data = data.encode()
             headers = {
                 "Content-type": "application/x-www-form-urlencoded",
                 "Accept": "text/plain",
-                "User-Agent": user_agent}
-            request = urllib2.Request(self.url, data, headers)
+                "User-Agent": user_agent,
+            }
+            request = Request(self.url, data, headers)
             response = None
             try:
-                response = urllib2.urlopen(request)
+                response = urlopen(request)
                 if response.code == 200:
                     logger.info(response.read())
                 else:
-                    logger.error(
-                        "Feedback server error: %s" % response.reason)
-                    raise Exception(
-                        "Feedback server error: %s" % response.reason)
-            except urllib2.HTTPError, e:
+                    logger.error("Feedback server error: %s" % response.reason)
+                    raise Exception("Feedback server error: %s" % response.reason)
+            except HTTPError as e:
                 logger.error(traceback.format_exc())
-                raise Exception(
-                    "Feedback server error: %s" % e.code)
-            except urllib2.URLError, e:
+                raise Exception("Feedback server error: %s" % e.code)
+            except URLError as e:
                 logger.error(traceback.format_exc())
-                raise Exception(
-                    "Feedback server error: %s" % e.reason)
+                raise Exception("Feedback server error: %s" % e.reason)
             finally:
                 if response:
                     response.close()
-        except Exception, x:
+        except Exception as x:
             logger.error(traceback.format_exc())
-            raise Exception("Feedback server error: %s" % x.message)
+            raise Exception("Feedback server error: %s" % x)

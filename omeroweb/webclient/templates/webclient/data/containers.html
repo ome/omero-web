@@ -37,7 +37,7 @@
 {% block script %}
     {{ block.super }}
 
-    <script type="text/javascript" src="{% static "3rdparty/jquery.jstree-3.0.8/jstree.js" %}"></script>
+    <script type="text/javascript" src="{% static "3rdparty/jquery.jstree-3.3.10/jstree.js" %}"></script>
     <script type="text/javascript" src="{% static "webclient/javascript/jquery.jstree.locate_plugin.js"|add:url_suffix %}"></script>
     <script type="text/javascript" src="{% static "webclient/javascript/jquery.jstree.conditionalselect_plugin.js"|add:url_suffix %}"></script>
     <script type="text/javascript" src="{% static "webclient/javascript/jquery.jstree.pagination_plugin.js"|add:url_suffix %}"></script>
@@ -48,6 +48,7 @@
     <script type="text/javascript" src="{% static "webclient/javascript/jquery.jstree.truncatetext_plugin.js"|add:url_suffix %}"></script>
 
     <script type="text/javascript" src="{% static 'webclient/javascript/ome.chgrp.js'|add:url_suffix %}"></script>
+    <script type="text/javascript" src="{% static 'webclient/javascript/ome.chown.js'|add:url_suffix %}"></script>
 
     <!-- Main jsTree code is here -->
     <script src="{% static 'webclient/javascript/ome.tree.js'|add:url_suffix %}"></script>
@@ -207,9 +208,9 @@
             // If we are filtering to show another user's data,
             // we 'should' have writeOwned privilege
 
-            var writeOwned = WEBCLIENT.eventContext.adminPrivileges.indexOf("WriteOwned") > -1;
+            var writeOwned = WEBCLIENT.current_admin_privileges.indexOf("WriteOwned") > -1;
             var $f = $("#new-container-form");
-            var memberOfGroup = WEBCLIENT.eventContext.memberOfGroups.indexOf(WEBCLIENT.active_group_id) > -1;
+            var memberOfGroup = WEBCLIENT.member_of_groups.indexOf(WEBCLIENT.active_group_id) > -1;
 
             // clear fields
             $("input[name='owner']", $f).val("");
@@ -287,9 +288,9 @@
             };
 
             // We 'canCreate' top level items, E.g. Project, Dataset, Screen, if the current userId is self or 'All Members'
-            var userId = {{ ome.user_id }},
-                memberOfGroup = WEBCLIENT.eventContext.memberOfGroups.indexOf(WEBCLIENT.active_group_id) > -1,
-                writeOwned = WEBCLIENT.eventContext.adminPrivileges.indexOf("WriteOwned") > -1,
+            var userId = {{ ome.active_user }},
+                memberOfGroup = WEBCLIENT.member_of_groups.indexOf(WEBCLIENT.active_group_id) > -1,
+                writeOwned = WEBCLIENT.current_admin_privileges.indexOf("WriteOwned") > -1,
                 allMembers = userId === -1,
                 // canCreate if looking at your own data or 'All Members' OR User's data with writeOwned
                 canCreate = (userId === WEBCLIENT.USER.id || (allMembers && memberOfGroup) ||
@@ -518,7 +519,7 @@
                 });
 
                 // same code is called from closing dialog or 'submit' of form
-                $("#new-container-form").submit(function() {
+                $("#new-container-form").on('submit', function() {
                     $("#new-container-form").dialog( "close" );
                     createNewContainer();
                     return false;
@@ -530,7 +531,7 @@
                     var new_container_name = $("input[name='name']", $f).val();
                     var new_container_desc = $("textarea[name='description']", $f).val();
                     var new_container_owner = $("input[name='owner']", $f).val();
-                    if ($.trim(new_container_name).length == 0) {
+                    if (new_container_name.trim().length == 0) {
                         alert("Please enter a Name");
                         return;
                     }
@@ -558,7 +559,7 @@
                     var root = inst.get_node('#');
                     $.each(root.children, function(index, id) {
                         var node = inst.get_node(id);
-                        if (node.type === 'experimenter' && node.data.obj.id === {{ ome.user_id }}) {
+                        if (node.type === 'experimenter' && node.data.obj.id === {{ ome.active_user }}) {
                             parent = node;
                             // Break out of each
                             return false;
@@ -591,7 +592,7 @@
                         var root = inst.get_node('#');
                         $.each(root.children, function(index, id) {
                             var node = inst.get_node(id);
-                             if (node.type === 'experimenter' && node.data.obj.id === {{ ome.user_id }}) {
+                             if (node.type === 'experimenter' && node.data.obj.id === {{ ome.active_user }}) {
                                 parent = node;
                                 // Break out of each
                                 return false;
@@ -682,41 +683,41 @@
 
         // Attach click handlers to the individual buttons
 
-        $('#addprojectButton').click(function() {
+        $('#addprojectButton').on('click', function() {
             OME.handleNewContainer("project");
         });
 
-        $('#adddatasetButton').click(function() {
+        $('#adddatasetButton').on('click', function() {
             OME.handleNewContainer("dataset");
         });
 
-        $('#addscreenButton').click(function() {
+        $('#addscreenButton').on('click', function() {
             OME.handleNewContainer("screen");
         });
 
-        $('#addtagButton').click(function() {
+        $('#addtagButton').on('click', function() {
             OME.handleNewContainer("tag");
         });
 
-        $('#addtagsetButton').click(function() {
+        $('#addtagsetButton').on('click', function() {
             OME.handleNewContainer("tagset");
         });
 
-        $('#copyButton').click(function() {
+        $('#copyButton').on('click', function() {
             var objs = inst.get_selected(true)
             inst.copy(objs);
         });
 
-        $('#cutButton').click(function() {
+        $('#cutButton').on('click', function() {
             var objs = inst.get_selected(true)
             inst.cut(objs);
         });
 
-        $('#createshareButton').click(function() {
+        $('#createshareButton').on('click', function() {
             OME.createShare(inst.get_selected());
         });
 
-        $('#pasteButton').click(function() {
+        $('#pasteButton').on('click', function() {
             var objs = inst.get_selected(true);
             if (objs.length == 1) {
                 inst.paste(objs[0]);
@@ -725,13 +726,13 @@
             }
         });
 
-        $('#deleteButton').click(function() {
+        $('#deleteButton').on('click', function() {
             var deleteUrl = "{% url 'manage_action_containers' 'deletemany' %}",
                 filesetCheckUrl = "{% url 'fileset_check' 'delete' %}";
             OME.handleDelete(deleteUrl, filesetCheckUrl, {{ ome.user.id }});
         });
 
-        $('#refreshButton').click(function() {
+        $('#refreshButton').on('click', function() {
             // Ensure the button cannot be clicked again while we are
             // performing a refresh.  The "refresh.jstree" event handler
             // is in ome.tree.js and will be responsible for enabling the
@@ -895,7 +896,16 @@
     <p id="deleteOthersWarning" class='error' style="font-size: 120%; font-weight: bold">
         Warning: Some objects you selected are owned by other users.
     </p>
-    <p>Are you sure you want to delete the selected <span id="delete_type">Images</span>?</p>
+    <p id="deleteCopyWarning" class='error' style="font-size: 120%; font-weight: bold">
+        Warning: One or more <span class="delete_type">Images</span> are linked to multiple
+        <span class="delete_parent_type">Dataset</span>s.
+        This will DELETE them from ALL of those
+        <span class="delete_parent_type">Dataset</span>s.
+        If you only wish to remove <span class="delete_type">Images</span> from one
+        <span class="delete_parent_type">Dataset</span>, use the
+        "Cut Link" action.
+    </p>
+    <p>Are you sure you want to delete the selected <span class="delete_type">Images</span>?</p>
     <p>If yes:</p>
     <form>
     <fieldset style="border: 0px solid white">
@@ -925,7 +935,9 @@
 <!-- hidden form for chgrp -->
 <form id="chgrp-form" title="Move to Group" action="{% url 'chgrp' %}" style="display:none" method="POST">{% csrf_token %}
 </form>
-
+<!-- hidden form for chown -->
+<form id="chown-form" title="Change Owner" action="{% url 'chown' %}" style="display:none" method="POST">{% csrf_token %}
+</form>
 
 {% endblock %}
 

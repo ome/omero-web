@@ -23,10 +23,10 @@
 # Version: 1.0
 #
 
-''' A view functions is simply a Python function that takes a Web request and
+""" A view functions is simply a Python function that takes a Web request and
 returns a Web response. This response can be the HTML contents of a Web page,
 or a redirect, or the 404 and 500 error, or an XML document, or an image...
-or anything.'''
+or anything."""
 
 import sys
 import datetime
@@ -34,12 +34,11 @@ import traceback
 import logging
 
 from django.conf import settings
-from django.template import loader as template_loader
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.http import HttpResponseServerError, HttpResponseNotFound
-from django.template import RequestContext
 from django.views.defaults import page_not_found
-from django.core.urlresolvers import reverse
+from django.urls import reverse
+from django.shortcuts import render
 
 from django.views.debug import get_exception_reporter_filter
 from django.utils.encoding import force_text
@@ -53,8 +52,8 @@ logger = logging.getLogger(__name__)
 def get_user_agent(request):
     user_agent = ""
     try:
-        user_agent = request.META['HTTP_USER_AGENT']
-    except:
+        user_agent = request.META["HTTP_USER_AGENT"]
+    except Exception:
         pass
     return user_agent
 
@@ -67,26 +66,32 @@ def send_feedback(request):
     error = None
     form = ErrorForm(data=request.POST.copy())
     if form.is_valid():
-        error = form.cleaned_data['error']
-        comment = form.cleaned_data['comment']
-        email = form.cleaned_data['email']
+        error = form.cleaned_data["error"]
+        comment = form.cleaned_data["comment"]
+        email = form.cleaned_data["email"]
         try:
             sf = SendFeedback(settings.FEEDBACK_URL)
-            sf.send_feedback(error=error, comment=comment, email=email,
-                             user_agent=get_user_agent(request))
-        except Exception, e:
-            logger.error('handler500: Feedback could not be sent')
+            sf.send_feedback(
+                error=error,
+                comment=comment,
+                email=email,
+                user_agent=get_user_agent(request),
+            )
+        except Exception as e:
+            logger.error("handler500: Feedback could not be sent")
             logger.error(traceback.format_exc())
-            error = ("Feedback could not be sent. Please contact"
-                     " administrator. %s" % e)
+            error = (
+                "Feedback could not be sent. Please contact" " administrator. %s" % e
+            )
             fileObj = open(
-                ("%s/error500-%s.html"
-                 % (settings.LOGDIR, datetime.datetime.now())), "w")
+                ("%s/error500-%s.html" % (settings.LOGDIR, datetime.datetime.now())),
+                "w",
+            )
             try:
                 try:
-                    fileObj.write(request.POST['error'])
-                except:
-                    logger.error('handler500: Error could not be saved.')
+                    fileObj.write(request.POST["error"])
+                except Exception:
+                    logger.error("handler500: Error could not be saved.")
                     logger.error(traceback.format_exc())
             finally:
                 fileObj.close()
@@ -94,13 +99,12 @@ def send_feedback(request):
             if request.is_ajax():
                 return HttpResponse(
                     "<h1>Thanks for your feedback</h1><p>You may need to"
-                    " refresh your browser to recover from the error</p>")
+                    " refresh your browser to recover from the error</p>"
+                )
             return HttpResponseRedirect(reverse("fthanks"))
 
-    context = {'form': form, 'error': error}
-    t = template_loader.get_template('500.html')
-    c = RequestContext(request, context)
-    return HttpResponse(t.render(c))
+    context = {"form": form, "error": error}
+    return render(request, "500.html", context)
 
 
 def send_comment(request):
@@ -113,38 +117,39 @@ def send_comment(request):
     if request.method == "POST":
         form = CommentForm(data=request.POST.copy())
         if form.is_valid():
-            comment = form.cleaned_data['comment']
-            email = form.cleaned_data['email']
+            comment = form.cleaned_data["comment"]
+            email = form.cleaned_data["email"]
             try:
                 sf = SendFeedback(settings.FEEDBACK_URL)
-                sf.send_feedback(comment=comment, email=email,
-                                 user_agent=get_user_agent(request))
-            except:
-                logger.error('handler500: Feedback could not be sent')
+                sf.send_feedback(
+                    comment=comment, email=email, user_agent=get_user_agent(request)
+                )
+            except Exception:
+                logger.error("handler500: Feedback could not be sent")
                 logger.error(traceback.format_exc())
-                error = ("Feedback could not be sent."
-                         " Please contact administrator.")
+                error = "Feedback could not be sent." " Please contact administrator."
             else:
                 return HttpResponseRedirect(reverse("fthanks"))
 
-    context = {'form': form, 'error': error}
-    t = template_loader.get_template('comment.html')
-    c = RequestContext(request, context)
-    return HttpResponse(t.render(c))
+    context = {"form": form, "error": error}
+    return render(request, "comment.html", context)
 
 
 ##############################################################################
 # handlers
+
 
 def csrf_failure(request, reason=""):
     """
     Always return Json response
     since this is accepted by browser and API users
     """
-    error = ("CSRF Error. You need to include valid CSRF tokens for any"
-             " POST, PUT, PATCH or DELETE operations."
-             " You have to include CSRF token in the POST data or"
-             " add the token to the HTTP header.")
+    error = (
+        "CSRF Error. You need to include valid CSRF tokens for any"
+        " POST, PUT, PATCH or DELETE operations."
+        " You have to include CSRF token in the POST data or"
+        " add the token to the HTTP header."
+    )
     return JsonResponse({"message": error}, status=403)
 
 
@@ -155,22 +160,23 @@ def handler500(request):
     NB: This only gets used by Django if omero.web.debug False (production use)
     If debug is True, Django returns it's own debug error page
     """
-    logger.error('handler500: Server error')
+    logger.error("handler500: Server error")
 
-    as_string = '\n'.join(traceback.format_exception(*sys.exc_info()))
+    as_string = "\n".join(traceback.format_exception(*sys.exc_info()))
     logger.error(as_string)
 
     try:
         error_filter = get_exception_reporter_filter(request)
         try:
-            request_repr = '\n{}'.format(
-                force_text(error_filter.get_request_repr(request)))
-        except:
+            request_repr = "\n{}".format(
+                force_text(error_filter.get_request_repr(request))
+            )
+        except Exception:
             request_repr = error_filter.get_request_repr(request)
-    except:
+    except Exception:
         try:
             request_repr = repr(request)
-        except:
+        except Exception:
             request_repr = "Request unavailable"
 
     error500 = "%s\n%s" % (as_string, request_repr)
@@ -180,25 +186,21 @@ def handler500(request):
         return HttpResponseServerError(error500)
 
     if settings.FEEDBACK_ERROR_ENABLED:
-        form = ErrorForm(initial={'error': error500})
-        context = {'form': form}
-        t = template_loader.get_template('500.html')
+        form = ErrorForm(initial={"error": error500})
+        context = {"form": form}
+        template = "500.html"
     else:
-        context = {'error500': error500}
-        t = template_loader.get_template('500-nosubmit.html')
-    c = RequestContext(request, context)
-    return HttpResponseServerError(t.render(c))
+        context = {"error500": error500}
+        template = "500-nosubmit.html"
+    return render(request, template, context, status=500)
 
 
-def handler404(request):
+def handler404(request, exception=None):
     logger.warning(
-        'Not Found: %s' % request.path,
-        extra={
-            'status_code': 404,
-            'request': request})
+        "Not Found: %s" % request.path, extra={"status_code": 404, "request": request}
+    )
     if request.is_ajax():
-        msg = traceback.format_exception(*sys.exc_info())[-1]
-        return HttpResponseNotFound(msg)
+        return HttpResponseNotFound()
 
     return page_not_found(request, "404.html")
 
@@ -211,15 +213,12 @@ def handlerInternalError(request, error):
     Otherwise return an html page, with 404 response.
     """
     logger.warning(
-        'Object Not Found: %s' % request.path,
-        extra={
-            'status_code': 404,
-            'request': request})
+        "Object Not Found: %s" % request.path,
+        extra={"status_code": 404, "request": request},
+    )
 
     if request.is_ajax():
         return HttpResponseNotFound(error)
 
     context = {"error": error}
-    t = template_loader.get_template("error.html")
-    c = RequestContext(request, context)
-    return HttpResponseNotFound(t.render(c))
+    return render(request, "error.html", context, status=404)

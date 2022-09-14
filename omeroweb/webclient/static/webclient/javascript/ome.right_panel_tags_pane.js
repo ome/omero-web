@@ -29,7 +29,7 @@ var TagPane = function TagPane($element, opts) {
 
     var initEvents = (function initEvents() {
 
-        $header.click(function(){
+        $header.on('click', function(){
             $header.toggleClass('closed');
             $body.slideToggle();
 
@@ -48,7 +48,7 @@ var TagPane = function TagPane($element, opts) {
             .hide().appendTo('body');
     }
 
-    $("#launch_tags_form").click(function(event) {
+    $("#launch_tags_form").on('click', function(event) {
         $("#add_tags_form").dialog("open");
         // load form via AJAX...
         var load_url = $(this).attr('href');
@@ -66,7 +66,7 @@ var TagPane = function TagPane($element, opts) {
         buttons: {
             "Save": function() {
                 // simply submit the form (AJAX handling set-up above)
-                $("#add_tags_form").trigger('prepare-submit').submit();
+                $("#add_tags_form").trigger('prepare-submit').trigger('submit');
                 $( this ).dialog( "close" );
             },
             "Cancel": function() {
@@ -125,8 +125,6 @@ var TagPane = function TagPane($element, opts) {
             request = request.join("&");
 
             var annsUrl = WEBCLIENT.URLS.webindex + "api/annotations/?type=tag&" + request
-            // set high limit on number of results (default is 200)
-            annsUrl += '&limit=10000'
             $.getJSON(annsUrl, function(data){
 
                 // manipulate data...
@@ -145,8 +143,8 @@ var TagPane = function TagPane($element, opts) {
                     }
                     // AddedBy IDs for filtering
                     tag.addedBy = [tag.link.owner.id];
-                    tag.textValue = _.escape(tag.textValue);
-                    tag.description = _.escape(tag.description);
+                    tag.textValue = tag.textValue;
+                    tag.description = tag.description;
                     tag.canRemove = tag.link.permissions.canDelete;
                     return tag;
                 });
@@ -160,7 +158,7 @@ var TagPane = function TagPane($element, opts) {
                         var tagId = tag.id,
                             linkOwner = tag.link.owner.id;
                         if (summary[tagId] === undefined) {
-                            summary[tagId] = {'textValue': tag.textValue,
+                            summary[tagId] = {'textValue': _.escape(tag.textValue),
                                               'id': tag.id,
                                               'canRemove': false,
                                               'canRemoveCount': 0,
