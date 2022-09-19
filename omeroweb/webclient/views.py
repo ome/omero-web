@@ -2265,17 +2265,9 @@ def batch_annotate(request, conn=None, **kwargs):
     conn.SERVICE_OPTS.setOmeroGroup(groupId)
 
     manager = BaseContainer(conn)
-    figScripts = manager.listFigureScripts(objs)
-    canExportAsJpg = manager.canExportAsJpg(request, objs)
-    filesetInfo = None
     iids = []
     if "image" in objs and len(objs["image"]) > 0:
         iids = [i.getId() for i in objs["image"]]
-    if len(iids) > 0:
-        filesetInfo = conn.getFilesetFilesInfo(iids)
-        archivedInfo = conn.getArchivedFilesInfo(iids)
-        filesetInfo["count"] += archivedInfo["count"]
-        filesetInfo["size"] += archivedInfo["size"]
 
     context = {
         "iids": iids,
@@ -2283,25 +2275,54 @@ def batch_annotate(request, conn=None, **kwargs):
         "link_string": link_string,
         "obj_labels": obj_labels,
         "batch_ann": True,
-        "figScripts": figScripts,
-        "canExportAsJpg": canExportAsJpg,
-        "filesetInfo": filesetInfo,
         "annotationBlocked": annotationBlocked,
         "differentGroups": False,
     }
+    context["template"] = "webclient/annotations/batch_annotate.html"
     if len(groupIds) > 1:
         context["annotationBlocked"] = (
             "Can't add annotations because" " objects are in different groups"
         )
         context["differentGroups"] = True  # E.g. don't run scripts etc
-    context["canDownload"] = manager.canDownload(objs)
-    context["template"] = "webclient/annotations/batch_annotate.html"
     context["webclient_path"] = reverse("webindex")
-    context["annotationCounts"] = manager.getBatchAnnotationCounts(
-        getObjects(request, conn)
-    )
+    context["annotationCounts"] = manager.getBatchAnnotationCounts(objs)
     return context
 
+@login_required()
+@render_response()
+def download_menu(request, conn=None, **kwargs):
+    # objs = getObjects(request, conn)
+    image_query = request.GET.get('image')
+    if image_query is None:
+        raise Http404("Need to specify objects via e.g. ?image=1,2")
+    image_ids = image_query.split(",")
+    objs = {"image": list(conn.getObjects("Image", image_ids))}
+    manager = BaseContainer(conn)
+    canExportAsJpg = False
+    iids = []
+    if "image" in objs and len(objs["image"]) > 0:
+        iids = [i.getId() for i in objs["image"]]
+    if len(iids) > 0:
+        canExportAsJpg = manager.canExportAsJpg(request, iids)
+        filesetInfo = conn.getFilesetFilesInfo(iids)
+        print('filesetInfo', filesetInfo)
+        archivedInfo = conn.getArchivedFilesInfo(iids)
+        filesetInfo["count"] += archivedInfo["count"]
+        filesetInfo["size"] += archivedInfo["size"]
+    link_string = "image-" + ("|image-".join(image_ids))
+    image = None
+    if len(objs["image"]) == 1:
+        image = objs["image"][0]
+
+    context = {
+        "canExportAsJpg": canExportAsJpg,
+        "link_string": link_string,
+        "filesetInfo": filesetInfo,
+        "canDownload": manager.canDownload(objs),
+        "image": image,
+        "template": "webclient/annotations/includes/download_menu.html"
+    }
+    return context
 
 @login_required()
 @render_response()

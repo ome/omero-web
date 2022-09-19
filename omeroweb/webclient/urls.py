@@ -268,6 +268,7 @@ urlpatterns = [
         name="manage_action_containers",
     ),
     url(r"^batch_annotate/$", views.batch_annotate, name="batch_annotate"),
+    url(r"^download_menu/$", views.download_menu, name="download_menu"),
     url(r"^annotate_tags/$", views.annotate_tags, name="annotate_tags"),
     url(
         r"^marshal_tagging_form_data/$",
