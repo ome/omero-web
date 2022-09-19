@@ -288,10 +288,14 @@ class BaseContainer(BaseController):
         elif image_ids is not None:
             params = omero.sys.ParametersI()
             params.addIds(image_ids)
-            query = ("select max(pix.sizeX * pix.sizeY) from Pixels as pix"
-                    " where pix.image.id in (:ids)")
+            query = (
+                "select max(pix.sizeX * pix.sizeY) from Pixels as pix"
+                " where pix.image.id in (:ids)"
+            )
             try:
-                result = self.conn.getQueryService().projection(query, params, self.conn.SERVICE_OPTS)
+                result = self.conn.getQueryService().projection(
+                    query, params, self.conn.SERVICE_OPTS
+                )
                 if result[0][0].val < limit:
                     can = True
             except omero.ValidationException:

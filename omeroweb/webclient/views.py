@@ -2288,11 +2288,12 @@ def batch_annotate(request, conn=None, **kwargs):
     context["annotationCounts"] = manager.getBatchAnnotationCounts(objs)
     return context
 
+
 @login_required()
 @render_response()
 def download_menu(request, conn=None, **kwargs):
     # objs = getObjects(request, conn)
-    image_query = request.GET.get('image')
+    image_query = request.GET.get("image")
     if image_query is None:
         raise Http404("Need to specify objects via e.g. ?image=1,2")
     image_ids = image_query.split(",")
@@ -2305,7 +2306,7 @@ def download_menu(request, conn=None, **kwargs):
     if len(iids) > 0:
         canExportAsJpg = manager.canExportAsJpg(request, iids)
         filesetInfo = conn.getFilesetFilesInfo(iids)
-        print('filesetInfo', filesetInfo)
+        print("filesetInfo", filesetInfo)
         archivedInfo = conn.getArchivedFilesInfo(iids)
         filesetInfo["count"] += archivedInfo["count"]
         filesetInfo["size"] += archivedInfo["size"]
@@ -2320,9 +2321,10 @@ def download_menu(request, conn=None, **kwargs):
         "filesetInfo": filesetInfo,
         "canDownload": manager.canDownload(objs),
         "image": image,
-        "template": "webclient/annotations/includes/download_menu.html"
+        "template": "webclient/annotations/includes/download_menu.html",
     }
     return context
+
 
 @login_required()
 @render_response()
