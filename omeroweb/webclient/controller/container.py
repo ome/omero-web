@@ -268,12 +268,12 @@ class BaseContainer(BaseController):
 
         return total
 
-    def canExportAsJpg(self, request, objDict=None):
+    def canExportAsJpg(self, request, image_ids=None):
         """
         Can't export as Jpg, Png, Tiff if bigger than approx 12k * 12k.
         Limit set by OOM error in omeis.providers.re.RGBIntBuffer
         """
-        can = True
+        can = False
         try:
             limit = request.session["server_settings"]["download_as"]["max_size"]
         except Exception:
@@ -283,13 +283,20 @@ class BaseContainer(BaseController):
             sizey = self.image.getSizeY()
             if sizex is None or sizey is None or (sizex * sizey) > limit:
                 can = False
-        elif objDict is not None:
-            if "image" in objDict:
-                for i in objDict["image"]:
-                    sizex = i.getSizeX()
-                    sizey = i.getSizeY()
-                    if sizex is None or sizey is None or (sizex * sizey) > limit:
-                        can = False
+            else:
+                can = True
+        elif image_ids is not None:
+            params = omero.sys.ParametersI()
+            params.addIds(image_ids)
+            query = ("select max(pix.sizeX * pix.sizeY) from Pixels as pix"
+                    " where pix.image.id in (:ids)")
+            try:
+                result = self.conn.getQueryService().projection(query, params, self.conn.SERVICE_OPTS)
+                if result[0][0].val < limit:
+                    can = True
+            except omero.ValidationException:
+                # e.g. Big Image pixel count causes HQL convertHibernateAccessException
+                pass
         return can
 
     def canDownload(self, objDict=None):
