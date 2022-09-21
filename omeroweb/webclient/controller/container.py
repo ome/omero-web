@@ -239,7 +239,7 @@ class BaseContainer(BaseController):
 
     def getBatchAnnotationCounts(self, objDict):
         """
-        Get the annotion counts for the given objects.
+        Get the annotation counts for the given objects.
 
         Only a single object type is supported, e.g. 'dataset'
         """
