@@ -339,8 +339,7 @@ class FilesAnnotationForm(BaseAnnotationForm):
         )
 
     annotation_file = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
-        required=False
+        widget=forms.ClearableFileInput(attrs={"multiple": True}), required=False
     )
 
 
