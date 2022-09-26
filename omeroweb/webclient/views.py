@@ -2410,14 +2410,10 @@ def annotate_file(request, conn=None, **kwargs):
             added_files = []
             if files is not None and len(files) > 0:
                 added_files = manager.createAnnotationsLinks("file", files, oids)
-            # upload new file
-            fileupload = (
-                "annotation_file" in request.FILES
-                and request.FILES["annotation_file"]
-                or None
-            )
-            if fileupload is not None and fileupload != "":
-                newFileId = manager.createFileAnnotations(fileupload, oids)
+            # upload new files
+            files = request.FILES.getlist("annotation_file")
+            for f in files:
+                newFileId = manager.createFileAnnotations(f, oids)
                 added_files.append(newFileId)
             return JsonResponse({"fileIds": added_files})
         else:

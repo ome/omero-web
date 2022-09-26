@@ -338,7 +338,10 @@ class FilesAnnotationForm(BaseAnnotationForm):
             required=False,
         )
 
-    annotation_file = forms.FileField(required=False)
+    annotation_file = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
+        required=False
+    )
 
 
 class CommentAnnotationForm(BaseAnnotationForm):
