@@ -1582,6 +1582,17 @@
         position: relative;
         width: 100%;
     }
+    #dataIcons li {
+        width: var(--iconSize);
+        height: var(--iconSize);
+    }
+    #dataIcons img{
+        width: 100%;
+        height: 100%;
+        /* fit the image to container, regardless of aspect ratio */
+        object-fit: contain;
+        object-position: center top;
+    }
 
     #dataIcons .ratingFilter_hidden {
         display: none;

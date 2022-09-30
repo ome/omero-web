@@ -72,6 +72,10 @@ $(document).ready(function() {
         day: "numeric", hour: "2-digit", minute: "2-digit"
     };
 
+    var setIconSize = function() {
+        $("#dataIcons").get(0).style.setProperty("--iconSize", iconSize + "px");
+    }
+
     // Start listening for Node Loading events on the tree...
     // If a node loads and it's selected, update_thumbs...
     $("#dataTree").on('load_node.jstree', function(event, data){
@@ -290,6 +294,8 @@ $(document).ready(function() {
 
         var html = iconTmpl(json);
         $("#icon_table").html(html);
+        // intial size
+        setIconSize();
 
         // load thumbnails in a batches
         thumbnailsBatch = {{ thumbnails_batch|default:50|json_dumps|safe }};
@@ -310,9 +316,6 @@ $(document).ready(function() {
             thumbUrl, iids, thumbnailsBatch,
             "{% static 'webgateway/img/image128.png' %}"
         );
-
-        // populate arrays etc for speedy icon zooming
-        setupIconZooming();
 
         // setup quicksearch filtering of images
         setupFiltering();
@@ -721,16 +724,7 @@ $(document).ready(function() {
 
         // It is possible to select the image itself or its individual container
         // Handle that here
-        var $targetIcon;
-        if (event.target.nodeName.toLowerCase() == 'li') {
-            $targetIcon = $(event.target);
-        } else if (event.target.nodeName.toLowerCase() == 'img') {
-            $targetIcon = $(event.target).parent().parent().parent();
-        } else if (event.target.nodeName.toLowerCase() == 'a') {
-            $targetIcon = $(event.target).parent().parent();
-        } else {
-            $targetIcon = $(event.target).parent();
-        }
+        var $targetIcon = $(event.target).closest(".row");
 
         var imageId = $targetIcon.attr('data-id');
 
@@ -875,47 +869,6 @@ $(document).ready(function() {
         $selectee.removeClass('fs-selected');
         for (var fsid in fsIds) {
             $selectee.filter("[data-fileset='"+ fsid + "']").addClass('fs-selected');
-        }
-    }
-
-    // Handle zooming of thumbnails with jQuery slider
-    var setupIconZooming = function() {
-        icon_styles = [];
-        li_styles = [];
-        aspect_ratios = [];
-        // manipulate thumbnail styles directly (approx 2x faster than using jQuery)
-        $("#dataIcons img").each(function(){
-            icon_styles.push(this.style);
-        });
-
-        var sizeX, sizeY;
-        $("#dataIcons li").each(function(){
-            if (! $(this).hasClass('thead')) {
-                li_styles.push(this.style);
-                sizeX = $(".sizeX", $(this)).text();
-                sizeY = $(".sizeY", $(this)).text();
-                aspect_ratios.push(parseFloat(sizeX) / parseFloat(sizeY));
-            }
-        });
-
-        setIconSize();
-    }
-
-    var setIconSize = function(icon_size) {
-        var icon_size = iconSize;
-        for (var s=0; s<icon_styles.length; s++) {
-            if (aspect_ratios[s] < 1) {
-                icon_styles[s].width = Math.round(icon_size * aspect_ratios[s]) + 1 + "px";
-                icon_styles[s].height = icon_size + "px";
-            } else if (aspect_ratios[s] > 1) {
-                icon_styles[s].height = Math.round(icon_size / aspect_ratios[s]) + 1 + "px";
-                icon_styles[s].width = icon_size + "px";
-            } else {
-                icon_styles[s].width = icon_size + "px";
-                icon_styles[s].height = icon_size + "px";
-            }
-            li_styles[s].width = icon_size + "px";
-            li_styles[s].height = icon_size + "px";
         }
     }
 
