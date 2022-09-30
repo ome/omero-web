@@ -513,6 +513,10 @@ $(function() {
 
                 // Extra data needed for showing thumbs in centre panel
                 if (node.type === 'dataset' || node.type === 'orphaned' || node.type === 'tag') {
+                    if ($('#dataTree').data("layout") === "table") {
+                        // Only need to display sizes in table layout
+                        payload['sizeXYZ'] = true;
+                    }
                     payload['date'] = true;
                 }
 
