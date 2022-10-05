@@ -13,7 +13,7 @@
     </li>
 
     <!-- If the images were loaded *before* switching to table layout, they won't have sizes -->
-    <% if (!images[0].data.obj.sizeX) { %>
+    <% if (images.length > 0 && !images[0].data.obj.sizeX) { %>
     <div class="table_caption">Please refresh the data to load image sizes in table layout</div>
     <% }%>
 
