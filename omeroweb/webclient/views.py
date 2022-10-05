@@ -4214,6 +4214,9 @@ def figure_script(request, scriptName, conn=None, **kwargs):
 
     context = {}
 
+    max_w, max_h = conn.getMaxPlaneSize()
+    big_img_warning = f"Images over {max_w} x {max_h} not supported"
+
     if imageIds is not None:
         imageIds, validImages = validateIds("Image", imageIds)
         context["idString"] = ",".join([str(i) for i in imageIds])
@@ -4228,14 +4231,12 @@ def figure_script(request, scriptName, conn=None, **kwargs):
         template = "webclient/scripts/split_view_figure.html"
         # Lookup Tags & Datasets (for row labels)
         imgDict = []  # A list of data about each image.
-        max_w, max_h = conn.getMaxPlaneSize()
         for iId in imageIds:
             data = {"id": iId}
             img = validImages[iId]
             if (img.getSizeX() * img.getSizeY()) > max_w * max_h:
                 # Don't include Big images
-                msg = f"Images over {max_w} x {max_h} not supported"
-                context["warning"] = msg
+                context["warning"] = big_img_warning
                 continue
             data["name"] = img.getName()
             tags = [
@@ -4310,6 +4311,8 @@ def figure_script(request, scriptName, conn=None, **kwargs):
 
         # expect to run on a single image at a time
         image = conn.getObject("Image", imageIds[0])
+        if (image.getSizeX() * image.getSizeY()) > max_w * max_h:
+            context["warning"] = big_img_warning
         # remove extension (if 3 chars or less)
         movieName = image.getName().rsplit(".", 1)
         if len(movieName) > 1 and len(movieName[1]) > 3:
