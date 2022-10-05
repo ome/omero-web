@@ -4228,9 +4228,15 @@ def figure_script(request, scriptName, conn=None, **kwargs):
         template = "webclient/scripts/split_view_figure.html"
         # Lookup Tags & Datasets (for row labels)
         imgDict = []  # A list of data about each image.
+        max_w, max_h = conn.getMaxPlaneSize()
         for iId in imageIds:
             data = {"id": iId}
             img = validImages[iId]
+            if (img.getSizeX() * img.getSizeY()) > max_w * max_h:
+                # Don't include Big images
+                msg = f"Images over {max_w} x {max_h} not supported"
+                context["warning"] = msg
+                continue
             data["name"] = img.getName()
             tags = [
                 ann.getTextValue()
