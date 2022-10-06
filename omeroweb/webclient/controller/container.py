@@ -372,12 +372,9 @@ class BaseContainer(BaseController):
             )
         elif objDict is not None:
             if "image" in objDict:
-                for i in objDict["image"]:
-                    if i.getSizeC() > 1:
-                        splitView["enabled"] = (
-                            "Split_View_Figure.py" in availableScripts
-                        )
-                        break
+                splitView["enabled"] = (
+                    "Split_View_Figure.py" in availableScripts
+                )
         thumbnailFig = {
             "id": "Thumbnail",
             "name": "Thumbnail Figure",

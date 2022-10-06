@@ -2265,6 +2265,7 @@ def batch_annotate(request, conn=None, **kwargs):
     conn.SERVICE_OPTS.setOmeroGroup(groupId)
 
     manager = BaseContainer(conn)
+    figScripts = manager.listFigureScripts(objs)
     iids = []
     if "image" in objs and len(objs["image"]) > 0:
         iids = [i.getId() for i in objs["image"]]
@@ -2275,6 +2276,7 @@ def batch_annotate(request, conn=None, **kwargs):
         "link_string": link_string,
         "obj_labels": obj_labels,
         "batch_ann": True,
+        "figScripts": figScripts,
         "annotationBlocked": annotationBlocked,
         "differentGroups": False,
     }
