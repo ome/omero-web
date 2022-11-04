@@ -1,3 +1,19 @@
+5.16.0 (November 2022)
+----------------------
+
+## Features
+
+- Update to a suitable version of the concurrent-log-handler [#415](https://github.com/ome/omero-web/pull/415)
+- Add whitenoise as a dependency [#397](https://github.com/ome/omero-web/pull/397)
+
+## Minor features
+
+- Switch to new output command in GitHub action [#417](https://github.com/ome/omero-web/pull/417)
+
+## Bug fixes
+
+- Disable submit and show spinner while editing channels [#398](https://github.com/ome/omero-web/pull/398)
+
 5.15.0 (August 2022)
 --------------------
 
