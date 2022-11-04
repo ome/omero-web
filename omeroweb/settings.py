@@ -87,7 +87,7 @@ FULL_REQUEST_LOGFORMAT = (
     " HTTP %(status_code)d %(request)s"
 )
 
-LOGGING_CLASS = "omero_ext.cloghandler.ConcurrentRotatingFileHandler"
+LOGGING_CLASS = "concurrent_log_handler.ConcurrentRotatingFileHandler"
 LOGSIZE = 500000000
 
 
