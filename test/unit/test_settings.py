@@ -40,12 +40,11 @@ class TestServerModel(object):
             Server()
         except TypeError as te:
             found = str(te)
-            python2 = "__new__() takes at least 3 arguments (1 given)"
-            python3 = (
+            error_message = (
                 "__new__() missing 2 required positional arguments:"
                 " 'host' and 'port'"
             )
-            assert found in (python2, python3)
+            assert found.endswith(error_message)
 
     def test_get_and_find(self):
         Server.reset()
