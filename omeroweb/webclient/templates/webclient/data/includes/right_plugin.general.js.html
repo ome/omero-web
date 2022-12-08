@@ -43,6 +43,11 @@ $(function () {
         if(selected.length == 0) {
             return;
         }
+        // Don't load if not visible or content aleady loaded (when moving between tabs)
+        if (!$metadata_general.is(":visible") || !$metadata_general.is(":empty")) {
+            return;
+        }
+
         if (selected.length > 1) {
             // handle batch annotation...
             var productListQuery = new Array();
@@ -91,52 +96,48 @@ $(function () {
         } else {
             $("#annotation_tabs").tabs("enable", general_tab_index);    // always want metadata_general enabled
             var url = null;
-            //var oid = selected.attr('id');
-            //var orel = selected[0].attr('rel');
             var oid = selected[0]["id"];
             var orel = oid.split("-")[0];
             if (typeof oid =="undefined" || oid==false) return;
             
-            // handle loading of GENERAL tab
-            if ($metadata_general.is(":visible") && $metadata_general.is(":empty")) {
-                // orphaned
-                if (oid.indexOf("orphaned")>=0) {
-                    $metadata_general.html('<div class="right_tab_inner"><p class="description">{{ ui.orphans.description }}</p></div>');
-                    //return;
-                // experimenter
-                } else if (oid.indexOf("experimenter")>=0) {
-                    //$metadata_general.html('<p>'+selected.children().eq(1).text()+'</p>');
-                // everything else
-                } else {
-                    if(orel=="image") {
-                        if (selected[0]["shareId"]) {
-                            url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/'+selected[0]["shareId"]+'/';
-                        } else {
-                            url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/';
-                        }
-                    } else if(orel=="well"){
-                        var well_index = selected[0]["index"] || 0;
-                        url = '{% url 'load_metadata_details' %}well/'+oid.split('-')[1]+'/?index='+ well_index;
+            // handle loading of GENERAL tab...
+            // orphaned
+            if (oid.indexOf("orphaned")>=0) {
+                $metadata_general.html('<div class="right_tab_inner"><p class="description">{{ ui.orphans.description }}</p></div>');
+                //return;
+            // experimenter
+            } else if (oid.indexOf("experimenter")>=0) {
+                //$metadata_general.html('<p>'+selected.children().eq(1).text()+'</p>');
+            // everything else
+            } else {
+                if(orel=="image") {
+                    if (selected[0]["shareId"]) {
+                        url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/'+selected[0]["shareId"]+'/';
                     } else {
                         url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/';
                     }
+                } else if(orel=="well"){
+                    var well_index = selected[0]["index"] || 0;
+                    url = '{% url 'load_metadata_details' %}well/'+oid.split('-')[1]+'/?index='+ well_index;
+                } else {
+                    url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/';
                 }
-                if (url !== null) {
-                    // We are effectively doing $metadata_general.load(url) BUT we need to check that selection
-                    // is still correct (hasn't changed during the AJAX call);
-                    OME.fadeInSpinner($metadata_general);
-                    $.ajax({
-                        url: url,
-                        dataType: "html",
-                        success: function(data) {
-                            var selected_id = $("body").data("selected_objects.ome")[0].id;
-                            var oid = $(data).filter("#object-id").text();
-                            if (oid === selected_id) {
-                                $metadata_general.html(data);
-                            }
+            }
+            if (url !== null) {
+                // We are effectively doing $metadata_general.load(url) BUT we need to check that selection
+                // is still correct (hasn't changed during the AJAX call);
+                OME.fadeInSpinner($metadata_general);
+                $.ajax({
+                    url: url,
+                    dataType: "html",
+                    success: function(data) {
+                        var selected_id = $("body").data("selected_objects.ome")[0].id;
+                        var oid = $(data).filter("#object-id").text();
+                        if (oid === selected_id) {
+                            $metadata_general.html(data);
                         }
-                    });
-                }
+                    }
+                });
             }
         }
     }
