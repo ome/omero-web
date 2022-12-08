@@ -56,6 +56,7 @@ $(function () {
                 query += "&index=" + well_index;
             }
             // Load right hand panel...
+            OME.fadeInSpinner($metadata_general);
             $.ajax({
                 url: query,
                 dataType: "html",
@@ -123,6 +124,7 @@ $(function () {
                 if (url !== null) {
                     // We are effectively doing $metadata_general.load(url) BUT we need to check that selection
                     // is still correct (hasn't changed during the AJAX call);
+                    OME.fadeInSpinner($metadata_general);
                     $.ajax({
                         url: url,
                         dataType: "html",
