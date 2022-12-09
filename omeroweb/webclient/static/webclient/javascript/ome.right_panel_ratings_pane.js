@@ -64,6 +64,8 @@ var RatingsPane = function RatingsPane($element, opts) {
     });
 
     var setRating = function(rating, $rating) {
+        // show spinner
+        $("#ratings_spinner").show();
         // update rating
         if ($rating) {
             var rating_src = WEBCLIENT.URLS.static_webclient + "image/rating" + rating + ".png";
@@ -91,9 +93,7 @@ var RatingsPane = function RatingsPane($element, opts) {
 
         if ($rating_annotations.is(":visible")) {
 
-            if ($rating_annotations.is(":empty")) {
-                $rating_annotations.html("Loading ratings...");
-            }
+            $("#ratings_spinner").show();
 
             $.getJSON(WEBCLIENT.URLS.webindex + "api/annotations/?type=rating&" + request, function(data){
 
@@ -112,6 +112,7 @@ var RatingsPane = function RatingsPane($element, opts) {
                                          'average': average,
                                          'count': anns.length,
                                          'static': WEBCLIENT.URLS.static_webclient});
+                $("#ratings_spinner").hide();
                 $rating_annotations.html(html);
 
                 // Finish up...

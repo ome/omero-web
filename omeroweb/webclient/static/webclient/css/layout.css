@@ -1152,7 +1152,7 @@
 			overflow: hidden;
 		}
 			
-		#comments_spinner {
+		.hidden_spinner {
             display: none;
         }
 
