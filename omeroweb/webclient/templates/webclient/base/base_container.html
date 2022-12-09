@@ -289,8 +289,9 @@
         {% include rt.include %}
     {% endfor %}
     
-    
-    
+    <!-- allow omero-mapr OR another app to include custom code -->
+    {% include "webclient/data/includes/mapr_extension.html" %}
+
 {% endblock %}
 
 
