@@ -1056,7 +1056,6 @@
 	#add_comment_form {
 		overflow:hidden;
 		clear:left;
-		margin-bottom:20px;
 	}
 	
 	#add_comment_form textarea {
@@ -1153,9 +1152,12 @@
 			overflow: hidden;
 		}
 			
-		
+		#comments_spinner {
+            display: none;
+        }
+
 		#comments_container	{
-			margin-top:5px;
+			margin-top:10px;
 		}
 					
 
