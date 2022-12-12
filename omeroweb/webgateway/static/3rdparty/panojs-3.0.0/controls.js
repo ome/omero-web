@@ -10,15 +10,15 @@
 
 *******************************************************************************/
 
-PanoJS.CONTROL_IMAGE_ZOOMIN   = "32px_plus.png";
-PanoJS.CONTROL_IMAGE_ZOOM11   = "32px_11.png";
-PanoJS.CONTROL_IMAGE_ZOOMOUT  = "32px_minus.png";
-PanoJS.CONTROL_IMAGE_MAXIMIZE = "32px_show.png";
+PanoJS.CONTROL_IMAGE_ZOOMIN   = "images/32px_plus.png";
+PanoJS.CONTROL_IMAGE_ZOOM11   = "images/32px_11.png";
+PanoJS.CONTROL_IMAGE_ZOOMOUT  = "images/32px_minus.png";
+PanoJS.CONTROL_IMAGE_MAXIMIZE = "images/32px_show.png";
 
-PanoJS.CONTROL_IMAGE_ZOOMIN_TOUCH   = "64px_plus.png";
-PanoJS.CONTROL_IMAGE_ZOOM11_TOUCH   = "64px_11.png";
-PanoJS.CONTROL_IMAGE_ZOOMOUT_TOUCH  = "64px_minus.png";
-PanoJS.CONTROL_IMAGE_MAXIMIZE_TOUCH = "64px_show.png";
+PanoJS.CONTROL_IMAGE_ZOOMIN_TOUCH   = "images/64px_plus.png";
+PanoJS.CONTROL_IMAGE_ZOOM11_TOUCH   = "images/64px_11.png";
+PanoJS.CONTROL_IMAGE_ZOOMOUT_TOUCH  = "images/64px_minus.png";
+PanoJS.CONTROL_IMAGE_MAXIMIZE_TOUCH = "images/64px_show.png";
 
 PanoJS.CONTROL_STYLE = "position: absolute; z-index: 30; "; //opacity:0.5; filter:alpha(opacity=50); ";
 
@@ -84,18 +84,10 @@ PanoControls.prototype.initControls = function() {
 PanoControls.prototype.createDOMElements = function() {
     this.dom_element = this.viewer.viewerDomElement();
       
-    if (PanoJS.CREATE_CONTROL_ZOOMIN) {
-      this.createButton (PanoJS.CONTROL_ZOOMIN);
-    }
-    if (PanoJS.CREATE_CONTROL_ZOOM11) {
-      this.createButton (PanoJS.CONTROL_ZOOM11);
-    }
-    if (PanoJS.CREATE_CONTROL_ZOOMOUT) {
-      this.createButton (PanoJS.CONTROL_ZOOMOUT);
-    }
-    if (PanoJS.CREATE_CONTROL_MAXIMIZE) {
-      this.createButton (PanoJS.CONTROL_MAXIMIZE);
-    }
+    this.createButton (PanoJS.CONTROL_ZOOMIN);
+    this.createButton (PanoJS.CONTROL_ZOOM11);
+    this.createButton (PanoJS.CONTROL_ZOOMOUT);
+    this.createButton (PanoJS.CONTROL_MAXIMIZE);  
 }
 
 PanoControls.prototype.createButton = function(control) {

@@ -20,11 +20,11 @@ function formatInt(n, pad) {
 // BisqueISLevel
 // -----------------------------------------------------
 
-function BisqueISLevel( width, height, xtilesize, ytilesize, level ) {
+function BisqueISLevel( width, height, tilesize, level ) {
     this.width = width;
     this.height = height;
-    this.xtiles = Math.ceil( width / xtilesize );
-    this.ytiles = Math.ceil( height / ytilesize );
+    this.xtiles = Math.ceil( width / tilesize );
+    this.ytiles = Math.ceil( height / tilesize );
     this.level = level;
 }
 
@@ -36,28 +36,21 @@ BisqueISLevel.prototype.tiles = function() {
 // BisqueISPyramid
 // -----------------------------------------------------
 
-function BisqueISPyramid( width, height, xtilesize, ytilesize, levels ) {
+function BisqueISPyramid( width, height, tilesize ) {
     this.width = width;
     this.height = height;
-    this.xtilesize = xtilesize;
-    this.ytilesize = ytilesize;
+    this.tilesize = tilesize;
     this._pyramid = Array();
     
     var level_id = 0;
     var level_width = width;    
     var level_height = height;   
-    var min_size = (Math.min(ytilesize,xtilesize) / 2) + 1;
-    // pyramid can only have mazimum 6 levels
-    while (level_id < levels) {
-        var level = new BisqueISLevel( level_width, level_height, xtilesize, ytilesize, level_id );
+    var min_size = (tilesize / 2) + 1;
+    while (level_id==0 || level_width > min_size || level_height > min_size ) {      
+        var level = new BisqueISLevel( level_width, level_height, tilesize, level_id );
         this._pyramid.push( level );
-        if (levels > 1 ) {
-            level_width  = Math.floor( level_width / (levels-1) );
-            level_height = Math.floor( level_height / (levels-1) );
-        } else {
-            level_width  = Math.floor( level_width );
-            level_height = Math.floor( level_height );
-        }
+        level_width  = Math.floor( level_width / 2 );
+        level_height = Math.floor( level_height / 2 );
         level_id++;
     }
     this._pyramid.reverse();
@@ -97,6 +90,6 @@ BisqueISPyramid.prototype.tile_filename = function( level, x_coordinate, y_coord
     var l = this.getLevel(level).level;
     var x = x_coordinate;
     var y = y_coordinate;
-    return 'tile=' + l + ',' + x + ',' + y + ',' + this.xtilesize + ',' + this.ytilesize;
+    return 'tile=' + l + ',' + x + ',' + y + ',' + this.tilesize;
 }
 
