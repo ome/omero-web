@@ -1064,9 +1064,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "HTML_HEAD_INCLUDES",
         "[]",
         json.loads,
-        (
-            "HTML templates to include in the <head> of main webclient page."
-        ),
+        ("HTML templates to include in the <head> of main webclient page."),
     ],
     "omero.web.plate_layout": [
         "PLATE_LAYOUT",
