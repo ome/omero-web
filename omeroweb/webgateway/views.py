@@ -3397,12 +3397,16 @@ class LoginView(View):
                     )
                 else:
                     error = settings.LOGIN_INCORRECT_CREDENTIALS_TEXT
-        elif "connector" in request.session and len(form.data) == 1:
+        elif "connector" in request.session and (
+            len(form.data) == 0
+            or ("csrfmiddlewaretoken" in form.data and len(form.data) == 1)
+        ):
             # If we appear to already be logged in and the form we've been
             # provided is empty repeat the "logged in" behaviour so a user
             # can get their event context.  A form with length 1 is considered
             # empty as a valid CSRF token is required to even get into this
-            # method.
+            # method.  The CSRF token may also have been provided via HTTP
+            # header in which case the form length will be 0.
             connector = request.session["connector"]
             # Do not allow retrieval of the event context of the public user
             if not connector.is_public:
