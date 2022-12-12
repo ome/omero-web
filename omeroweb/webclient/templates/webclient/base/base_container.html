@@ -289,8 +289,10 @@
         {% include rt.include %}
     {% endfor %}
     
-    <!-- allow omero-mapr OR another app to include custom code -->
-    {% include "webclient/data/includes/mapr_extension.html" %}
+    <!-- allow apps to include custom code -->
+    {% for hhi in ome.html_head_includes %}
+        {% include hhi %}
+    {% endfor %}
 
 {% endblock %}
 
