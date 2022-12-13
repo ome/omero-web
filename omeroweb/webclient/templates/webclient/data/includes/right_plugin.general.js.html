@@ -28,6 +28,13 @@
  * It loads appropriate data into the right-hand 'general' tab on selection changes in the jsTree.
 **/
 
+// This can be overwritten by plugins to provide custom URL for right panel
+// NB: The returned html should have an element <div id="object-id">oid</div>
+// where the oid matches the oid from this function
+OME.getCustomRightPanelUrl = function getCustomRightPanelUrl(oid) {
+    return;
+}
+
 $(function () {
 
     $("#annotation_tabs").tabs({cache: true, disabled: true});
@@ -89,25 +96,22 @@ $(function () {
             
         } else {
             $("#annotation_tabs").tabs("enable", general_tab_index);    // always want metadata_general enabled
-            var url = null;
-            //var oid = selected.attr('id');
-            //var orel = selected[0].attr('rel');
+
             var oid = selected[0]["id"];
-            var orel = oid.split("-")[0];
             if (typeof oid =="undefined" || oid==false) return;
+            var orel = oid.split("-")[0];
+
+            var url = OME.getCustomRightPanelUrl(oid);
             
             // handle loading of GENERAL tab
             if ($metadata_general.is(":visible") && $metadata_general.is(":empty")) {
                 // orphaned
                 if (oid.indexOf("orphaned")>=0) {
                     $metadata_general.html('<div class="right_tab_inner"><p class="description">{{ ui.orphans.description }}</p></div>');
-                    //return;
-                // experimenter
-                } else if (oid.indexOf("experimenter")>=0) {
-                    //$metadata_general.html('<p>'+selected.children().eq(1).text()+'</p>');
-                // everything else
-                } else {
-                    if(orel=="image") {
+                } else if (!url) {
+                    if (oid.indexOf("experimenter")>=0) {
+                        // leave blank for experimenter
+                    } else if(orel=="image") {
                         if (selected[0]["shareId"]) {
                             url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/'+selected[0]["shareId"]+'/';
                         } else {
@@ -120,7 +124,7 @@ $(function () {
                         url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/';
                     }
                 }
-                if (url !== null) {
+                if (url) {
                     // We are effectively doing $metadata_general.load(url) BUT we need to check that selection
                     // is still correct (hasn't changed during the AJAX call);
                     $.ajax({
