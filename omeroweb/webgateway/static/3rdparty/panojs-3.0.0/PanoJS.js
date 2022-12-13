@@ -1,5 +1,5 @@
 /*******************************************************************************
- Panoramic JavaScript Image Viewer (PanoJS) 3.0.0
+ Panoramic JavaScript Image Viewer (PanoJS) 2.0.0
  aka GSV 3.0 aka Giant-Ass Image Viewer 3
 
  Generates a draggable and zoomable viewer for images that would
@@ -116,7 +116,7 @@ function PanoJS(viewer, options) {
 
 // project specific variables
 PanoJS.PROJECT_NAME = 'PanoJS';
-PanoJS.PROJECT_VERSION = '3.0.0';
+PanoJS.PROJECT_VERSION = '2.0.0';
 PanoJS.REVISION_FLAG = '';
 
 // CSS definition settings
