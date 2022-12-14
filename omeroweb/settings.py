@@ -1613,7 +1613,7 @@ PIPELINE = {
                 "webgateway/js/ome.postit.js",
                 "3rdparty/jquery.selectboxes-2.2.6.js",
                 "3rdparty/farbtastic-1.2/farbtastic.js",
-                "3rdparty/jquery.mousewheel-3.0.6.js",
+                "3rdparty/jquery.mousewheel-3.1.13.js",
             ),
             "output_filename": "omeroweb.viewer.min.js",
         }
