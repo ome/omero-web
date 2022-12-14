@@ -552,7 +552,7 @@ jQuery.fn.viewportImage = function(options) {
                 imageWidth      : myPyramid.width,
                 imageHeight     : myPyramid.height,
                 initialZoom     : init_zoom,
-                staticBaseURL   : mediaroot+'3rdparty/panojs-3.0.0/images/',
+                staticBaseURL   : mediaroot+'3rdparty/panojs-3.0.0/',
                 blankTile       : mediaroot+'3rdparty/panojs-3.0.0/images/blank.gif',
                 loadingTile     : mediaroot+'3rdparty/panojs-3.0.0/images/blank.gif',
                 zoomLevelScaling : zoomLevelScaling,
