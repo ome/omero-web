@@ -319,7 +319,19 @@
 	        }
         
         
-
+    .right_panel_spinner {
+        text-align: center;
+        margin-top: 25px;
+        font-size: 18px;
+        /* transition: opacity 2s; */
+        display: none;
+    }
+    /* .right_panel_spinner.fade {
+        opacity: 1;
+    } */
+    .right_panel_spinner span {
+        opacity: 0.5;
+    }
     
 	
 	    

@@ -50,6 +50,11 @@ $(function () {
         if(selected.length == 0) {
             return;
         }
+        // Don't load if not visible or content aleady loaded (when moving between tabs)
+        if (!$metadata_general.is(":visible") || !$metadata_general.is(":empty")) {
+            return;
+        }
+
         if (selected.length > 1) {
             // handle batch annotation...
             var productListQuery = new Array();
@@ -63,6 +68,7 @@ $(function () {
                 query += "&index=" + well_index;
             }
             // Load right hand panel...
+            OME.fadeInSpinner($metadata_general);
             $.ajax({
                 url: query,
                 dataType: "html",
@@ -124,9 +130,11 @@ $(function () {
                         url = prefix+'metadata_details/'+orel+'/'+oid.split("-")[1]+'/';
                     }
                 }
+
                 if (url) {
                     // We are effectively doing $metadata_general.load(url) BUT we need to check that selection
                     // is still correct (hasn't changed during the AJAX call);
+                    OME.fadeInSpinner($metadata_general);
                     $.ajax({
                         url: url,
                         dataType: "html",
