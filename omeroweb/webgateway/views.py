@@ -3344,6 +3344,7 @@ class LoginView(View):
         """
         error = None
         form = self.form_class(request.POST.copy())
+        userip = get_client_ip(request)
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
@@ -3363,7 +3364,7 @@ class LoginView(View):
                 and compatible
             ):
                 conn = connector.create_connection(
-                    self.useragent, username, password, userip=get_client_ip(request)
+                    self.useragent, username, password, userip=userip
                 )
                 if conn is not None:
                     try:
@@ -3396,6 +3397,30 @@ class LoginView(View):
                     )
                 else:
                     error = settings.LOGIN_INCORRECT_CREDENTIALS_TEXT
+        elif "connector" in request.session and (
+            len(form.data) == 0
+            or ("csrfmiddlewaretoken" in form.data and len(form.data) == 1)
+        ):
+            # If we appear to already be logged in and the form we've been
+            # provided is empty repeat the "logged in" behaviour so a user
+            # can get their event context.  A form with length 1 is considered
+            # empty as a valid CSRF token is required to even get into this
+            # method.  The CSRF token may also have been provided via HTTP
+            # header in which case the form length will be 0.
+            connector = request.session["connector"]
+            # Do not allow retrieval of the event context of the public user
+            if not connector.is_public:
+                conn = connector.join_connection(self.useragent, userip)
+                # Connection is None if it could not be successfully joined
+                # and any omero.client objects will have had close() called
+                # on them.
+                if conn is not None:
+                    try:
+                        return self.handle_logged_in(request, conn, connector)
+                    except Exception:
+                        pass
+                    finally:
+                        conn.close(hard=False)
         return self.handle_not_logged_in(request, error, form)
 
 
