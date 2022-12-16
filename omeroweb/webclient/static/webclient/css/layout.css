@@ -1671,15 +1671,6 @@
     .tableLayout li.thead {
         height: 30px;
     }
-    .table_caption {
-        display: none;
-        padding: 10px;
-        text-align: right;
-        font-size: 14px;
-    }
-    .tableLayout .table_caption {
-        display: table-caption;
-    }
     .element_sorter .clickable {
         cursor: pointer;
         background: url("../image/table_arrow_up_down.png") no-repeat scroll center left transparent;

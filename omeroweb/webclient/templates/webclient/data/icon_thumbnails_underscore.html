@@ -12,11 +12,6 @@
         <div class='sort-numeric'>Size T</div>
     </li>
 
-    <!-- If the images were loaded *before* switching to table layout, they won't have sizes -->
-    <% if (images.length > 0 && !images[0].data.obj.sizeX) { %>
-    <div class="table_caption">Please refresh the data to load image sizes in table layout</div>
-    <% }%>
-
     <% _.each(images, function(img) { %>
         <li class="row <% if(img.selected) {print ('ui-selected')} %>
             <% if(img.fsSelected) {print ('fs-selected')} %> "
