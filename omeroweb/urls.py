@@ -119,7 +119,7 @@ urlpatterns += [
     url(
         r"^favicon\.ico$",
         lambda request: redirect("%s%s" % (settings.STATIC_URL, settings.FAVICON_URL)),
-        name="favicon"
+        name="favicon",
     ),
     url(r"^webgateway/", include("omeroweb.webgateway.urls")),
     url(r"^webadmin/", include("omeroweb.webadmin.urls")),
