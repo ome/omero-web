@@ -259,7 +259,9 @@ def get_app_labels():
             cfg_class = getattr(app_module, cls_name)
             app_config = cfg_class(cls_name, app_module)
             labels.append(app_config.label)
-        except:
+        except ImportError:
+            logger.debug("Failed to import app config for app: %s" % app)
+        except AttributeError:
             logger.debug("Failed to lookup label for app: %s" % app)
     return labels
 
