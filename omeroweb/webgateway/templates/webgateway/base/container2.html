@@ -33,6 +33,12 @@
 {% endblock %}
 
 {% block script %}
+    <!--
+        This template is no-longer used by omero-web
+        Since it will be removed soon, we need to be sure that any users are warned:
+    -->
+    <script>alert("WARNING: Django template webgateway/base/container2.html has been deprecated")</script>
+
     {{ block.super }}
     <script type="text/javascript" src="{% static "webgateway/js/ome.nav.js"|add:url_suffix %}"></script> <!-- handles expand  / collapse columns -->
     
