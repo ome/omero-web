@@ -290,8 +290,8 @@
     {% endfor %}
     
     <!-- allow apps to include custom code -->
-    {% for hhi in ome.html_head_includes %}
-        {% include hhi %}
+    {% for include_template in ome.to_include %}
+        {% include include_template %}
     {% endfor %}
 
 {% endblock %}

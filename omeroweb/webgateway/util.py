@@ -17,11 +17,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from importlib import import_module
 import os
 import tempfile
 import zipfile
 import shutil
 import logging
+
+from django.conf import settings
+from django.template.loader import get_template
+from django.template import TemplateDoesNotExist
 
 try:
     import long
@@ -238,3 +243,40 @@ def points_string_to_XY_list(string):
         x, y = xy.split(",")
         xyList.append((float(x.strip()), float(y.strip())))
     return xyList
+
+
+def get_app_labels():
+    """For each installed app, try to load AppConfig and return label"""
+
+    labels = []
+    for app in settings.INSTALLED_APPS:
+        # try to load default_app_config...
+        try:
+            module = import_module(app)
+            config = getattr(module, "default_app_config")
+            module_name, cls_name = config.rsplit(".", 1)
+            app_module = import_module(module_name)
+            cfg_class = getattr(app_module, cls_name)
+            app_config = cfg_class(cls_name, app_module)
+            labels.append(app_config.label)
+        except:
+            logger.debug("Failed to lookup label for app: %s" % app)
+    return labels
+
+
+def get_app_header_includes():
+    """
+    For each app, try to load template: <app_label>/includes/webclient_head.html
+
+    We only consider apps that have an AppConfig with label
+    """
+
+    to_include = []
+    for app_label in get_app_labels():
+        template_path = os.path.join(app_label, "includes", "webclient_head.html")
+        try:
+            get_template(template_path)
+            to_include.append(template_path)
+        except TemplateDoesNotExist:
+            logger.debug("No template found at: %s" % template_path)
+    return to_include

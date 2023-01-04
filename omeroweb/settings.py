@@ -1060,12 +1060,6 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "The javascript loads data into ``$('#div_id')``."
         ),
     ],
-    "omero.web.html_head_includes": [
-        "HTML_HEAD_INCLUDES",
-        "[]",
-        json.loads,
-        ("HTML templates to include in the <head> of main webclient page."),
-    ],
     "omero.web.plate_layout": [
         "PLATE_LAYOUT",
         "expand",
