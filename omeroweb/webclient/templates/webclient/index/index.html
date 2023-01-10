@@ -27,6 +27,13 @@
 {% endblock %}
 
 {% block script %}
+
+    <!--
+        This template is no-longer used by omero-web
+        Since it will be removed soon, we need to be sure that any users are warned:
+    -->
+    <script>alert("WARNING: Django template webclient/index/index.html has been deprecated")</script>
+
     {{ block.super }}
     
     <script type="text/javascript">

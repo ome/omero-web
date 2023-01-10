@@ -26,6 +26,12 @@
 
 
 {% block script %}
+    <!--
+        This template is no-longer used by omero-web
+        Since it will be removed soon, we need to be sure that any users are warned:
+    -->
+    <script>alert("WARNING: Django template webclient/base/base.html has been deprecated")</script>
+
     {{ block.super }}
     <!-- required for the script_launch html below -->
     {% include "webclient/base/includes/script_launch_head.html" %}
