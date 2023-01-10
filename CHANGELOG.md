@@ -7,6 +7,7 @@
 - Show a spinner while loading right panel [#423](https://github.com/ome/omero-web/pull/423)
 - Web API access to eventContext [#422](https://github.com/ome/omero-web/pull/422)
 - Only show hierarchy button for single Image [#413](https://github.com/ome/omero-web/pull/413)
+- Improve documentation of search default settings [#429](https://github.com/ome/omero-web/pull/429)
 
 # Deprecation & bug fixes
 
