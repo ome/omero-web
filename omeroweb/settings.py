@@ -974,7 +974,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         int,
         (
             "ID of the user to pre-select in search form. "
-            "A value of 0 pre-selects the logged in user. "
+            "A value of 0 pre-selects the logged-in user. "
             "A value of -1 pre-selects All Users if "
             "the search is across all groups or All Members "
             "if the search is within a specific group."
