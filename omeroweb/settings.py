@@ -972,13 +972,22 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "SEARCH_DEFAULT_USER",
         0,
         int,
-        ("ID of user to pre-select in search form."),
+        (
+            "ID of the user to pre-select in search form. "
+            "A value of 0 pre-selects the logged-in user. "
+            "A value of -1 pre-selects All Users if "
+            "the search is across all groups or All Members "
+            "if the search is within a specific group."
+        ),
     ],
     "omero.web.search.default_group": [
         "SEARCH_DEFAULT_GROUP",
         0,
         int,
-        ("ID of group to pre-select in search form."),
+        (
+            "ID of the group to pre-select in search form. "
+            "A value of 0 or -1 pre-selects All groups."
+        ),
     ],
     "omero.web.ui.top_links": [
         "TOP_LINKS",
