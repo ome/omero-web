@@ -4212,10 +4212,10 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             conn.SERVICE_OPTS.setOmeroGroup(gid)
         return filteredIds, validObjs
 
-    context = {}
-
     max_w, max_h = conn.getMaxPlaneSize()
     big_img_warning = f"Images over {max_w} x {max_h} not supported"
+
+    context = {}
 
     if imageIds is not None:
         imageIds, validImages = validateIds("Image", imageIds)
