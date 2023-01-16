@@ -24,6 +24,11 @@ $(document).ready(function() {
     // We use these controls to update the paramter fields themselves,
     // as well as updating the Figure preview.
 
+    // If there were no images (E.g. Big images excluded) disable submit
+    if ($(".figImageData").length == 0) {
+        $("#submit").attr("disabled", true);
+    }
+
     $("#enableScalebar").on('click', function(){
         var enabled = $(this).is(":checked");
         if (enabled) {
