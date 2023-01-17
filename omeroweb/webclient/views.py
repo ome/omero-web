@@ -4252,10 +4252,11 @@ def figure_script(request, scriptName, conn=None, **kwargs):
         context["idString"] = ",".join([str(i) for i in imageIds])
 
         # Use the first image as a reference
-        image = validImages[imageIds[0]]
+        if len(imageIds) > 0:
+            image = validImages[imageIds[0]]
+            context["image"] = image
+            context["channels"] = image.getChannels()
         context["imgDict"] = imgDict
-        context["image"] = image
-        context["channels"] = image.getChannels()
 
     elif scriptName == "Thumbnail":
         scriptPath = "/omero/figure_scripts/Thumbnail_Figure.py"
