@@ -4247,6 +4247,9 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             data["tags"] = tags
             data["datasets"] = [d.getName() for d in img.listParents()]
             imgDict.append(data)
+        # update lists without Big Images
+        imageIds = [obj["id"] for obj in imgDict]
+        context["idString"] = ",".join([str(i) for i in imageIds])
 
         # Use the first image as a reference
         image = validImages[imageIds[0]]
