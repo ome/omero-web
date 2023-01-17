@@ -1,3 +1,20 @@
+5.17.0 (January 2023)
+---------------------
+
+# Features
+
+- Support upload of multiple file-annotations [#410](https://github.com/ome/omero-web/pull/410)
+- Show a spinner while loading right panel [#423](https://github.com/ome/omero-web/pull/423)
+- Web API access to eventContext [#422](https://github.com/ome/omero-web/pull/422)
+- Only show hierarchy button for single Image [#413](https://github.com/ome/omero-web/pull/413)
+- Improve documentation of search default settings [#429](https://github.com/ome/omero-web/pull/429)
+
+# Other changes
+
+- Mark unused Django templates as deprecated [#424](https://github.com/ome/omero-web/pull/424)
+- Fix usage of configured Favicon [#431](https://github.com/ome/omero-web/pull/431)
+- Add Python 3.10 to the testing matrix [#421](https://github.com/ome/omero-web/pull/421)
+
 5.16.0 (November 2022)
 ----------------------
 
