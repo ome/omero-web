@@ -13,6 +13,7 @@
 
 - Mark unused Django templates as deprecated [#424](https://github.com/ome/omero-web/pull/424)
 - Fix usage of configured Favicon [#431](https://github.com/ome/omero-web/pull/431)
+- Add Python 3.10 to the testing matrix [#421](https://github.com/ome/omero-web/pull/421)
 
 5.16.0 (November 2022)
 ----------------------
