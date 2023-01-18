@@ -425,20 +425,16 @@ class login_required(object):
 
         # If we have an OMERO session key in our request variables attempt
         # to make a connection based on those credentials.
-        try:
-            omero_session_key = request.GET["bsession"]
-            connector = Connector(server_id, is_secure)
-        except KeyError:
-            # We do not have an OMERO session key in the current request.
-            pass
-        else:
+        if "bsession" in request.GET:
             # We have an OMERO session key in the current request use it
             # to try join an existing connection / OMERO session.
+            omero_session_key = request.GET["bsession"]
             logger.debug(
                 "Have OMERO session key %s, attempting to join..." % omero_session_key
             )
-            connector.user_id = None
-            connector.omero_session_key = omero_session_key
+            connector = Connector(
+                server_id, is_secure, omero_session_key=omero_session_key
+            )
             connection = connector.join_connection(self.useragent, userip)
             connector.to_session(request)
             return connection
