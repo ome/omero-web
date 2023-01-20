@@ -76,8 +76,11 @@ function PanoJS(viewer, options) {
                                                        options.tileExtension ? options.tileExtension : PanoJS.TILE_EXTENSION
                                                      );
 
-  this.tileSize = (options.tileSize ? options.tileSize : PanoJS.TILE_SIZE);
-  this.realTileSize = this.tileSize;
+  this.xTileSize = (options.xTileSize ? options.xTileSize : PanoJS.TILE_SIZE);
+  this.yTileSize = (options.yTileSize ? options.yTileSize : PanoJS.TILE_SIZE);
+  this.realXTileSize = this.xTileSize;
+  this.realYTileSize = this.yTileSize;
+  
   
   if (options.staticBaseURL) PanoJS.STATIC_BASE_URL = options.staticBaseURL;  
       
@@ -87,6 +90,8 @@ function PanoJS(viewer, options) {
   if (this.zoomLevel > this.maxZoomLevel) this.zoomLevel = this.maxZoomLevel;
     
   this.initialPan = (options.initialPan ? options.initialPan : PanoJS.INITIAL_PAN);
+  // map Zoom Levels to Scales (only needed if each zoom level is not a factor of 2)
+  this.zoomLevelScaling = options.zoomLevelScaling;   // 'undefined' is handled in this.currentScale()
     
   this.initialized = false;
   this.surface = null;
@@ -106,7 +111,9 @@ function PanoJS(viewer, options) {
   this.loadingTile = options.loadingTile ? options.loadingTile : PanoJS.LOADING_TILE_IMAGE;      
   this.resetCache();
   this.image_size = { width: options.imageWidth, height: options.imageHeight };
-    
+  
+  this.delay_ms = options.delay ? options.delay : PanoJS.DELAY_MS; 
+  
   // employed to throttle the number of redraws that
   // happen while the mouse is moving
   this.moveCount = 0;
@@ -142,9 +149,16 @@ PanoJS.INITIAL_PAN = { 'x' : .5, 'y' : .5 };
 PanoJS.USE_LOADER_IMAGE = true;
 PanoJS.USE_SLIDE = true;
 
+// Delay before positioning tiles in the viewer, see positionTiles 
+// or moving the viewer, see: ThumbnailControl
+PanoJS.DELAY_MS = 500;
+
 // dima
 if (!PanoJS.STATIC_BASE_URL) PanoJS.STATIC_BASE_URL = '';
-PanoJS.CREATE_CONTROLS = true;
+PanoJS.CREATE_CONTROL_ZOOMIN = true;
+PanoJS.CREATE_CONTROL_ZOOM11 = true;
+PanoJS.CREATE_CONTROL_ZOOMOUT = true;
+PanoJS.CREATE_CONTROL_MAXIMIZE = true;
 PanoJS.CREATE_INFO_CONTROLS = true;
 PanoJS.CREATE_OSD_CONTROLS = true;
 PanoJS.CREATE_THUMBNAIL_CONTROLS = (isClientPhone() ? false : true);
@@ -195,7 +209,7 @@ PanoJS.prototype.init = function() {
     if (this.zoomLevel < 0 || this.zoomLevel > this.maxZoomLevel) {
             var new_level = 0;
             // here MAX defines partial fit and MIN would use full fit
-            while (this.tileSize * Math.pow(2, new_level) <= Math.max(this.width, this.height) && 
+            while ((Math.max(this.xTileSize, this.yTileSize)) * Math.pow(2, new_level) <= Math.max(this.width, this.height) && 
                    new_level<=this.maxZoomLevel) {
                 this.zoomLevel = new_level;
                 new_level += 1;   
@@ -203,8 +217,8 @@ PanoJS.prototype.init = function() {
     }
       
     // move top level up and to the left so that the image is centered
-    var fullWidth = this.tileSize * Math.pow(2, this.zoomLevel);
-    var fullHeight = this.tileSize * Math.pow(2, this.zoomLevel);
+    var fullWidth = this.xTileSize * Math.pow(2, this.zoomLevel);
+    var fullHeight = this.yTileSize * Math.pow(2, this.zoomLevel);
     if (this.image_size) {
       var cur_size = this.currentImageSize();  
       fullWidth = cur_size.width;
@@ -238,7 +252,10 @@ PanoJS.prototype.init = function() {
 
 
     // set event handlers for controls buttons
-    if (PanoJS.CREATE_CONTROLS && !this.controls)
+    if ((PanoJS.CREATE_CONTROL_ZOOMIN
+         || PanoJS.CREATE_CONTROL_ZOOM11
+         || PanoJS.CREATE_CONTROL_ZOOMOUT
+         || PanoJS.CREATE_CONTROL_MAXIMIZE) && !this.controls)
       this.controls = new PanoControls(this);
          
     if (PanoJS.CREATE_INFO_CONTROLS && !this.info_control) {
@@ -279,7 +296,7 @@ PanoJS.prototype.init = function() {
     this.ui_listener.ongesturestart  = callback(this, this.gestureStartHandler);
     this.ui_listener.ongesturechange = callback(this, this.gestureChangeHandler);
     this.ui_listener.ongestureend    = callback(this, this.gestureEndHandler);        
-        
+    
     // notify listners
     this.notifyViewerZoomed();    
     this.notifyViewerMoved();  
@@ -303,8 +320,8 @@ PanoJS.prototype.currentImageSize = function() {
 };    
     
 PanoJS.prototype.prepareTiles = function() {        
-    var rows = Math.ceil(this.height / this.tileSize)+ PanoJS.PRE_CACHE_AMOUNT;
-    var cols = Math.ceil(this.width / this.tileSize)+ PanoJS.PRE_CACHE_AMOUNT;
+    var rows = Math.ceil(this.height / this.yTileSize)+ PanoJS.PRE_CACHE_AMOUNT;
+    var cols = Math.ceil(this.width / this.xTileSize)+ PanoJS.PRE_CACHE_AMOUNT;
            
     for (var c = 0; c < cols; c++) {
       var tileCol = [];
@@ -354,64 +371,64 @@ PanoJS.prototype.positionTiles = function(motion, reset) {
       for (var r = 0; r < this.tiles[c].length; r++) {
         var tile = this.tiles[c][r];
                 
-        tile.posx = (tile.xIndex * this.tileSize) + this.x + motion.x;
-        tile.posy = (tile.yIndex * this.tileSize) + this.y + motion.y;
+        tile.posx = (tile.xIndex * this.xTileSize) + this.x + motion.x;
+        tile.posy = (tile.yIndex * this.yTileSize) + this.y + motion.y;
                 
         var visible = true;
                 
-        if (tile.posx > this.width  +this.tileSize ) {
+        if (tile.posx > this.width  +this.xTileSize ) {
           // tile moved out of view to the right
           // consider the tile coming into view from the left
           do {
             tile.xIndex -= this.tiles.length;
-            tile.posx = (tile.xIndex * this.tileSize) + this.x + motion.x;
-          } while (tile.posx > this.width +this.tileSize  );
+            tile.posx = (tile.xIndex * this.xTileSize) + this.x + motion.x;
+          } while (tile.posx > this.width +this.xTileSize  );
                     
-          if (tile.posx + this.tileSize < 0) {
+          if (tile.posx + this.xTileSize < 0) {
             visible = false;
           }
                     
         } else {
           // tile may have moved out of view from the left
           // if so, consider the tile coming into view from the right
-          while (tile.posx < -this.tileSize  *2) {
+          while (tile.posx < -this.xTileSize  *2) {
             tile.xIndex += this.tiles.length;
-            tile.posx = (tile.xIndex * this.tileSize) + this.x + motion.x;
+            tile.posx = (tile.xIndex * this.xTileSize) + this.x + motion.x;
           }
                     
-          if (tile.posx > this.width  +this.tileSize) {
+          if (tile.posx > this.width  +this.xTileSize) {
             visible = false;
           }
         }
                 
-        if (tile.posy > this.height   +this.tileSize) {
+        if (tile.posy > this.height   +this.yTileSize) {
           // tile moved out of view to the bottom
           // consider the tile coming into view from the top
           do {
             tile.yIndex -= this.tiles[c].length;
-            tile.posy = (tile.yIndex * this.tileSize) + this.y + motion.y;
-          } while (tile.posy > this.height   +this.tileSize);
+            tile.posy = (tile.yIndex * this.yTileSize) + this.y + motion.y;
+          } while (tile.posy > this.height   +this.yTileSize);
                     
-          if (tile.posy + this.tileSize < 0) {
+          if (tile.posy + this.yTileSize < 0) {
             visible = false;
           }
                     
         } else {
           // tile may have moved out of view to the top
           // if so, consider the tile coming into view from the bottom
-          while (tile.posy < -this.tileSize  *2) {
+          while (tile.posy < -this.yTileSize  *2) {
             tile.yIndex += this.tiles[c].length;
-            tile.posy = (tile.yIndex * this.tileSize) + this.y + motion.y;
+            tile.posy = (tile.yIndex * this.yTileSize) + this.y + motion.y;
           }
                     
-          if (tile.posy > this.height   +this.tileSize) {
+          if (tile.posy > this.height   +this.yTileSize) {
             visible = false;
           }
         }
                 
         // additional constraint                
-        if (tile.xIndex*this.tileSize >= cur_size.width) visible = false;
-        if (tile.yIndex*this.tileSize >= cur_size.height) visible = false;                    
+        if (tile.xIndex*this.xTileSize >= cur_size.width) visible = false;
+        if (tile.yIndex*this.yTileSize >= cur_size.height) visible = false;                    
                 
         // display the image if visible
         if (visible)
@@ -455,8 +472,8 @@ PanoJS.prototype.assignTileImage = function(tile) {
       
       // dima: allow zooming in more than 100%
       var cur_size = this.currentImageSize();      
-      var right = tile.xIndex*this.tileSize >= cur_size.width;
-      var low   = tile.yIndex*this.tileSize >= cur_size.height;              
+      var right = tile.xIndex*this.xTileSize >= cur_size.width;
+      var low   = tile.yIndex*this.yTileSize >= cur_size.height;              
             
       if (high || left || low || right) {
         useBlankImage = true;
@@ -480,7 +497,7 @@ PanoJS.prototype.assignTileImage = function(tile) {
       this.well.removeChild(tile.element);
     }
 
-    var scale = Math.max(this.tileSize / this.realTileSize, 1.0);         
+    var scale = Math.max(this.xTileSize / this.realXTileSize, 1.0);
     var tileImg = this.cache[tileImgId];
 
     //window.localStorage (details)
@@ -503,9 +520,24 @@ PanoJS.prototype.assignTileImage = function(tile) {
       tileImg.style.height = tileImg.offsetHeight*scale + 'px';         
     }
 
+    // error handling for tile image loading - simply try to reload image after timeout
+    tileImg.onerror = function() {
+        var $this = $(this);
+        // only try to reload if this is the first failure
+        if (!$this.hasClass('failed')) {
+          $this.addClass('failed');
+          setTimeout(function(){
+            var s = tileImg.src;
+            tileImg.src = s;    // no change, but is enough to trigger reload
+          }, 1000); // try to reload src after timeout - 1 sec seems to work OK
+        }
+      };
+
     if ( tileImg.done || !tileImg.delayed_loading &&
          (useBlankImage || !PanoJS.USE_LOADER_IMAGE || tileImg.complete || (tileImg.image && tileImg.image.complete))  ) {
       tileImg.onload = null;
+      // tileImg.onerror = null;  // seems we can't remove error handler here
+      $(tileImg).removeClass('failed');
       if (tileImg.image) tileImg.image.onload = null;
             
       if (tileImg.parentNode == null) {
@@ -540,6 +572,9 @@ PanoJS.prototype.assignTileImage = function(tile) {
             tile.element = null;      
           }           
         }
+
+        // since we've loaded OK, I assume this frees up memory (not confirmed)
+        tileImg.onerror = null;
                 
         tileImg.onload = function() {};
         return false;
@@ -576,15 +611,21 @@ PanoJS.prototype.createPrototype = function(src, src_to_load) {
       img.delayed_loading = true;
     }
     img.className = PanoJS.TILE_STYLE_CLASS;
-    //img.style.width = this.tileSize + 'px';
-    //img.style.height = this.tileSize + 'px';
+    //img.style.width = this.xTileSize + 'px';
+    //img.style.height = this.yTileSize + 'px';
     return img;
 };
     
 PanoJS.prototype.currentScale = function() {      
     var scale = 1.0;
-    if (this.zoomLevel<this.maxZoomLevel)
-      scale = 1.0 / Math.pow(2, Math.abs(this.zoomLevel-this.maxZoomLevel));
+    if (this.zoomLevel<this.maxZoomLevel) {
+      var zoomDiff = Math.abs(this.zoomLevel-this.maxZoomLevel);
+      if (this.zoomLevelScaling && typeof this.zoomLevelScaling[zoomDiff] != "undefined") {
+        scale = this.zoomLevelScaling[zoomDiff];
+      } else {
+        scale = 1.0 / Math.pow(2, Math.abs(this.zoomLevel-this.maxZoomLevel));
+      }
+    }
     else
     if (this.zoomLevel>this.maxZoomLevel)
       scale = Math.pow(2, Math.abs(this.zoomLevel-this.maxZoomLevel));
@@ -650,6 +691,18 @@ PanoJS.prototype.notifyViewerMoved = function(coords) {
     }
 };
 
+PanoJS.prototype.queuePositionTiles = function (motion, reset) {
+  if (this.positionTiles_timeout) clearTimeout (this.positionTiles_timeout);
+  this.positionTiles_timeout = setTimeout(callback(this, 'positionTilesNow', motion, reset), this.delay_ms);
+}
+
+PanoJS.prototype.positionTilesNow = function (motion, reset) {
+  if (this.positionTiles_timeout) clearTimeout (this.positionTiles_timeout);
+  this.positionTiles_timeout = null;
+  this.positionTiles(motion, reset);
+}
+
+
 PanoJS.prototype.zoom = function(direction) {       
     // ensure we are not zooming out of range
     if (this.zoomLevel + direction < 0) {
@@ -664,13 +717,14 @@ PanoJS.prototype.zoom = function(direction) {
     this.resetCache();       
         
     if (this.zoomLevel+direction > this.maxZoomLevel) {
-      //dima
-      var scale_dif = (this.zoomLevel+direction - this.maxZoomLevel) * 2;
-        this.tileSize = this.realTileSize*scale_dif;      
+        //dima
+        var scale_dif = (this.zoomLevel+direction - this.maxZoomLevel) * 2;
+        this.xTileSize = this.realXTileSize*scale_dif;
+        this.yTileSize = this.realYTileSize*scale_dif;
     } else {
-        this.tileSize = this.realTileSize;
+        this.xTileSize = this.realXTileSize;
+        this.yTileSize = this.realYTileSize;
     }
-        
     var coords = { 'x' : Math.floor(this.width / 2), 'y' : Math.floor(this.height / 2) };
         
     var before = {
@@ -678,16 +732,30 @@ PanoJS.prototype.zoom = function(direction) {
       'y' : (coords.y - this.y)
     };
         
+    var scaleDiff = Math.pow(2, direction);
+
+    // if we're zooming less than 100%, check for non-default scaling as specified by this.zoomLevelScaling
+    if (this.zoomLevel<this.maxZoomLevel || (this.zoomLevel+direction)<this.maxZoomLevel) {
+      var oldZoom = Math.abs(this.zoomLevel-this.maxZoomLevel),
+        newZoom = Math.abs((this.zoomLevel + direction) -this.maxZoomLevel);
+      if (this.zoomLevelScaling && (typeof this.zoomLevelScaling[oldZoom] != "undefined") && this.zoomLevelScaling[newZoom]) {
+        scaleDiff = this.zoomLevelScaling[newZoom] / this.zoomLevelScaling[oldZoom]
+      }
+    }
+
     var after = {
-      'x' : Math.floor(before.x * Math.pow(2, direction)),
-      'y' : Math.floor(before.y * Math.pow(2, direction))
+      'x' : Math.floor(before.x * scaleDiff),
+      'y' : Math.floor(before.y * scaleDiff)
     };
         
     this.x = coords.x - after.x;
     this.y = coords.y - after.y;
     this.zoomLevel += direction;
         
-    this.positionTiles();
+    if (this.delay_ms<=0)
+      this.positionTiles();
+    else
+      this.queuePositionTiles();
     this.notifyViewerZoomed();
 };
 
@@ -931,8 +999,8 @@ PanoJS.prototype.activate = function(pressed) {
 PanoJS.prototype.pointExceedsBoundaries = function(coords) {     
   return (coords.x < this.x ||
           coords.y < this.y ||
-          coords.x > (this.tileSize * Math.pow(2, this.zoomLevel) + this.x) ||
-          coords.y > (this.tileSize * Math.pow(2, this.zoomLevel) + this.y));
+          coords.x > (this.xTileSize * Math.pow(2, this.zoomLevel) + this.x) ||
+          coords.y > (this.xTileSize * Math.pow(2, this.zoomLevel) + this.y));
 };
   
 // QUESTION: where is the best place for this method to be invoked?

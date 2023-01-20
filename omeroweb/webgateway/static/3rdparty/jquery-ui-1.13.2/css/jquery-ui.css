@@ -1,3 +1,7 @@
+/* 
+	NB: manually edited to preserve webclient UI as it looked with jquery-ui 1.10.4
+	See https://github.com/ome/omero-web/issues/333#issuecomment-969174368
+*/
 /*! jQuery UI - v1.13.2 - 2022-12-06
 * http://jqueryui.com
 * Includes: draggable.css, core.css, resizable.css, selectable.css, sortable.css, accordion.css, autocomplete.css, menu.css, button.css, controlgroup.css, checkboxradio.css, datepicker.css, dialog.css, progressbar.css, selectmenu.css, slider.css, spinner.css, tabs.css, tooltip.css, theme.css
