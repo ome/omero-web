@@ -828,26 +828,33 @@ def _get_signature_from_request(request):
     return rv
 
 
-def _get_maps_enabled(request, name, sizeC=0):
+def _get_inverted_enabled(request):
     """
-    Parses 'maps' query string from request
+    Parses 'maps' query string from request for 'inverted' and 'reverse'
+
+    @param request: http request
+    @return:        List of boolean representing whether the
+                    corresponding channel is inverted
     """
+
     codomains = None
     if "maps" in request:
         map_json = request["maps"]
         codomains = []
+        # If coming from request string, need to load -> json
+        if isinstance(map_json, (unicode, str)):
+            map_json = json.loads(map_json)
         try:
-            # If coming from request string, need to load -> json
-            if isinstance(map_json, (unicode, str)):
-                map_json = json.loads(map_json)
-            sizeC = max(len(map_json), sizeC)
-            for c in range(sizeC):
-                enabled = None
-                if len(map_json) > c:
-                    m = map_json[c].get(name)
-                    # If None, no change to saved status
-                    if m is not None:
-                        enabled = m.get("enabled") in (True, "true")
+            for quant_map in map_json:
+                enabled = False
+                # 'reverse' is now deprecated (5.4.0). Check for 'inverted'
+                #  first. inverted is True if 'inverted' OR 'reverse' is enabled
+                m = quant_map.get("inverted")
+                if m is None:
+                    m = quant_map.get("reverse")
+                # If None, no change to saved status
+                if m is not None:
+                    enabled = m.get("enabled") in (True, "true")
                 codomains.append(enabled)
         except Exception:
             logger.debug("Invalid json for query ?maps=%s" % map_json)
@@ -879,34 +886,35 @@ def _get_prepared_image(
     img = conn.getObject("Image", iid)
     if img is None:
         return
-    invert_flags = None
-    if "maps" in r:
-        reverses = _get_maps_enabled(r, "reverse", img.getSizeC())
-        # 'reverse' is now deprecated (5.4.0). Also check for 'invert'
-        invert_flags = _get_maps_enabled(r, "inverted", img.getSizeC())
-        # invert is True if 'invert' OR 'reverse' is enabled
-        if reverses is not None and invert_flags is not None:
-            invert_flags = [
-                z[0] if z[0] is not None else z[1] for z in zip(invert_flags, reverses)
-            ]
-        try:
-            # quantization maps (just applied, not saved at the moment)
-            qm = [m.get("quantization") for m in json.loads(r["maps"])]
-            img.setQuantizationMaps(qm)
-        except Exception:
-            logger.debug("Failed to set quantization maps")
 
     if "c" in r:
         logger.debug("c=" + r["c"])
-        activechannels, windows, colors = _split_channel_info(r["c"])
-        allchannels = range(1, img.getSizeC() + 1)
+        requestedChannels, windows, colors = _split_channel_info(r["c"])
+        invert_flags = None
+        if "maps" in r:
+            invert_flags = _get_inverted_enabled(r)
+            try:
+                # quantization maps (just applied, not saved at the moment)
+                # Need to pad the list of quant maps to have one entry per channel
+                totalChannels = img.getSizeC()
+                channelIndices = [abs(int(ch)) - 1 for ch in requestedChannels]
+                qm = [m.get("quantization") for m in json.loads(r["maps"])]
+                if len(channelIndices) != len(qm):
+                    raise Exception("Maps and channels numbers don't match")
+                allMaps = [None] * totalChannels
+                for i in range(0, len(channelIndices)):
+                    allMaps[channelIndices[i]] = qm[i]
+                img.setQuantizationMaps(allMaps)
+            except Exception:
+                logger.info("Failed to set quantization maps")
+        allChannels = range(1, img.getSizeC() + 1)
         # If saving, apply to all channels
         if saveDefs and not img.setActiveChannels(
-            allchannels, windows, colors, invert_flags
+            allChannels, windows, colors, invert_flags
         ):
             logger.debug("Something bad happened while setting the active channels...")
         # Save the active/inactive state of the channels
-        if not img.setActiveChannels(activechannels, windows, colors, invert_flags):
+        if not img.setActiveChannels(requestedChannels, windows, colors, invert_flags):
             logger.debug("Something bad happened while setting the active channels...")
 
     if r.get("m", None) == "g":
@@ -933,6 +941,20 @@ def _get_prepared_image(
     return (img, compress_quality)
 
 
+def validateRdefQuery(request):
+    r = request.GET
+    if "maps" in r:
+        map_json = r["maps"]
+        # If coming from request string, need to load -> json
+        if isinstance(map_json, (unicode, str)):
+            map_json = json.loads(map_json)
+        if "c" not in r:
+            return False
+        rchannels = r["c"].split(",")
+        if len(map_json) != len(rchannels):
+            return False
+    return True
+
 @login_required()
 def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
@@ -948,6 +970,10 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     @return:            http response wrapping jpeg
     """
     server_id = request.session["connector"].server_id
+
+    if not validateRdefQuery(request):
+        return HttpResponseBadRequest("Must provide the same number of "
+            + "maps and channels or no maps")
     # if the region=x,y,w,h is not parsed correctly to give 4 ints then we
     # simply provide whole image plane.
     # alternatively, could return a 404?
@@ -2269,7 +2295,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         return rv
 
     def applyRenderingSettings(image, rdef):
-        invert_flags = _get_maps_enabled(rdef, "inverted", image.getSizeC())
+        invert_flags = _get_inverted_enabled(rdef, "inverted", image.getSizeC())
         channels, windows, colors = _split_channel_info(rdef["c"])
         # also prepares _re
         image.setActiveChannels(channels, windows, colors, invert_flags)
@@ -3344,7 +3370,6 @@ class LoginView(View):
         """
         error = None
         form = self.form_class(request.POST.copy())
-        userip = get_client_ip(request)
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
@@ -3364,7 +3389,7 @@ class LoginView(View):
                 and compatible
             ):
                 conn = connector.create_connection(
-                    self.useragent, username, password, userip=userip
+                    self.useragent, username, password, userip=get_client_ip(request)
                 )
                 if conn is not None:
                     try:
@@ -3397,30 +3422,6 @@ class LoginView(View):
                     )
                 else:
                     error = settings.LOGIN_INCORRECT_CREDENTIALS_TEXT
-        elif "connector" in request.session and (
-            len(form.data) == 0
-            or ("csrfmiddlewaretoken" in form.data and len(form.data) == 1)
-        ):
-            # If we appear to already be logged in and the form we've been
-            # provided is empty repeat the "logged in" behaviour so a user
-            # can get their event context.  A form with length 1 is considered
-            # empty as a valid CSRF token is required to even get into this
-            # method.  The CSRF token may also have been provided via HTTP
-            # header in which case the form length will be 0.
-            connector = request.session["connector"]
-            # Do not allow retrieval of the event context of the public user
-            if not connector.is_public:
-                conn = connector.join_connection(self.useragent, userip)
-                # Connection is None if it could not be successfully joined
-                # and any omero.client objects will have had close() called
-                # on them.
-                if conn is not None:
-                    try:
-                        return self.handle_logged_in(request, conn, connector)
-                    except Exception:
-                        pass
-                    finally:
-                        conn.close(hard=False)
         return self.handle_not_logged_in(request, error, form)
 
 

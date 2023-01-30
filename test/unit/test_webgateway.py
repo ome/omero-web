@@ -393,3 +393,14 @@ class TestViews(object):
         data = views.rowsToByteArray(rows)
         assert data[0] == 97  # 01100001 First, Second and 7th bits
         assert data[1] == 24  # 00011000 11th and 12th bits
+
+    def testGetInvertedEnabled(self):
+        mockRequest = {'maps': '[{"inverted": {"enabled": "true"}}, {"inverted": {"enabled": "false"}}]'}
+        inverses = views._get_inverted_enabled(mockRequest)
+        assert inverses == [True, False]
+        mockRequest = {'maps': '[{}, {"inverted": {"enabled": "true"}}, {"inverted": {"enabled": true}}]'}
+        inverses = views._get_inverted_enabled(mockRequest)
+        assert inverses == [False, True, True]
+        mockRequest = {'maps': '[{}, {"reverse": {"enabled": "true"}}, {"inverted": {"enabled": true}}]'}
+        inverses = views._get_inverted_enabled(mockRequest)
+        assert inverses == [False, True, True]
