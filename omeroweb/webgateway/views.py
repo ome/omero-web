@@ -955,6 +955,7 @@ def validateRdefQuery(request):
             return False
     return True
 
+
 @login_required()
 def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
@@ -972,8 +973,9 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     server_id = request.session["connector"].server_id
 
     if not validateRdefQuery(request):
-        return HttpResponseBadRequest("Must provide the same number of "
-            + "maps and channels or no maps")
+        return HttpResponseBadRequest(
+            "Must provide the same number of " + "maps and channels or no maps"
+        )
     # if the region=x,y,w,h is not parsed correctly to give 4 ints then we
     # simply provide whole image plane.
     # alternatively, could return a 404?
