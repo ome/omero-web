@@ -837,29 +837,29 @@ def _get_inverted_enabled(request):
                     corresponding channel is inverted
     """
 
-    codomains = None
+    inversions = None
     if "maps" in request:
         map_json = request["maps"]
-        codomains = []
-        # If coming from request string, need to load -> json
-        if isinstance(map_json, (unicode, str)):
-            map_json = json.loads(map_json)
+        inversions = []
         try:
-            for quant_map in map_json:
+            # If coming from request string, need to load -> json
+            if isinstance(map_json, str):
+                map_json = json.loads(map_json)
+            for codomain_map in map_json:
                 enabled = False
                 # 'reverse' is now deprecated (5.4.0). Check for 'inverted'
                 #  first. inverted is True if 'inverted' OR 'reverse' is enabled
-                m = quant_map.get("inverted")
+                m = codomain_map.get("inverted")
                 if m is None:
-                    m = quant_map.get("reverse")
+                    m = codomain_map.get("reverse")
                 # If None, no change to saved status
                 if m is not None:
                     enabled = m.get("enabled") in (True, "true")
-                codomains.append(enabled)
+                inversions.append(enabled)
         except Exception:
             logger.debug("Invalid json for query ?maps=%s" % map_json)
-            codomains = None
-    return codomains
+            inversions = None
+    return inversions
 
 
 def _get_prepared_image(
@@ -2297,7 +2297,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         return rv
 
     def applyRenderingSettings(image, rdef):
-        invert_flags = _get_inverted_enabled(rdef, "inverted", image.getSizeC())
+        invert_flags = _get_inverted_enabled(rdef)
         channels, windows, colors = _split_channel_info(rdef["c"])
         # also prepares _re
         image.setActiveChannels(channels, windows, colors, invert_flags)
