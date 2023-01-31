@@ -946,7 +946,7 @@ def validateRdefQuery(request):
     if "maps" in r:
         map_json = r["maps"]
         # If coming from request string, need to load -> json
-        if isinstance(map_json, (unicode, str)):
+        if isinstance(map_json, str):
             map_json = json.loads(map_json)
         if "c" not in r:
             return False
