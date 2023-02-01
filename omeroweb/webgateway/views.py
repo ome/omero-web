@@ -945,9 +945,13 @@ def validateRdefQuery(request):
     r = request.GET
     if "maps" in r:
         map_json = r["maps"]
-        # If coming from request string, need to load -> json
-        if isinstance(map_json, str):
-            map_json = json.loads(map_json)
+        try:
+            # If coming from request string, need to load -> json
+            if isinstance(map_json, str):
+                map_json = json.loads(map_json)
+        except Exception:
+            log.warn("Failed to parse maps JSON")
+            return False
         if "c" not in r:
             return False
         rchannels = r["c"].split(",")

@@ -413,3 +413,34 @@ class TestViews(object):
         }
         inverses = views._get_inverted_enabled(mockRequest)
         assert inverses == [False, True, True]
+
+
+    def testValidateRdefQuery(self):
+        class MockRequest(object):
+            def __init__(self, data):
+                self.GET = data
+
+        request = MockRequest({
+            "c": '1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF',
+            "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}},\
+            {"inverted": {"enabled": "false"}}]'
+        })
+        validated = views.validateRdefQuery(request)
+        assert validated == True
+        #Wrong number of maps
+        request = MockRequest({
+            "c": '1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF',
+            "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]'
+        })
+        validated = views.validateRdefQuery(request)
+        assert validated == False
+        #Malformed maps JSON
+        request = MockRequest({
+            "c": '1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF',
+            "maps": '[{"inverted}": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]'
+        })
+        validated = views.validateRdefQuery(request)
+        assert validated == False
