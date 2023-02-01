@@ -828,7 +828,7 @@ def _get_signature_from_request(request):
     return rv
 
 
-def _get_inverted_enabled(request):
+def _get_inverted_enabled(request, sizeC):
     """
     Parses 'maps' query string from request for 'inverted' and 'reverse'
 
@@ -856,6 +856,8 @@ def _get_inverted_enabled(request):
                 if m is not None:
                     enabled = m.get("enabled") in (True, "true")
                 inversions.append(enabled)
+            while len(inversions) < sizeC:
+                inversions.append(None)
         except Exception:
             logger.debug("Invalid json for query ?maps=%s" % map_json)
             inversions = None
@@ -892,7 +894,7 @@ def _get_prepared_image(
         requestedChannels, windows, colors = _split_channel_info(r["c"])
         invert_flags = None
         if "maps" in r:
-            invert_flags = _get_inverted_enabled(r)
+            invert_flags = _get_inverted_enabled(r, img.getSizeC())
             try:
                 # quantization maps (just applied, not saved at the moment)
                 # Need to pad the list of quant maps to have one entry per channel
@@ -1100,10 +1102,10 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     """
     server_id = request.session["connector"].server_id
 
-    if not validateRdefQuery(request):
-        return HttpResponseBadRequest(
-            "Must provide the same number of maps and channels or no maps"
-        )
+#    if not validateRdefQuery(request):
+#        return HttpResponseBadRequest(
+#            "Must provide the same number of maps and channels or no maps"
+#        )
 
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
@@ -2067,6 +2069,12 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     @return:            http response 'true' or 'false'
     """
     server_id = request.session["connector"].server_id
+
+    if not validateRdefQuery(request):
+        return HttpResponseBadRequest(
+            "Must provide the same number of maps and channels or no maps"
+        )
+
     pi = _get_prepared_image(
         request, iid, server_id=server_id, conn=conn, saveDefs=True
     )
@@ -2307,7 +2315,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         return rv
 
     def applyRenderingSettings(image, rdef):
-        invert_flags = _get_inverted_enabled(rdef)
+        invert_flags = _get_inverted_enabled(rdef, image.getSizeC())
         channels, windows, colors = _split_channel_info(rdef["c"])
         # also prepares _re
         image.setActiveChannels(channels, windows, colors, invert_flags)
