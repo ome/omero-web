@@ -1,3 +1,18 @@
+5.18.0 (February 2023)
+----------------------
+
+## Features
+- 
+- Allow the JSONSerializer to be used as a session serializer [#435](https://github.com/ome/omero-web/pull/435)
+
+## Other changes
+
+- Upgrade OMERO.web dependencies [#433](https://github.com/ome/omero-web/pull/433)
+
+## Bug fixes
+
+- Apply inversion and quantization to proper channels [#441](https://github.com/ome/omero-web/pull/441)
+
 5.17.0 (January 2023)
 ---------------------
 
