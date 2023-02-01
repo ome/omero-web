@@ -950,7 +950,7 @@ def validateRdefQuery(request):
             if isinstance(map_json, str):
                 map_json = json.loads(map_json)
         except Exception:
-            log.warn("Failed to parse maps JSON")
+            logger.warn("Failed to parse maps JSON")
             return False
         if "c" not in r:
             return False

@@ -427,7 +427,7 @@ class TestViews(object):
             {"inverted": {"enabled": "false"}}]'
         })
         validated = views.validateRdefQuery(request)
-        assert validated == True
+        assert validated is True
         #Wrong number of maps
         request = MockRequest({
             "c": '1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF',
@@ -435,7 +435,7 @@ class TestViews(object):
             {"inverted": {"enabled": "false"}}]'
         })
         validated = views.validateRdefQuery(request)
-        assert validated == False
+        assert validated is False
         #Malformed maps JSON
         request = MockRequest({
             "c": '1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF',
@@ -443,4 +443,4 @@ class TestViews(object):
             {"inverted": {"enabled": "false"}}]'
         })
         validated = views.validateRdefQuery(request)
-        assert validated == False
+        assert validated is False
