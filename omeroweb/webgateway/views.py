@@ -905,8 +905,8 @@ def _get_prepared_image(
                 for i in range(0, len(channelIndices)):
                     allMaps[channelIndices[i]] = qm[i]
                 img.setQuantizationMaps(allMaps)
-            except Exception:
-                logger.info("Failed to set quantization maps")
+            except Exception as ex:
+                logger.error("Failed to set quantization maps", ex)
         allChannels = range(1, img.getSizeC() + 1)
         # If saving, apply to all channels
         if saveDefs and not img.setActiveChannels(
@@ -978,7 +978,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
 
     if not validateRdefQuery(request):
         return HttpResponseBadRequest(
-            "Must provide the same number of " + "maps and channels or no maps"
+            "Must provide the same number of maps and channels or no maps"
         )
     # if the region=x,y,w,h is not parsed correctly to give 4 ints then we
     # simply provide whole image plane.
@@ -1099,6 +1099,12 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     @return:            http response wrapping jpeg
     """
     server_id = request.session["connector"].server_id
+
+    if not validateRdefQuery(request):
+        return HttpResponseBadRequest(
+            "Must provide the same number of maps and channels or no maps"
+        )
+
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
         raise Http404
