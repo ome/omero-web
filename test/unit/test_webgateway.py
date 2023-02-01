@@ -399,19 +399,19 @@ class TestViews(object):
             "maps": '[{"inverted": {"enabled": "true"}},\
             {"inverted": {"enabled": "false"}}]'
         }
-        inverses = views._get_inverted_enabled(mockRequest)
-        assert inverses == [True, False]
+        inverses = views._get_inverted_enabled(mockRequest, 3)
+        assert inverses == [True, False, None]
         mockRequest = {
             "maps": '[{}, {"inverted": {"enabled": "true"}},\
             {"inverted": {"enabled": true}}]'
         }
-        inverses = views._get_inverted_enabled(mockRequest)
+        inverses = views._get_inverted_enabled(mockRequest, 3)
         assert inverses == [False, True, True]
         mockRequest = {
             "maps": '[{}, {"reverse": {"enabled": "true"}},\
             {"inverted": {"enabled": true}}]'
         }
-        inverses = views._get_inverted_enabled(mockRequest)
+        inverses = views._get_inverted_enabled(mockRequest, 3)
         assert inverses == [False, True, True]
 
     def testValidateRdefQuery(self):
