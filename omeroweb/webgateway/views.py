@@ -901,14 +901,13 @@ def _get_prepared_image(
                 totalChannels = img.getSizeC()
                 channelIndices = [abs(int(ch)) - 1 for ch in requestedChannels]
                 qm = [m.get("quantization") for m in json.loads(r["maps"])]
-                if len(channelIndices) != len(qm):
-                    raise Exception("Maps and channels numbers don't match")
                 allMaps = [None] * totalChannels
                 for i in range(0, len(channelIndices)):
-                    allMaps[channelIndices[i]] = qm[i]
+                    if i < len(qm):
+                        allMaps[channelIndices[i]] = qm[i]
                 img.setQuantizationMaps(allMaps)
-            except Exception as ex:
-                logger.error("Failed to set quantization maps", ex)
+            except Exception:
+                logger.info("Failed to set quantization maps")
         allChannels = range(1, img.getSizeC() + 1)
         # If saving, apply to all channels
         if saveDefs and not img.setActiveChannels(
@@ -1102,10 +1101,10 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     """
     server_id = request.session["connector"].server_id
 
-#    if not validateRdefQuery(request):
-#        return HttpResponseBadRequest(
-#            "Must provide the same number of maps and channels or no maps"
-#        )
+    if not validateRdefQuery(request):
+        return HttpResponseBadRequest(
+            "Must provide the same number of maps and channels or no maps"
+        )
 
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
