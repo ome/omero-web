@@ -224,6 +224,54 @@ class UserProxy(object):
 # _session_cb = SessionCB()
 
 
+def validate_rdef_query(func):
+    @wraps(func)
+    def wrapper_validate(request, *args, **kwargs):
+        r = None
+        try:
+            logger.info(request)
+            r = request.GET
+        except Exception:
+            logger.info("Function {} wrapped with validate_rdef_query"
+                + " but first arg is not a request".format(str(func)))
+            return HttpResponseServerError("Endpoint improperly configured")
+
+        if "c" not in r:
+            return HttpResponseBadRequest("Rendering settings must specify "
+                + " channels as c")
+        channels, windows, colors = _split_channel_info(r["c"])
+        # Need the same number of channels, windows, and colors
+        for i in range(0, len(channels)):
+            window = windows[i]
+            # Unspecified windows and colors are returned as None
+            # Validation requires windows to be specified
+            if window[0] is None or window[1] is None:
+                return HttpResponseBadRequest("Must specify window for"
+                    + " each channel")
+            if colors[i] is None:
+                return HttpResponseBadRequest("Must specify color for"
+                    + " each channel")
+        if "m" not in r or r["m"] not in ["g", "c"]:
+            return HttpResponseBadRequest("Query parameter \"m\" must be"
+                + " present with value either \"g\" or \"c\"")
+        #TODO: What to do about z, t, and p?
+        if "maps" in r:
+            map_json = r["maps"]
+            try:
+                # If coming from request string, need to load -> json
+                if isinstance(map_json, str):
+                    map_json = json.loads(map_json)
+            except Exception:
+                logger.warn("Failed to parse maps JSON")
+                return HttpResponseBadRequest("Failed to parse maps JSON")
+            rchannels = r["c"].split(",")
+            if len(map_json) != len(rchannels):
+                return HttpResponseBadRequest("Number of \"maps\" must"
+                    + " match number of channels")
+        return func(request, *args, **kwargs)
+    return wrapper_validate
+
+
 def _split_channel_info(rchannels):
     """
     Splits the request query channel information for images into a sequence of
@@ -962,6 +1010,7 @@ def validateRdefQuery(request):
 
 
 @login_required()
+@validate_rdef_query
 def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
     Returns a jpeg of the OMERO image, rendering only a region specified in
@@ -977,10 +1026,6 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
     server_id = request.session["connector"].server_id
 
-    if not validateRdefQuery(request):
-        return HttpResponseBadRequest(
-            "Must provide the same number of maps and channels or no maps"
-        )
     # if the region=x,y,w,h is not parsed correctly to give 4 ints then we
     # simply provide whole image plane.
     # alternatively, could return a 404?
@@ -1084,6 +1129,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
 
 
 @login_required()
+@validate_rdef_query
 def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     """
     Renders the image with id {{iid}} at {{z}} and {{t}} as jpeg.
@@ -1100,11 +1146,6 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     @return:            http response wrapping jpeg
     """
     server_id = request.session["connector"].server_id
-
-    if not validateRdefQuery(request):
-        return HttpResponseBadRequest(
-            "Must provide the same number of maps and channels or no maps"
-        )
 
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
