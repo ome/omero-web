@@ -232,8 +232,6 @@ def validate_rdef_query(func):
             logger.info(request)
             r = request.GET
         except Exception:
-            logger.info("Function {} wrapped with validate_rdef_query"
-                + " but first arg is not a request".format(str(func)))
             return HttpResponseServerError("Endpoint improperly configured")
 
         if "c" not in r:
