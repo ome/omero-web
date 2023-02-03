@@ -235,8 +235,9 @@ def validate_rdef_query(func):
             return HttpResponseServerError("Endpoint improperly configured")
 
         if "c" not in r:
-            return HttpResponseBadRequest("Rendering settings must specify "
-                + " channels as c")
+            return HttpResponseBadRequest(
+                "Rendering settings must specify " + " channels as c"
+            )
         channels, windows, colors = _split_channel_info(r["c"])
         # Need the same number of channels, windows, and colors
         for i in range(0, len(channels)):
@@ -244,15 +245,18 @@ def validate_rdef_query(func):
             # Unspecified windows and colors are returned as None
             # Validation requires windows to be specified
             if window[0] is None or window[1] is None:
-                return HttpResponseBadRequest("Must specify window for"
-                    + " each channel")
+                return HttpResponseBadRequest(
+                    "Must specify window for" + " each channel"
+                )
             if colors[i] is None:
-                return HttpResponseBadRequest("Must specify color for"
-                    + " each channel")
+                return HttpResponseBadRequest(
+                    "Must specify color for" + " each channel"
+                )
         if "m" not in r or r["m"] not in ["g", "c"]:
-            return HttpResponseBadRequest("Query parameter \"m\" must be"
-                + " present with value either \"g\" or \"c\"")
-        #TODO: What to do about z, t, and p?
+            return HttpResponseBadRequest(
+                'Query parameter "m" must be' + ' present with value either "g" or "c"'
+            )
+        # TODO: What to do about z, t, and p?
         if "maps" in r:
             map_json = r["maps"]
             try:
@@ -264,9 +268,11 @@ def validate_rdef_query(func):
                 return HttpResponseBadRequest("Failed to parse maps JSON")
             rchannels = r["c"].split(",")
             if len(map_json) != len(rchannels):
-                return HttpResponseBadRequest("Number of \"maps\" must"
-                    + " match number of channels")
+                return HttpResponseBadRequest(
+                    'Number of "maps" must' + " match number of channels"
+                )
         return func(request, *args, **kwargs)
+
     return wrapper_validate
 
 
