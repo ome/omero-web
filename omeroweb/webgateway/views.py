@@ -245,13 +245,9 @@ def validate_rdef_query(func):
             # Unspecified windows and colors are returned as None
             # Validation requires windows to be specified
             if window[0] is None or window[1] is None:
-                return HttpResponseBadRequest(
-                    "Must specify window for each channel"
-                )
+                return HttpResponseBadRequest("Must specify window for each channel")
             if colors[i] is None:
-                return HttpResponseBadRequest(
-                    "Must specify color for each channel"
-                )
+                return HttpResponseBadRequest("Must specify color for each channel")
         if "m" not in r or r["m"] not in ["g", "c"]:
             return HttpResponseBadRequest(
                 'Query parameter "m" must be present with value either "g" or "c"'
