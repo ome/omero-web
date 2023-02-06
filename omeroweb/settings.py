@@ -599,7 +599,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "django.contrib.sessions.serializers.PickleSerializer",
         str,
         (
-            "You can use the this setting to customize the session "
+            "You can use this setting to customize the session "
             "serialization format. See :djangodoc:`Django session "
             "serialization documentation <topics/http/sessions/"
             "#session-serialization>` for more details."
