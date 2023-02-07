@@ -27,7 +27,6 @@ from django import forms
 
 
 class ErrorForm(forms.Form):
-
     email = forms.CharField(
         max_length=250,
         widget=forms.TextInput(attrs={"size": 40}),
@@ -41,7 +40,6 @@ class ErrorForm(forms.Form):
 
 
 class CommentForm(forms.Form):
-
     email = forms.CharField(
         max_length=250,
         widget=forms.TextInput(attrs={"size": 40}),

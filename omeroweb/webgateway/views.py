@@ -2939,7 +2939,7 @@ def perform_table_query(
             cols = []
             col_indices = []
             for col_name in col_names:
-                for (i, j) in enumerated_columns:
+                for i, j in enumerated_columns:
                     if col_name == j.name:
                         col_indices.append(i)
                         cols.append(j)

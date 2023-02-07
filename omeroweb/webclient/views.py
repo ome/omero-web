@@ -425,7 +425,6 @@ def logout(request, conn=None, **kwargs):
 
 ###########################################################################
 def _load_template(request, menu, conn=None, url=None, **kwargs):
-
     """
     This view handles most of the top-level pages, as specified by 'menu' E.g.
     userdata, usertags, history, search etc.
@@ -735,7 +734,6 @@ def api_container_list(request, conn=None, **kwargs):
             or experimenter_id == conn.getUserId()
             or orph_t.get("enabled", True)
         ):
-
             orphaned = tree.marshal_orphaned(
                 conn=conn,
                 group_id=group_id,
@@ -1340,7 +1338,6 @@ def api_tags_and_tagged_list_DELETE(request, conn=None, **kwargs):
 
 @login_required()
 def api_annotations(request, conn=None, **kwargs):
-
     r = request.GET
     image_ids = get_list(request, "image")
     dataset_ids = get_list(request, "dataset")
@@ -2128,7 +2125,6 @@ def load_metadata_acquisition(
 @login_required()
 @render_response()
 def load_original_metadata(request, imageId, conn=None, share_id=None, **kwargs):
-
     image = conn.getObject("Image", imageId)
     if image is None:
         raise Http404("No Image found with ID %s" % imageId)

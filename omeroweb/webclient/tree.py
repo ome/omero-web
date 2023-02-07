@@ -600,7 +600,6 @@ def marshal_images(
     thumb_version=False,
     limit=settings.PAGE,
 ):
-
     """Marshals images
 
     @param conn OMERO gateway.
@@ -839,7 +838,6 @@ def _marshal_screen(conn, row):
 
 
 def marshal_screens(conn, group_id=-1, experimenter_id=-1, page=1, limit=settings.PAGE):
-
     """Marshals screens
 
     @param conn OMERO gateway.
@@ -1983,7 +1981,6 @@ def marshal_annotations(
     page=1,
     limit=settings.PAGE,
 ):
-
     annotations = []
     qs = conn.getQueryService()
     service_opts = deepcopy(conn.SERVICE_OPTS)

@@ -33,7 +33,6 @@ from omeroweb.webclient.controller import BaseController
 
 
 class BaseShare(BaseController):
-
     shares = None
     shSize = None
     ownShares = None

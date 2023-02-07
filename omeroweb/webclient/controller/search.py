@@ -36,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 class BaseSearch(BaseController):
-
     images = None
     projects = None
     datasets = None

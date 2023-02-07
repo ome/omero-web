@@ -338,7 +338,6 @@ class GroupForm(NonASCIIForm):
 
         self.name_check = name_check
         if can_modify_group:
-
             self.fields["name"] = forms.CharField(
                 max_length=100,
                 widget=forms.TextInput(attrs={"size": 25, "autocomplete": "off"}),
@@ -532,7 +531,6 @@ class ContainedExperimentersForm(NonASCIIForm):
 
 
 class UploadPhotoForm(forms.Form):
-
     photo = forms.FileField(required=False)
 
     def clean_photo(self):
@@ -553,7 +551,6 @@ class UploadPhotoForm(forms.Form):
 
 
 class ChangePassword(NonASCIIForm):
-
     old_password = forms.CharField(
         max_length=50,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
@@ -585,7 +582,6 @@ class ChangePassword(NonASCIIForm):
 
 
 class EnumerationEntry(NonASCIIForm):
-
     new_entry = forms.CharField(
         max_length=250, widget=forms.TextInput(attrs={"size": 30})
     )

@@ -51,7 +51,6 @@ logger = logging.getLogger(__name__)
 
 
 class SendFeedback(object):
-
     conn = None
 
     def __init__(self, feedback_url):
