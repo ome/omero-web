@@ -6,7 +6,35 @@ continue to function as expected.
 
 ## OMERO.web 5.18.0
 
+### Connector storage in Django sessions
 
+To prepare for upcoming Django upgrades, this upgrade changes the use of
+`request.session["connector"]` from storing a Connector object to a 
+"persist and rehydration" strategy similar to how the Django authentication
+middleware handles model objects. 
+
+Any downstream implementation which was directly assigning and/or retrieving 
+`request.session["connector"]` will need to update their codebase.
+
+More information at https://github.com/ome/omero-web/pull/435
+
+### Third-party JavaScript libraries
+
+If your plugin or customizations depend on any of the following libraries, please
+make sure to check for breaking API or CSS changes.
+
+| Library           | Previous Version | Upgraded to | Link                                                                                                                           |
+|-------------------|------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------|
+| d3                | 3.5.17           | 7.7.0       | [https://d3js.org/](https://d3js.org/)                                                                                         |
+| hammer            | 2.0.2            | 2.0.8       | [https://hammerjs.github.io/](https://hammerjs.github.io/)                                                                     |
+| jquery            | 3.5.1            | 3.6.2       | [https://jquery.com/download/](https://jquery.com/download/)                                                                   |
+| jquery-ui         | 1.12.1           | 1.13.2      | [https://jqueryui.com/download/](https://jqueryui.com/download/)                                                               |
+| jquery.jstree     | 3.3.10           | 3.3.12      | [https://www.jstree.com/](https://www.jstree.com/)                                                                             |
+| jquery.mousewheel | 3.0.6            | 3.1.12      |                                                                                                                                |
+| raphael           | 2.1.0            | 2.3.0       | [https://dmitrybaranovskiy.github.io/raphael/](https://dmitrybaranovskiy.github.io/raphael/)                                   |
+| underscore        | 1.13.1           | 1.13.6      | [https://underscorejs.org/](https://underscorejs.org/)                                                                         |
+
+More information at https://github.com/ome/omero-web/pull/433
 
 ## OMERO.web 5.14.0 plugin migration guide
 
