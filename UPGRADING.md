@@ -8,13 +8,17 @@ continue to function as expected.
 
 ### Connector storage in Django sessions
 
-To prepare for upcoming Django upgrades, this upgrade changes the use of
-`request.session["connector"]` from storing a Connector object to a 
-"persist and rehydration" strategy similar to how the Django authentication
-middleware handles model objects. 
+To prepare for upcoming Django upgrades, this upgrade changes how Connector 
+objects are stored to a "persist and rehydration" strategy similar to how the 
+Django authentication middleware handles model objects. 
 
 Any downstream implementation which was directly assigning and/or retrieving 
-`request.session["connector"]` will need to update their codebase.
+`request.session["connector"]` will need to update their codebase:
+
+- all usages of `request.session.get("connector")` should be replaced 
+  by `Connector.from_session(request)`
+- all usages of `request.session["connector"] = connector` should be 
+  replaced by `connector.to_session(request)`
 
 More information at https://github.com/ome/omero-web/pull/435
 
