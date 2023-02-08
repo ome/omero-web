@@ -2,7 +2,7 @@
 ----------------------
 
 ## Features
-- 
+
 - Allow the JSONSerializer to be used as a session serializer [#435](https://github.com/ome/omero-web/pull/435)
 
 ## Other changes
