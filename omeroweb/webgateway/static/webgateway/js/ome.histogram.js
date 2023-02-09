@@ -48,11 +48,11 @@ window.OME.Histogram = function(element, webgatewayUrl, graphWidth, graphHeight)
         // cache this for use by chartRange
         colCount = data.length;
 
-        var x = d3.scale.linear()
+        var x = d3.scaleLinear()
             .domain([0, data.length - 1])
             .range([0, graphWidth]);
 
-        var y = d3.scale.linear()
+        var y = d3.scaleLinear()
             .domain([
                 d3.min(data),
                 d3.max(data)
@@ -60,7 +60,7 @@ window.OME.Histogram = function(element, webgatewayUrl, graphWidth, graphHeight)
             .range([graphHeight, 0]);
 
         // line
-        var line = d3.svg.line()
+        var line = d3.line()
             .x(function(d, i) { return x(i); })
             .y(function(d, i) { return y(d); });
         svg.selectAll(".line")
@@ -69,7 +69,7 @@ window.OME.Histogram = function(element, webgatewayUrl, graphWidth, graphHeight)
             .attr('stroke', color);
 
         // area to fill under line
-        var area = d3.svg.area()
+        var area = d3.area()
             .x(function(d, i) { return x(i); })
             .y0(graphHeight)
             .y1(function(d) { return y(d); });
