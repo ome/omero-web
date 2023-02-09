@@ -8,6 +8,7 @@
 ## Other changes
 
 - Upgrade OMERO.web dependencies [#433](https://github.com/ome/omero-web/pull/433)
+- Remove outdated Python version warning [#436](https://github.com/ome/omero-web/pull/436)
 
 ## Bug fixes
 
