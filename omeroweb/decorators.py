@@ -82,7 +82,7 @@ def is_public_user(request):
 
     Returns None if no connector found
     """
-    connector = request.session.get("connector")
+    connector = Connector.from_session(request)
     if connector is not None:
         return connector.is_public
 
@@ -352,7 +352,7 @@ class login_required(object):
                 )
                 connection = public_user_connector.join_connection(self.useragent)
                 if connection is not None:
-                    request.session["connector"] = public_user_connector
+                    public_user_connector.to_session(request)
                     logger.debug(
                         "Attempt to use cached OMERO.web public "
                         "session key successful!"
@@ -372,7 +372,7 @@ class login_required(object):
                 is_public=True,
                 userip=get_client_ip(request),
             )
-            request.session["connector"] = connector
+            connector.to_session(request)
             # Clear any previous context so we don't try to access this
             # NB: we also do this in WebclientLoginView.handle_logged_in()
             if "active_group" in request.session:
@@ -399,11 +399,9 @@ class login_required(object):
         # TODO: Handle previous try_super logic; is it still needed?
 
         userip = get_client_ip(request)
-        session = request.session
-        request = request.GET
         is_secure = settings.SECURE
         logger.debug("Is SSL? %s" % is_secure)
-        connector = session.get("connector", None)
+        connector = Connector.from_session(request)
         logger.debug("Connector: %s" % connector)
 
         if server_id is None:
@@ -414,7 +412,7 @@ class login_required(object):
                 server_id = connector.server_id
             else:
                 try:
-                    server_id = request["server"]
+                    server_id = request.GET["server"]
                 except Exception:
                     # If only 1 server, use it
                     servers = list(Server)
@@ -427,22 +425,18 @@ class login_required(object):
 
         # If we have an OMERO session key in our request variables attempt
         # to make a connection based on those credentials.
-        try:
-            omero_session_key = request["bsession"]
-            connector = Connector(server_id, is_secure)
-        except KeyError:
-            # We do not have an OMERO session key in the current request.
-            pass
-        else:
+        if "bsession" in request.GET:
             # We have an OMERO session key in the current request use it
             # to try join an existing connection / OMERO session.
+            omero_session_key = request.GET["bsession"]
             logger.debug(
                 "Have OMERO session key %s, attempting to join..." % omero_session_key
             )
-            connector.user_id = None
-            connector.omero_session_key = omero_session_key
+            connector = Connector(
+                server_id, is_secure, omero_session_key=omero_session_key
+            )
             connection = connector.join_connection(self.useragent, userip)
-            session["connector"] = connector
+            connector.to_session(request)
             return connection
 
         # An OMERO session is not available, we're either trying to service
@@ -450,8 +444,8 @@ class login_required(object):
         username = None
         password = None
         try:
-            username = request["username"]
-            password = request["password"]
+            username = request.GET["username"]
+            password = request.GET["password"]
         except KeyError:
             if connector is None:
                 logger.debug("No username or password in request, exiting.")
@@ -470,7 +464,7 @@ class login_required(object):
             connection = connector.create_connection(
                 self.useragent, username, password, userip=userip
             )
-            session["connector"] = connector
+            connector.to_session(request)
             return connection
 
         logger.debug("Django session connector: %r" % connector)
@@ -485,10 +479,10 @@ class login_required(object):
             # be invalid and we may have other credentials as request
             # variables.
             logger.debug("Connector is no longer valid, destroying...")
-            del session["connector"]
+            del request.session["connector"]
             return None
 
-        session["connector"] = connector
+        connector.to_session(request)
         return None
 
     def __call__(ctx, f):

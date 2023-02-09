@@ -72,7 +72,7 @@ import tempfile
 from omero import ApiUsageException
 from omero.util.decorators import timeit, TimeIt
 from omeroweb.httprsp import HttpJavascriptResponse, HttpJavascriptResponseServerError
-from omeroweb.connector import Server
+from omeroweb.connector import Connector, Server
 
 import glob
 
@@ -93,7 +93,6 @@ import zipfile
 import shutil
 
 from omeroweb.decorators import login_required, ConnCleaningHttpResponse
-from omeroweb.connector import Connector
 from omeroweb.webgateway.util import zip_archived_files, LUTS_IN_PNG
 from omeroweb.webgateway.util import get_longs, getIntOrDefault
 
@@ -350,7 +349,7 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
     @param h:           Thumbnail max height
     @return:            http response containing jpeg
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
 
     server_settings = request.session.get("server_settings", {}).get("browser", {})
     defaultSize = server_settings.get("thumb_default_size", 96)
@@ -427,7 +426,7 @@ def render_roi_thumbnail(request, roiId, w=None, h=None, conn=None, **kwargs):
     z-section) then render a region around that shape, scale to width and
     height (or default size) and draw the shape on to the region
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
 
     # need to find the z indices of the first shape in T
     result = conn.getRoiService().findByRoi(long(roiId), None, conn.SERVICE_OPTS)
@@ -483,7 +482,7 @@ def render_shape_thumbnail(request, shapeId, w=None, h=None, conn=None, **kwargs
     For the given Shape, redner a region around that shape, scale to width and
     height (or default size) and draw the shape on to the region.
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
 
     # need to find the z indices of the first shape in T
     params = omero.sys.Parameters()
@@ -947,7 +946,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     @param conn:        L{omero.gateway.BlitzGateway} connection
     @return:            http response wrapping jpeg
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     # if the region=x,y,w,h is not parsed correctly to give 4 ints then we
     # simply provide whole image plane.
     # alternatively, could return a 404?
@@ -1066,7 +1065,7 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     @param conn:        L{omero.gateway.BlitzGateway} connection
     @return:            http response wrapping jpeg
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
         raise Http404
@@ -1130,7 +1129,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                         if dryrun is True, returns count of images that would
                         be exported
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     imgs = []
     if ctx == "p":
         obj = conn.getObject("Project", cid)
@@ -1281,7 +1280,7 @@ def render_movie(request, iid, axis, pos, conn=None, **kwargs):
     @return:            http response wrapping the file, or redirect to temp
                         file
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     try:
         # Prepare a filename we'll use for temp cache, and check if file is
         # already there
@@ -1373,7 +1372,7 @@ def render_split_channel(request, iid, z, t, conn=None, **kwargs):
     @param conn:        L{omero.gateway.BlitzGateway} connection
     @return:            http response wrapping a jpeg
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
         raise Http404
@@ -1426,7 +1425,7 @@ def jsonp(f):
         try:
             server_id = kwargs.get("server_id", None)
             if server_id is None and request.session.get("connector"):
-                server_id = request.session["connector"].server_id
+                server_id = request.session["connector"]["server_id"]
             kwargs["server_id"] = server_id
             rv = f(request, *args, **kwargs)
             if kwargs.get("_raw", False):
@@ -1957,7 +1956,7 @@ def search_json(request, conn=None, **kwargs):
     @return:            json search results
     TODO: cache
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     opts = searchOptFromRequest(request)
     rv = []
     logger.debug("searchObjects(%s)" % (opts["search"]))
@@ -2028,7 +2027,7 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     @param conn:        L{omero.gateway.BlitzGateway}
     @return:            http response 'true' or 'false'
     """
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     pi = _get_prepared_image(
         request, iid, server_id=server_id, conn=conn, saveDefs=True
     )
@@ -2194,7 +2193,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
     @return:            json dict of Boolean:[Image-IDs]
     """
 
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     json_data = False
 
     fromid = request.GET.get("fromid", None)
@@ -2389,7 +2388,7 @@ def full_viewer(request, iid, conn=None, **kwargs):
     @return:            html page of image and metadata
     """
 
-    server_id = request.session["connector"].server_id
+    server_id = request.session["connector"]["server_id"]
     server_name = Server.get(server_id).server
 
     rid = getImgDetailsFromReq(request)
@@ -2792,12 +2791,11 @@ def su(request, user, conn=None, **kwargs):
     """
     if request.method == "POST":
         conn.setGroupNameForSession("system")
-        connector = request.session["connector"]
-        connector = Connector(connector.server_id, connector.is_secure)
+        connector = Connector.from_session(request)
         session = conn.getSessionService().getSession(conn._sessionUuid)
         ttl = session.getTimeToIdle().val
         connector.omero_session_key = conn.suConn(user, ttl=ttl)._sessionUuid
-        request.session["connector"] = connector
+        connector.to_session(request)
         conn.revertGroupForSession()
         conn.close()
         return True
@@ -3368,7 +3366,7 @@ class LoginView(View):
                 )
                 if conn is not None:
                     try:
-                        request.session["connector"] = connector
+                        connector.to_session(request)
                         # UpgradeCheck URL should be loaded from the server or
                         # loaded omero.web.upgrades.url allows to customize web
                         # only
@@ -3407,7 +3405,7 @@ class LoginView(View):
             # empty as a valid CSRF token is required to even get into this
             # method.  The CSRF token may also have been provided via HTTP
             # header in which case the form length will be 0.
-            connector = request.session["connector"]
+            connector = Connector.from_session(request)
             # Do not allow retrieval of the event context of the public user
             if not connector.is_public:
                 conn = connector.join_connection(self.useragent, userip)

@@ -594,6 +594,17 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "https://docs.gunicorn.org/en/stable/settings.html#timeout"
         ),
     ],
+    "omero.web.session_serializer": [
+        "SESSION_SERIALIZER",
+        "django.contrib.sessions.serializers.PickleSerializer",
+        str,
+        (
+            "You can use this setting to customize the session "
+            "serialization format. See :djangodoc:`Django session "
+            "serialization documentation <topics/http/sessions/"
+            "#session-serialization>` for more details."
+        ),
+    ],
     # Public user
     "omero.web.public.enabled": [
         "PUBLIC_ENABLED",
@@ -1697,11 +1708,6 @@ DEFAULT_USER = os.path.join(
 # broken-link notifications when
 # SEND_BROKEN_LINK_EMAILS=True.
 MANAGERS = ADMINS  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
-
-# https://docs.djangoproject.com/en/1.6/releases/1.6/#default-session-serialization-switched-to-json
-# JSON serializer, which is now the default, cannot handle
-# omeroweb.connector.Connector object
-SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 
 # Load custom settings from etc/grid/config.xml
 # Tue  2 Nov 2010 11:03:18 GMT -- ticket:3228
