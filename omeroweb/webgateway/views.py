@@ -286,7 +286,7 @@ def redirect_explicit_rdef(func):
         rdef['maps'] = json.dumps(rdef['maps'])
         # QueryDict immutable by default, need a copy
         queryDict = request.GET.copy()
-        allQueryParams = queryDict.update(rdef)
+        queryDict.update(rdef)
         queryStr = queryDict.urlencode()
         return HttpResponseRedirect("{}?{}".format(request.path, queryStr))
 
