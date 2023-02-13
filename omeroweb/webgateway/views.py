@@ -272,6 +272,28 @@ def validate_rdef_query(func):
     return wrapper_validate
 
 
+def redirect_explicit_rdef(func):
+    @wraps(func)
+    def wrapper_redirect(request, iid, z=None, t=None, conn=None, *args, **kwargs):
+        # Check for "c" to indicate presence of rdef query params
+        if "c" in request.GET:
+            return func(request, iid, z, t, conn, *args, **kwargs)
+        img = conn.getObject("Image", iid)
+        img.loadRenderOptions()
+
+        rdef = getRenderingSettings(img)
+        # Need to make sure maps is a valid JSON string
+        rdef['maps'] = json.dumps(rdef['maps'])
+        # QueryDict immutable by default, need a copy
+        queryDict = request.GET.copy()
+        allQueryParams = queryDict.update(rdef)
+        queryStr = queryDict.urlencode()
+        return HttpResponseRedirect("{}?{}".format(request.path, queryStr))
+
+    return wrapper_redirect
+
+
+
 def _split_channel_info(rchannels):
     """
     Splits the request query channel information for images into a sequence of
@@ -1010,6 +1032,7 @@ def validateRdefQuery(request):
 
 
 @login_required()
+@redirect_explicit_rdef
 @validate_rdef_query
 def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
@@ -1129,6 +1152,7 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
 
 
 @login_required()
+@redirect_explicit_rdef
 @validate_rdef_query
 def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     """
@@ -2259,6 +2283,53 @@ def reset_rdef_json(request, toOwners=False, conn=None, **kwargs):
 
     return rv
 
+# maybe these pair of methods should be on ImageWrapper??
+def getRenderingSettings(image):
+    rv = {}
+    chs = []
+    maps = []
+    for i, ch in enumerate(image.getChannels()):
+        act = "" if ch.isActive() else "-"
+        start = ch.getWindowStart()
+        end = ch.getWindowEnd()
+        color = ch.getLut()
+        maps.append(
+            {
+                "inverted": {"enabled": ch.isInverted()},
+                "quantization": {
+                    "coefficient": unwrap(ch.getCoefficient()),
+                    "family": unwrap(ch.getFamily()),
+                },
+            }
+        )
+        if not color or len(color) == 0:
+            color = ch.getColor().getHtml()
+        chs.append("%s%s|%s:%s$%s" % (act, i + 1, start, end, color))
+    rv["c"] = ",".join(chs)
+    rv["maps"] = maps
+    logger.info(maps)
+    rv["m"] = "g" if image.isGreyscaleRenderingModel() else "c"
+    rv["z"] = image.getDefaultZ() + 1
+    rv["t"] = image.getDefaultT() + 1
+    rv["p"] = image.getProjection()
+    return rv
+
+def applyRenderingSettings(image, rdef):
+    invert_flags = _get_inverted_enabled(rdef, image.getSizeC())
+    channels, windows, colors = _split_channel_info(rdef["c"])
+    # also prepares _re
+    image.setActiveChannels(channels, windows, colors, invert_flags)
+    if rdef["m"] == "g":
+        image.setGreyscaleRenderingModel()
+    else:
+        image.setColorRenderingModel()
+    if "z" in rdef:
+        image._re.setDefaultZ(long(rdef["z"]) - 1)
+    if "t" in rdef:
+        image._re.setDefaultT(long(rdef["t"]) - 1)
+    image.saveDefaults()
+
+
 
 @login_required()
 @jsonp
@@ -2332,42 +2403,6 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
     # Check session for 'fromid'
     if fromid is None:
         fromid = request.session.get("fromid", None)
-
-    # maybe these pair of methods should be on ImageWrapper??
-    def getRenderingSettings(image):
-        rv = {}
-        chs = []
-        maps = []
-        for i, ch in enumerate(image.getChannels()):
-            act = "" if ch.isActive() else "-"
-            start = ch.getWindowStart()
-            end = ch.getWindowEnd()
-            color = ch.getLut()
-            maps.append({"inverted": {"enabled": ch.isInverted()}})
-            if not color or len(color) == 0:
-                color = ch.getColor().getHtml()
-            chs.append("%s%s|%s:%s$%s" % (act, i + 1, start, end, color))
-        rv["c"] = ",".join(chs)
-        rv["maps"] = maps
-        rv["m"] = "g" if image.isGreyscaleRenderingModel() else "c"
-        rv["z"] = image.getDefaultZ() + 1
-        rv["t"] = image.getDefaultT() + 1
-        return rv
-
-    def applyRenderingSettings(image, rdef):
-        invert_flags = _get_inverted_enabled(rdef, image.getSizeC())
-        channels, windows, colors = _split_channel_info(rdef["c"])
-        # also prepares _re
-        image.setActiveChannels(channels, windows, colors, invert_flags)
-        if rdef["m"] == "g":
-            image.setGreyscaleRenderingModel()
-        else:
-            image.setColorRenderingModel()
-        if "z" in rdef:
-            image._re.setDefaultZ(long(rdef["z"]) - 1)
-        if "t" in rdef:
-            image._re.setDefaultT(long(rdef["t"]) - 1)
-        image.saveDefaults()
 
     # Use rdef from above or previously saved one...
     if rdef is None:
