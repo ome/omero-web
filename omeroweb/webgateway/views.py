@@ -1012,25 +1012,6 @@ def _get_prepared_image(
     return (img, compress_quality)
 
 
-def validateRdefQuery(request):
-    r = request.GET
-    if "maps" in r:
-        map_json = r["maps"]
-        try:
-            # If coming from request string, need to load -> json
-            if isinstance(map_json, str):
-                map_json = json.loads(map_json)
-        except Exception:
-            logger.warn("Failed to parse maps JSON")
-            return False
-        if "c" not in r:
-            return False
-        rchannels = r["c"].split(",")
-        if len(map_json) != len(rchannels):
-            return False
-    return True
-
-
 @login_required()
 @redirect_explicit_rdef
 @validate_rdef_query
@@ -2120,6 +2101,7 @@ def search_json(request, conn=None, **kwargs):
 
 @require_POST
 @login_required()
+@validate_rdef_query
 def save_image_rdef_json(request, iid, conn=None, **kwargs):
     """
     Requests that the rendering defs passed in the request be set as the
@@ -2133,11 +2115,6 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     @return:            http response 'true' or 'false'
     """
     server_id = request.session["connector"].server_id
-
-    if not validateRdefQuery(request):
-        return HttpResponseBadRequest(
-            "Must provide the same number of maps and channels or no maps"
-        )
 
     pi = _get_prepared_image(
         request, iid, server_id=server_id, conn=conn, saveDefs=True
