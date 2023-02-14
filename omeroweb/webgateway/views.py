@@ -283,7 +283,7 @@ def redirect_explicit_rdef(func):
 
         rdef = getRenderingSettings(img)
         # Need to make sure maps is a valid JSON string
-        rdef['maps'] = json.dumps(rdef['maps'])
+        rdef["maps"] = json.dumps(rdef["maps"])
         # QueryDict immutable by default, need a copy
         queryDict = request.GET.copy()
         queryDict.update(rdef)
@@ -291,7 +291,6 @@ def redirect_explicit_rdef(func):
         return HttpResponseRedirect("{}?{}".format(request.path, queryStr))
 
     return wrapper_redirect
-
 
 
 def _split_channel_info(rchannels):
@@ -2260,6 +2259,7 @@ def reset_rdef_json(request, toOwners=False, conn=None, **kwargs):
 
     return rv
 
+
 # maybe these pair of methods should be on ImageWrapper??
 def getRenderingSettings(image):
     rv = {}
@@ -2291,6 +2291,7 @@ def getRenderingSettings(image):
     rv["p"] = image.getProjection()
     return rv
 
+
 def applyRenderingSettings(image, rdef):
     invert_flags = _get_inverted_enabled(rdef, image.getSizeC())
     channels, windows, colors = _split_channel_info(rdef["c"])
@@ -2305,7 +2306,6 @@ def applyRenderingSettings(image, rdef):
     if "t" in rdef:
         image._re.setDefaultT(long(rdef["t"]) - 1)
     image.saveDefaults()
-
 
 
 @login_required()
