@@ -435,7 +435,7 @@ class TestViews(object):
             }
         )
 
-        assert wrapped_fake_view(request) is 1
+        assert wrapped_fake_view(request) == 1
 
         # Unsupported rendering model
         request = MockRequest(
