@@ -229,7 +229,6 @@ def validate_rdef_query(func):
     def wrapper_validate(request, *args, **kwargs):
         r = None
         try:
-            logger.info(request)
             r = request.GET
         except Exception:
             return HttpResponseServerError("Endpoint improperly configured")
