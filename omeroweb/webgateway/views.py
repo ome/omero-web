@@ -827,31 +827,40 @@ def _get_signature_from_request(request):
     return rv
 
 
-def _get_maps_enabled(request, name, sizeC=0):
+def _get_inverted_enabled(request, sizeC):
     """
-    Parses 'maps' query string from request
+    Parses 'maps' query string from request for 'inverted' and 'reverse'
+
+    @param request: http request
+    @return:        List of boolean representing whether the
+                    corresponding channel is inverted
     """
-    codomains = None
+
+    inversions = None
     if "maps" in request:
         map_json = request["maps"]
-        codomains = []
+        inversions = []
         try:
             # If coming from request string, need to load -> json
-            if isinstance(map_json, (unicode, str)):
+            if isinstance(map_json, str):
                 map_json = json.loads(map_json)
-            sizeC = max(len(map_json), sizeC)
-            for c in range(sizeC):
-                enabled = None
-                if len(map_json) > c:
-                    m = map_json[c].get(name)
-                    # If None, no change to saved status
-                    if m is not None:
-                        enabled = m.get("enabled") in (True, "true")
-                codomains.append(enabled)
+            for codomain_map in map_json:
+                enabled = False
+                # 'reverse' is now deprecated (5.4.0). Check for 'inverted'
+                #  first. inverted is True if 'inverted' OR 'reverse' is enabled
+                m = codomain_map.get("inverted")
+                if m is None:
+                    m = codomain_map.get("reverse")
+                # If None, no change to saved status
+                if m is not None:
+                    enabled = m.get("enabled") in (True, "true")
+                inversions.append(enabled)
+            while len(inversions) < sizeC:
+                inversions.append(None)
         except Exception:
             logger.debug("Invalid json for query ?maps=%s" % map_json)
-            codomains = None
-    return codomains
+            inversions = None
+    return inversions
 
 
 def _get_prepared_image(
@@ -878,34 +887,34 @@ def _get_prepared_image(
     img = conn.getObject("Image", iid)
     if img is None:
         return
-    invert_flags = None
-    if "maps" in r:
-        reverses = _get_maps_enabled(r, "reverse", img.getSizeC())
-        # 'reverse' is now deprecated (5.4.0). Also check for 'invert'
-        invert_flags = _get_maps_enabled(r, "inverted", img.getSizeC())
-        # invert is True if 'invert' OR 'reverse' is enabled
-        if reverses is not None and invert_flags is not None:
-            invert_flags = [
-                z[0] if z[0] is not None else z[1] for z in zip(invert_flags, reverses)
-            ]
-        try:
-            # quantization maps (just applied, not saved at the moment)
-            qm = [m.get("quantization") for m in json.loads(r["maps"])]
-            img.setQuantizationMaps(qm)
-        except Exception:
-            logger.debug("Failed to set quantization maps")
 
     if "c" in r:
         logger.debug("c=" + r["c"])
-        activechannels, windows, colors = _split_channel_info(r["c"])
-        allchannels = range(1, img.getSizeC() + 1)
+        requestedChannels, windows, colors = _split_channel_info(r["c"])
+        invert_flags = None
+        if "maps" in r:
+            invert_flags = _get_inverted_enabled(r, img.getSizeC())
+            try:
+                # quantization maps (just applied, not saved at the moment)
+                # Need to pad the list of quant maps to have one entry per channel
+                totalChannels = img.getSizeC()
+                channelIndices = [abs(int(ch)) - 1 for ch in requestedChannels]
+                qm = [m.get("quantization") for m in json.loads(r["maps"])]
+                allMaps = [None] * totalChannels
+                for i in range(0, len(channelIndices)):
+                    if i < len(qm):
+                        allMaps[channelIndices[i]] = qm[i]
+                img.setQuantizationMaps(allMaps)
+            except Exception:
+                logger.info("Failed to set quantization maps")
+        allChannels = range(1, img.getSizeC() + 1)
         # If saving, apply to all channels
         if saveDefs and not img.setActiveChannels(
-            allchannels, windows, colors, invert_flags
+            allChannels, windows, colors, invert_flags
         ):
             logger.debug("Something bad happened while setting the active channels...")
         # Save the active/inactive state of the channels
-        if not img.setActiveChannels(activechannels, windows, colors, invert_flags):
+        if not img.setActiveChannels(requestedChannels, windows, colors, invert_flags):
             logger.debug("Something bad happened while setting the active channels...")
 
     if r.get("m", None) == "g":
@@ -932,6 +941,25 @@ def _get_prepared_image(
     return (img, compress_quality)
 
 
+def validateRdefQuery(request):
+    r = request.GET
+    if "maps" in r:
+        map_json = r["maps"]
+        try:
+            # If coming from request string, need to load -> json
+            if isinstance(map_json, str):
+                map_json = json.loads(map_json)
+        except Exception:
+            logger.warn("Failed to parse maps JSON")
+            return False
+        if "c" not in r:
+            return False
+        rchannels = r["c"].split(",")
+        if len(map_json) != len(rchannels):
+            return False
+    return True
+
+
 @login_required()
 def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
@@ -947,6 +975,11 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     @return:            http response wrapping jpeg
     """
     server_id = request.session["connector"]["server_id"]
+
+    if not validateRdefQuery(request):
+        return HttpResponseBadRequest(
+            "Must provide the same number of maps and channels or no maps"
+        )
     # if the region=x,y,w,h is not parsed correctly to give 4 ints then we
     # simply provide whole image plane.
     # alternatively, could return a 404?
@@ -1066,6 +1099,12 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     @return:            http response wrapping jpeg
     """
     server_id = request.session["connector"]["server_id"]
+
+    if not validateRdefQuery(request):
+        return HttpResponseBadRequest(
+            "Must provide the same number of maps and channels or no maps"
+        )
+
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
         raise Http404
@@ -2028,6 +2067,12 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     @return:            http response 'true' or 'false'
     """
     server_id = request.session["connector"]["server_id"]
+
+    if not validateRdefQuery(request):
+        return HttpResponseBadRequest(
+            "Must provide the same number of maps and channels or no maps"
+        )
+
     pi = _get_prepared_image(
         request, iid, server_id=server_id, conn=conn, saveDefs=True
     )
@@ -2268,7 +2313,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         return rv
 
     def applyRenderingSettings(image, rdef):
-        invert_flags = _get_maps_enabled(rdef, "inverted", image.getSizeC())
+        invert_flags = _get_inverted_enabled(rdef, image.getSizeC())
         channels, windows, colors = _split_channel_info(rdef["c"])
         # also prepares _re
         image.setActiveChannels(channels, windows, colors, invert_flags)

@@ -393,3 +393,59 @@ class TestViews(object):
         data = views.rowsToByteArray(rows)
         assert data[0] == 97  # 01100001 First, Second and 7th bits
         assert data[1] == 24  # 00011000 11th and 12th bits
+
+    def testGetInvertedEnabled(self):
+        mockRequest = {
+            "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]'
+        }
+        inverses = views._get_inverted_enabled(mockRequest, 3)
+        assert inverses == [True, False, None]
+        mockRequest = {
+            "maps": '[{}, {"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": true}}]'
+        }
+        inverses = views._get_inverted_enabled(mockRequest, 3)
+        assert inverses == [False, True, True]
+        mockRequest = {
+            "maps": '[{}, {"reverse": {"enabled": "true"}},\
+            {"inverted": {"enabled": true}}]'
+        }
+        inverses = views._get_inverted_enabled(mockRequest, 3)
+        assert inverses == [False, True, True]
+
+    def testValidateRdefQuery(self):
+        class MockRequest(object):
+            def __init__(self, data):
+                self.GET = data
+
+        request = MockRequest(
+            {
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+        validated = views.validateRdefQuery(request)
+        assert validated is True
+        # Wrong number of maps
+        request = MockRequest(
+            {
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+        validated = views.validateRdefQuery(request)
+        assert validated is False
+        # Malformed maps JSON
+        request = MockRequest(
+            {
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted}": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+        validated = views.validateRdefQuery(request)
+        assert validated is False
