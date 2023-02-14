@@ -448,8 +448,7 @@ class TestViews(object):
             }
         )
 
-        assert isinstance(wrapped_fake_view(request),
-            HttpResponseBadRequest) is True
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
 
         # Missing rendering model
         request = MockRequest(
@@ -461,8 +460,7 @@ class TestViews(object):
             }
         )
 
-        assert isinstance(wrapped_fake_view(request),
-            HttpResponseBadRequest) is True
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
 
         # Missing window information
         request = MockRequest(
@@ -475,8 +473,7 @@ class TestViews(object):
             }
         )
 
-        assert isinstance(wrapped_fake_view(request),
-            HttpResponseBadRequest) is True
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
 
         # Missing color information
         request = MockRequest(
@@ -489,8 +486,7 @@ class TestViews(object):
             }
         )
 
-        assert isinstance(wrapped_fake_view(request),
-            HttpResponseBadRequest) is True
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
 
         # Wrong number of maps
         request = MockRequest(
@@ -501,8 +497,7 @@ class TestViews(object):
             {"inverted": {"enabled": "false"}}]',
             }
         )
-        assert isinstance(wrapped_fake_view(request),
-            HttpResponseBadRequest) is True
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
         # Malformed maps JSON
         request = MockRequest(
             {
@@ -512,5 +507,4 @@ class TestViews(object):
             {"inverted": {"enabled": "false"}}]',
             }
         )
-        assert isinstance(wrapped_fake_view(request),
-            HttpResponseBadRequest) is True
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
