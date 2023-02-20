@@ -42,7 +42,8 @@ var RatingsPane = function RatingsPane($element, opts) {
             var expanded = !$header.hasClass('closed');
             OME.setPaneExpanded('ratings', expanded);
 
-            if (expanded && $rating_annotations.is(":empty")) {
+            let isEmpty = $(".lnfiles", $rating_annotations).length == 0;
+            if (expanded && isEmpty) {
                 this.render();
             }
         }.bind(this));
