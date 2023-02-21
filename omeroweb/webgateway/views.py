@@ -271,27 +271,6 @@ def validate_rdef_query(func):
     return wrapper_validate
 
 
-def redirect_explicit_rdef(func):
-    @wraps(func)
-    def wrapper_redirect(request, iid, z=None, t=None, conn=None, *args, **kwargs):
-        # Check for "c" to indicate presence of rdef query params
-        if "c" in request.GET:
-            return func(request, iid, z, t, conn, *args, **kwargs)
-        img = conn.getObject("Image", iid)
-        img.loadRenderOptions()
-
-        rdef = getRenderingSettings(img)
-        # Need to make sure maps is a valid JSON string
-        rdef["maps"] = json.dumps(rdef["maps"])
-        # QueryDict immutable by default, need a copy
-        queryDict = request.GET.copy()
-        queryDict.update(rdef)
-        queryStr = queryDict.urlencode()
-        return HttpResponseRedirect("{}?{}".format(request.path, queryStr))
-
-    return wrapper_redirect
-
-
 def _split_channel_info(rchannels):
     """
     Splits the request query channel information for images into a sequence of
@@ -1011,8 +990,6 @@ def _get_prepared_image(
 
 
 @login_required()
-@redirect_explicit_rdef
-@validate_rdef_query
 def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
     Returns a jpeg of the OMERO image, rendering only a region specified in
@@ -1131,8 +1108,6 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
 
 
 @login_required()
-@redirect_explicit_rdef
-@validate_rdef_query
 def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     """
     Renders the image with id {{iid}} at {{z}} and {{t}} as jpeg.
@@ -1190,6 +1165,16 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
         rsp["Content-Length"] = len(jpeg_data)
         rsp["Content-Disposition"] = "attachment; filename=%s.%s" % (fileName, format)
     return rsp
+
+@login_required()
+@validate_rdef_query
+def render_image_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
+    return render_image(request, iid, **kwargs)
+
+@login_required()
+@validate_rdef_query
+def render_image_region_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
+    return render_image_region(request, iid, z, t, **kwargs)
 
 
 @login_required()
