@@ -1166,10 +1166,12 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
         rsp["Content-Disposition"] = "attachment; filename=%s.%s" % (fileName, format)
     return rsp
 
+
 @login_required()
 @validate_rdef_query
 def render_image_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
     return render_image(request, iid, **kwargs)
+
 
 @login_required()
 @validate_rdef_query
