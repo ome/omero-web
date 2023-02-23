@@ -110,7 +110,7 @@ Params in render_image/<iid>/<z>/<t>/ are:
 render_image_rdef = url(
     r"^render_image_rdef/(?P<iid>[0-9]+)/(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$",
     views.render_image_rdef,
-    name="webgateway_render_image",
+    name="webgateway_render_image_rdef",
 )
 """
 Returns a jpeg of the OMERO image. See L{views.render_image}. Rendering
@@ -125,7 +125,7 @@ Params in render_image/<iid>/<z>/<t>/ are:
 render_image_region_rdef = url(
     r"^render_image_region_rdef/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$",
     views.render_image_region_rdef,
-    name="webgateway_render_image_region",
+    name="webgateway_render_image_region_rdef",
 )
 """
 Returns a jpeg of the OMERO image, rendering only a region specified in query
