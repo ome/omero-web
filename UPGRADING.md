@@ -4,6 +4,18 @@ This document highlights steps that may need to be taken by developers
 when upgrading OMERO.web to ensure plugins or other customizations
 continue to function as expected.
 
+## OMERO.web 5.19.0
+
+### Partial channel lists in render_image and render_image_region web API calls
+
+When requesting images via the render_image and render_image_region web API
+calls, the desired channel rendering settings may be omitted (to use the
+default rendering settings), fully specified (to use custom settings), or 
+partially specified (to combine custom settings with default rendering 
+settings).  The latter method of partially specifying channel rendering settings
+is now considered deprecated and should not be used in any new or updated
+applications and plugins.
+
 ## OMERO.web 5.18.0
 
 ### Connector storage in Django sessions
