@@ -1170,13 +1170,13 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
 @login_required()
 @validate_rdef_query
 def render_image_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
-    return render_image(request, iid, **kwargs)
+    return render_image(request, iid, z=z, t=t, conn=conn, **kwargs)
 
 
 @login_required()
 @validate_rdef_query
 def render_image_region_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
-    return render_image_region(request, iid, z, t, **kwargs)
+    return render_image_region(request, iid, z, t, conn=conn, **kwargs)
 
 
 @login_required()
