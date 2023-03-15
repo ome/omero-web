@@ -46,7 +46,6 @@ class PlateGrid(object):
     @property
     def metadata(self):
         if self._metadata is None:
-
             q = self._conn.getQueryService()
             params = omero.sys.ParametersI()
             params.addId(self.plate.id)

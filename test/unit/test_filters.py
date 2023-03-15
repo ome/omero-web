@@ -32,7 +32,6 @@ class TestFilters(object):
     """
 
     def test_ago(self):
-
         now = datetime.now()
         assert ago(now - timedelta(seconds=15)) == "less than a minute"
         assert ago(now - timedelta(minutes=15)) == "15 minutes"

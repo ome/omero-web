@@ -2113,7 +2113,6 @@ omero.gateway.SafeCallWrapper = OmeroWebSafeCallWrapper
 
 
 class OmeroWebObjectWrapper(object):
-
     annotation_counter = None
 
     def countParents(self):

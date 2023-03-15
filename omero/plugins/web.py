@@ -137,7 +137,6 @@ def assert_config_argtype(func):
 
 
 class WebControl(DiagnosticsControl):
-
     config_choices = (
         "nginx",
         "nginx-development",

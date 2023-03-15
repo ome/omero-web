@@ -34,7 +34,6 @@ register = Library()
 @register.filter
 def wikify(value):
     if value is not None:
-
         urlier = (
             r"(http[s]?://|localhost|ftp://|ftps://)"
             r"(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\)\|,]|"
@@ -65,7 +64,6 @@ def wikify(value):
 @register.filter
 def sharewikify(value):
     if value is not None:
-
         WIKI_WORD = (
             r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\)\|,]|"
             "(?:%[0-9a-fA-F][0-9a-fA-F]))+"
