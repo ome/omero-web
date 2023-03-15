@@ -44,7 +44,10 @@
             </table>
             </form>
             {% endif %}
-
+            <div id="comments_spinner" class="hidden_spinner">
+                <img class="loader" alt="Loading" src="{% static "webgateway/img/spinner.gif" %}">
+                Loading...
+            </div>
             <div id="comments_container" class="lncomments"></div>
     </div>
     </div>
