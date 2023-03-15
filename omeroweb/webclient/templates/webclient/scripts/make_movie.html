@@ -57,6 +57,10 @@
 
         <h1>Make Movie</h1>
 
+        {% if warning %}
+            <h2 style="color: red">{{ warning }}</h2>
+        {% endif %}
+
         <hr/>
 
         <!-- Data_Type and IDs are already set (we can hide these) -->
