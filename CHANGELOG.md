@@ -8,6 +8,8 @@
 ## Other changes
 
 - UI activity indicator [426](https://github.com/ome/omero-web/pull/426)
+- Thumbnail zooming [411](https://github.com/ome/omero-web/pull/411)
+- Indicate split view not supported for big images [412](https://github.com/ome/omero-web/pull/412)
 
 ## Bug fixes
 
