@@ -223,6 +223,53 @@ class UserProxy(object):
 # _session_cb = SessionCB()
 
 
+def validate_rdef_query(func):
+    @wraps(func)
+    def wrapper_validate(request, *args, **kwargs):
+        r = None
+        try:
+            r = request.GET
+        except Exception:
+            return HttpResponseServerError("Endpoint improperly configured")
+
+        if "c" not in r:
+            return HttpResponseBadRequest(
+                "Rendering settings must specify channels as c"
+            )
+        channels, windows, colors = _split_channel_info(r["c"])
+        # Need the same number of channels, windows, and colors
+        for i in range(0, len(channels)):
+            window = windows[i]
+            # Unspecified windows and colors are returned as None
+            # Validation requires windows to be specified
+            if window[0] is None or window[1] is None:
+                return HttpResponseBadRequest("Must specify window for each channel")
+            if colors[i] is None:
+                return HttpResponseBadRequest("Must specify color for each channel")
+        if "m" not in r or r["m"] not in ["g", "c"]:
+            return HttpResponseBadRequest(
+                'Query parameter "m" must be present with value either "g" or "c"'
+            )
+        # TODO: What to do about z, t, and p?
+        if "maps" in r:
+            map_json = r["maps"]
+            try:
+                # If coming from request string, need to load -> json
+                if isinstance(map_json, str):
+                    map_json = json.loads(map_json)
+            except Exception:
+                logger.warn("Failed to parse maps JSON")
+                return HttpResponseBadRequest("Failed to parse maps JSON")
+            rchannels = r["c"].split(",")
+            if len(map_json) != len(rchannels):
+                return HttpResponseBadRequest(
+                    'Number of "maps" must match number of channels'
+                )
+        return func(request, *args, **kwargs)
+
+    return wrapper_validate
+
+
 def _split_channel_info(rchannels):
     """
     Splits the request query channel information for images into a sequence of
@@ -941,25 +988,6 @@ def _get_prepared_image(
     return (img, compress_quality)
 
 
-def validateRdefQuery(request):
-    r = request.GET
-    if "maps" in r:
-        map_json = r["maps"]
-        try:
-            # If coming from request string, need to load -> json
-            if isinstance(map_json, str):
-                map_json = json.loads(map_json)
-        except Exception:
-            logger.warn("Failed to parse maps JSON")
-            return False
-        if "c" not in r:
-            return False
-        rchannels = r["c"].split(",")
-        if len(map_json) != len(rchannels):
-            return False
-    return True
-
-
 @login_required()
 def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
@@ -976,10 +1004,6 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     """
     server_id = request.session["connector"]["server_id"]
 
-    if not validateRdefQuery(request):
-        return HttpResponseBadRequest(
-            "Must provide the same number of maps and channels or no maps"
-        )
     # if the region=x,y,w,h is not parsed correctly to give 4 ints then we
     # simply provide whole image plane.
     # alternatively, could return a 404?
@@ -1100,11 +1124,6 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     """
     server_id = request.session["connector"]["server_id"]
 
-    if not validateRdefQuery(request):
-        return HttpResponseBadRequest(
-            "Must provide the same number of maps and channels or no maps"
-        )
-
     pi = _get_prepared_image(request, iid, server_id=server_id, conn=conn)
     if pi is None:
         raise Http404
@@ -1145,6 +1164,18 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
         rsp["Content-Length"] = len(jpeg_data)
         rsp["Content-Disposition"] = "attachment; filename=%s.%s" % (fileName, format)
     return rsp
+
+
+@login_required()
+@validate_rdef_query
+def render_image_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
+    return render_image(request, iid, z=z, t=t, conn=conn, **kwargs)
+
+
+@login_required()
+@validate_rdef_query
+def render_image_region_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
+    return render_image_region(request, iid, z, t, conn=conn, **kwargs)
 
 
 @login_required()
@@ -2054,6 +2085,7 @@ def search_json(request, conn=None, **kwargs):
 
 @require_POST
 @login_required()
+@validate_rdef_query
 def save_image_rdef_json(request, iid, conn=None, **kwargs):
     """
     Requests that the rendering defs passed in the request be set as the
@@ -2067,11 +2099,6 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     @return:            http response 'true' or 'false'
     """
     server_id = request.session["connector"]["server_id"]
-
-    if not validateRdefQuery(request):
-        return HttpResponseBadRequest(
-            "Must provide the same number of maps and channels or no maps"
-        )
 
     pi = _get_prepared_image(
         request, iid, server_id=server_id, conn=conn, saveDefs=True
@@ -2218,6 +2245,54 @@ def reset_rdef_json(request, toOwners=False, conn=None, **kwargs):
     return rv
 
 
+# maybe these pair of methods should be on ImageWrapper??
+def getRenderingSettings(image):
+    rv = {}
+    chs = []
+    maps = []
+    for i, ch in enumerate(image.getChannels()):
+        act = "" if ch.isActive() else "-"
+        start = ch.getWindowStart()
+        end = ch.getWindowEnd()
+        color = ch.getLut()
+        maps.append(
+            {
+                "inverted": {"enabled": ch.isInverted()},
+                "quantization": {
+                    "coefficient": unwrap(ch.getCoefficient()),
+                    "family": unwrap(ch.getFamily()),
+                },
+            }
+        )
+        if not color or len(color) == 0:
+            color = ch.getColor().getHtml()
+        chs.append("%s%s|%s:%s$%s" % (act, i + 1, start, end, color))
+    rv["c"] = ",".join(chs)
+    rv["maps"] = maps
+    logger.info(maps)
+    rv["m"] = "g" if image.isGreyscaleRenderingModel() else "c"
+    rv["z"] = image.getDefaultZ() + 1
+    rv["t"] = image.getDefaultT() + 1
+    rv["p"] = image.getProjection()
+    return rv
+
+
+def applyRenderingSettings(image, rdef):
+    invert_flags = _get_inverted_enabled(rdef, image.getSizeC())
+    channels, windows, colors = _split_channel_info(rdef["c"])
+    # also prepares _re
+    image.setActiveChannels(channels, windows, colors, invert_flags)
+    if rdef["m"] == "g":
+        image.setGreyscaleRenderingModel()
+    else:
+        image.setColorRenderingModel()
+    if "z" in rdef:
+        image._re.setDefaultZ(long(rdef["z"]) - 1)
+    if "t" in rdef:
+        image._re.setDefaultT(long(rdef["t"]) - 1)
+    image.saveDefaults()
+
+
 @login_required()
 @jsonp
 def copy_image_rdef_json(request, conn=None, **kwargs):
@@ -2290,42 +2365,6 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
     # Check session for 'fromid'
     if fromid is None:
         fromid = request.session.get("fromid", None)
-
-    # maybe these pair of methods should be on ImageWrapper??
-    def getRenderingSettings(image):
-        rv = {}
-        chs = []
-        maps = []
-        for i, ch in enumerate(image.getChannels()):
-            act = "" if ch.isActive() else "-"
-            start = ch.getWindowStart()
-            end = ch.getWindowEnd()
-            color = ch.getLut()
-            maps.append({"inverted": {"enabled": ch.isInverted()}})
-            if not color or len(color) == 0:
-                color = ch.getColor().getHtml()
-            chs.append("%s%s|%s:%s$%s" % (act, i + 1, start, end, color))
-        rv["c"] = ",".join(chs)
-        rv["maps"] = maps
-        rv["m"] = "g" if image.isGreyscaleRenderingModel() else "c"
-        rv["z"] = image.getDefaultZ() + 1
-        rv["t"] = image.getDefaultT() + 1
-        return rv
-
-    def applyRenderingSettings(image, rdef):
-        invert_flags = _get_inverted_enabled(rdef, image.getSizeC())
-        channels, windows, colors = _split_channel_info(rdef["c"])
-        # also prepares _re
-        image.setActiveChannels(channels, windows, colors, invert_flags)
-        if rdef["m"] == "g":
-            image.setGreyscaleRenderingModel()
-        else:
-            image.setColorRenderingModel()
-        if "z" in rdef:
-            image._re.setDefaultZ(long(rdef["z"]) - 1)
-        if "t" in rdef:
-            image._re.setDefaultT(long(rdef["t"]) - 1)
-        image.saveDefaults()
 
     # Use rdef from above or previously saved one...
     if rdef is None:
