@@ -4,6 +4,7 @@
 ## Features
 
 - New cacheable web API calls to render images or image regions [#443](https://github.com/ome/omero-web/pull/443)
+  Also see notes in UPGRADING.md.
 
 ## Other changes
 

@@ -8,13 +8,20 @@ continue to function as expected.
 
 ### Partial channel lists in render_image and render_image_region web API calls
 
-When requesting images via the render_image and render_image_region web API
+When requesting images via the `render_image` and `render_image_region` web API
 calls, the desired channel rendering settings may be omitted (to use the
 default rendering settings), fully specified (to use custom settings), or 
 partially specified (to combine custom settings with default rendering 
 settings).  The latter method of partially specifying channel rendering settings
 is now considered deprecated and should not be used in any new or updated
 applications and plugins.
+
+New API calls for requesting images using fully specified channel rendering
+settings are now available as `render_image_rdef` and 
+`render_image_region_rdef`.
+
+Documentation for these API calls is available at
+https://omero.readthedocs.io/en/latest/developers/Web/WebGateway.html.
 
 ## OMERO.web 5.18.0
 
