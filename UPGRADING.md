@@ -21,7 +21,7 @@ settings are now available as `render_image_rdef` and
 `render_image_region_rdef`.
 
 Documentation for these API calls is available at
-https://omero.readthedocs.io/en/latest/developers/Web/WebGateway.html.
+https://omero.readthedocs.io/en/stable/developers/Web/WebGateway.html.
 
 ## OMERO.web 5.18.0
 
