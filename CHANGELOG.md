@@ -1,3 +1,21 @@
+5.19.0 (March 2023)
+-------------------
+
+## Features
+
+- New cacheable web API calls to render images or image regions [#443](https://github.com/ome/omero-web/pull/443)
+  Also see notes in UPGRADING.md.
+
+## Other changes
+
+- UI activity indicator [426](https://github.com/ome/omero-web/pull/426)
+- Thumbnail zooming [411](https://github.com/ome/omero-web/pull/411)
+- Indicate split view not supported for big images [412](https://github.com/ome/omero-web/pull/412)
+
+## Bug fixes
+
+- Fix search server errors [446](https://github.com/ome/omero-web/pull/446)
+
 5.18.0 (February 2023)
 ----------------------
 
