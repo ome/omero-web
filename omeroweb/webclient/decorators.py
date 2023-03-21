@@ -178,7 +178,6 @@ class render_response(omeroweb.decorators.render_response):
         self.load_settings(request, context, conn)
 
     def load_settings(self, request, context, conn):
-
         # Process various settings and add to the template context dict
         ping_interval = settings.PING_INTERVAL
         if ping_interval > 0:

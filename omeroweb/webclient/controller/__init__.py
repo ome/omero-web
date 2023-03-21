@@ -29,7 +29,6 @@ PAGE = settings.PAGE
 
 
 class BaseController(object):
-
     conn = None
 
     def __init__(self, conn, **kw):

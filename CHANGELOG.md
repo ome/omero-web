@@ -1,3 +1,55 @@
+5.19.0 (March 2023)
+-------------------
+
+## Features
+
+- New cacheable web API calls to render images or image regions [#443](https://github.com/ome/omero-web/pull/443)
+  Also see notes in UPGRADING.md.
+
+## Other changes
+
+- UI activity indicator [426](https://github.com/ome/omero-web/pull/426)
+- Thumbnail zooming [411](https://github.com/ome/omero-web/pull/411)
+- Indicate split view not supported for big images [412](https://github.com/ome/omero-web/pull/412)
+
+## Bug fixes
+
+- Fix search server errors [446](https://github.com/ome/omero-web/pull/446)
+
+5.18.0 (February 2023)
+----------------------
+
+## Features
+
+- Allow the JSONSerializer to be used as a session serializer [#435](https://github.com/ome/omero-web/pull/435)
+
+## Other changes
+
+- Upgrade OMERO.web dependencies [#433](https://github.com/ome/omero-web/pull/433)
+- Remove outdated Python version warning [#436](https://github.com/ome/omero-web/pull/436)
+- Upgrade Django dependency [#448](https://github.com/ome/omero-web/pull/448)
+
+## Bug fixes
+
+- Apply inversion and quantization to proper channels [#441](https://github.com/ome/omero-web/pull/441)
+
+5.17.0 (January 2023)
+---------------------
+
+# Features
+
+- Support upload of multiple file-annotations [#410](https://github.com/ome/omero-web/pull/410)
+- Show a spinner while loading right panel [#423](https://github.com/ome/omero-web/pull/423)
+- Web API access to eventContext [#422](https://github.com/ome/omero-web/pull/422)
+- Only show hierarchy button for single Image [#413](https://github.com/ome/omero-web/pull/413)
+- Improve documentation of search default settings [#429](https://github.com/ome/omero-web/pull/429)
+
+# Other changes
+
+- Mark unused Django templates as deprecated [#424](https://github.com/ome/omero-web/pull/424)
+- Fix usage of configured Favicon [#431](https://github.com/ome/omero-web/pull/431)
+- Add Python 3.10 to the testing matrix [#421](https://github.com/ome/omero-web/pull/421)
+
 5.16.0 (November 2022)
 ----------------------
 

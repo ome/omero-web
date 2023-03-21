@@ -425,7 +425,6 @@ def logout(request, conn=None, **kwargs):
 
 ###########################################################################
 def _load_template(request, menu, conn=None, url=None, **kwargs):
-
     """
     This view handles most of the top-level pages, as specified by 'menu' E.g.
     userdata, usertags, history, search etc.
@@ -735,7 +734,6 @@ def api_container_list(request, conn=None, **kwargs):
             or experimenter_id == conn.getUserId()
             or orph_t.get("enabled", True)
         ):
-
             orphaned = tree.marshal_orphaned(
                 conn=conn,
                 group_id=group_id,
@@ -1340,7 +1338,6 @@ def api_tags_and_tagged_list_DELETE(request, conn=None, **kwargs):
 
 @login_required()
 def api_annotations(request, conn=None, **kwargs):
-
     r = request.GET
     image_ids = get_list(request, "image")
     dataset_ids = get_list(request, "dataset")
@@ -2128,7 +2125,6 @@ def load_metadata_acquisition(
 @login_required()
 @render_response()
 def load_original_metadata(request, imageId, conn=None, share_id=None, **kwargs):
-
     image = conn.getObject("Image", imageId)
     if image is None:
         raise Http404("No Image found with ID %s" % imageId)
@@ -4208,6 +4204,9 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             conn.SERVICE_OPTS.setOmeroGroup(gid)
         return filteredIds, validObjs
 
+    max_w, max_h = conn.getMaxPlaneSize()
+    big_img_warning = f"Images over {max_w} x {max_h} not supported"
+
     context = {}
 
     if imageIds is not None:
@@ -4227,6 +4226,10 @@ def figure_script(request, scriptName, conn=None, **kwargs):
         for iId in imageIds:
             data = {"id": iId}
             img = validImages[iId]
+            if (img.getSizeX() * img.getSizeY()) > max_w * max_h:
+                # Don't include Big images
+                context["warning"] = big_img_warning
+                continue
             data["name"] = img.getName()
             tags = [
                 ann.getTextValue()
@@ -4236,12 +4239,16 @@ def figure_script(request, scriptName, conn=None, **kwargs):
             data["tags"] = tags
             data["datasets"] = [d.getName() for d in img.listParents()]
             imgDict.append(data)
+        # update lists without Big Images
+        imageIds = [obj["id"] for obj in imgDict]
+        context["idString"] = ",".join([str(i) for i in imageIds])
 
         # Use the first image as a reference
-        image = validImages[imageIds[0]]
+        if len(imageIds) > 0:
+            image = validImages[imageIds[0]]
+            context["image"] = image
+            context["channels"] = image.getChannels()
         context["imgDict"] = imgDict
-        context["image"] = image
-        context["channels"] = image.getChannels()
 
     elif scriptName == "Thumbnail":
         scriptPath = "/omero/figure_scripts/Thumbnail_Figure.py"
@@ -4300,6 +4307,8 @@ def figure_script(request, scriptName, conn=None, **kwargs):
 
         # expect to run on a single image at a time
         image = conn.getObject("Image", imageIds[0])
+        if (image.getSizeX() * image.getSizeY()) > max_w * max_h:
+            context["warning"] = big_img_warning
         # remove extension (if 3 chars or less)
         movieName = image.getName().rsplit(".", 1)
         if len(movieName) > 1 and len(movieName[1]) > 3:

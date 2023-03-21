@@ -35,7 +35,6 @@ logger = logging.getLogger(__name__)
 
 
 class BaseContainer(BaseController):
-
     project = None
     screen = None
     dataset = None

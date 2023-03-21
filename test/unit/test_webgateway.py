@@ -5,6 +5,7 @@
 import time
 import os
 import pytest
+from django.http import HttpResponseBadRequest
 
 from omeroweb.webgateway.webgateway_cache import FileCache, WebGatewayCache
 from omeroweb.webgateway.webgateway_cache import WebGatewayTempFile
@@ -393,3 +394,117 @@ class TestViews(object):
         data = views.rowsToByteArray(rows)
         assert data[0] == 97  # 01100001 First, Second and 7th bits
         assert data[1] == 24  # 00011000 11th and 12th bits
+
+    def testGetInvertedEnabled(self):
+        mockRequest = {
+            "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]'
+        }
+        inverses = views._get_inverted_enabled(mockRequest, 3)
+        assert inverses == [True, False, None]
+        mockRequest = {
+            "maps": '[{}, {"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": true}}]'
+        }
+        inverses = views._get_inverted_enabled(mockRequest, 3)
+        assert inverses == [False, True, True]
+        mockRequest = {
+            "maps": '[{}, {"reverse": {"enabled": "true"}},\
+            {"inverted": {"enabled": true}}]'
+        }
+        inverses = views._get_inverted_enabled(mockRequest, 3)
+        assert inverses == [False, True, True]
+
+    def testValidateRdefQuery(self):
+        class MockRequest(object):
+            def __init__(self, data):
+                self.GET = data
+
+        def fake_view(request):
+            return 1
+
+        wrapped_fake_view = views.validate_rdef_query(fake_view)
+
+        request = MockRequest(
+            {
+                "m": "c",
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+
+        assert wrapped_fake_view(request) == 1
+
+        # Unsupported rendering model
+        request = MockRequest(
+            {
+                "m": "x",
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
+
+        # Missing rendering model
+        request = MockRequest(
+            {
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
+
+        # Missing window information
+        request = MockRequest(
+            {
+                "m": "c",
+                "c": "1|$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
+
+        # Missing color information
+        request = MockRequest(
+            {
+                "m": "c",
+                "c": "1|0:255$FF0000,2|0:255,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
+
+        # Wrong number of maps
+        request = MockRequest(
+            {
+                "m": "c",
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True
+        # Malformed maps JSON
+        request = MockRequest(
+            {
+                "m": "c",
+                "c": "1|0:255$FF0000,2|0:255$00FF00,3|0:255$0000FF",
+                "maps": '[{"inverted}": {"enabled": "true"}},\
+            {"inverted": {"enabled": "false"}}]',
+            }
+        )
+        assert isinstance(wrapped_fake_view(request), HttpResponseBadRequest) is True

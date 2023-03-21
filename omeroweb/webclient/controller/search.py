@@ -36,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 class BaseSearch(BaseController):
-
     images = None
     projects = None
     datasets = None
@@ -157,17 +156,29 @@ class BaseSearch(BaseController):
         except Exception as x:
             logger.info("Search Exception: %s" % x.message)
             if isinstance(x, omero.ServerError):
-                # Only show message to user if we can be helpful
+                # Handle known server exceptions and return useful messages to
+                # the user
                 if "TooManyClauses" in x.message:
                     self.searchError = (
                         "Please try to narrow down your query. The wildcard"
                         " matched too many terms."
                     )
-                elif ":" in query:
-                    self.searchError = (
-                        "There was an error parsing your query."
-                        " Colons ':' are reserved for searches of"
-                        " key-value annotations in the form: 'key:value'."
+                elif "caused a parse exception" in x.message:
+                    # Handle ParseException errors sent by FullText
+                    self.searchError = "There was an error parsing your query."
+                    if ":" in query:
+                        self.searchError += (
+                            " Colons ':' are reserved for searches of"
+                            " key-value annotations in the form: 'key:value'."
+                        )
+                    self.searchError += (
+                        " Please refer to https://omero-guides.readthedocs.io/en/"
+                        "latest/introduction/docs/search-omero.html "
+                        "for more information."
                     )
+                else:
+                    # For all other server errors, raise a QA form with the stack
+                    # trace rather than returning No results
+                    raise x
 
         self.c_size = resultCount

@@ -45,6 +45,9 @@
 
         <h1>Create Split View Figure</h1>
 
+        {% if warning %}
+            <h2 style="color: red">{{ warning }}</h2>
+        {% endif %}
         <hr/>
 
         <input type="text" name="IDs" value="{{ idString }}" style="display:none">

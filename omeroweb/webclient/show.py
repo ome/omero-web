@@ -718,7 +718,6 @@ def paths_to_object(
     # May not have acquisition (load plate from well)
     # We don't need to load the wellsample (not in tree)
     elif lowest_type == "well":
-
         paths_to_img = paths_to_well_image(
             conn,
             params,
@@ -850,7 +849,6 @@ def paths_to_well_image(
     experimenter_id=None,
     orphanedImage=False,
 ):
-
     qs = conn.getQueryService()
     service_opts = deepcopy(conn.SERVICE_OPTS)
     q = """
@@ -974,7 +972,6 @@ def paths_to_tag(conn, experimenter_id=None, tagset_id=None, tag_id=None):
 
     # If we haven't found tag in tagset, just look for tags with matching IDs
     if len(paths) == 0:
-
         where_clause = []
 
         if experimenter_id is not None:
