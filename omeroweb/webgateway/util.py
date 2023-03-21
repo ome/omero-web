@@ -266,7 +266,7 @@ def get_app_labels():
     return labels
 
 
-def get_app_header_includes():
+def get_app_header_includes(template_name):
     """
     For each app, try to load template: <app_label>/includes/webclient_head.html
 
@@ -275,7 +275,7 @@ def get_app_header_includes():
 
     to_include = []
     for app_label in get_app_labels():
-        template_path = os.path.join(app_label, "includes", "webclient_head.html")
+        template_path = os.path.join(app_label, "includes", template_name)
         try:
             get_template(template_path)
             to_include.append(template_path)

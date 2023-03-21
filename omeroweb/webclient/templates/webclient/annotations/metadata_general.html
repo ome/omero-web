@@ -21,6 +21,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 {% endcomment %}
+    <!-- allow apps to include custom code -->
+    {% for include_template in to_include %}
+        {% include include_template %}
+    {% endfor %}
+
     <script type="text/javascript">
         
         $(document).ready(function()
@@ -486,6 +491,7 @@
 
 
         <!-- This is used by AJAX loading the right panel, to check it matches current selection -->
+        <!-- Can also be used by JavaScript to get the current object and ID -->
         <div id='object-id' style="display:none">{{manager.obj_type}}-{{ manager.obj_id }}</div>
 
 
