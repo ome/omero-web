@@ -92,7 +92,7 @@ from omeroweb.webgateway import views as webgateway_views
 from omeroweb.webgateway.marshal import graphResponseMarshal
 from omeroweb.webgateway.util import (
     get_longs as webgateway_get_longs,
-    get_app_header_includes
+    get_app_header_includes,
 )
 
 from omeroweb.feedback.views import handlerInternalError
