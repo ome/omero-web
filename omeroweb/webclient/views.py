@@ -1750,9 +1750,9 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
         context["form_comment"] = form_comment
 
     # For each app, look for /app/includes/ module with right_panel_title() to get custom html
-    title_html = get_app_includes("right_panel_title",
-                                   request=request, conn=conn,
-                                   c_type=c_type, c_id=c_id)
+    title_html = get_app_includes(
+        "right_panel_title", request=request, conn=conn, c_type=c_type, c_id=c_id
+    )
 
     context["to_include"] = title_html
     context["figScripts"] = figScripts
