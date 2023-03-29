@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from importlib import import_module
+import pkgutil
 import os
 import tempfile
 import zipfile
@@ -243,6 +244,37 @@ def points_string_to_XY_list(string):
         x, y = xy.split(",")
         xyList.append((float(x.strip()), float(y.strip())))
     return xyList
+
+
+def get_app_includes(name, **kwargs):
+    """
+    For each installed app, try to load app.includes module
+    and look for a function with the specified name.
+
+    Call each function with the kwargs above, combining
+    the expected html response into a single string
+    """
+
+    html = ""
+    # look for "app.includes" module...
+    for app in settings.INSTALLED_APPS:
+        if "omeroweb.%s" % app in settings.INSTALLED_APPS:
+            includes_module = "omeroweb.%s.includes" % app
+        else:
+            includes_module = "%s.includes" % app
+
+        # Try to import module.includes if it exists
+        module_found = pkgutil.find_loader(includes_module)
+        if module_found is not None:
+            try:
+                mod = import_module(includes_module)
+                if hasattr(mod, name):
+                    func = getattr(mod, name)
+                    html += func(**kwargs)
+            except ImportError:
+                logger.debug("No include for app: %s" % app)
+
+    return html
 
 
 def get_app_labels():
