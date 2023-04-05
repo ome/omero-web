@@ -2836,15 +2836,6 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
     image = conn.getObject("Image", iid)
     if image is None:
         raise Http404
-    maxW, maxH = conn.getMaxPlaneSize()
-    sizeX = image.getSizeX()
-    sizeY = image.getSizeY()
-    if (sizeX * sizeY) > (maxW * maxH):
-        msg = "Histogram not supported for 'big' images (over %s * %s pixels)" % (
-            maxW,
-            maxH,
-        )
-        return JsonResponse({"error": msg})
 
     theZ = int(request.GET.get("theZ", 0))
     theT = int(request.GET.get("theT", 0))
