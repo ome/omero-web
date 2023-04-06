@@ -2842,6 +2842,11 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
     theC = int(theC)
     binCount = int(request.GET.get("bins", 256))
 
+    if (theZ >= image.getSizeZ() or
+        theT >= image.getSizeT() or
+        theC >= image.getSizeC()):
+        raise Http404
+
     # TODO: handle projection when supported by OMERO
     data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
     histogram = data[theC]
