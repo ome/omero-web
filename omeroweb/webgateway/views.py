@@ -2850,6 +2850,7 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
         data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
         histogram = data[theC]
     except omero.ApiUsageException as ex:
+        logger.warn(ex)
         return HttpResponseBadRequest("Histograms not supported for tiled images")
     return JsonResponse({"data": histogram})
 
