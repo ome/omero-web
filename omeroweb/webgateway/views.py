@@ -2846,9 +2846,11 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
         raise Http404
 
     # TODO: handle projection when supported by OMERO
-    data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
-    histogram = data[theC]
-
+    try:
+        data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
+        histogram = data[theC]
+    except omero.ApiUsageException as ex:
+        return HttpResponseBadRequest("Histograms not supported for tiled images")
     return JsonResponse({"data": histogram})
 
 
