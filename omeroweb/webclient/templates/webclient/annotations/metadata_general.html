@@ -296,6 +296,8 @@
                     $chNameForm.find(".confirmButtons").hide();
                     $("#channel_names_display").show();
                     $("#editChannelNames").show();
+                    $("button[type='submit']", $chNameForm).removeAttr('disabled');
+                    $chNameForm.removeClass("in_progress");  // hide spinner
                     $chNameForm.hide();
                 }
                 // Workflow starts by displaying the form
@@ -321,6 +323,10 @@
                 // Form handled by AJAX
                 $chNameForm.ajaxForm({
                     dataType:  'json',
+                    beforeSubmit: function() {
+                        $("button[type='submit']", $chNameForm).attr('disabled', true);
+                        $chNameForm.addClass("in_progress"); // shows spinner
+                    },
                     success: function(data) {
                         var cnames = data.channelNames;
                         // update the channel names, and ititial values in form

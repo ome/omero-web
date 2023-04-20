@@ -67,7 +67,6 @@ help_expire = (
 
 
 class GlobalSearchForm(NonASCIIForm):
-
     search_query = forms.CharField(widget=forms.TextInput(attrs={"size": 25}))
 
 
@@ -127,7 +126,6 @@ class ShareForm(NonASCIIForm):
 
 
 class ContainerForm(NonASCIIForm):
-
     name = forms.CharField(max_length=250, widget=forms.TextInput(attrs={"size": 45}))
     description = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2, "cols": 49}), required=False
@@ -136,12 +134,10 @@ class ContainerForm(NonASCIIForm):
 
 
 class ContainerNameForm(NonASCIIForm):
-
     name = forms.CharField(max_length=250, widget=forms.TextInput(attrs={"size": 45}))
 
 
 class ContainerDescriptionForm(NonASCIIForm):
-
     description = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 3, "cols": 39}), required=False
     )
@@ -338,7 +334,9 @@ class FilesAnnotationForm(BaseAnnotationForm):
             required=False,
         )
 
-    annotation_file = forms.FileField(required=False)
+    annotation_file = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={"multiple": True}), required=False
+    )
 
 
 class CommentAnnotationForm(BaseAnnotationForm):
@@ -1687,7 +1685,6 @@ class MetadataObjectiveForm(forms.Form):
 
 
 class MetadataObjectiveSettingsForm(MetadataObjectiveForm):
-
     BOOLEAN_CHOICES = (
         ("", "---------"),
         ("True", "True"),
@@ -2814,7 +2811,6 @@ class MetadataDetectorForm(forms.Form):
 
 
 class MetadataLightSourceForm(forms.Form):
-
     BOOLEAN_CHOICES = (
         ("", "---------"),
         ("True", "True"),

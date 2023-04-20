@@ -51,7 +51,6 @@ class TestWeb(object):
             monkeypatch.delenv("PYTHONPATH")
 
     def set_python_dir(self, monkeypatch):
-
         dist_dir = (
             path(__file__) / ".." / ".." / ".." / ".." / ".." / "target"
         )  # FIXME: should not be hard-coded
@@ -393,7 +392,6 @@ class TestWeb(object):
         capsys,
         monkeypatch,
     ):
-
         self.mock_django_setting("APPLICATION_SERVER", app_server, monkeypatch)
         static_prefix = self.add_prefix(prefix, monkeypatch)
         upstream_name = self.add_upstream_name(prefix, monkeypatch)

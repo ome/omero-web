@@ -965,7 +965,6 @@ def manage_group_owner(request, action, gid, conn=None, **kwargs):
     if action == "edit":
         context = getEditFormContext()
     elif action == "save":
-
         if request.method != "POST":
             return HttpResponseRedirect(
                 reverse(viewname="wamanagegroupownerid", args=["edit", group.id])

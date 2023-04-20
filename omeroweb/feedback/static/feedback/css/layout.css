@@ -37,3 +37,32 @@ h2 {
     width: 600px;
     margin: 5px auto;
 }
+
+.logo_list {
+    display: flex;
+    align-items: center;
+}
+
+.logo_list li {
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 5px;
+}
+
+.logo_list .middle_logo {
+    margin-right: 15px;
+}
+
+.version_list li {
+    margin-top: 7px;
+}
+
+.version_chip {
+    background-color: #dfdfdf;
+    border: 1px solid #afafaf;
+    margin-right: 2px;
+    margin-left: 2px;
+    padding: 1px;
+    border-radius: 10%;
+    font-size: 9px;
+}

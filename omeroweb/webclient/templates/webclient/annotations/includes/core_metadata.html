@@ -86,16 +86,22 @@
                         <!-- hidden input for 'apply to dataset' options -->
                         <input type="text" name="parentId" size=5 style="display:none" />
                         <!-- buttons -->
-                        <span class="originalButtons">
-                            <button name="save" type="submit" value="save" title="Save channel names">Save</button>
-                            <button name="apply" title="Save and apply to all images">Apply to All</button>
-                        </span>
-                        <span class="confirmButtons" style="display:none">
-                            <div>Update channel names for all images 
+                        <div class="buttons">
+                            <button class="originalButtons" name="save" type="submit" value="save" title="Save channel names">
+                                Save
+                            </button>
+                            <button class="originalButtons" name="apply" title="Save and apply to all images">
+                                Apply to All
+                            </button>
+                            <div class="confirmButtons">Update channel names for all images 
                                 in the <span class="ptype"></span>? <br />This cannot be undone.</div>
-                            <button name="confirm_apply" type="submit" value="apply" title="Save and apply to all Images">Continue</button>
-                        </span>
-                        <button type="reset" name="cancel" title="Cancel">Cancel</button>
+                            <button class="confirmButtons" name="confirm_apply" type="submit" value="apply" title="Save and apply to all Images">
+                                Continue
+                            </button>
+                            <button type="reset" name="cancel" title="Cancel">
+                                Cancel
+                            </button>
+                        </div>
                     </form>
                     {% if image.canEdit %}
                         <button id="editChannelNames" class="btn silver btn_edit" 

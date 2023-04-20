@@ -34,7 +34,6 @@ from omeroweb.webclient.controller import BaseController
 
 
 class BaseCalendar(BaseController):
-
     day = None
     month = None
     year = None
@@ -204,7 +203,6 @@ class BaseCalendar(BaseController):
         )
 
     def get_items(self, page=None):
-
         if self.month < 10:
             mn = "0%i" % self.month
         else:

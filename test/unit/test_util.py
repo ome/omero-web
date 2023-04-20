@@ -39,7 +39,6 @@ class TestUtil(object):
     """
 
     def test_format_percent_fraction(self):
-
         assert formatPercentFraction(1) == "100"
         assert formatPercentFraction(0.805) == "81"
         assert formatPercentFraction(0.2) == "20"

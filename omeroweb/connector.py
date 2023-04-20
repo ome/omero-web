@@ -130,12 +130,19 @@ class Connector(object):
 
     SERVER_VERSION_RE = re.compile("^.*?[-]?(\\d+[.]\\d+([.]\\d+)?)[-]?.*?$")
 
-    def __init__(self, server_id, is_secure):
+    def __init__(
+        self,
+        server_id,
+        is_secure,
+        is_public=False,
+        omero_session_key=None,
+        user_id=None,
+    ):
         self.server_id = server_id
         self.is_secure = is_secure
-        self.is_public = False
-        self.omero_session_key = None
-        self.user_id = None
+        self.is_public = is_public
+        self.omero_session_key = omero_session_key
+        self.user_id = user_id
 
     def lookup_host_and_port(self):
         server = Server.get(self.server_id)
@@ -265,3 +272,19 @@ class Connector(object):
         if client_version[0] == "5" and int(client_version[1]) >= 6:
             return int(server_version[1]) >= 5
         return server_version[:2] == client_version[:2]
+
+    @staticmethod
+    def from_session(request):
+        """
+        Creates a new Connector from metadata in the current session.
+        """
+        v = request.session.get("connector", None)
+        if v is None:
+            return None
+        return Connector(**v)
+
+    def to_session(self, request):
+        """
+        Writes Connector metadata to the current session.
+        """
+        request.session["connector"] = self.__dict__

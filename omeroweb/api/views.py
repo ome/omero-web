@@ -411,7 +411,6 @@ class ShapeView(ObjectView):
 
 
 class ExperimenterView(ObjectView):
-
     OMERO_TYPE = "Experimenter"
 
     CAN_DELETE = False
@@ -426,7 +425,6 @@ class ExperimenterView(ObjectView):
 
 
 class ExperimenterGroupView(ObjectView):
-
     OMERO_TYPE = "ExperimenterGroup"
 
     CAN_DELETE = False

@@ -26,11 +26,17 @@
     </h1>
     <div class="annotations_section" style="display: none">
         <!-- If we're in 'batch annotate' (obj_string) use annotationBlocked -->
-        <div id="rating_annotations"
+        <div id="rating_annotations" style="float: left"
           {% if obj_string and not annotationBlocked %}
               class="canAnnotate"
           {% elif manager.canAnnotate %}
               class="canAnnotate"
-          {% endif %}></div>
+          {% endif %}>
+        </div>
+        <div id="ratings_spinner" class="hidden_spinner" style="margin-top: 10px;">
+            <img class="loader" alt="Loading" src="{% static "webgateway/img/spinner.gif" %}">
+            Loading...
+        </div>
+        <div style="clear:left"></div>
      </div>
      </div>

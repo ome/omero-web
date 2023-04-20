@@ -107,6 +107,38 @@ Params in render_image/<iid>/<z>/<t>/ are:
     - t:    T index
 """
 
+render_image_rdef = url(
+    r"^render_image_rdef/(?P<iid>[0-9]+)/(?:(?P<z>[0-9]+)/)?(?:(?P<t>[0-9]+)/)?$",
+    views.render_image_rdef,
+    name="webgateway_render_image_rdef",
+)
+"""
+Returns a jpeg of the OMERO image. See L{views.render_image}. Rendering
+settings MUST be specified in the request parameters. See
+L{views.getImgDetailsFromReq} for details.
+Params in render_image/<iid>/<z>/<t>/ are:
+    - iid:  Image ID
+    - z:    Z index
+    - t:    T index
+"""
+
+render_image_region_rdef = url(
+    r"^render_image_region_rdef/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$",
+    views.render_image_region_rdef,
+    name="webgateway_render_image_region_rdef",
+)
+"""
+Returns a jpeg of the OMERO image, rendering only a region specified in query
+string as region=x,y,width,height. E.g. region=0,512,256,256 See
+L{views.render_image_region}.
+Rendering settings MUST be specified in the request parameters.
+Params in render_image/<iid>/<z>/<t>/ are:
+    - iid:  Image ID
+    - z:    Z index
+    - t:    T index
+"""
+
+
 render_split_channel = url(
     r"^render_split_channel/(?P<iid>[0-9]+)/(?P<z>[0-9]+)/(?P<t>[0-9]+)/$",
     views.render_split_channel,
@@ -568,6 +600,8 @@ urlpatterns = [
     webgateway,
     render_image,
     render_image_region,
+    render_image_rdef,
+    render_image_region_rdef,
     render_split_channel,
     render_row_plot,
     render_col_plot,

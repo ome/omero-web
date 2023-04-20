@@ -11,14 +11,13 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          - '3.6'
-          - '3.7'
           - '3.8'
           - '3.9'
-    runs-on: ubuntu-18.04
+          - '3.10'
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -27,6 +26,6 @@ jobs:
         id: toxtarget
         run: |
           py=$(echo ${{ matrix.python-version }} | tr -d .)
-          echo "::set-output name=py::$py"
+          echo "py=$py" >> $GITHUB_OUTPUT
       - name: Run tests
         run: tox -e py${{ steps.toxtarget.outputs.py }}

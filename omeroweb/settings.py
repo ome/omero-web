@@ -87,7 +87,7 @@ FULL_REQUEST_LOGFORMAT = (
     " HTTP %(status_code)d %(request)s"
 )
 
-LOGGING_CLASS = "omero_ext.cloghandler.ConcurrentRotatingFileHandler"
+LOGGING_CLASS = "concurrent_log_handler.ConcurrentRotatingFileHandler"
 LOGSIZE = 500000000
 
 
@@ -594,6 +594,17 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "https://docs.gunicorn.org/en/stable/settings.html#timeout"
         ),
     ],
+    "omero.web.session_serializer": [
+        "SESSION_SERIALIZER",
+        "django.contrib.sessions.serializers.PickleSerializer",
+        str,
+        (
+            "You can use this setting to customize the session "
+            "serialization format. See :djangodoc:`Django session "
+            "serialization documentation <topics/http/sessions/"
+            "#session-serialization>` for more details."
+        ),
+    ],
     # Public user
     "omero.web.public.enabled": [
         "PUBLIC_ENABLED",
@@ -972,13 +983,22 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "SEARCH_DEFAULT_USER",
         0,
         int,
-        ("ID of user to pre-select in search form."),
+        (
+            "ID of the user to pre-select in search form. "
+            "A value of 0 pre-selects the logged-in user. "
+            "A value of -1 pre-selects All Users if "
+            "the search is across all groups or All Members "
+            "if the search is within a specific group."
+        ),
     ],
     "omero.web.search.default_group": [
         "SEARCH_DEFAULT_GROUP",
         0,
         int,
-        ("ID of group to pre-select in search form."),
+        (
+            "ID of the group to pre-select in search form. "
+            "A value of 0 or -1 pre-selects All groups."
+        ),
     ],
     "omero.web.ui.top_links": [
         "TOP_LINKS",
@@ -1585,8 +1605,8 @@ PIPELINE = {
                 "3rdparty/jquery-ui-1.10.4/js/jquery-ui.1.10.4.js",
                 "webgateway/js/ome.popup.js",
                 "3rdparty/aop-1.3.js",
-                "3rdparty/raphael-2.1.0/raphael.js",
-                "3rdparty/raphael-2.1.0/scale.raphael.js",
+                "3rdparty/raphael-2.3.0/raphael.js",
+                "3rdparty/raphael-2.3.0/scale.raphael.js",
                 "3rdparty/panojs-2.0.0/utils.js",
                 "3rdparty/panojs-2.0.0/PanoJS.js",
                 "3rdparty/panojs-2.0.0/controls.js",
@@ -1598,7 +1618,7 @@ PIPELINE = {
                 "3rdparty/panojs-2.0.0/control_svg.js",
                 "3rdparty/panojs-2.0.0/control_roi.js",
                 "3rdparty/panojs-2.0.0/control_scalebar.js",
-                "3rdparty/hammer-2.0.2/hammer.min.js",
+                "3rdparty/hammer-2.0.8/hammer.min.js",
                 "webgateway/js/ome.gs_utils.js",
                 "webgateway/js/ome.viewportImage.js",
                 "webgateway/js/ome.gs_slider.js",
@@ -1613,7 +1633,7 @@ PIPELINE = {
                 "webgateway/js/ome.postit.js",
                 "3rdparty/jquery.selectboxes-2.2.6.js",
                 "3rdparty/farbtastic-1.2/farbtastic.js",
-                "3rdparty/jquery.mousewheel-3.0.6.js",
+                "3rdparty/jquery.mousewheel-3.1.13.js",
             ),
             "output_filename": "omeroweb.viewer.min.js",
         }
@@ -1688,11 +1708,6 @@ DEFAULT_USER = os.path.join(
 # broken-link notifications when
 # SEND_BROKEN_LINK_EMAILS=True.
 MANAGERS = ADMINS  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
-
-# https://docs.djangoproject.com/en/1.6/releases/1.6/#default-session-serialization-switched-to-json
-# JSON serializer, which is now the default, cannot handle
-# omeroweb.connector.Connector object
-SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 
 # Load custom settings from etc/grid/config.xml
 # Tue  2 Nov 2010 11:03:18 GMT -- ticket:3228

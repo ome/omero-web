@@ -65,6 +65,8 @@ var CommentsPane = function CommentsPane($element, opts) {
     // handle submit of Add Comment form
     $("#add_comment_form").ajaxForm({
         beforeSubmit: function(data, $form, options) {
+            $("#add_comment_form input[type='submit']").hide();
+            $("#comments_spinner").show();
             var textArea = $('#add_comment_form textarea');
             if (textArea.val().trim().length === 0) return false;
             // here we specify what objects are to be annotated
@@ -85,7 +87,7 @@ var CommentsPane = function CommentsPane($element, opts) {
         if ($comments_container.is(":visible")) {
 
             if ($comments_container.is(":empty")) {
-                $comments_container.html("Loading comments...");
+                $("#comments_spinner").show();
             }
 
             var request = objects.map(function(o){
@@ -131,6 +133,7 @@ var CommentsPane = function CommentsPane($element, opts) {
                                           'static': WEBCLIENT.URLS.static_webclient,
                                           'webindex': WEBCLIENT.URLS.webindex});
                 }
+                $("#comments_spinner").hide();
                 $comments_container.html(html);
 
                 // Finish up...
