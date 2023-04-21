@@ -2851,6 +2851,10 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
         histogram = data[theC]
     except omero.ApiUsageException as ex:
         logger.warn(ex)
+        if ex.message == "All resolution levels larger than max plane size":
+            return HttpResponseBadRequest(
+                "All resolution levels larger than max plane size"
+            )
         return HttpResponseBadRequest("Histograms not supported for tiled images")
     return JsonResponse({"data": histogram})
 
