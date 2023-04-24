@@ -27,7 +27,7 @@ from django.forms.widgets import SelectMultiple, MultipleHiddenInput
 from django.forms.fields import Field
 from django.forms import ModelChoiceField, ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.core.validators import EMPTY_VALUES
 
 from omero_model_FileAnnotationI import FileAnnotationI
@@ -89,7 +89,7 @@ class MetadataQuerySetIterator(object):
         if self.empty_label is not None:
             yield ("", self.empty_label)
         for obj in self.queryset:
-            yield (obj.value, smart_text(obj.value))
+            yield (obj.value, smart_str(obj.value))
 
 
 class MetadataModelChoiceField(ModelChoiceField):
@@ -168,7 +168,7 @@ class AnnotationQuerySetIterator(object):
                 if length > 55:
                     textValue = "%s..." % textValue[:55]
             oid = obj.id
-            yield (oid, smart_text(textValue))
+            yield (oid, smart_str(textValue))
 
 
 class AnnotationModelChoiceField(ModelChoiceField):
@@ -275,9 +275,9 @@ class ObjectQuerySetIterator(object):
             yield ("", self.empty_label)
         for obj in self.queryset:
             if hasattr(obj.id, "val"):
-                yield (obj.id.val, smart_text(obj.id.val))
+                yield (obj.id.val, smart_str(obj.id.val))
             else:
-                yield (obj.id, smart_text(obj.id))
+                yield (obj.id, smart_str(obj.id))
 
 
 class ObjectModelChoiceField(ModelChoiceField):
