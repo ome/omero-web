@@ -41,7 +41,7 @@ from django.urls import reverse
 from django.shortcuts import render
 
 from django.views.debug import get_exception_reporter_filter
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 from omeroweb.connector import Connector, Server
 from omeroweb.feedback.sendfeedback import SendFeedback
@@ -201,7 +201,7 @@ def handler500(request):
         error_filter = get_exception_reporter_filter(request)
         try:
             request_repr = "\n{}".format(
-                force_text(error_filter.get_request_repr(request))
+                force_str(error_filter.get_request_repr(request))
             )
         except Exception:
             request_repr = error_filter.get_request_repr(request)
