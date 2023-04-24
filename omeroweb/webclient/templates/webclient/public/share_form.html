@@ -54,14 +54,14 @@ $(document).ready(function () {
 
 <div>
     {% for field in form %}
-        {% ifequal field.label_tag form.image.label_tag %}
+        {% if field.label_tag == form.image.label_tag %}
             {% if field.errors %}
                 <div>{% if field.field.required %}<span class="required">{{ field.label_tag }}</span>{% else %}{{ field.label_tag }}{% endif %}</div>
                 <div>{{ field.errors }}</div>
             {% endif %}
             <div class="hiddenField">{{ field }}</div>
         {% else %}
-            {% ifequal field.label_tag form.enable.label_tag %}
+            {% if field.label_tag == form.enable.label_tag %}
                 <div>
                     {% if field.field.required %}<span class="required">{{ field.label_tag }}</span>{% else %}{{ field.label_tag }}{% endif %}
                     {{ field }}
@@ -77,8 +77,8 @@ $(document).ready(function () {
                 {{ field.help_text|safe }}</div>
                 <div>{% if field.errors %}{{ field.errors }}{% endif %}</div>
                 <div>{{ field }}</div>
-            {% endifequal %}
-        {% endifequal %}
+            {% endif %}
+        {% endif %}
     {% endfor %}
 </div>
 
