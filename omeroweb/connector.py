@@ -281,6 +281,8 @@ class Connector(object):
         v = request.session.get("connector", None)
         if v is None:
             return None
+        if isinstance(v, Connector):
+            return v
         return Connector(**v)
 
     def to_session(self, request):
