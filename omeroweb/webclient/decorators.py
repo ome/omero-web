@@ -26,7 +26,6 @@ Decorators for use with the webclient application.
 import logging
 
 import omeroweb.decorators
-from omeroweb.webgateway.util import get_app_header_includes
 from omero import constants
 
 from django.http import HttpResponse
@@ -237,6 +236,5 @@ class render_response(omeroweb.decorators.render_response):
             )
         context["ome"]["center_plugins"] = c_plugins
 
-        context["ome"]["to_include"] = get_app_header_includes("webclient_head.html")
         context["ome"]["user_dropdown"] = settings.USER_DROPDOWN
         context["ome"]["login_view"] = settings.LOGIN_VIEW

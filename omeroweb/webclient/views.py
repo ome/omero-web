@@ -90,10 +90,7 @@ from omeroweb.webadmin.forms import LoginForm
 
 from omeroweb.webgateway import views as webgateway_views
 from omeroweb.webgateway.marshal import graphResponseMarshal
-from omeroweb.webgateway.util import (
-    get_longs as webgateway_get_longs,
-    get_app_includes,
-)
+from omeroweb.webgateway.util import get_longs as webgateway_get_longs
 
 from omeroweb.feedback.views import handlerInternalError
 
@@ -1749,13 +1746,6 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
     if form_comment is not None:
         context["form_comment"] = form_comment
 
-    # For each app, look for /app/includes/ module with right_panel_title()
-    # to get custom html
-    title_html = get_app_includes(
-        "right_panel_title", request=request, conn=conn, c_type=c_type, c_id=c_id
-    )
-
-    context["to_include"] = title_html
     context["figScripts"] = figScripts
     context["template"] = template
     context["webclient_path"] = reverse("webindex")

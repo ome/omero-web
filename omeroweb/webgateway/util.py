@@ -17,17 +17,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from importlib import import_module
-import pkgutil
 import os
 import tempfile
 import zipfile
 import shutil
 import logging
-
-from django.conf import settings
-from django.template.loader import get_template
-from django.template import TemplateDoesNotExist
 
 try:
     import long
@@ -244,73 +238,3 @@ def points_string_to_XY_list(string):
         x, y = xy.split(",")
         xyList.append((float(x.strip()), float(y.strip())))
     return xyList
-
-
-def get_app_includes(name, **kwargs):
-    """
-    For each installed app, try to load app.includes module
-    and look for a function with the specified name.
-
-    Call each function with the kwargs above, combining
-    the expected html response into a single string
-    """
-
-    html = ""
-    # look for "app.includes" module...
-    for app in settings.INSTALLED_APPS:
-        if "omeroweb.%s" % app in settings.INSTALLED_APPS:
-            includes_module = "omeroweb.%s.includes" % app
-        else:
-            includes_module = "%s.includes" % app
-
-        # Try to import module.includes if it exists
-        module_found = pkgutil.find_loader(includes_module)
-        if module_found is not None:
-            try:
-                mod = import_module(includes_module)
-                if hasattr(mod, name):
-                    func = getattr(mod, name)
-                    html += func(**kwargs)
-            except ImportError:
-                logger.debug("No include for app: %s" % app)
-
-    return html
-
-
-def get_app_labels():
-    """For each installed app, try to load AppConfig and return label"""
-
-    labels = []
-    for app in settings.INSTALLED_APPS:
-        # try to load default_app_config...
-        try:
-            module = import_module(app)
-            config = getattr(module, "default_app_config")
-            module_name, cls_name = config.rsplit(".", 1)
-            app_module = import_module(module_name)
-            cfg_class = getattr(app_module, cls_name)
-            app_config = cfg_class(cls_name, app_module)
-            labels.append(app_config.label)
-        except ImportError:
-            logger.debug("Failed to import app config for app: %s" % app)
-        except AttributeError:
-            logger.debug("Failed to lookup label for app: %s" % app)
-    return labels
-
-
-def get_app_header_includes(template_name):
-    """
-    For each app, try to load template: <app_label>/includes/webclient_head.html
-
-    We only consider apps that have an AppConfig with label
-    """
-
-    to_include = []
-    for app_label in get_app_labels():
-        template_path = os.path.join(app_label, "includes", template_name)
-        try:
-            get_template(template_path)
-            to_include.append(template_path)
-        except TemplateDoesNotExist:
-            logger.debug("No template found at: %s" % template_path)
-    return to_include

@@ -288,12 +288,8 @@
     {% for rt in ome.right_plugins %}
         {% include rt.include %}
     {% endfor %}
-    
-    <!-- allow apps to include custom code -->
-    {% for include_template in ome.to_include %}
-        {% include include_template %}
-    {% endfor %}
 
+    
 {% endblock %}
 
 

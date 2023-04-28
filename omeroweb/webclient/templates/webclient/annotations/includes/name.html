@@ -19,9 +19,8 @@
 {% endcomment %}
 
 <!-- allow apps to include custom html -->
-{% autoescape off %}
-    {{ to_include }}
-{% endautoescape %}
+{% block right_panel_title %}
+{% endblock %}
 
 {% if obj.canEdit and not manager.well %}
     <div class="data_heading" id="{{ manager.obj_type }}name-{{ manager.obj_id }}">
