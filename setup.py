@@ -61,6 +61,7 @@ setup(
         "gunicorn>=19.3",
         "omero-marshal>=0.7.0",
         "Pillow",
+        "portalocker",
     ],
     include_package_data=True,
     tests_require=["pytest"],

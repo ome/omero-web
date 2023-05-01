@@ -40,8 +40,8 @@ import pytz
 import random
 import string
 from builtins import str as text
+import portalocker
 
-from omero_ext import portalocker
 from omero.util.concurrency import get_event
 from omeroweb.utils import sort_properties_to_tuple
 from omeroweb.connector import Server
