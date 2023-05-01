@@ -62,6 +62,7 @@ setup(
         "omero-marshal>=0.7.0",
         "Pillow",
         "pytz",
+        "portalocker",
     ],
     include_package_data=True,
     tests_require=["pytest"],
