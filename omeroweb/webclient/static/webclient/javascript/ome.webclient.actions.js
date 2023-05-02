@@ -732,6 +732,9 @@ OME.handleDelete = function(deleteUrl, filesetCheckUrl, userId) {
 
 // Format a date like "2015-06-15 12:08:01"
 OME.formatDate = function formatDate(date) {
+    if (!date) {
+        return "";
+    }
     function padZero(number) {
         var n = "" + number;
         if (n.length < 2) {
