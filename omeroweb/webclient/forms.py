@@ -65,8 +65,9 @@ help_expire = (
 #################################################################
 # Custom widget and validation for multiple file uploads
 
+
 class MultipleFileInput(forms.ClearableFileInput):
-        allow_multiple_selected = True
+    allow_multiple_selected = True
 
 
 class MultipleFileField(forms.FileField):
