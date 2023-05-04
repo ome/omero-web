@@ -2399,7 +2399,9 @@ def annotate_file(request, conn=None, **kwargs):
 
     if request.method == "POST":
         # handle form submission
-        form_file = FilesAnnotationForm(initial=initial, data=request.POST.copy())
+        form_file = FilesAnnotationForm(
+            initial=initial, data=request.POST.copy(), files=request.FILES
+        )
         if form_file.is_valid():
             # Link existing files...
             files = form_file.cleaned_data["files"]
