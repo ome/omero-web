@@ -1477,6 +1477,16 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         """
 
+        temp_switch = False
+        if self.getEventContext().groupId == group.id:
+            # can't update current group
+            temp_switch = True
+            # find a group to temp switch to...
+            gids = [gid for gid in self.getEventContext().memberOfGroups if (gid != 0 and gid != group.id)]
+            if len(gids) == 0:
+                return ["You can't edit your current group!"]
+            self.setGroupForSession(gids[0])
+
         up_gr = group._obj
         up_gr.name = rstring(str(name))
         up_gr.description = (
@@ -1493,6 +1503,9 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             err = self.updatePermissions(group, permissions)
             if err is not None:
                 msgs.append(err)
+
+        if temp_switch:
+            self.revertGroupForSession()
         return msgs
 
     def updateMyAccount(
