@@ -1482,7 +1482,11 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             # can't update current group
             temp_switch = True
             # find a group to temp switch to...
-            gids = [gid for gid in self.getEventContext().memberOfGroups if (gid != 0 and gid != group.id)]
+            gids = [
+                gid
+                for gid in self.getEventContext().memberOfGroups
+                if (gid != 0 and gid != group.id)
+            ]
             if len(gids) == 0:
                 return ["You can't edit your current group!"]
             self.setGroupForSession(gids[0])
