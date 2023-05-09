@@ -34,6 +34,7 @@ from django.urls import reverse
 
 from omeroweb.custom_forms import NonASCIIForm
 from .custom_forms import MetadataModelChoiceField
+from .custom_forms import MultipleFileField
 from .custom_forms import AnnotationModelMultipleChoiceField
 from .custom_forms import ObjectModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import ExperimenterModelMultipleChoiceField
@@ -60,28 +61,6 @@ help_expire = (
     " when the share will stop being available. Date format:"
     ' YYYY-MM-DD."><img src="%s" /></span>'
 ) % help_button
-
-
-#################################################################
-# Custom widget and validation for multiple file uploads
-
-
-class MultipleFileInput(forms.ClearableFileInput):
-    allow_multiple_selected = True
-
-
-class MultipleFileField(forms.FileField):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("widget", MultipleFileInput())
-        super().__init__(*args, **kwargs)
-
-    def clean(self, data, initial=None):
-        single_file_clean = super().clean
-        if isinstance(data, (list, tuple)):
-            result = [single_file_clean(d, initial) for d in data]
-        else:
-            result = single_file_clean(data, initial)
-        return result
 
 
 #################################################################
