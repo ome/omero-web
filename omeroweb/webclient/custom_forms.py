@@ -382,7 +382,8 @@ class ObjectModelMultipleChoiceField(ObjectModelChoiceField):
 
 
 # Custom widget and validation for multiple file uploads
-# See https://docs.djangoproject.com/en/3.2/topics/http/file-uploads/#uploading-multiple-files
+# See https://docs.djangoproject.com/en/3.2/topics/http/
+# file-uploads/#uploading-multiple-files
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
