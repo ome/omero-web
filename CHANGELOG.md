@@ -3,7 +3,7 @@
 
 ## Other changes
 
-- Fix multiple file uploads and support Django 3.2.19 security update [#465](https://github.com/ome/omero-web/pull/465)
+- Fix multi-file upload validation and support Django 3.2.19 security update [#465](https://github.com/ome/omero-web/pull/465)
 - Declare portalocker as external dependency [#457](https://github.com/ome/omero-web/pull/457)
 
 ## Bug fixes
