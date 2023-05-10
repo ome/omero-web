@@ -1479,8 +1479,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         temp_switch = False
         if self.getEventContext().groupId == group.id:
-            # can't update current group
-            temp_switch = True
+            # we can't update the current group
             # find a group to temp switch to...
             gids = [
                 gid
@@ -1490,26 +1489,28 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
             if len(gids) == 0:
                 return ["You can't edit your current group!"]
             self.setGroupForSession(gids[0])
-
-        up_gr = group._obj
-        up_gr.name = rstring(str(name))
-        up_gr.description = (
-            (description != "" and description is not None)
-            and rstring(str(description))
-            or None
-        )
+            temp_switch = True
 
         msgs = []
-        admin_serv = self.getAdminService()
-        admin_serv.updateGroup(up_gr)
+        try:
+            up_gr = group._obj
+            up_gr.name = rstring(str(name))
+            up_gr.description = (
+                (description != "" and description is not None)
+                and rstring(str(description))
+                or None
+            )
 
-        if str(permissions) != str(up_gr.details.getPermissions()):
-            err = self.updatePermissions(group, permissions)
-            if err is not None:
-                msgs.append(err)
+            admin_serv = self.getAdminService()
+            admin_serv.updateGroup(up_gr)
 
-        if temp_switch:
-            self.revertGroupForSession()
+            if str(permissions) != str(up_gr.details.getPermissions()):
+                err = self.updatePermissions(group, permissions)
+                if err is not None:
+                    msgs.append(err)
+        finally:
+            if temp_switch:
+                self.revertGroupForSession()
         return msgs
 
     def updateMyAccount(
