@@ -34,6 +34,7 @@ from django.urls import reverse
 
 from omeroweb.custom_forms import NonASCIIForm
 from .custom_forms import MetadataModelChoiceField
+from .custom_forms import MultipleFileField
 from .custom_forms import AnnotationModelMultipleChoiceField
 from .custom_forms import ObjectModelMultipleChoiceField
 from omeroweb.webadmin.custom_forms import ExperimenterModelMultipleChoiceField
@@ -334,9 +335,7 @@ class FilesAnnotationForm(BaseAnnotationForm):
             required=False,
         )
 
-    annotation_file = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={"multiple": True}), required=False
-    )
+    annotation_file = MultipleFileField(required=False)
 
 
 class CommentAnnotationForm(BaseAnnotationForm):
