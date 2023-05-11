@@ -1,3 +1,15 @@
+5.20.0 (May 2023)
+-----------------
+
+## Other changes
+
+- Fix multi-file upload validation and support Django 3.2.19 security update [#465](https://github.com/ome/omero-web/pull/465)
+- Declare portalocker as external dependency [#457](https://github.com/ome/omero-web/pull/457)
+
+## Bug fixes
+
+- Avoid creation of empty file annotations [#466](https://github.com/ome/omero-web/pull/466)
+
 5.19.0 (March 2023)
 -------------------
 
