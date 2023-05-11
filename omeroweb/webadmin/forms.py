@@ -33,8 +33,6 @@ from django.forms.widgets import Textarea
 
 from omeroweb.connector import Server
 
-from omeroweb.custom_forms import NonASCIIForm
-
 from .custom_forms import ServerModelChoiceField, GroupModelChoiceField
 from .custom_forms import GroupModelMultipleChoiceField, OmeNameField
 from .custom_forms import ExperimenterModelMultipleChoiceField, MultiEmailField
@@ -45,7 +43,7 @@ logger = logging.getLogger(__name__)
 # Non-model Form
 
 
-class LoginForm(NonASCIIForm):
+class LoginForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.fields["server"] = ServerModelChoiceField(Server, empty_label=None)
@@ -67,7 +65,7 @@ class LoginForm(NonASCIIForm):
         return self.cleaned_data["username"]
 
 
-class ForgottonPasswordForm(NonASCIIForm):
+class ForgottonPasswordForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(ForgottonPasswordForm, self).__init__(*args, **kwargs)
         self.fields["server"] = ServerModelChoiceField(Server, empty_label=None)
@@ -88,7 +86,7 @@ ROLE_CHOICES = (
 )
 
 
-class ExperimenterForm(NonASCIIForm):
+class ExperimenterForm(forms.Form):
     def __init__(
         self,
         name_check=False,
@@ -324,7 +322,7 @@ PERMISSION_CHOICES = (
 )
 
 
-class GroupForm(NonASCIIForm):
+class GroupForm(forms.Form):
     def __init__(
         self,
         name_check=False,
@@ -448,7 +446,7 @@ class GroupOwnerForm(forms.Form):
     )
 
 
-class MyAccountForm(NonASCIIForm):
+class MyAccountForm(forms.Form):
     def __init__(self, email_check=False, *args, **kwargs):
         super(MyAccountForm, self).__init__(*args, **kwargs)
         self.email_check = email_check
@@ -510,7 +508,7 @@ class MyAccountForm(NonASCIIForm):
         return self.cleaned_data.get("email")
 
 
-class ContainedExperimentersForm(NonASCIIForm):
+class ContainedExperimentersForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(ContainedExperimentersForm, self).__init__(*args, **kwargs)
 
@@ -550,7 +548,7 @@ class UploadPhotoForm(forms.Form):
         return self.cleaned_data.get("photo")
 
 
-class ChangePassword(NonASCIIForm):
+class ChangePassword(forms.Form):
     old_password = forms.CharField(
         max_length=50,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
@@ -581,13 +579,13 @@ class ChangePassword(NonASCIIForm):
                 return self.cleaned_data.get("password")
 
 
-class EnumerationEntry(NonASCIIForm):
+class EnumerationEntry(forms.Form):
     new_entry = forms.CharField(
         max_length=250, widget=forms.TextInput(attrs={"size": 30})
     )
 
 
-class EnumerationEntries(NonASCIIForm):
+class EnumerationEntries(forms.Form):
     def __init__(self, entries, *args, **kwargs):
         super(EnumerationEntries, self).__init__(*args, **kwargs)
         for i, e in enumerate(entries):

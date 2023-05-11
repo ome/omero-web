@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import warnings
 from past.builtins import basestring
 from django import forms
 from django.utils.encoding import smart_str
@@ -26,9 +27,14 @@ from django.utils.encoding import smart_str
 from django.forms.utils import ErrorDict, ValidationError
 from django.forms.fields import FileField, CharField
 
+DEPRECATION_MESSAGE = (
+    "This form is deprecated as of OMERO.web 5.21.0. Use Django's" "forms.Form instead."
+)
+
 
 class NonASCIIForm(forms.Form):
     def __init__(self, *args, **kwargs):
+        warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
         super(NonASCIIForm, self).__init__(*args, **kwargs)
 
     def full_clean(self):
