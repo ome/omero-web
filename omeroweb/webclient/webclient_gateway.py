@@ -1480,16 +1480,12 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         temp_switch = False
         if self.getEventContext().groupId == group.id:
             # we can't update the current group
-            # find a group to temp switch to...
-            gids = [
-                gid
-                for gid in self.getEventContext().memberOfGroups
-                if (gid != 0 and gid != group.id)
-            ]
-            if len(gids) == 0:
-                return ["You can't edit your current group!"]
-            self.setGroupForSession(gids[0])
-            temp_switch = True
+            # unless it's the system group (form won't include name change)
+            sys_id = self.getAdminService().getSecurityRoles().systemGroupId
+            if self.getEventContext().groupId != sys_id:
+                # otherwise, temp switch to allow editing of 'current' group
+                self.setGroupForSession(sys_id)
+                temp_switch = True
 
         msgs = []
         try:
