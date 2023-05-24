@@ -3820,7 +3820,8 @@ def activities(request, conn=None, **kwargs):
                             kwargs["error"] = 1
                             kwargs[
                                 "Message"
-                            ] = f"Script exited with failure. (returncode={ cb.returncode })"
+                            ] = (f"Script exited with failure."
+                                 f" (returncode={ cb.returncode })")
                         update_callback(request, cbString, **kwargs)
                         new_results.append(cbString)
                     except Exception:
