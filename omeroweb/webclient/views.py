@@ -3524,7 +3524,6 @@ def update_callback(request, cbString, **kwargs):
 
 # Subclass to handle returncode
 class ScriptsCallback(omero.scripts.ProcessCallbackI):
-
     def processFinished(self, returncode, current=None):
         super().processFinished(returncode, current)
         self.returncode = returncode
