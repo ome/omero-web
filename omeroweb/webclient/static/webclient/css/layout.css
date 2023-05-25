@@ -1009,7 +1009,6 @@
 
     .mapAnnContainer {
         position: relative;
-        max-height: 250px;
         overflow-y: auto;
     }
     .keyValueTable {
