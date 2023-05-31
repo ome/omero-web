@@ -551,6 +551,28 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "OMERO.web."
         ),
     ],
+    "omero.web.csrf_cookie_samesite": [
+        "CSRF_COOKIE_SAMESITE",
+        "Lax",
+        str,
+        (
+            "The value of the SameSite flag on the CSRF cookie. "
+            "This flag prevents the cookie from being sent in cross-site "
+            "requests thus preventing CSRF attacks and making some methods of "
+            "CSRF session cookie impossible."
+        ),
+    ],
+    "omero.web.session_cookie_samesite": [
+        "SESSION_COOKIE_SAMESITE",
+        "Lax",
+        str,
+        (
+            "The value of the SameSite flag on the session cookie. This flag "
+            "prevents the cookie from being sent in cross-site requests thus "
+            "preventing CSRF attacks and making some methods of stealing "
+            "session cookie impossible."
+        ),
+    ],
     "omero.web.logdir": ["LOGDIR", LOGDIR, str, "A path to the custom log directory."],
     "omero.web.secure_proxy_ssl_header": [
         "SECURE_PROXY_SSL_HEADER",
