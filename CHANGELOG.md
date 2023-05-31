@@ -1,3 +1,15 @@
+5.21.0 (May 2023)
+-----------------
+
+## Features
+
+- New settings to configure SameSite property for CSRF and session cookies [#471](https://github.com/ome/omero-web/pull/471)
+
+## Bug fixes
+
+- Users can now edit their current group [#469](https://github.com/ome/omero-web/pull/469)
+- Handle null dates properly [#462](https://github.com/ome/omero-web/pull/462)
+
 5.20.0 (May 2023)
 -----------------
 
