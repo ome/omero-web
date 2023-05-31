@@ -30,6 +30,14 @@ from past.builtins import basestring
 logger = logging.getLogger(__name__)
 
 
+def is_ajax(request):
+    """
+    Replicates the functionality of the Django 3.1 deprecated
+    HttpRequest.is_ajax() method for compatibility.
+    """
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
 def reverse_with_params(*args, **kwargs):
     """
     Adds query string to django.urls.reverse

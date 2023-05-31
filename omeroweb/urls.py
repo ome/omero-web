@@ -27,11 +27,11 @@ import logging
 import pkgutil
 from django.conf import settings
 from django.apps import AppConfig
-from django.conf.urls import url, include
+from django.conf.urls import include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
 
-from django.urls import reverse
+from django.urls import re_path, reverse
 from django.utils.functional import lazy
 from django.views.generic import RedirectView
 from django.views.decorators.cache import never_cache
@@ -52,7 +52,7 @@ def redirect_urlpatterns():
     """
     if settings.INDEX_TEMPLATE is None:
         return [
-            url(
+            re_path(
                 r"^$",
                 never_cache(
                     RedirectView.as_view(url=reverse_lazy("webindex"), permanent=True)
@@ -62,7 +62,7 @@ def redirect_urlpatterns():
         ]
     else:
         return [
-            url(
+            re_path(
                 r"^$",
                 never_cache(
                     RedirectView.as_view(
@@ -102,7 +102,7 @@ for app in settings.ADDITIONAL_APPS:
                 regex = r"^"
             else:
                 regex = "^%s/" % label
-            urlpatterns.append(url(regex, include(urlmodule)))
+            urlpatterns.append(re_path(regex, include(urlmodule)))
         except ImportError:
             print(
                 """Failed to import %s
@@ -116,18 +116,18 @@ OMERO.web are compatible
         logger.debug("Module not found: %s" % urlmodule)
 
 urlpatterns += [
-    url(
+    re_path(
         r"^favicon\.ico$",
         lambda request: redirect("%s%s" % (settings.STATIC_URL, settings.FAVICON_URL)),
         name="favicon",
     ),
-    url(r"^webgateway/", include("omeroweb.webgateway.urls")),
-    url(r"^webadmin/", include("omeroweb.webadmin.urls")),
-    url(r"^webclient/", include("omeroweb.webclient.urls")),
-    url(r"^url/", include("omeroweb.webredirect.urls")),
-    url(r"^feedback/", include("omeroweb.feedback.urls")),
-    url(r"^api/", include("omeroweb.api.urls")),
-    url(r"^index/$", webclient_views.custom_index, name="webindex_custom"),
+    re_path(r"^webgateway/", include("omeroweb.webgateway.urls")),
+    re_path(r"^webadmin/", include("omeroweb.webadmin.urls")),
+    re_path(r"^webclient/", include("omeroweb.webclient.urls")),
+    re_path(r"^url/", include("omeroweb.webredirect.urls")),
+    re_path(r"^feedback/", include("omeroweb.feedback.urls")),
+    re_path(r"^api/", include("omeroweb.api.urls")),
+    re_path(r"^index/$", webclient_views.custom_index, name="webindex_custom"),
 ]
 
 urlpatterns += redirect_urlpatterns()

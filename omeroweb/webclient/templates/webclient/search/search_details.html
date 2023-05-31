@@ -125,7 +125,7 @@
                     </td>
                     <!-- only show Acquisition dates for 'image'. NB image.getDate() returns AquisitionDate-->
                     <td class="date"
-                        {% ifequal byId.otype 'image' %}data-isodate='{{ c.getDate|date:"r" }}'{% endifequal %}
+                        {% if byId.otype == 'image' %}data-isodate='{{ c.getDate|date:"r" }}'{% endif %}
                     </td>
                     <td class="date" data-isodate='{{ c.creationEventDate|date:"r" }}'>
                         <script>document.write(OME.formatDate("{{ c.creationEventDate|date:'r' }}")</script></script>

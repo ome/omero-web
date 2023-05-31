@@ -38,7 +38,7 @@ import warnings
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
 from django.utils.html import escape
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from time import time
 
@@ -186,7 +186,9 @@ def validate_redirect_url(url):
     If url is a different host, not in settings.REDIRECT_ALLOWED_HOSTS
     we return webclient index URL.
     """
-    if not is_safe_url(url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS):
+    if not url_has_allowed_host_and_scheme(
+        url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+    ):
         url = reverse("webindex")
     return url
 

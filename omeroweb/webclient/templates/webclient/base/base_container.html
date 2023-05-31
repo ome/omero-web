@@ -197,12 +197,12 @@
         WEBCLIENT.initially_select = {{ initially_select|json_dumps|safe }};
         WEBCLIENT.initially_open = {{ initially_open|json_dumps|safe }};
 
-        {% ifequal menu 'usertags' %}
+        {% if menu == 'usertags' %}
             WEBCLIENT.TAG_TREE = true;
             WEBCLIENT.URLS.tree_top_level = WEBCLIENT.URLS.api_tags_and_tagged;
         {% else %}
             WEBCLIENT.URLS.tree_top_level = WEBCLIENT.URLS.api_containers;
-        {% endifequal %}
+        {% endif %}
 
         WEBCLIENT.URLS.api_experimenter = "{% url 'api_experimenter' ome.active_user %}";
 

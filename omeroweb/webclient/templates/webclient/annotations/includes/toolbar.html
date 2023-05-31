@@ -193,12 +193,12 @@
                 <!-- if we have a single orig file, download directly. Otherwise popup a 
                   'preparing zip' download placeholder -->
                 <a id="download-origfile" 
-                  {% ifequal filesetInfo.count 1 %}
+                  {% if filesetInfo.count == 1 %}
                     href="{% url 'archived_files' image.id %}"
                   {% else %}
                     href="#"
                     onClick="return OME.openPopup('{% url 'download_placeholder' %}?ids=image-{{ image.id }}&fileCount={{ fileCount }}&name={{ image.name }}');"
-                  {% endifequal %}
+                  {% endif %}
                 title="Download {{ filesetInfo.count }} original imported file{{ filesetInfo.count|pluralize:'s'}} ({{ filesetInfo.size|filesizeformat }})"
                 >
                 Download...</a>
@@ -214,16 +214,16 @@
             {% elif filesetInfo %}
             <li {% if not filesetInfo.count %}class='disabled'{% endif %}>
               <a id="download-origfile"
-                {% ifequal filesetInfo.count 0 %}
+                {% if filesetInfo.count == 0 %}
                   href="#"
                 {% else %}
-                  {% ifequal filesetInfo.count 1 %}
+                  {% if filesetInfo.count == 1 %}
                     href="{% url 'archived_files' %}?{{ obj_string }}"
                   {% else %}
                     href="#"
                     onClick="return OME.openPopup('{% url 'download_placeholder' %}?ids={{ link_string }}&fileCount={{ filesetInfo.count }}&index={{ index }}');"
-                  {% endifequal %}
-                {% endifequal %}
+                  {% endif %}
+                {% endif %}
                 title="Download {{ filesetInfo.count }} original imported file{{ filesetInfo.count|pluralize:'s'}} ({{ filesetInfo.size|filesizeformat }})"
                 >
                 Download...</a>

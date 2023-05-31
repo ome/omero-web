@@ -36,7 +36,7 @@ from functools import update_wrapper
 from django.urls import reverse, resolve, NoReverseMatch
 from django.core.cache import cache
 
-from omeroweb.utils import reverse_with_params
+from omeroweb.utils import is_ajax, reverse_with_params
 from omeroweb.connector import Connector, Server
 from omero.gateway.utils import propertiesToDict
 from omero import ApiUsageException
@@ -191,7 +191,7 @@ class login_required(object):
 
     def on_not_logged_in(self, request, url, error=None):
         """Called whenever the user is not logged in."""
-        if request.is_ajax():
+        if is_ajax(request):
             logger.debug("Request is Ajax, returning HTTP 403.")
             return HttpResponseForbidden()
 

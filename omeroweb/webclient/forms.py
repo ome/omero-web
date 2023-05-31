@@ -32,7 +32,6 @@ from django import forms
 from django.forms.formsets import formset_factory
 from django.urls import reverse
 
-from omeroweb.custom_forms import NonASCIIForm
 from .custom_forms import MetadataModelChoiceField
 from .custom_forms import MultipleFileField
 from .custom_forms import AnnotationModelMultipleChoiceField
@@ -67,11 +66,11 @@ help_expire = (
 # Non-model Form
 
 
-class GlobalSearchForm(NonASCIIForm):
+class GlobalSearchForm(forms.Form):
     search_query = forms.CharField(widget=forms.TextInput(attrs={"size": 25}))
 
 
-class ShareForm(NonASCIIForm):
+class ShareForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(ShareForm, self).__init__(*args, **kwargs)
 
@@ -126,7 +125,7 @@ class ShareForm(NonASCIIForm):
         return self.cleaned_data["expiration"]
 
 
-class ContainerForm(NonASCIIForm):
+class ContainerForm(forms.Form):
     name = forms.CharField(max_length=250, widget=forms.TextInput(attrs={"size": 45}))
     description = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2, "cols": 49}), required=False
@@ -134,17 +133,17 @@ class ContainerForm(NonASCIIForm):
     owner = forms.CharField(widget=forms.HiddenInput, required=False)
 
 
-class ContainerNameForm(NonASCIIForm):
+class ContainerNameForm(forms.Form):
     name = forms.CharField(max_length=250, widget=forms.TextInput(attrs={"size": 45}))
 
 
-class ContainerDescriptionForm(NonASCIIForm):
+class ContainerDescriptionForm(forms.Form):
     description = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 3, "cols": 39}), required=False
     )
 
 
-class BaseAnnotationForm(NonASCIIForm):
+class BaseAnnotationForm(forms.Form):
     """
     This is the superclass of the various forms used for annotating single or
     multiple objects.

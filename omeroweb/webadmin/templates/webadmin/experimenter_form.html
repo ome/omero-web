@@ -327,12 +327,12 @@
             <div class="exp_field">
             {% if field.errors %}<div style="clear:both">{{ field.errors }}</div>{% endif %}
 
-            {% ifequal field.label_tag form.default_group.label_tag %}
+            {% if field.label_tag == form.default_group.label_tag %}
                 <!-- default group -->
                 <span class="required">{{ field.label_tag }}</span>
                 {{ field }}
             {% else %}
-                {% ifequal field.label_tag form.other_groups.label_tag %}
+                {% if field.label_tag == form.other_groups.label_tag %}
                     <!-- other groups -->
                     <span class="required">{{ field.label_tag }}</span>
                     {{ field }}
@@ -343,8 +343,8 @@
                         {{ field.label_tag }}
                     {% endif %}
                     {{ field }}
-                {% endifequal %}
-            {% endifequal %}
+                {% endif %}
+            {% endif %}
             </div>
         {% endfor %}
         
