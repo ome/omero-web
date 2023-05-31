@@ -5,6 +5,11 @@
 
 - New settings to configure SameSite property for CSRF and session cookies [#471](https://github.com/ome/omero-web/pull/471)
 
+## Other changes
+
+- Django 4.0 compatibility [#458](https://github.com/ome/omero-web/pull/458)
+- Plugin hooks [#425](https://github.com/ome/omero-web/pull/425)
+
 ## Bug fixes
 
 - Users can now edit their current group [#469](https://github.com/ome/omero-web/pull/469)
