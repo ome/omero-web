@@ -27,15 +27,15 @@
 <div class="paging"> 
     {% if controller.paging.prev %}<a href="{% url 'load_history' controller.year controller.month controller.day %}?page={{controller.paging.prev}}#data">{% trans "preview" %}</a>{% endif %} {% trans "Page" %} 
     {% for p in controller.paging.total %}
-        {% ifequal controller.paging.page p %}
+        {% if controller.paging.page == p %}
             {{ p }} 
         {% else %}
-            {% ifequal p -1 %}
+            {% if p == -1 %}
                 ...
             {% else %}
                 <a href="{% url 'load_history' controller.year controller.month controller.day %}?page={{ p }}#data">{{ p }}</a>
-            {% endifequal %}
-        {% endifequal %}
+            {% endif %}
+        {% endif %}
     {% endfor %}
     {% if controller.paging.next %}<a href="{% url 'load_history' controller.year controller.month controller.day %}?page={{controller.paging.next}}#data">{% trans "next" %}</a>{% endif %}
 

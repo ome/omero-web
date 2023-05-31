@@ -22,7 +22,6 @@
 import re
 import logging
 
-from django.utils.encoding import force_text
 from future.utils import with_metaclass
 
 from omero import client_wrapper
@@ -89,12 +88,6 @@ class Server(ServerBase):
         Json for printin settings.py: [["localhost", 4064, "omero"]]'
         """
         return """["%s", %s, "%s"]""" % (self.host, self.port, self.server)
-
-    def __str__(self):
-        return force_text(self).encode("utf-8")
-
-    def __unicode__(self):
-        return str(self.id)
 
     @classmethod
     def get(cls, pk):

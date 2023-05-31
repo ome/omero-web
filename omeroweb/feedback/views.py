@@ -41,11 +41,12 @@ from django.urls import reverse
 from django.shortcuts import render
 
 from django.views.debug import get_exception_reporter_filter
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 from omeroweb.connector import Connector, Server
 from omeroweb.feedback.sendfeedback import SendFeedback
 from omeroweb.feedback.forms import ErrorForm, CommentForm
+from omeroweb.utils import is_ajax
 from omeroweb.version import omeroweb_version
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,7 @@ def send_feedback(request):
             finally:
                 fileObj.close()
         else:
-            if request.is_ajax():
+            if is_ajax(request.is_ajax):
                 return HttpResponse(
                     "<h1>Thanks for your feedback</h1><p>You may need to"
                     " refresh your browser to recover from the error</p>"
@@ -201,7 +202,7 @@ def handler500(request):
         error_filter = get_exception_reporter_filter(request)
         try:
             request_repr = "\n{}".format(
-                force_text(error_filter.get_request_repr(request))
+                force_str(error_filter.get_request_repr(request))
             )
         except Exception:
             request_repr = error_filter.get_request_repr(request)
@@ -214,7 +215,7 @@ def handler500(request):
     error500 = "%s\n%s" % (as_string, request_repr)
 
     # If AJAX, return JUST the error message (not within html page)
-    if request.is_ajax():
+    if is_ajax(request):
         return HttpResponseServerError(error500)
 
     if settings.FEEDBACK_ERROR_ENABLED:
@@ -231,7 +232,7 @@ def handler404(request, exception=None):
     logger.warning(
         "Not Found: %s" % request.path, extra={"status_code": 404, "request": request}
     )
-    if request.is_ajax():
+    if is_ajax(request):
         return HttpResponseNotFound()
 
     return page_not_found(request, "404.html")
@@ -249,7 +250,7 @@ def handlerInternalError(request, error):
         extra={"status_code": 404, "request": request},
     )
 
-    if request.is_ajax():
+    if is_ajax(request):
         return HttpResponseNotFound(error)
 
     context = {"error": error}

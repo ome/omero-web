@@ -788,10 +788,10 @@
 
             <!-- Remember to update this in public/public.html as well. We should change this, but for the meantime, you need to manually update the menu there too -->
 
-            <li id="explore_tab" class="ui-state-default{% ifequal menu 'userdata' %} ui-tabs-active{% endifequal %}">
+            <li id="explore_tab" class="ui-state-default{% if menu == 'userdata' %} ui-tabs-active{% endif %}">
                 <a href="{% url 'load_template' 'userdata' %}" class="ui-tabs-anchor" title="Explore">{% trans "Explore" %}</a>
             </li>
-            <li id="tags_tab" class="ui-state-default{% ifequal menu 'usertags' %} ui-tabs-active{% endifequal %}">
+            <li id="tags_tab" class="ui-state-default{% if menu == 'usertags' %} ui-tabs-active{% endif %}">
                 <a href="{% url 'load_template' 'usertags' %}" class="ui-tabs-anchor">{% trans "Tags" %}</a>
             </li>
             <li id="public_tab" class="ui-state-default">
