@@ -9,6 +9,7 @@
 
 - Django 4.0 compatibility [#458](https://github.com/ome/omero-web/pull/458)
 - Plugin hooks [#425](https://github.com/ome/omero-web/pull/425)
+- Remove legacy form [#473](https://github.com/ome/omero-web/pull/473)
 
 ## Bug fixes
 
