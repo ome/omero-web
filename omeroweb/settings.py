@@ -562,6 +562,16 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "CSRF session cookie impossible."
         ),
     ],
+    "omero.web.csrf_trusted_origins": [
+        "CSRF_TRUSTED_ORIGINS",
+        "[]",
+        json.loads,
+        (
+            "A list of hosts which are trusted origins for unsafe requests. "
+            "When starting with '.', all subdomains are included. "
+            """Example: '[".example.com", "another.example.net"]'"""
+        ),
+    ],
     "omero.web.session_cookie_samesite": [
         "SESSION_COOKIE_SAMESITE",
         "Lax",
