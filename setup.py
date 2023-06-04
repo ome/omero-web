@@ -63,6 +63,7 @@ setup(
         "Pillow",
         "pytz",
         "portalocker",
+        "packaging",
     ],
     include_package_data=True,
     tests_require=["pytest"],
