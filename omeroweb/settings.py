@@ -569,7 +569,9 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "A list of hosts which are trusted origins for unsafe requests. "
             "When starting with '.', all subdomains are included. "
-            """Example: '[".example.com", "another.example.net"]'"""
+            """Example ``'[".example.com", "another.example.net"]'``. """
+            "For more details see :djangodoc:`CSRF trusted origins <ref/"
+            "settings/#csrf-trusted-origins>`."
         ),
     ],
     "omero.web.session_cookie_samesite": [
