@@ -253,11 +253,6 @@ class WebControl(DiagnosticsControl):
             "Developer use: Loads the blitz gateway into a Python" " interpreter",
         )
 
-        # THIS FIXES Django 4.2.x
-        os.environ["DJANGO_SETTINGS_MODULE"] = os.environ.get(
-            "DJANGO_SETTINGS_MODULE", "omeroweb.settings"
-        )
-
     @config_required
     def help(self, args, settings):
         """Return extended help"""
