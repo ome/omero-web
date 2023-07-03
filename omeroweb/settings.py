@@ -186,7 +186,7 @@ DEVELOPMENT = "development"
 DEFAULT_SERVER_TYPE = WSGITCP
 ALL_SERVER_TYPES = (WSGI, WSGITCP, DEVELOPMENT)
 
-DEFAULT_SESSION_ENGINE = "omeroweb.filesessionstore"
+DEFAULT_SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_ENGINE_VALUES = (
     "omeroweb.filesessionstore",
     "django.contrib.sessions.backends.db",
