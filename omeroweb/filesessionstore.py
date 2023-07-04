@@ -23,8 +23,9 @@ import django.contrib.sessions.backends.file
 import warnings
 
 DEPRECATION_MESSAGE = (
-    "This session backend is deprecated as of OMERO.web 5.22.0. Use Django "
-    "'django.contrib.sessions.backends.file' instead."
+    "This session store implementation behaves identically to Django's built-in "
+    "'django.contrib.sessions.backends.file' and is deprecated as of "
+    "OMERO.web 5.22.0."
 )
 
 
