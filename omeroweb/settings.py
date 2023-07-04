@@ -470,8 +470,8 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "/#session-engine>`."
             "Allowed values are: ``omeroweb.filesessionstore`` (deprecated), "
             "``django.contrib.sessions.backends.db``, "
-            "``django.contrib.sessions.backends.file``` "
-            "``django.contrib.sessions.backends.cache``` or "
+            "``django.contrib.sessions.backends.file``, "
+            "``django.contrib.sessions.backends.cache`` or "
             "``django.contrib.sessions.backends.cached_db``."
         ),
     ],
