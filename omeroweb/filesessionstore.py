@@ -1,9 +1,31 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# Copyright (C) 2014-2023 University of Dundee & Open Microscopy Environment.
+# All rights reserved.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 import datetime
 import errno
 import logging
 import os
 import shutil
 import tempfile
+import warnings
 
 from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
@@ -20,6 +42,11 @@ from django.contrib.sessions.exceptions import InvalidSessionKey
 
 logger = logging.getLogger(__name__)
 
+DEPRECATION_MESSAGE = (
+    "This session backend is deprecated as of OMERO.web 5.22.0. Use Django "
+    "'django.contrib.sessions.backends.file' instead."
+)
+
 
 class SessionStore(SessionBase):
     """
@@ -27,6 +54,7 @@ class SessionStore(SessionBase):
     """
 
     def __init__(self, session_key=None):
+        warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
         self.storage_path = type(self)._get_storage_path()
         self.file_prefix = settings.SESSION_COOKIE_NAME
         super(SessionStore, self).__init__(session_key)
