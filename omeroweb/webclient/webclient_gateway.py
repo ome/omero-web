@@ -89,7 +89,7 @@ def defaultThumbnail(size=(120, 120)):
     if len(size) == 1:
         size = (size[0], size[0])
     img = Image.open(settings.DEFAULT_IMG)
-    img.thumbnail(size, Image.ANTIALIAS)
+    img.thumbnail(size, Image.LANCZOS)
     f = BytesIO()
     img.save(f, "PNG")
     f.seek(0)
@@ -903,7 +903,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         img = Image.open(settings.DEFAULT_USER)
-        img.thumbnail((150, 150), Image.ANTIALIAS)
+        img.thumbnail((150, 150), Image.LANCZOS)
         f = BytesIO()
         img.save(f, "PNG")
         f.seek(0)
