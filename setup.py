@@ -54,7 +54,7 @@ setup(
         "omero-py>=5.7.0",
         # minimum requirements for `omero web start`
         "concurrent-log-handler>=0.9.20",
-        "Django>=3.2.19,<4.3",
+        "Django>=4.2.3,<4.3",
         "django-pipeline==2.1.0",
         "django-cors-headers==3.7.0",
         "whitenoise>=5.3.0",
