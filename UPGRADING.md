@@ -49,6 +49,11 @@ Any downstream implementation which was directly assigning and/or retrieving
 
 More information at https://github.com/ome/omero-web/pull/435
 
+Due to the serialization change, the sessions store must be cleared before
+restarting OMERO.web following this upgrade - see
+https://omero.readthedocs.io/en/stable/sysadmins/omeroweb-upgrade.html#clear-the-sessions-store-optional
+for more information.
+
 ### Third-party JavaScript libraries
 
 If your plugin or customizations depend on any of the following libraries, please
