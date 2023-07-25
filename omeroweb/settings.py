@@ -186,7 +186,7 @@ DEVELOPMENT = "development"
 DEFAULT_SERVER_TYPE = WSGITCP
 ALL_SERVER_TYPES = (WSGI, WSGITCP, DEVELOPMENT)
 
-DEFAULT_SESSION_ENGINE = "omeroweb.filesessionstore"
+DEFAULT_SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_ENGINE_VALUES = (
     "omeroweb.filesessionstore",
     "django.contrib.sessions.backends.db",
@@ -468,6 +468,11 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "Controls where Django stores session data. See :djangodoc:"
             "`Configuring the session engine for more details <ref/settings"
             "/#session-engine>`."
+            "Allowed values are: ``omeroweb.filesessionstore`` (deprecated), "
+            "``django.contrib.sessions.backends.db``, "
+            "``django.contrib.sessions.backends.file``, "
+            "``django.contrib.sessions.backends.cache`` or "
+            "``django.contrib.sessions.backends.cached_db``."
         ),
     ],
     "omero.web.session_expire_at_browser_close": [
