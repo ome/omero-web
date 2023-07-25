@@ -1,3 +1,18 @@
+5.22.0 (July 2023)
+------------------
+
+## Features
+
+- New setting to configure CSRF trusted origins [#477](https://github.com/ome/omero-web/pull/477)
+
+## Other changes
+
+- Django 4.2 compatibility [#480](https://github.com/ome/omero-web/pull/480)
+- Deprecate custom in favor of Django session store [#486](https://github.com/ome/omero-web/pull/486)
+- Update Pillow constant [#487](https://github.com/ome/omero-web/pull/487)
+- Add packaging package [#478](https://github.com/ome/omero-web/pull/478)
+- Organize contributor names and emails [#482](https://github.com/ome/omero-web/pull/482) 
+
 5.21.0 (May 2023)
 -----------------
 
