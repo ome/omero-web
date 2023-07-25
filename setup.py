@@ -54,8 +54,8 @@ setup(
         "omero-py>=5.7.0",
         # minimum requirements for `omero web start`
         "concurrent-log-handler>=0.9.20",
-        "Django>=3.2.19,<4.0",
-        "django-pipeline==2.0.7",
+        "Django>=3.2.19,<4.3",
+        "django-pipeline==2.1.0",
         "django-cors-headers==3.7.0",
         "whitenoise>=5.3.0",
         "gunicorn>=19.3",
@@ -68,6 +68,6 @@ setup(
     include_package_data=True,
     tests_require=["pytest"],
     extras_require={
-        "redis": ["django-redis==5.0.0"],
+        "redis": ["django-redis==5.3.0"],
     },
 )

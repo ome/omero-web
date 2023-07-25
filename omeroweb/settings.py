@@ -1420,10 +1420,55 @@ if not DEBUG:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
     LOGGING["loggers"][""]["level"] = "INFO"
 
 
-def report_settings(module):
-    from django.views.debug import SafeExceptionReporterFilter
+class CallableSettingWrapper:
+    """
+    Object to wrap callable appearing in settings.
 
-    setting_filter = SafeExceptionReporterFilter()
+    Adapted from:
+      * `django.views.debug.CallableSettingWrapper()`
+    """
+
+    def __init__(self, callable_setting):
+        self._wrapped = callable_setting
+
+    def __repr__(self):
+        return repr(self._wrapped)
+
+
+def cleanse_setting(key, value):
+    """
+    Cleanse an individual setting key/value of sensitive content. If the
+    value is a dictionary, recursively cleanse the keys in that dictionary.
+
+    Adapted from:
+      * `django.views.debug.SafeExceptionReporterFilter.cleanse_setting()`
+    """
+    cleansed_substitute = "********************"
+    hidden_settings = re.compile("API|TOKEN|KEY|SECRET|PASS|SIGNATUREE", flags=re.I)
+
+    try:
+        is_sensitive = hidden_settings.search(key)
+    except TypeError:
+        is_sensitive = False
+
+    if is_sensitive:
+        cleansed = cleansed_substitute
+    elif isinstance(value, dict):
+        cleansed = {k: cleanse_setting(k, v) for k, v in value.items()}
+    elif isinstance(value, list):
+        cleansed = [cleanse_setting("", v) for v in value]
+    elif isinstance(value, tuple):
+        cleansed = tuple([cleanse_setting("", v) for v in value])
+    else:
+        cleansed = value
+
+    if callable(cleansed):
+        cleansed = CallableSettingWrapper(cleansed)
+
+    return cleansed
+
+
+def report_settings(module):
     custom_settings_mappings = getattr(module, "CUSTOM_SETTINGS_MAPPINGS", {})
     for key in sorted(custom_settings_mappings):
         values = custom_settings_mappings[key]
@@ -1434,7 +1479,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (source:%s)",
                 global_name,
-                setting_filter.cleanse_setting(global_name, global_value),
+                cleanse_setting(global_name, global_value),
                 source,
             )
 
@@ -1447,7 +1492,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (deprecated:%s, %s)",
                 global_name,
-                setting_filter.cleanse_setting(global_name, global_value),
+                cleanse_setting(global_name, global_value),
                 key,
                 description,
             )

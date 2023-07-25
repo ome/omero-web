@@ -60,10 +60,16 @@ if __name__ == "__main__":
     # Monkeypatch Django development web server to always run in single thread
     # even if --nothreading is not specified on command line
     def force_nothreading(
-        addr, port, wsgi_handler, ipv6=False, threading=False, server_cls=WSGIServer
+        addr,
+        port,
+        wsgi_handler,
+        ipv6=False,
+        threading=False,
+        on_bind=None,
+        server_cls=WSGIServer,
     ):
         django_core_servers_basehttp_run(
-            addr, port, wsgi_handler, ipv6, False, server_cls
+            addr, port, wsgi_handler, ipv6, False, on_bind, server_cls
         )
 
     import django.core.servers.basehttp
