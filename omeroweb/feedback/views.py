@@ -99,7 +99,7 @@ def send_feedback(request):
             finally:
                 fileObj.close()
         else:
-            if is_ajax(request.is_ajax):
+            if is_ajax(request):
                 return HttpResponse(
                     "<h1>Thanks for your feedback</h1><p>You may need to"
                     " refresh your browser to recover from the error</p>"
