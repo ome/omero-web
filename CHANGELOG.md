@@ -1,3 +1,14 @@
+5.22.1 (July 2023)
+------------------
+
+## Other changes
+
+- Additional upgrade note about session storage [#492](https://github.com/ome/omero-web/pull/492) 
+
+## Bug fixes
+
+- Fix Django 4 refactoring [#495](https://github.com/ome/omero-web/pull/495)
+
 5.22.0 (July 2023)
 ------------------
 
