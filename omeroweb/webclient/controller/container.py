@@ -27,6 +27,7 @@ import omero
 from omero.rtypes import rstring, rlong, unwrap
 from django.utils.encoding import smart_str
 import logging
+import time
 
 from omeroweb.webclient.controller import BaseController
 from omeroweb.webgateway.views import _bulk_file_annotations
@@ -60,6 +61,9 @@ class BaseContainer(BaseController):
     file_annotations = None
 
     orphaned = False
+
+    _list_scripts_cache = []
+    _list_scripts_cache_timestamp = 0
 
     def __init__(
         self,
@@ -315,6 +319,11 @@ class BaseContainer(BaseController):
         """
         Get the file names of all scripts
         """
+        now = time.time()
+        if now - BaseContainer._list_scripts_cache_timestamp < 60:
+            # cache 10 minutes
+            return BaseContainer._list_scripts_cache
+
         scriptService = self.conn.getScriptService()
         scripts = scriptService.getScripts()
 
@@ -323,6 +332,9 @@ class BaseContainer(BaseController):
         for s in scripts:
             name = s.name.val
             scriptlist.append(name)
+
+        BaseContainer._list_scripts_cache = scriptlist
+        BaseContainer._list_scripts_cache_timestamp = now
 
         return scriptlist
 
