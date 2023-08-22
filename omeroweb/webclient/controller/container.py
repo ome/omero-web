@@ -320,7 +320,7 @@ class BaseContainer(BaseController):
         Get the file names of all scripts
         """
         now = time.time()
-        if now - BaseContainer._list_scripts_cache_timestamp < 60:
+        if now - BaseContainer._list_scripts_cache_timestamp < 600:
             # cache 10 minutes
             return BaseContainer._list_scripts_cache
 
