@@ -1738,7 +1738,7 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
             context["canExportAsJpg"] = manager.canExportAsJpg(request)
             context["annotationCounts"] = manager.getAnnotationCounts()
             context["tableCountsOnParents"] = manager.countTablesOnParents()
-            figScripts = manager.listFigureScripts()
+            figScripts = manager.listFigureScripts(request=request)
     context["manager"] = manager
 
     if c_type in ("tag", "tagset"):
@@ -2280,7 +2280,7 @@ def batch_annotate(request, conn=None, **kwargs):
     conn.SERVICE_OPTS.setOmeroGroup(groupId)
 
     manager = BaseContainer(conn)
-    figScripts = manager.listFigureScripts(objs)
+    figScripts = manager.listFigureScripts(objs, request=request)
     canExportAsJpg = manager.canExportAsJpg(request, objs)
     filesetInfo = None
     iids = []

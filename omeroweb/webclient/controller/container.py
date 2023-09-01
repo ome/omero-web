@@ -27,7 +27,6 @@ import omero
 from omero.rtypes import rstring, rlong, unwrap
 from django.utils.encoding import smart_str
 import logging
-import time
 
 from omeroweb.webclient.controller import BaseController
 from omeroweb.webgateway.views import _bulk_file_annotations
@@ -61,9 +60,6 @@ class BaseContainer(BaseController):
     file_annotations = None
 
     orphaned = False
-
-    _list_scripts_cache = []
-    _list_scripts_cache_timestamp = 0
 
     def __init__(
         self,
@@ -315,14 +311,13 @@ class BaseContainer(BaseController):
                 or self.plate.canDownload()
             )
 
-    def list_scripts(self):
+    def list_scripts(self, request=None):
         """
         Get the file names of all scripts
         """
-        now = time.time()
-        if now - BaseContainer._list_scripts_cache_timestamp < 600:
-            # cache 10 minutes
-            return BaseContainer._list_scripts_cache
+
+        if request and "list_scripts" in request.session:
+            return request.session["list_scripts"]
 
         scriptService = self.conn.getScriptService()
         scripts = scriptService.getScripts()
@@ -333,19 +328,19 @@ class BaseContainer(BaseController):
             name = s.name.val
             scriptlist.append(name)
 
-        BaseContainer._list_scripts_cache = scriptlist
-        BaseContainer._list_scripts_cache_timestamp = now
+        if request:
+            request.session["list_scripts"] = scriptlist
 
         return scriptlist
 
-    def listFigureScripts(self, objDict=None):
+    def listFigureScripts(self, objDict=None, request=None):
         """
         This configures all the Figure Scripts, setting their enabled status
         given the currently selected object (self.image etc) or batch objects
         (uses objDict) and the script availability.
         """
 
-        availableScripts = self.list_scripts()
+        availableScripts = self.list_scripts(request=request)
         image = None
         if self.image or self.well:
             image = self.image or self.getWellSampleImage()
