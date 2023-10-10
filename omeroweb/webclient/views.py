@@ -3814,7 +3814,7 @@ def activities(request, conn=None, **kwargs):
                         # we can only retrieve this ONCE - must save results
                         results = proc.getResults(0, conn.SERVICE_OPTS)
                         kwargs = {
-                            "status": ("finished" if cb.returncode == 0 else "failed"),
+                            "status": "finished",
                             "failure": cb.returncode,
                         }
                         if cb.returncode != 0:
