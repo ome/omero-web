@@ -553,8 +553,6 @@
         top:6px ;bottom:0px; left:0px; right:0px;
         position: absolute;
         font-size:1.1em;
-        //border-left: solid 1px hsl(210,10%,85%);
-        min-width:240px;
     }
 
     #preview_tab .right_tab_inner {
@@ -1009,7 +1007,6 @@
 
     .mapAnnContainer {
         position: relative;
-        max-height: 250px;
         overflow-y: auto;
     }
     .keyValueTable {
