@@ -3815,11 +3815,9 @@ def activities(request, conn=None, **kwargs):
                         results = proc.getResults(0, conn.SERVICE_OPTS)
                         kwargs = {
                             "status": "finished",
-                            "failure": cb.returncode,
+                            "returncode": cb.returncode,
                         }
                         if cb.returncode != 0:
-                            # This 'error' shows failure icon
-                            kwargs["error"] = 1
                             kwargs["Message"] = (
                                 f"Script exited with failure."
                                 f" (returncode={ cb.returncode })"

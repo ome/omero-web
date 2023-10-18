@@ -240,7 +240,7 @@
 								<img alt="Running Script" src="{% static "webgateway/img/spinner.gif" %}" />
                             
 							{% else %} 
-								{% if j.error %} 
+								{% if j.returncode and j.returncode > 0 %}
                                 <div class='script_error' title="Script failed. Please see error logs">
                                     <img alt="Failed to run script properly" src="{% static "webgateway/img/failed.png" %}" />
                                 </div>
