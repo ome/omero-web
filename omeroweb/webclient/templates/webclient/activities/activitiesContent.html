@@ -240,22 +240,9 @@
 								<img alt="Running Script" src="{% static "webgateway/img/spinner.gif" %}" />
                             
 							{% else %} 
-								{% if j.error %} 
-                                <div class='script_error' title="{{ j.error }}">
+								{% if j.returncode and j.returncode > 0 %}
+                                <div class='script_error' title="Script failed. Please see error logs">
                                     <img alt="Failed to run script properly" src="{% static "webgateway/img/failed.png" %}" />
-								
-									
-                                    {% comment %}
-                                    <!-- Don't allow submitting now. TODO: launch submit page -->
-                                    <img src="{% static "webclient/image/info16.png" %}"/>
-                                    <input type='submit' title="Send Error as Feeback to the OME team" jobKey="{{ j.key }}"
-                                    {% if j.error_sent %}
-                                        value='Thank you' disabled='true'
-                                    {% else %}
-                                        value='Submit Feedback'
-                                    {% endif %} />
-                                    {% endcomment %}
-									
                                 </div>
 								{% else %}
 								<img alt="Success" src="{% static "webgateway/img/success.png" %}" />

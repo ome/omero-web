@@ -3524,6 +3524,13 @@ def update_callback(request, cbString, **kwargs):
         request.session["callback"][cbString][key] = value
 
 
+# Subclass to handle returncode
+class ScriptsCallback(omero.scripts.ProcessCallbackI):
+    def processFinished(self, returncode, current=None):
+        super().processFinished(returncode, current)
+        self.returncode = returncode
+
+
 @login_required()
 @render_response()
 def activities(request, conn=None, **kwargs):
@@ -3799,14 +3806,23 @@ def activities(request, conn=None, **kwargs):
                         error=1,
                     )
                     continue
-                cb = omero.scripts.ProcessCallbackI(conn.c, proc)
+                cb = ScriptsCallback(conn.c, proc)
                 # check if we get something back from the handle...
                 if cb.block(0):  # ms.
                     cb.close()
                     try:
                         # we can only retrieve this ONCE - must save results
                         results = proc.getResults(0, conn.SERVICE_OPTS)
-                        update_callback(request, cbString, status="finished")
+                        kwargs = {
+                            "status": "finished",
+                            "returncode": cb.returncode,
+                        }
+                        if cb.returncode != 0:
+                            kwargs["Message"] = (
+                                f"Script exited with failure."
+                                f" (returncode={ cb.returncode })"
+                            )
+                        update_callback(request, cbString, **kwargs)
                         new_results.append(cbString)
                     except Exception:
                         update_callback(
