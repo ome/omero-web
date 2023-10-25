@@ -2852,7 +2852,9 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
     except omero.ApiUsageException as ex:
         logger.warn(ex)
         resObj = {"error": ex.message}
-        return HttpResponseBadRequest(json.dumps(resObj), content_type="application/json")
+        return HttpResponseBadRequest(
+            json.dumps(resObj), content_type="application/json"
+        )
     return JsonResponse({"data": histogram})
 
 
