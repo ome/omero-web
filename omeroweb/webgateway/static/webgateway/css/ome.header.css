@@ -69,7 +69,7 @@
  }
 	
 	
-	#middle_header_left a, #show_user_dropdown, #public_login_button {
+	#middle_header_left a, #show_user_dropdown, #public_login_button, #scriptButton, #launch_activities {
 		color: hsl(210,20%,80%);
 		font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
 		font-weight:500;
@@ -218,12 +218,9 @@
 			background: url(../img/icon_figure_scripts.png) center center no-repeat;
 		}
 
-		#scriptButton{
-			background: url(../img/icon_script.png) center center no-repeat;
-		}
-	
-		#launch_activities{
-			background:url(../img/activity_light_24.png) center center no-repeat;
+		#scriptButton, #launch_activities{
+			margin: 0px 5px;
+			line-height: 23px;
 		}
 		
 		#script_notifications li:first-child {
@@ -670,8 +667,8 @@ li.menu_back a {
 
 #runningStatus {
 	 position:absolute; 
-	 bottom:1px; 
-	 left:1px; 
+	 top:2px; 
+	 right:-2px; 
 	 width:12px; 
 	 height:12px; 
 	 border-radius:8px;
@@ -772,7 +769,7 @@ li.menu_back a {
 		
 			.notifier {
 				position:absolute;
-				left:20px;
+				right:-9px;
 				top:-4px;
 				color:white;
 				font-weight:bold;
