@@ -2836,25 +2836,25 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
     image = conn.getObject("Image", iid)
     if image is None:
         raise Http404
-    maxW, maxH = conn.getMaxPlaneSize()
-    sizeX = image.getSizeX()
-    sizeY = image.getSizeY()
-    if (sizeX * sizeY) > (maxW * maxH):
-        msg = "Histogram not supported for 'big' images (over %s * %s pixels)" % (
-            maxW,
-            maxH,
-        )
-        return JsonResponse({"error": msg})
 
     theZ = int(request.GET.get("theZ", 0))
     theT = int(request.GET.get("theT", 0))
     theC = int(theC)
     binCount = int(request.GET.get("bins", 256))
 
-    # TODO: handle projection when supported by OMERO
-    data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
-    histogram = data[theC]
+    if theZ >= image.getSizeZ() or theT >= image.getSizeT() or theC >= image.getSizeC():
+        raise Http404
 
+    # TODO: handle projection when supported by OMERO
+    try:
+        data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
+        histogram = data[theC]
+    except omero.ApiUsageException as ex:
+        logger.warn(ex)
+        resObj = {"error": ex.message}
+        return HttpResponseBadRequest(
+            json.dumps(resObj), content_type="application/json"
+        )
     return JsonResponse({"data": histogram})
 
 
