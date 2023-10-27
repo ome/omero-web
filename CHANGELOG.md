@@ -1,3 +1,22 @@
+5.23.0 (October 2023)
+---------------------
+
+## Features
+
+- Key value pairs height [#475](https://github.com/ome/omero-web/pull/475)
+- Cache script names [#498](https://github.com/ome/omero-web/pull/498)
+- Detect and display non-zero return code from scripts [#474](https://github.com/ome/omero-web/pull/474)
+- Add placeholder for right panel title [#463](https://github.com/ome/omero-web/pull/463)
+- Tiled image histograms [#456](https://github.com/ome/omero-web/pull/456)
+
+## Bug fixes
+
+- Make sure drag handle is visible [#503](https://github.com/ome/omero-web/pull/503)
+
+## Other changes
+
+- Force Django 4.2 and Python 3.8 [#491](https://github.com/ome/omero-web/pull/491)
+
 5.22.1 (July 2023)
 ------------------
 
