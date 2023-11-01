@@ -1368,8 +1368,15 @@ def api_annotations(request, conn=None, **kwargs):
     to_query = defaultdict(set)
     inheritors = defaultdict(lambda: defaultdict(list))
     requested = defaultdict(list)
-    for type_ in ("Image", "Dataset", "Project",
-                  "Well", "Acquisition", "Plate", "Screen"):
+    for type_ in (
+        "Image",
+        "Dataset",
+        "Project",
+        "Well",
+        "Acquisition",
+        "Plate",
+        "Screen",
+    ):
         if type_ == "Acquisition":
             type_ = "PlateAcquisition"
 
@@ -1378,9 +1385,7 @@ def api_annotations(request, conn=None, **kwargs):
             requested[type_].append(id_)
 
             obj = conn.getObject(type_, id_)
-            obj_descr = {"id": id_,
-                         "class": type_+"I",
-                         "name": obj.getName()}
+            obj_descr = {"id": id_, "class": type_ + "I", "name": obj.getName()}
             if type_ == "Well":
                 del obj_descr["name"]
 
@@ -1417,9 +1422,9 @@ def api_annotations(request, conn=None, **kwargs):
             inherited_anns["annotations"].append(ann)
             inherited_anns["inheritors"][int(ann["id"])] = inheritor_l
 
-    return JsonResponse({"annotations": anns,
-                         "inherited": inherited_anns,
-                         "experimenters": exps})
+    return JsonResponse(
+        {"annotations": anns, "inherited": inherited_anns, "experimenters": exps}
+    )
 
 
 @login_required()
