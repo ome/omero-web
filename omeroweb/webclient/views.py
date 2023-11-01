@@ -35,6 +35,7 @@ import json
 import re
 import sys
 import warnings
+from collections import defaultdict
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
 from django.utils.html import escape
@@ -191,6 +192,24 @@ def validate_redirect_url(url):
     ):
         url = reverse("webindex")
     return url
+
+
+def get_parentIds_recursive(obj):
+    """
+    Goes recursively through the object parents list.
+    Returns a dictionary containing a list of parents Id
+    per type.
+    """
+    d = defaultdict(set)
+    if obj.OMERO_CLASS == "WellSample":
+        id_ = int(obj.getPlateAcquisition().getId())
+        d["PlateAcquisition"].add(id_)
+    else:
+        d[obj.OMERO_CLASS].add(int(obj.getId()))
+    for parent in obj.listParents():
+        for k, v in get_parentIds_recursive(parent).items():
+            d[k].update(v)
+    return d
 
 
 ##############################################################################
@@ -1341,35 +1360,66 @@ def api_tags_and_tagged_list_DELETE(request, conn=None, **kwargs):
 @login_required()
 def api_annotations(request, conn=None, **kwargs):
     r = request.GET
-    image_ids = get_list(request, "image")
-    dataset_ids = get_list(request, "dataset")
-    project_ids = get_list(request, "project")
-    screen_ids = get_list(request, "screen")
-    plate_ids = get_list(request, "plate")
-    run_ids = get_list(request, "acquisition")
-    well_ids = get_list(request, "well")
     page = get_long_or_default(request, "page", 1)
     limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
-
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
 
-    anns, exps = tree.marshal_annotations(
+    to_query = defaultdict(set)
+    inheritors = defaultdict(lambda: defaultdict(list))
+    requested = defaultdict(list)
+    for type_ in ("Image", "Dataset", "Project",
+                  "Well", "Acquisition", "Plate", "Screen"):
+        if type_ == "Acquisition":
+            type_ = "PlateAcquisition"
+
+        for id_ in get_list(request, type_.lower()):
+            id_ = int(id_)
+            requested[type_].append(id_)
+
+            obj = conn.getObject(type_, id_)
+            obj_descr = {"id": id_,
+                         "class": type_+"I",
+                         "name": obj.getName()}
+            if type_ == "Well":
+                del obj_descr["name"]
+
+            for k, v in get_parentIds_recursive(obj).items():
+                to_query[k].update(v)
+                if k != type_:  # Skip current object
+                    for parent in v:
+                        inheritors[k][parent].append(obj_descr)
+
+    all_anns, exps = tree.marshal_annotations(
         conn,
-        project_ids=project_ids,
-        dataset_ids=dataset_ids,
-        image_ids=image_ids,
-        screen_ids=screen_ids,
-        plate_ids=plate_ids,
-        run_ids=run_ids,
-        well_ids=well_ids,
+        project_ids=to_query["Project"],
+        dataset_ids=to_query["Dataset"],
+        image_ids=to_query["Image"],
+        screen_ids=to_query["Screen"],
+        plate_ids=to_query["Plate"],
+        run_ids=to_query["PlateAcquisition"],
+        well_ids=to_query["Well"],
         ann_type=ann_type,
         ns=ns,
         page=page,
         limit=limit,
     )
 
-    return JsonResponse({"annotations": anns, "experimenters": exps})
+    anns = []
+    inherited_anns = {"annotations": [], "inheritors": {}}
+    for ann in all_anns:
+        p = ann["link"]["parent"]
+        pclass, pid = p["class"][:-1], p["id"]
+        if pid in requested[pclass]:
+            anns.append(ann)
+        inheritor_l = inheritors[pclass][pid]
+        if len(inheritor_l) > 0:
+            inherited_anns["annotations"].append(ann)
+            inherited_anns["inheritors"][int(ann["id"])] = inheritor_l
+
+    return JsonResponse({"annotations": anns,
+                         "inherited": inherited_anns,
+                         "experimenters": exps})
 
 
 @login_required()
