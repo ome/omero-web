@@ -7,9 +7,16 @@
             data-added-by="<%= WEBCLIENT.USER.id %>"
         <% } %>
         class="keyValueTable
-            <% if (!ann.id || (ann.permissions.canEdit && clientMapAnn)){ %> editableKeyValueTable <% } %>
+            <% if (!ann.id || (ann.permissions.canEdit && clientMapAnn && !isInherited)){ %> editableKeyValueTable <% } %>
             ">
     <thead>
+      <% if (isInherited) { %>
+        <tr">
+          <th colspan="2">
+              <%- (ann.link.parent.class.substring(0, ann.link.parent.class.length - 1) + ":" + ann.link.parent.id  + ":" + ann.link.parent.name).slice(0, 50) %>
+          </th>
+        </tr>
+      <% } %>
       <% if (showNs && ann.ns) { %>
       <tr title="<%- ann.ns %>">
           <th colspan="2">
