@@ -1418,9 +1418,7 @@ def api_annotations(request, conn=None, **kwargs):
         limit=limit,
     )
     if not with_parents:
-        return JsonResponse(
-            {"annotations": all_anns, "experimenters": exps}
-        )
+        return JsonResponse({"annotations": all_anns, "experimenters": exps})
 
     anns = []
     inh_anns = {"annotations": [], "inheritors": defaultdict(dict)}
