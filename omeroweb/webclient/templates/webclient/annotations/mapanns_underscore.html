@@ -10,14 +10,7 @@
             <% if (!ann.id || (ann.permissions.canEdit && clientMapAnn && !isInherited)){ %> editableKeyValueTable <% } %>
             ">
     <thead>
-      <% if (isInherited) { %>
-        <tr">
-          <th colspan="2">
-              <%- (ann.link.parent.class.substring(0, ann.link.parent.class.length - 1) + ":" + ann.link.parent.id  + ":" + ann.link.parent.name).slice(0, 50) %>
-          </th>
-        </tr>
-      <% } %>
-      <% if (showNs && ann.ns) { %>
+      <% if (showNs && ann.ns && !isInherited) { %>
       <tr title="<%- ann.ns %>">
           <th colspan="2">
               <%- ann.ns.slice(0, 50) %>
@@ -27,6 +20,9 @@
       <tr class="tooltip">
           <th colspan="2">
             <% if (ann.id) { %>
+              <% if (isInherited) { %>
+                Added on <%- ann.link.parent.class.substring(0, ann.link.parent.class.length - 1) %> <%- ann.link.parent.name.slice(0, 30) %>
+              <% } else { %>
                 Added by: <%- ann.owner.firstName %> <%- ann.owner.lastName %>
                 <% if (showParent && ann.link.parent.name){ %>
                   <br>
@@ -37,8 +33,14 @@
                   <% } %>
                   <%- ann.parentNames ? (ann.parentNames.length + " objects") : ann.link.parent.name %>
                 <% } %>
+              <% } %>
 
                 <span class="tooltip_html" style='display:none'>
+                    <% if (isInherited) { %>
+                      <% if (ann.childNames.length > 1){ %>
+                        You are viewing annotations inherited by <b><%- ann.childNames.length %></b> <%- ann.childClass %>s
+                      <% } %>
+                    <% } %>
                     <% if (ann.parentNames) { %>
                       You are
                       <% print (ann.permissions.canEdit && clientMapAnn ? 'editing' : 'viewing') %>
@@ -64,6 +66,15 @@
                         <% if (ann.link.date) { %>
                             <br /><b>On:</b> <% print(OME.formatDate(ann.link.date)) %>
                         <% } %>
+                    <% } %>
+                    <% if (isInherited) { %>
+                      <% if (ann.childNames.length > 1) { %>
+                        <br /><b>Inherited by:</b>
+                        <% _.each(ann.childNames, function(cname) { %>
+                          <br />&nbsp <%- cname %>
+                        <% }) %>
+                      <% } %>
+                      <br /><b>Namespace:</b> <%- ann.ns.slice(0, 50) %><br />
                     <% } %>
                 </span>
             <% } else if (objCount && objCount > 1) { %>

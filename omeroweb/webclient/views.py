@@ -1393,7 +1393,9 @@ def api_annotations(request, conn=None, **kwargs):
                 to_query[type_].add(id_)
                 continue
 
-            details = {"id": id_, "class": type_ + "I"}
+            details = {"id": id_, "class": type_ + "I", "name": obj.getName()}
+            if type_ in ["Well", "PlateAcquisition"]:
+                del details["name"]
 
             for p_type, p_ids in get_parentIds_recursive(obj).items():
                 to_query[p_type].update(p_ids)

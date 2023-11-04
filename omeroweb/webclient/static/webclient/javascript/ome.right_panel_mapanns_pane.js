@@ -147,20 +147,24 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
                     // Populate experimenters within anns
                     var anns = data.annotations.map(populate_experimenter);
 
-
-                    var inh_anns = [];
-                    data.inherited.annotations.forEach(function(ann) {
-                        ann = populate_experimenter(ann);
-                        let class_ = ann.link.parent.class;
-                        let id_ = '' + ann.link.parent.id;
-                        children = data.inherited.inheritors[class_][id_];
-                        for(j = 0; j < children.length; j++){
-                            // Unpacking the parent annoations for each image
-                            let clone_ann = { ...ann };
-                            //clone_ann.link.parent.class = clone_ann.link.parent.class.substring(0, class_.length - 1);
-                            inh_anns.push(clone_ann);
-                        }
-                    });
+                    var inh_map_annotations = [];
+                    if (data.hasOwnProperty("inherited")){
+                        data.inherited.annotations.forEach(function(ann) {
+                            ann = populate_experimenter(ann);
+                            let class_ = ann.link.parent.class;
+                            let id_ = '' + ann.link.parent.id;
+                            children = data.inherited.inheritors[class_][id_];
+                            class_ = children[0].class;
+                            ann.childClass = class_.substring(0, class_.length - 1);
+                            ann.childNames = [];
+                            if (children[0].hasOwnProperty("name")){
+                                for(j = 0; j < children.length; j++){
+                                    ann.childNames.push(children[j].name);
+                                }
+                            }
+                            inh_map_annotations.push(ann);
+                        });
+                    }
 
                     // Sort map anns into 3 lists...
                     var client_map_annotations = [];
@@ -177,22 +181,10 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
                         }
                     });
 
-                    var inh_client_map_annotations = [];
-                    var inh_map_annotations = [];
-                    inh_anns.forEach(function(ann){
-                        if (isClientMapAnn(ann)) {
-                            inh_client_map_annotations.push(ann);
-                        } else {
-                            inh_map_annotations.push(ann);
-                        }
-                    });
-
                     if (batchAnn) {
                         my_client_map_annotations = groupDuplicateAnns(my_client_map_annotations);
                         client_map_annotations = groupDuplicateAnns(client_map_annotations);
                         map_annotations = groupDuplicateAnns(map_annotations);
-                        inh_client_map_annotations = groupDuplicateAnns(inh_client_map_annotations);
-                        inh_map_annotations = groupDuplicateAnns(inh_map_annotations);
                     }
 
                     // Update html...
@@ -207,16 +199,14 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
                     }
                     // In batch_annotate view, we show which object each map is linked to
                     var showParent = batchAnn;
-                    html = html + mapAnnsTempl({'anns': inh_client_map_annotations, 'isInherited': true,
-                        'showTableHead': showHead, 'showNs': false, 'clientMapAnn': true, 'showParent': showParent});
-                    html = html + mapAnnsTempl({'anns': inh_map_annotations, 'isInherited': true,
-                        'showTableHead': false, 'showNs': true, 'clientMapAnn': false, 'showParent': showParent});
                     html = html + mapAnnsTempl({'anns': my_client_map_annotations, 'objCount': objects.length,
                         'showTableHead': showHead, 'showNs': false, 'clientMapAnn': true, 'showParent': showParent,
                         'isInherited': false});
                     html = html + mapAnnsTempl({'anns': client_map_annotations, 'isInherited': false,
                         'showTableHead': false, 'showNs': false, 'clientMapAnn': true, 'showParent': showParent});
                     html = html + mapAnnsTempl({'anns': map_annotations, 'isInherited': false,
+                        'showTableHead': false, 'showNs': true, 'clientMapAnn': false, 'showParent': showParent});
+                    html = html + mapAnnsTempl({'anns': inh_map_annotations, 'isInherited': true,
                         'showTableHead': false, 'showNs': true, 'clientMapAnn': false, 'showParent': showParent});
                     $mapAnnContainer.html(html);
 
