@@ -199,13 +199,15 @@ def get_parentIds_recursive(obj):
     Goes recursively through the object parents list.
     Returns a dictionary containing a list of parents Id
     per type.
+    params:
+        - obj: if not in exisiting_d, add and iterate on parents
     """
     d = defaultdict(set)
     if obj.OMERO_CLASS == "WellSample":
-        id_ = int(obj.getPlateAcquisition().getId())
-        d["PlateAcquisition"].add(id_)
-    else:
-        d[obj.OMERO_CLASS].add(int(obj.getId()))
+        d["PlateAcquisition"].add(int(obj.getPlateAcquisition().getId()))
+        obj = obj.getParent()  # Jump right away to the Well
+    d[obj.OMERO_CLASS].add(int(obj.getId()))
+
     for parent in obj.listParents():
         for k, v in get_parentIds_recursive(parent).items():
             d[k].update(v)
@@ -1364,6 +1366,7 @@ def api_annotations(request, conn=None, **kwargs):
     limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
+    with_parents = r.get("parents", False)
 
     to_query = defaultdict(set)
     inheritors = defaultdict(lambda: defaultdict(list))
@@ -1385,15 +1388,17 @@ def api_annotations(request, conn=None, **kwargs):
             requested[type_].append(id_)
 
             obj = conn.getObject(type_, id_)
-            obj_descr = {"id": id_, "class": type_ + "I", "name": obj.getName()}
-            if type_ == "Well":
-                del obj_descr["name"]
+            if not with_parents:
+                to_query[type_].add(id_)
+                continue
+
+            details = {"id": id_, "class": type_ + "I"}
 
             for k, v in get_parentIds_recursive(obj).items():
                 to_query[k].update(v)
                 if k != type_:  # Skip current object
                     for parent in v:
-                        inheritors[k][parent].append(obj_descr)
+                        inheritors[k][parent].append(details)
 
     all_anns, exps = tree.marshal_annotations(
         conn,
@@ -1409,9 +1414,13 @@ def api_annotations(request, conn=None, **kwargs):
         page=page,
         limit=limit,
     )
+    if not with_parents:
+        return JsonResponse(
+            {"annotations": all_anns, "experimenters": exps}
+        )
 
     anns = []
-    inherited_anns = {"annotations": [], "inheritors": {}}
+    inh_anns = {"annotations": [], "inheritors": {}}
     for ann in all_anns:
         p = ann["link"]["parent"]
         pclass, pid = p["class"][:-1], p["id"]
@@ -1419,11 +1428,11 @@ def api_annotations(request, conn=None, **kwargs):
             anns.append(ann)
         inheritor_l = inheritors[pclass][pid]
         if len(inheritor_l) > 0:
-            inherited_anns["annotations"].append(ann)
-            inherited_anns["inheritors"][int(ann["id"])] = inheritor_l
+            inh_anns["annotations"].append(ann)
+            inh_anns["inheritors"][int(ann["id"])] = inheritor_l
 
     return JsonResponse(
-        {"annotations": anns, "inherited": inherited_anns, "experimenters": exps}
+        {"annotations": anns, "inherited": inh_anns, "experimenters": exps}
     )
 
 

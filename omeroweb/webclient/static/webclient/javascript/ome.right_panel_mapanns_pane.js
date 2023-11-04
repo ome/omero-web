@@ -104,7 +104,7 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
             }
 
             // convert objects to json data
-            ajaxdata = {"type": "map"};
+            ajaxdata = {"type": "map", "parents": true};
             for (var i=0; i < objects.length; i++) {
                 var o = objects[i].split(/-(.+)/);
                 if (typeof ajaxdata[o[0]] !== 'undefined') {
