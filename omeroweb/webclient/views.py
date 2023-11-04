@@ -1366,7 +1366,8 @@ def api_annotations(request, conn=None, **kwargs):
     limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
-    with_parents = r.get("parents", False)
+    with_parents = r.get("parents", "no")
+    with_parents = with_parents == "yes"
 
     to_query = defaultdict(set)
     inheritors = defaultdict(lambda: defaultdict(list))
@@ -1394,11 +1395,11 @@ def api_annotations(request, conn=None, **kwargs):
 
             details = {"id": id_, "class": type_ + "I"}
 
-            for k, v in get_parentIds_recursive(obj).items():
-                to_query[k].update(v)
-                if k != type_:  # Skip current object
-                    for parent in v:
-                        inheritors[k][parent].append(details)
+            for p_type, p_ids in get_parentIds_recursive(obj).items():
+                to_query[p_type].update(p_ids)
+                if p_type != type_:  # Skip current object
+                    for p_id in p_ids:
+                        inheritors[p_type][p_id].append(details)
 
     all_anns, exps = tree.marshal_annotations(
         conn,
@@ -1420,16 +1421,16 @@ def api_annotations(request, conn=None, **kwargs):
         )
 
     anns = []
-    inh_anns = {"annotations": [], "inheritors": {}}
+    inh_anns = {"annotations": [], "inheritors": defaultdict(dict)}
     for ann in all_anns:
         p = ann["link"]["parent"]
-        pclass, pid = p["class"][:-1], p["id"]
-        if pid in requested[pclass]:
+        pclass, pid = p["class"], p["id"]
+        if pid in requested[pclass[:-1]]:
             anns.append(ann)
-        inheritor_l = inheritors[pclass][pid]
+        inheritor_l = inheritors[pclass[:-1]][pid]
         if len(inheritor_l) > 0:
             inh_anns["annotations"].append(ann)
-            inh_anns["inheritors"][int(ann["id"])] = inheritor_l
+            inh_anns["inheritors"][pclass][pid] = inheritor_l
 
     return JsonResponse(
         {"annotations": anns, "inherited": inh_anns, "experimenters": exps}

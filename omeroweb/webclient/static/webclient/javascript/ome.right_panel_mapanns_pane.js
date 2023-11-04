@@ -104,7 +104,7 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
             }
 
             // convert objects to json data
-            ajaxdata = {"type": "map", "parents": true};
+            ajaxdata = {"type": "map", "parents": "yes"};
             for (var i=0; i < objects.length; i++) {
                 var o = objects[i].split(/-(.+)/);
                 if (typeof ajaxdata[o[0]] !== 'undefined') {
@@ -151,7 +151,10 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
                     var inh_anns = [];
                     data.inherited.annotations.forEach(function(ann) {
                         ann = populate_experimenter(ann);
-                        for(j = 0; j < data.inherited.inheritors[ann["id"]].length; j++){
+                        let class_ = ann.link.parent.class;
+                        let id_ = '' + ann.link.parent.id;
+                        children = data.inherited.inheritors[class_][id_];
+                        for(j = 0; j < children.length; j++){
                             // Unpacking the parent annoations for each image
                             let clone_ann = { ...ann };
                             //clone_ann.link.parent.class = clone_ann.link.parent.class.substring(0, class_.length - 1);
