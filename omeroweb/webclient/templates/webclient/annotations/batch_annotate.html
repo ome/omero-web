@@ -39,13 +39,7 @@
 
 
                 // Make list of ['image-123', 'image-456'] for use in Annotation Tabs...
-                // If we have iids (possibly when Wells selected) just use these:
-                {% if iids|length > 0 %}
-                var selectedObjs = [{% for id in iids %}{% if forloop.counter > 1 %},{% endif %}"image-{{ id }}"{% endfor %}];
-                {% else %}
-                // ...otherwise use the obj_labels
-                var selectedObjs = [{% for o in obj_labels %}{% if forloop.counter > 1 %},{% endif %}"{{ o.type|lower }}-{{ o.id}}"{% endfor %}];
-                {% endif %}
+                var selectedObjs = [{% for o in obj_labels %}{% if forloop.counter > 1 %}, {% endif %} "{{ o.type|lower }}-{{ o.id}}"{% endfor %}];
 
                 var annPaneData = {
                     'selected': selectedObjs,

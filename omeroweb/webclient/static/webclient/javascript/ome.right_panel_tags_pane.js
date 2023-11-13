@@ -119,24 +119,22 @@ var TagPane = function TagPane($element, opts) {
                 $tags_container.html("Loading tags...");
             }
 
-            var request = objects.map(function(o){
-                return o.replace("-", "=");
-            });
-            request = request.join("&");
+            // create request ?image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
+            var request = OME.buildQueryStringForObjects(objects);
 
             var annsUrl = WEBCLIENT.URLS.webindex + "api/annotations/?type=tag&" + request
             $.getJSON(annsUrl, function(data){
 
                 // manipulate data...
                 // make an object of eid: experimenter
-                var experimenters = data.experimenters.reduce(function(prev, exp){
+                var experimenters = data.experimenters.reduce(function (prev, exp) {
                     prev[exp.id + ""] = exp;
                     return prev;
                 }, {});
 
                 // Populate experimenters within tags
                 // And do other tag marshalling
-                var tags = data.annotations.map(function(tag){
+                var tags = data.annotations.map(function (tag) {
                     tag.owner = experimenters[tag.owner.id];
                     if (tag.link && tag.link.owner) {
                         tag.link.owner = experimenters[tag.link.owner.id];

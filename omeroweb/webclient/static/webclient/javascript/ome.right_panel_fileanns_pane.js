@@ -138,10 +138,8 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
                 $fileanns_container.html("Loading attachments...");
             }
 
-            var request = objects.map(function(o){
-                return o.replace("-", "=");
-            });
-            request = request.join("&");
+            // create request ?image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
+            var request = OME.buildQueryStringForObjects(objects);
 
             $.getJSON(WEBCLIENT.URLS.webindex + "api/annotations/?type=file&" + request, function(data){
 

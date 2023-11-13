@@ -60,6 +60,23 @@ OME.getURLParameter = function(key) {
     return false;
 };
 
+OME.buildQueryStringForObjects = function buildQueryStringForObjects(obj_ids) {
+    // create request image=1,2&dataset=3,4 from list of ['image-1', 'dataset-3'] etc
+    let typeIds = obj_ids.reduce(function (prev, s) {
+        let dtype = s.split('-')[0];
+        let objId = s.split('-')[1];
+        if (!prev[dtype]) {
+            prev[dtype] = [];
+        }
+        prev[dtype].push(objId);
+        return prev;
+    }, {});
+    var request = Object.keys(typeIds).map(dtype => {
+        return dtype + '=' + typeIds[dtype].join(',');
+    }).join('&');
+    return request;
+}
+
 var linkify = function(input) {
     var regex = /(https?|ftp|file):\/\/[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]/g;
     input = input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
