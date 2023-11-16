@@ -71,6 +71,7 @@ class Show(object):
         "well",
         "tagset",
         "roi",
+        "fileset",
     )
 
     # Regular expression which declares the format for a "path" used either
@@ -270,6 +271,15 @@ class Show(object):
             first_selected = self._load_tag(attributes)
         elif first_obj == "well":
             first_selected = self._load_well(attributes)
+        elif first_obj == "fileset":
+            # Don't use getObjects() for fileset since it loads ALL file and images
+            params = omero.sys.ParametersI()
+            params.addId(attributes["id"])
+            params.page(0, 1)
+            query = "select img from Image img where img.fileset.id=:id"
+            first_image = self.conn.getQueryService().findAllByQuery(
+                query, params, self.conn.SERVICE_OPTS)[0]
+            first_selected = self.conn.getObject("Image", first_image.id.val)
         else:
             # All other objects can be loaded by type and attributes.
             (first_selected,) = self.conn.getObjects(first_obj, attributes=attributes)
@@ -308,6 +318,8 @@ class Show(object):
             if first_obj == "roi":
                 first_obj = "image"
                 first_selected = first_selected.getImage()
+            elif first_obj == "fileset":
+                first_obj = "image"
 
             # Tree hierarchy open to first selected object.
             self._initially_open = ["%s-%s" % (first_obj, first_selected.getId())]
