@@ -278,7 +278,8 @@ class Show(object):
             params.page(0, 1)
             query = "select img from Image img where img.fileset.id=:id"
             first_image = self.conn.getQueryService().findAllByQuery(
-                query, params, self.conn.SERVICE_OPTS)[0]
+                query, params, self.conn.SERVICE_OPTS
+            )[0]
             first_selected = self.conn.getObject("Image", first_image.id.val)
         else:
             # All other objects can be loaded by type and attributes.
