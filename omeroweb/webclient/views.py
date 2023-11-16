@@ -1366,12 +1366,9 @@ def api_annotations(request, conn=None, **kwargs):
     limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
-    with_parents = r.get("parents", "false")
-    with_parents = with_parents == "true"
+    with_parents = r.get("parents", "false") == "true"
 
     to_query = defaultdict(set)
-    lineage_d = defaultdict(lambda: defaultdict(list))
-    requested = defaultdict(list)
     for type_ in (
         "Image",
         "Dataset",
@@ -1381,37 +1378,34 @@ def api_annotations(request, conn=None, **kwargs):
         "Plate",
         "Screen",
     ):
+        ids = get_list(request, type_.lower())
         if type_ == "Acquisition":
             type_ = "PlateAcquisition"
+        # Important to cast to int to match marshal_lineage output
+        to_query[f"{type_}I"] = list(map(int, ids))
 
-        for id_ in get_list(request, type_.lower()):
-            id_ = int(id_)
-            requested[type_].append(id_)
-
-            obj = conn.getObject(type_, id_)
-            if not with_parents:
-                to_query[type_].add(id_)
-                continue
-
-            details = {"id": id_, "class": type_ + "I", "name": obj.getName()}
-            if type_ in ["Well", "PlateAcquisition"]:
-                del details["name"]
-
-            for p_type, p_ids in get_parentIds_recursive(obj).items():
-                to_query[p_type].update(p_ids)
-                if p_type != type_:  # Skip current object
-                    for p_id in p_ids:
-                        lineage_d[p_type][p_id].append(details)
+    if with_parents:
+        requested = to_query.copy()
+        lineage_d, to_query = tree.marshal_lineage(
+            conn,
+            project_ids=to_query["ProjectI"],
+            dataset_ids=to_query["DatasetI"],
+            image_ids=to_query["ImageI"],
+            screen_ids=to_query["ScreenI"],
+            plate_ids=to_query["PlateI"],
+            run_ids=to_query["PlateAcquisitionI"],
+            well_ids=to_query["WellI"],
+        )
 
     all_anns, exps = tree.marshal_annotations(
         conn,
-        project_ids=to_query["Project"],
-        dataset_ids=to_query["Dataset"],
-        image_ids=to_query["Image"],
-        screen_ids=to_query["Screen"],
-        plate_ids=to_query["Plate"],
-        run_ids=to_query["PlateAcquisition"],
-        well_ids=to_query["Well"],
+        project_ids=to_query["ProjectI"],
+        dataset_ids=to_query["DatasetI"],
+        image_ids=to_query["ImageI"],
+        screen_ids=to_query["ScreenI"],
+        plate_ids=to_query["PlateI"],
+        run_ids=to_query["PlateAcquisitionI"],
+        well_ids=to_query["WellI"],
         ann_type=ann_type,
         ns=ns,
         page=page,
@@ -1425,12 +1419,13 @@ def api_annotations(request, conn=None, **kwargs):
     for ann in all_anns:
         p = ann["link"]["parent"]
         pclass, pid = p["class"], p["id"]
-        if pid in requested[pclass[:-1]]:
+        if pid in requested[pclass]:
             anns.append(ann)
-        lineage_l = lineage_d[pclass[:-1]][pid]
-        if len(lineage_l) > 0:
-            parent_anns["annotations"].append(ann)
-            parent_anns["lineage"][pclass][pid] = lineage_l
+        if pclass != "ImageI":
+            lineage = lineage_d[pclass][pid]
+            if len(lineage) > 0:
+                parent_anns["annotations"].append(ann)
+                parent_anns["lineage"][pclass][pid] = lineage
 
     return JsonResponse(
         {"annotations": anns, "parents": parent_anns, "experimenters": exps}

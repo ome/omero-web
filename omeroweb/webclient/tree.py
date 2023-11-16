@@ -24,6 +24,7 @@ import time
 import pytz
 import omero
 from builtins import bytes
+from collections import defaultdict
 
 from omero.rtypes import rlong, unwrap, wrap
 from django.conf import settings
@@ -2074,3 +2075,113 @@ def marshal_annotations(
     experimenters.sort(key=lambda x: x["id"])
 
     return annotations, experimenters
+
+
+def marshal_lineage(conn,
+                    project_ids=None,
+                    dataset_ids=None,
+                    image_ids=None,
+                    screen_ids=None,
+                    plate_ids=None,
+                    run_ids=None,
+                    well_ids=None):
+
+    def add_refs(ref_, dataset=None, project=None, well=None,
+                 run=None, plate=None, screen=None):
+        def _add_refs(obj_type, obj_id):
+            if obj_id:
+                all_obj_ids[obj_type].add(obj_id)
+                lineage_d[obj_type][obj_id].append(ref_)
+        _add_refs("DatasetI", dataset)
+        _add_refs("ProjectI", project)
+        _add_refs("PlateAcquisitionI", run)
+        _add_refs("WellI", well)
+        _add_refs("PlateI", plate)
+        _add_refs("ScreenI", screen)
+
+    def parse_hql_id(hql_ids):
+        return ("" if x is None else x.getValue() for x in hql_ids)
+
+    requested = {
+        "ImageI": image_ids,
+        "DatasetI": dataset_ids,
+        "ProjectI": project_ids,
+        "PlateAcquisitionI": run_ids,
+        "WellI": well_ids,
+        "PlateI": plate_ids,
+        "ScreenI": screen_ids,
+    }
+
+    child_ref_d = defaultdict(dict)  # Children references dict
+    lineage_d, all_obj_ids = {}, {}  # Result dictionnaries
+    for obj_type in ["ImageI", "DatasetI", "ProjectI", "PlateI",
+                     "PlateAcquisitionI", "WellI", "ScreenI"]:
+        lineage_d[obj_type] = defaultdict(list)
+        all_obj_ids[obj_type] = set(requested[obj_type])
+
+        if len(requested[obj_type]) > 0:
+            for o in conn.getObjects(obj_type[:-1], requested[obj_type]):
+                details = {"id": o.getId(),
+                           "class": obj_type}
+                if obj_type not in ["PlateAcquisitionI", "WellI"]:
+                    details["name"] = o.getName()
+                child_ref_d[obj_type][details["id"]] = details
+
+    service_opts = conn.SERVICE_OPTS.copy()
+    qs = conn.getQueryService()
+    hql_image = ("select img.id, dset.id, pdl.parent.id, smp.well.id,"
+                 " smp.plateAcquisition.id, plt.id, spl.parent.id"
+                 " from Image img"
+                 " left outer join img.datasetLinks dil"
+                 " left outer join dil.parent dset"
+                 " left outer join img.wellSamples smp"
+                 " left outer join dset.projectLinks pdl"
+                 " left outer join smp.well.plate plt"
+                 " left outer join plt.screenLinks spl"
+                 " where img.id in (:ids)")
+
+    hql_wellrun = ("select child_o.id, plt.id, pdl.parent.id"
+                   " from {} child_o"
+                   " join child_o.plate plt"
+                   " left outer join plt.screenLinks pdl"
+                   " where child_o.id in (:ids)")
+
+    hql_dsetplate = ("select child_o.id, opl.parent.id FROM {} child_o"
+                     " left outer join child_o.{}Links opl "
+                     " where child_o.id in (:ids)")
+
+    if len(requested["ImageI"]) > 0:
+        params = omero.sys.ParametersI()
+        params.addIds(requested["ImageI"])
+        for (im, ds, pr,
+             wl, rn, pl, sc) in map(parse_hql_id,
+                                    qs.projection(hql_image,
+                                                  params, service_opts)):
+            ref_ = child_ref_d["ImageI"][im]
+            add_refs(ref_, ds, pr, wl, rn, pl, sc)
+
+    for _type in ["WellI", "PlateAcquisitionI"]:
+        if len(requested[_type]) > 0:
+            params = omero.sys.ParametersI()
+            params.addIds(requested[_type])
+            for ob, pl, sc in map(parse_hql_id,
+                                  qs.projection(hql_wellrun.format(_type[:-1]),
+                                                params, service_opts)):
+                ref_ = child_ref_d[_type][ob]
+                add_refs(ref_, plate=pl, screen=sc)
+
+    for _type, parent_type in zip(["PlateI", "DatasetI"],
+                                  ["screen", "project"]):
+        if len(requested[_type]) > 0:
+            params = omero.sys.ParametersI()
+            params.addIds(requested[_type])
+            for ob, p in map(parse_hql_id,
+                             qs.projection(hql_dsetplate.format(_type[:-1],
+                                                                parent_type),
+                                           params, service_opts)):
+                ref_ = child_ref_d[_type][ob]
+                if _type == "PlateI":
+                    add_refs(ref_, screen=p)
+                else:
+                    add_refs(ref_, project=p)
+    return lineage_d, all_obj_ids
