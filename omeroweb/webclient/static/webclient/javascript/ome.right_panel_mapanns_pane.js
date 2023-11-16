@@ -104,7 +104,7 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
             }
 
             // convert objects to json data
-            ajaxdata = {"type": "map", "parents": "yes"};
+            ajaxdata = {"type": "map", "parents": "true"};
             for (var i=0; i < objects.length; i++) {
                 var o = objects[i].split(/-(.+)/);
                 if (typeof ajaxdata[o[0]] !== 'undefined') {
@@ -148,12 +148,12 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
                     var anns = data.annotations.map(populate_experimenter);
 
                     var inh_map_annotations = [];
-                    if (data.hasOwnProperty("inherited")){
-                        data.inherited.annotations.forEach(function(ann) {
+                    if (data.hasOwnProperty("parents")){
+                        data.parents.annotations.forEach(function(ann) {
                             ann = populate_experimenter(ann);
                             let class_ = ann.link.parent.class;
                             let id_ = '' + ann.link.parent.id;
-                            children = data.inherited.inheritors[class_][id_];
+                            children = data.parents.lineage[class_][id_];
                             class_ = children[0].class;
                             ann.childClass = class_.substring(0, class_.length - 1);
                             ann.childNames = [];

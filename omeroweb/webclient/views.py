@@ -1366,11 +1366,11 @@ def api_annotations(request, conn=None, **kwargs):
     limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
-    with_parents = r.get("parents", "no")
-    with_parents = with_parents == "yes"
+    with_parents = r.get("parents", "false")
+    with_parents = with_parents == "true"
 
     to_query = defaultdict(set)
-    inheritors = defaultdict(lambda: defaultdict(list))
+    lineage_d = defaultdict(lambda: defaultdict(list))
     requested = defaultdict(list)
     for type_ in (
         "Image",
@@ -1401,7 +1401,7 @@ def api_annotations(request, conn=None, **kwargs):
                 to_query[p_type].update(p_ids)
                 if p_type != type_:  # Skip current object
                     for p_id in p_ids:
-                        inheritors[p_type][p_id].append(details)
+                        lineage_d[p_type][p_id].append(details)
 
     all_anns, exps = tree.marshal_annotations(
         conn,
@@ -1421,19 +1421,19 @@ def api_annotations(request, conn=None, **kwargs):
         return JsonResponse({"annotations": all_anns, "experimenters": exps})
 
     anns = []
-    inh_anns = {"annotations": [], "inheritors": defaultdict(dict)}
+    parent_anns = {"annotations": [], "lineage": defaultdict(dict)}
     for ann in all_anns:
         p = ann["link"]["parent"]
         pclass, pid = p["class"], p["id"]
         if pid in requested[pclass[:-1]]:
             anns.append(ann)
-        inheritor_l = inheritors[pclass[:-1]][pid]
-        if len(inheritor_l) > 0:
-            inh_anns["annotations"].append(ann)
-            inh_anns["inheritors"][pclass][pid] = inheritor_l
+        lineage_l = lineage_d[pclass[:-1]][pid]
+        if len(lineage_l) > 0:
+            parent_anns["annotations"].append(ann)
+            parent_anns["lineage"][pclass][pid] = lineage_l
 
     return JsonResponse(
-        {"annotations": anns, "inherited": inh_anns, "experimenters": exps}
+        {"annotations": anns, "parents": parent_anns, "experimenters": exps}
     )
 
 
