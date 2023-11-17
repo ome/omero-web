@@ -194,26 +194,6 @@ def validate_redirect_url(url):
     return url
 
 
-def get_parentIds_recursive(obj):
-    """
-    Goes recursively through the object parents list.
-    Returns a dictionary containing a list of parents Id
-    per type.
-    params:
-        - obj: if not in exisiting_d, add and iterate on parents
-    """
-    d = defaultdict(set)
-    if obj.OMERO_CLASS == "WellSample":
-        d["PlateAcquisition"].add(int(obj.getPlateAcquisition().getId()))
-        obj = obj.getParent()  # Jump right away to the Well
-    d[obj.OMERO_CLASS].add(int(obj.getId()))
-
-    for parent in obj.listParents():
-        for k, v in get_parentIds_recursive(parent).items():
-            d[k].update(v)
-    return d
-
-
 ##############################################################################
 # custom index page
 
