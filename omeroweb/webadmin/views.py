@@ -1037,6 +1037,7 @@ def my_account(request, action=None, conn=None, **kwargs):
         isLdapUser,
         hasAvatar,
     ) = prepare_experimenter(conn)
+    isSudo = conn.getEventContext().sudoerId is not None
     try:
         defaultGroupId = defaultGroup.id
     except Exception:
@@ -1092,6 +1093,7 @@ def my_account(request, action=None, conn=None, **kwargs):
     context = {
         "form": form,
         "ldapAuth": isLdapUser,
+        "isSudo": isSudo,
         "experimenter": experimenter,
         "ownedGroups": ownedGroups,
         "password_form": password_form,

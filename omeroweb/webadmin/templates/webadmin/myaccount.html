@@ -293,7 +293,7 @@
 
                {% if ldapAuth %}
                <div id="password"><label>LDAP: </label>{{ ldapAuth }}</div>
-               {% else %}
+               {% elif not isSudo %}
 
                <div id="password">
 
@@ -308,8 +308,9 @@
                </div>
                {% endif %}
 
-
+               {% if not isSudo %}
                <input type="submit" value="{% trans 'Save' %}" />
+               {% endif %}
              </div>
             <div style="clear:both"></div>
        </form>
