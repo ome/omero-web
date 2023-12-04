@@ -30,8 +30,7 @@ from omero.rtypes import rlong, unwrap, wrap
 from django.conf import settings
 from datetime import datetime
 from copy import deepcopy
-from omero.gateway import _letterGridLabel
-
+from omero.gateway import _letterGridLabel, _PlateWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -1908,8 +1907,17 @@ def _marshal_annotation(conn, annotation, link=None):
                 "id": link.parent.id.val,
                 "class": link.parent.__class__.__name__,
             }
-            if hasattr(link.parent, "name"):
+            if hasattr(link.parent, "name") and link.parent.name:
                 ann["link"]["parent"]["name"] = unwrap(link.parent.name)
+            elif type(link.parent) is omero.model.PlateAcquisitionI:
+                # Name is optional for PlateAcquisition
+                ann["link"]["parent"]["name"] = f"Run {link.parent.id._val}"
+            elif type(link.parent) is omero.model.WellI:
+                # Well name constructed from plate
+                plate = _PlateWrapper(conn, link.parent.plate)
+                row = plate.getRowLabels()[link.parent.row._val]
+                col = plate.getColumnLabels()[link.parent.column._val]
+                ann["link"]["parent"]["name"] = f"{row}{col}"
         linkCreation = link.details.creationEvent._time
         ann["link"]["date"] = _marshal_date(unwrap(linkCreation))
         p = link.details.permissions
@@ -2053,11 +2061,12 @@ def marshal_annotations(
             left outer join fetch oal.child as ch
             left outer join fetch oal.parent as pa
             join fetch ch.details.creationEvent
-            join fetch ch.details.owner
+            join fetch ch.details.owner %s
             left outer join fetch ch.file as file
             where %s order by ch.ns
             """ % (
             dtype,
+            "join fetch pa.plate" if dtype == "Well" else "",
             " and ".join(where_clause),
         )
 
