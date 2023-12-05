@@ -2313,9 +2313,7 @@ def batch_annotate(request, conn=None, **kwargs):
     context["template"] = "webclient/annotations/batch_annotate.html"
     context["webclient_path"] = reverse("webindex")
     objs["plateacquisition"] = objs.pop("acquisition")
-    context["annotationCounts"] = manager.getBatchAnnotationCounts(
-        objs
-    )
+    context["annotationCounts"] = manager.getBatchAnnotationCounts(objs)
     return context
 
 
