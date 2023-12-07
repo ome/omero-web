@@ -24,10 +24,11 @@
 #
 
 import omero
-from omero.rtypes import rstring, rlong, unwrap
+from omero.rtypes import rstring, rlist, rlong, unwrap
 from django.utils.encoding import smart_str
 import logging
 
+from omero.model import FileAnnotationI
 from omeroweb.webclient.controller import BaseController
 from omeroweb.webgateway.views import _bulk_file_annotations
 
@@ -78,7 +79,7 @@ class BaseContainer(BaseController):
         annotation=None,
         index=None,
         orphaned=None,
-        **kw
+        **kw,
     ):
         BaseController.__init__(self, conn)
         if project is not None:
@@ -516,64 +517,114 @@ class BaseContainer(BaseController):
             return True
         return False
 
+    class FileAnnotationShim:
+        """
+        Duck type which loosely mimics the structure that
+        AnnotationQuerySetIterator is expecting to be able to yield
+        FileAnnotation.id and FileAnnotation.file.name.
+        """
+
+        def __init__(self, _id, name):
+            self._obj = FileAnnotationI()
+            self.id = unwrap(_id)
+            self.name = unwrap(name)
+
+        def getFileName(self):
+            return self.name
+
+    FILES_BY_OBJECT_QUERY = (
+        "SELECT {columns} FROM FileAnnotation AS fa "
+        "JOIN fa.file AS ofile "
+        "    WHERE NOT EXISTS ( "
+        "        SELECT 1 FROM {parent_type}AnnotationLink sa_link "
+        "            WHERE sa_link.parent.id in (:ids) "
+        "                AND fa.id = sa_link.child.id "
+        "                AND fa.ns not in (:ns_to_exclude) "
+        "                {owned_by_me} "
+        "            GROUP BY sa_link.child.id "
+        "            HAVING count(sa_link.id) >= :count "
+        "    ) "
+        "    {order_by}"
+    )
+
     def getFilesByObject(self, parent_type=None, parent_ids=None):
-        eid = (
+        me = (
             (not self.canUseOthersAnns()) and self.conn.getEventContext().userId or None
         )
-        ns = [
-            omero.constants.namespaces.NSCOMPANIONFILE,
-            omero.constants.namespaces.NSEXPERIMENTERPHOTO,
-        ]
-
-        def sort_file_anns(file_ann_gen):
-            file_anns = list(file_ann_gen)
-            try:
-                file_anns.sort(key=lambda x: x.getFile().getName().lower())
-            except Exception:
-                pass
-            return file_anns
+        ns_to_exclude = rlist(
+            [
+                rstring(omero.constants.namespaces.NSCOMPANIONFILE),
+                rstring(omero.constants.namespaces.NSEXPERIMENTERPHOTO),
+            ]
+        )
 
         if self.image is not None:
-            return sort_file_anns(
-                self.image.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
-            )
+            parent_ids = [self.image.getId()]
+            parent_type = "Image"
         elif self.dataset is not None:
-            return sort_file_anns(
-                self.dataset.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
-            )
+            parent_ids = [self.dataset.getId()]
+            parent_type = "Dataset"
         elif self.project is not None:
-            return sort_file_anns(
-                self.project.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
-            )
+            parent_ids = [self.project.getId()]
+            parent_type = "Project"
         elif self.well is not None:
-            return sort_file_anns(
-                self.well.getWellSample()
-                .image()
-                .listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
-            )
+            parent_ids = [self.well.getId()]
+            parent_type = "Well"
         elif self.plate is not None:
-            return sort_file_anns(
-                self.plate.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
-            )
+            parent_ids = [self.plate.getId()]
+            parent_type = "Plate"
         elif self.screen is not None:
-            return sort_file_anns(
-                self.screen.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
-            )
+            parent_ids = [self.screen.getId()]
+            parent_type = "Screen"
         elif self.acquisition is not None:
-            return sort_file_anns(
-                self.acquisition.listOrphanedAnnotations(eid=eid, ns=ns, anntype="File")
-            )
+            parent_ids = [self.acquisition.getId()]
+            parent_type = "PlateAcqusition"
         elif parent_type and parent_ids:
             parent_type = parent_type.title()
             if parent_type == "Acquisition":
                 parent_type = "PlateAcquisition"
-            return sort_file_anns(
-                self.conn.listOrphanedAnnotations(
-                    parent_type, parent_ids, eid=eid, ns=ns, anntype="File"
-                )
-            )
         else:
-            return sort_file_anns(self.conn.listFileAnnotations(eid=eid))
+            raise ValueError("No context provided!")
+
+        q = self.conn.getQueryService()
+        params = omero.sys.ParametersI()
+        # Count the total number of FileAnnotations that would match the
+        # full query below
+        params.addIds(parent_ids)
+        params.map["ns_to_exclude"] = ns_to_exclude
+        params.addLong("count", len(parent_ids))
+        owned_by_me = ""
+        if me:
+            owned_by_me = "AND sa_link.details.owner.id = :me"
+            params.addLong("me", me)
+        columns = "count(*)"
+        query = self.FILES_BY_OBJECT_QUERY.format(
+            columns=columns,
+            parent_type=parent_type,
+            owned_by_me=owned_by_me,
+            order_by="",
+        )
+        (row,) = q.projection(query, params, self.conn.SERVICE_OPTS)
+        (total_files,) = unwrap(row)
+
+        # Perform the full query and limit the results so that we don't get
+        # overwhelmed
+        params.page(0, 100)  # offset, limit
+        columns = "fa.id, ofile.name"
+        order_by = "ORDER BY fa.details.updateEvent.time DESC"
+        query = self.FILES_BY_OBJECT_QUERY.format(
+            columns=columns,
+            parent_type=parent_type,
+            owned_by_me=owned_by_me,
+            order_by=order_by,
+        )
+        rows = q.projection(query, params, self.conn.SERVICE_OPTS)
+
+        logger.warn(f"TOTAL FILES: {total_files}")
+        return (
+            total_files,
+            [self.FileAnnotationShim(_id, name) for (_id, name) in rows],
+        )
 
     ####################################################################
     # Creation

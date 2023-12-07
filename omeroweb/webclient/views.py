@@ -2385,14 +2385,14 @@ def annotate_file(request, conn=None, **kwargs):
                 return handlerInternalError(request, x)
 
     if manager is not None:
-        files = manager.getFilesByObject()
+        total_files, files = manager.getFilesByObject()
     else:
         manager = BaseContainer(conn)
         for dtype, objs in oids.items():
             if len(objs) > 0:
                 # NB: we only support a single data-type now. E.g. 'image' OR
                 # 'dataset' etc.
-                files = manager.getFilesByObject(
+                total_files, files = manager.getFilesByObject(
                     parent_type=dtype, parent_ids=[o.getId() for o in objs]
                 )
                 break
@@ -2421,7 +2421,7 @@ def annotate_file(request, conn=None, **kwargs):
 
     else:
         form_file = FilesAnnotationForm(initial=initial)
-        context = {"form_file": form_file}
+        context = {"form_file": form_file, "total_files": total_files}
         template = "webclient/annotations/files_form.html"
     context["template"] = template
     return context
