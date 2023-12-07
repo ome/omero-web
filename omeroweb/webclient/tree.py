@@ -2145,7 +2145,7 @@ def marshal_lineage(
                     name = o.getWellPos()
                 else:
                     name = o.getName()
-                    if (obj_type == "PlateAcquisitionI" and name is None):
+                    if obj_type == "PlateAcquisitionI" and name is None:
                         name = f"Run {o.getId()}"
                 details["name"] = name
                 child_ref_d[obj_type][details["id"]] = details
