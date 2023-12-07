@@ -2141,8 +2141,13 @@ def marshal_lineage(
         if len(requested[obj_type]) > 0:
             for o in conn.getObjects(obj_type[:-1], requested[obj_type]):
                 details = {"id": o.getId(), "class": obj_type}
-                if obj_type not in ["PlateAcquisitionI", "WellI"]:
-                    details["name"] = o.getName()
+                if obj_type == "WellI":
+                    name = o.getWellPos()
+                else:
+                    name = o.getName()
+                    if (obj_type == "PlateAcquisitionI" and name is None):
+                        name = f"Run {o.getId()}"
+                details["name"] = name
                 child_ref_d[obj_type][details["id"]] = details
 
     service_opts = conn.SERVICE_OPTS.copy()

@@ -37,16 +37,18 @@
 
                 <span class="tooltip_html" style='display:none'>
                     <% if (isInherited) { %>
-                      <% if (ann.childNames.length > 1){ %>
-                        You are viewing annotations inherited by <b><%- ann.childNames.length %></b> <%- ann.childClass %>s
+                      <% if (ann.childNames.length > 1) { %>
+                        You are viewing an annotation inherited by <b><%- ann.childNames.length %></b> <%- ann.childClass %>s<br />
+                      <% } else { %>
+                        You are viewing an inherited annotation<br />
                       <% } %>
                     <% } %>
+                    <!-- ann.parentNames is a property of grouped annotations -->
                     <% if (ann.parentNames) { %>
                       You are
                       <% print (ann.permissions.canEdit && clientMapAnn ? 'editing' : 'viewing') %>
-                      <b><%- ann.parentNames.length %></b> identical Key-Value annotations:
-                    <% } %>
-                    <% if (!ann.parentNames && ann.link) { %>
+                      <b><%- ann.parentNames.length %></b> identical Key-Value annotations:<br />
+                    <% } else if (ann.link) { %>
                         <!-- If single object show e.g. Image ID: (slice ImageI -> Image) -->
                         <b><%- ann.link.parent.class.slice(0, ann.link.parent.class.length-1) %>
                             ID:</b> <%- ann.link.parent.id %><br />
@@ -59,22 +61,20 @@
                         <% }) %>
                     <% } %>
                     <% if (ann.owner) { %>
-                        <b>Owner:</b> <%- ann.owner.firstName %> <%- ann.owner.lastName %>
+                        <b>Owner:</b> <%- ann.owner.firstName %> <%- ann.owner.lastName %><br />
                     <% } %>
                     <% if (ann.link) { %>
-                        <br /><b>Linked by:</b> <%- ann.link.owner.firstName %> <%- ann.link.owner.lastName %>
+                        <b>Linked by:</b> <%- ann.link.owner.firstName %> <%- ann.link.owner.lastName %><br />
                         <% if (ann.link.date) { %>
-                            <br /><b>On:</b> <% print(OME.formatDate(ann.link.date)) %>
+                            <b>On:</b> <% print(OME.formatDate(ann.link.date)) %><br />
                         <% } %>
                     <% } %>
                     <% if (isInherited) { %>
-                      <% if (ann.childNames.length > 1) { %>
-                        <br /><b>Inherited by:</b>
+                        <b>Inherited by:</b><br />
                         <% _.each(ann.childNames, function(cname) { %>
-                          <br />&nbsp <%- cname %>
+                          &nbsp <%- cname %><br />
                         <% }) %>
-                      <% } %>
-                      <br /><b>Namespace:</b> <%- ann.ns.slice(0, 50) %><br />
+                      <b>Namespace:</b> <%- ann.ns.slice(0, 50) %><br />
                     <% } %>
                 </span>
             <% } else if (objCount && objCount > 1) { %>
