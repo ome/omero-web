@@ -620,7 +620,7 @@ class BaseContainer(BaseController):
         )
         rows = q.projection(query, params, self.conn.SERVICE_OPTS)
 
-        logger.warn(f"TOTAL FILES: {total_files}")
+        logger.warning(f"TOTAL FILES: {total_files}")
         return (
             total_files,
             [self.FileAnnotationShim(_id, name) for (_id, name) in rows],
