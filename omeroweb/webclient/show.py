@@ -276,7 +276,7 @@ class Show(object):
             params = omero.sys.ParametersI()
             params.addId(attributes["id"])
             params.page(0, 1)
-            query = "select img from Image img where img.fileset.id=:id"
+            query = "select img from Image img where img.fileset.id=:id order by img.id"
             first_image = self.conn.getQueryService().findAllByQuery(
                 query, params, self.conn.SERVICE_OPTS
             )[0]
