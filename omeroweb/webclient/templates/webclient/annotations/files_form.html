@@ -60,7 +60,10 @@
 
 <p>
     <h1>And/or attach an existing File:</h1>
-    <span>Select the attachments to add (total: {{ total_files }})</span>
+    <span>
+      Select the attachments to add
+      (total: {{ total_files }}{% if total_files > 500 %}, showing 500{% endif %})
+    </span>
     
     <div>{{ form_file.files }}</div>
     <!-- hidden fields used to specify the objects we're tagging -->
