@@ -36,14 +36,22 @@ import omero.clients
 import tempfile
 import re
 import json
-import pytz
 import random
 import string
 from builtins import str as text
 import portalocker
 
 from omero.util.concurrency import get_event
-from omeroweb.utils import sort_properties_to_tuple
+from omeroweb.utils import (
+    LeaveUnset,
+    check_timezone,
+    identity,
+    parse_boolean,
+    leave_none_unset,
+    leave_none_unset_int,
+    sort_properties_to_tuple,
+    str_slash,
+)
 from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
@@ -196,13 +204,6 @@ SESSION_ENGINE_VALUES = (
 )
 
 
-def parse_boolean(s):
-    s = s.strip().lower()
-    if s in ("true", "1", "t"):
-        return True
-    return False
-
-
 def parse_paths(s):
     return [os.path.normpath(path) for path in json.loads(s)]
 
@@ -222,42 +223,6 @@ def check_session_engine(s):
             % (s, SESSION_ENGINE_VALUES)
         )
     return s
-
-
-def identity(x):
-    return x
-
-
-def check_timezone(s):
-    """
-    Checks that string is a valid time-zone. If not, raise Exception
-    """
-    pytz.timezone(s)
-    return s
-
-
-def str_slash(s):
-    if s is not None:
-        s = str(s)
-        if s and not s.endswith("/"):
-            s += "/"
-    return s
-
-
-class LeaveUnset(Exception):
-    pass
-
-
-def leave_none_unset(s):
-    if s is None:
-        raise LeaveUnset()
-    return s
-
-
-def leave_none_unset_int(s):
-    s = leave_none_unset(s)
-    if s is not None:
-        return int(s)
 
 
 CUSTOM_HOST = CUSTOM_SETTINGS.get("Ice.Default.Host", "localhost")
