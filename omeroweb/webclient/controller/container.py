@@ -539,7 +539,7 @@ class BaseContainer(BaseController):
         "        SELECT 1 FROM {parent_type}AnnotationLink sa_link "
         "            WHERE sa_link.parent.id in (:ids) "
         "                AND fa.id = sa_link.child.id "
-        "                AND fa.ns not in (:ns_to_exclude) "
+        "                AND (fa.ns not in (:ns_to_exclude) OR fa.ns IS NULL)"
         "                {owned_by_me} "
         "            GROUP BY sa_link.child.id "
         "            HAVING count(sa_link.id) >= :count "
