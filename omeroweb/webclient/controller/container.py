@@ -609,7 +609,7 @@ class BaseContainer(BaseController):
 
         # Perform the full query and limit the results so that we don't get
         # overwhelmed
-        params.page(0, 100)  # offset, limit
+        params.page(0, 500)  # offset, limit
         columns = "fa.id, ofile.name"
         order_by = "ORDER BY ofile.name, fa.id DESC"
         query = self.FILES_BY_OBJECT_QUERY.format(
