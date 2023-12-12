@@ -1,3 +1,21 @@
+5.24.0 (December 2023)
+----------------------
+
+## Features
+
+- Add support for selecting fileset via URL [#514](https://github.com/ome/omero-web/pull/514)
+- Support inherited annotations [#508](https://github.com/ome/omero-web/pull/508)
+
+## Bug fixes
+
+- Disable account form to prevent server errors in sudo mode [#516](https://github.com/ome/omero-web/pull/516)
+- Avoid breakage from large numbers of file annotations [#519](https://github.com/ome/omero-web/pull/519)
+
+## Other changes
+
+- Allow plugins to use settings utilities [#513](https://github.com/ome/omero-web/pull/513)
+- Manage Python versions [#509](https://github.com/ome/omero-web/pull/509), [#512](https://github.com/ome/omero-web/pull/512)
+
 5.23.0 (October 2023)
 ---------------------
 
