@@ -2320,6 +2320,7 @@ def batch_annotate(request, conn=None, **kwargs):
 
 MAX_FILES_IN_FILE_ANNOTATION_DIALOG = 500
 
+
 @login_required()
 @render_response()
 def annotate_file(request, conn=None, **kwargs):
