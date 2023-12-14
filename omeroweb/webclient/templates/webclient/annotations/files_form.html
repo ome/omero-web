@@ -62,7 +62,7 @@
     <h1>And/or attach an existing File:</h1>
     <span>
       Select the attachments to add
-      (total: {{ total_files }}{% if total_files > 500 %}, showing 500{% endif %})
+      (total: {{ total_files }}{% if total_files > max_files %}, showing {{ max_files }}{% endif %})
     </span>
     
     <div>{{ form_file.files }}</div>

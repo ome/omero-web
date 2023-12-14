@@ -2318,6 +2318,8 @@ def batch_annotate(request, conn=None, **kwargs):
     return context
 
 
+MAX_FILES_IN_FILE_ANNOTATION_DIALOG = 500
+
 @login_required()
 @render_response()
 def annotate_file(request, conn=None, **kwargs):
@@ -2385,7 +2387,10 @@ def annotate_file(request, conn=None, **kwargs):
                 return handlerInternalError(request, x)
 
     if manager is not None:
-        total_files, files = manager.getFilesByObject()
+        total_files, files = manager.getFilesByObject(
+            offset=0,
+            limit=MAX_FILES_IN_FILE_ANNOTATION_DIALOG,
+        )
     else:
         manager = BaseContainer(conn)
         for dtype, objs in oids.items():
@@ -2393,7 +2398,10 @@ def annotate_file(request, conn=None, **kwargs):
                 # NB: we only support a single data-type now. E.g. 'image' OR
                 # 'dataset' etc.
                 total_files, files = manager.getFilesByObject(
-                    parent_type=dtype, parent_ids=[o.getId() for o in objs]
+                    parent_type=dtype,
+                    parent_ids=[o.getId() for o in objs],
+                    offset=0,
+                    limit=MAX_FILES_IN_FILE_ANNOTATION_DIALOG,
                 )
                 break
 
@@ -2421,7 +2429,11 @@ def annotate_file(request, conn=None, **kwargs):
 
     else:
         form_file = FilesAnnotationForm(initial=initial)
-        context = {"form_file": form_file, "total_files": total_files}
+        context = {
+            "form_file": form_file,
+            "total_files": total_files,
+            "max_files": MAX_FILES_IN_FILE_ANNOTATION_DIALOG,
+        }
         template = "webclient/annotations/files_form.html"
     context["template"] = template
     return context

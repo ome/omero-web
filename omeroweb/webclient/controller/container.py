@@ -547,7 +547,7 @@ class BaseContainer(BaseController):
         "    {order_by}"
     )
 
-    def getFilesByObject(self, parent_type=None, parent_ids=None):
+    def getFilesByObject(self, parent_type=None, parent_ids=None, offset=0, limit=100):
         me = (
             (not self.canUseOthersAnns()) and self.conn.getEventContext().userId or None
         )
@@ -609,7 +609,7 @@ class BaseContainer(BaseController):
 
         # Perform the full query and limit the results so that we don't get
         # overwhelmed
-        params.page(0, 500)  # offset, limit
+        params.page(offset, limit)
         columns = "fa.id, ofile.name"
         order_by = "ORDER BY ofile.name, fa.id DESC"
         query = self.FILES_BY_OBJECT_QUERY.format(
