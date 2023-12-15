@@ -36,13 +36,6 @@
               <% } %>
 
                 <span class="tooltip_html" style='display:none'>
-                    <% if (isInherited) { %>
-                      <% if (ann.childNames.length > 1) { %>
-                        You are viewing an annotation inherited by <b><%- ann.childNames.length %></b> <%- ann.childClass %>s<br />
-                      <% } else { %>
-                        You are viewing an inherited annotation<br />
-                      <% } %>
-                    <% } %>
                     <!-- ann.parentNames is a property of grouped annotations -->
                     <% if (ann.parentNames) { %>
                       You are
@@ -70,10 +63,12 @@
                         <% } %>
                     <% } %>
                     <% if (isInherited) { %>
-                        <b>Inherited by:</b><br />
-                        <% _.each(ann.childNames, function(cname) { %>
-                          &nbsp <%- cname %><br />
-                        <% }) %>
+                        <% if (showParent) { %>
+                          <b>Inherited by:</b><br />
+                          <% _.each(ann.childNames, function(cname) { %>
+                            &nbsp <%- cname %><br />
+                          <% }) %>
+                        <% } %>
                       <b>Namespace:</b> <%- ann.ns.slice(0, 50) %><br />
                     <% } %>
                 </span>
