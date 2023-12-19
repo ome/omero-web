@@ -10,6 +10,7 @@
 
 - Disable account form to prevent server errors in sudo mode [#516](https://github.com/ome/omero-web/pull/516)
 - Avoid breakage from large numbers of file annotations [#519](https://github.com/ome/omero-web/pull/519)
+- Fix annotation count acquisition [#518](https://github.com/ome/omero-web/pull/518)
 
 ## Other changes
 
