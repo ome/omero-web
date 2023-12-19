@@ -35,6 +35,7 @@ import json
 import re
 import sys
 import warnings
+from collections import defaultdict
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
 from django.utils.html import escape
@@ -1341,35 +1342,74 @@ def api_tags_and_tagged_list_DELETE(request, conn=None, **kwargs):
 @login_required()
 def api_annotations(request, conn=None, **kwargs):
     r = request.GET
-    image_ids = get_list(request, "image")
-    dataset_ids = get_list(request, "dataset")
-    project_ids = get_list(request, "project")
-    screen_ids = get_list(request, "screen")
-    plate_ids = get_list(request, "plate")
-    run_ids = get_list(request, "acquisition")
-    well_ids = get_list(request, "well")
     page = get_long_or_default(request, "page", 1)
     limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
-
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
+    with_parents = r.get("parents", "false") == "true"
 
-    anns, exps = tree.marshal_annotations(
+    to_query = defaultdict(set)
+    for type_ in (
+        "Image",
+        "Dataset",
+        "Project",
+        "Well",
+        "Acquisition",
+        "Plate",
+        "Screen",
+    ):
+        ids = get_list(request, type_.lower())
+        if type_ == "Acquisition":
+            type_ = "PlateAcquisition"
+        # Important to cast to int to match marshal_lineage output
+        to_query[f"{type_}I"] = list(map(int, ids))
+
+    if with_parents:
+        requested = to_query.copy()
+        lineage_d, to_query = tree.marshal_lineage(
+            conn,
+            project_ids=to_query["ProjectI"],
+            dataset_ids=to_query["DatasetI"],
+            image_ids=to_query["ImageI"],
+            screen_ids=to_query["ScreenI"],
+            plate_ids=to_query["PlateI"],
+            run_ids=to_query["PlateAcquisitionI"],
+            well_ids=to_query["WellI"],
+        )
+
+    all_anns, exps = tree.marshal_annotations(
         conn,
-        project_ids=project_ids,
-        dataset_ids=dataset_ids,
-        image_ids=image_ids,
-        screen_ids=screen_ids,
-        plate_ids=plate_ids,
-        run_ids=run_ids,
-        well_ids=well_ids,
+        project_ids=to_query["ProjectI"],
+        dataset_ids=to_query["DatasetI"],
+        image_ids=to_query["ImageI"],
+        screen_ids=to_query["ScreenI"],
+        plate_ids=to_query["PlateI"],
+        run_ids=to_query["PlateAcquisitionI"],
+        well_ids=to_query["WellI"],
         ann_type=ann_type,
         ns=ns,
         page=page,
         limit=limit,
     )
+    if not with_parents:
+        return JsonResponse({"annotations": all_anns, "experimenters": exps})
 
-    return JsonResponse({"annotations": anns, "experimenters": exps})
+    anns = []
+    parent_anns = {"annotations": [], "lineage": defaultdict(dict)}
+    for ann in all_anns:
+        p = ann["link"]["parent"]
+        pclass, pid = p["class"], p["id"]
+        if pid in requested[pclass]:
+            anns.append(ann)
+        if pclass != "ImageI":
+            lineage = lineage_d[pclass][pid]
+            if len(lineage) > 0:
+                parent_anns["annotations"].append(ann)
+                parent_anns["lineage"][pclass][pid] = lineage
+
+    return JsonResponse(
+        {"annotations": anns, "parents": parent_anns, "experimenters": exps}
+    )
 
 
 @login_required()
