@@ -57,6 +57,7 @@ setup(
         "Django>=4.2.3,<4.3",
         "django-pipeline==2.1.0",
         "django-cors-headers==3.7.0",
+        "django-csp",
         "whitenoise>=5.3.0",
         "gunicorn>=19.3",
         "omero-marshal>=0.7.0",
