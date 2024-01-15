@@ -1171,8 +1171,8 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "Remember to terminate lines with; when necessary."
         ),
     ],
-    # Content-Security-Protocol settings: https://django-csp.readthedocs.io/en/latest/configuration.html
-    # default-src 'none'; script-src 'self'; img-src 'self'; style-src 'self';base-uri 'self';form-action 'self'
+    # Content-Security-Protocol settings:
+    # see https://django-csp.readthedocs.io/en/latest/configuration.html
     "omero.web.csp_default_src": [
         "CSP_DEFAULT_SRC",
         "[\"'self'\"]",
