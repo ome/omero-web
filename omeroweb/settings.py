@@ -1171,23 +1171,37 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "Remember to terminate lines with; when necessary."
         ),
     ],
-
     # Content-Security-Protocol settings: https://django-csp.readthedocs.io/en/latest/configuration.html
     # default-src 'none'; script-src 'self'; img-src 'self'; style-src 'self';base-uri 'self';form-action 'self'
     "omero.web.csp_default_src": [
-        "CSP_DEFAULT_SRC", '["\'self\'"]', json.loads, "Set the CSP default-src directive",
+        "CSP_DEFAULT_SRC",
+        "[\"'self'\"]",
+        json.loads,
+        "Set the CSP default-src directive",
     ],
     "omero.web.csp_script_src": [
-        "CSP_SCRIPT_SRC", '["\'self\'"]', json.loads, "Set the CSP script-src directive",
+        "CSP_SCRIPT_SRC",
+        "[\"'self'\"]",
+        json.loads,
+        "Set the CSP script-src directive",
     ],
     "omero.web.csp_img_src": [
-        "CSP_IMG_SRC", '["\'self\'"]', json.loads, "Set the CSP img-src directive",
+        "CSP_IMG_SRC",
+        "[\"'self'\"]",
+        json.loads,
+        "Set the CSP img-src directive",
     ],
     "omero.web.csp_style_src": [
-        "CSP_STYLE_SRC", '["\'self\'"]', json.loads, "Set the CSP style-src directive",
+        "CSP_STYLE_SRC",
+        "[\"'self'\"]",
+        json.loads,
+        "Set the CSP style-src directive",
     ],
     "omero.web.csp_base_uri": [
-        "CSP_BASE_URI", '["\'self\'"]', json.loads, "Set the CSP base-uri directive",
+        "CSP_BASE_URI",
+        "[\"'self'\"]",
+        json.loads,
+        "Set the CSP base-uri directive",
     ],
 }
 
