@@ -1181,7 +1181,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.csp_script_src": [
         "CSP_SCRIPT_SRC",
-        "[\"'self'\"]",
+        "[\"'self'\", \"unsafe-inline\"]",
         json.loads,
         "Set the CSP script-src directive",
     ],
@@ -1193,7 +1193,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.csp_style_src": [
         "CSP_STYLE_SRC",
-        "[\"'self'\"]",
+        "[\"'self'\", \"unsafe-inline\"]",
         json.loads,
         "Set the CSP style-src directive",
     ],
