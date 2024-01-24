@@ -1179,6 +1179,12 @@ CUSTOM_SETTINGS_MAPPINGS = {
         json.loads,
         "Set the CSP default-src directive",
     ],
+    "omero.web.csp_worker_src": [
+        "CSP_WORKER_SRC",
+        '["\'self\'", "blob:"]',
+        json.loads,
+        "Set the CSP worker-src directive",
+    ],
     "omero.web.csp_script_src": [
         "CSP_SCRIPT_SRC",
         "[\"'self'\", \"'unsafe-inline'\", \"'unsafe-eval'\"]",
@@ -1187,7 +1193,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.csp_img_src": [
         "CSP_IMG_SRC",
-        "[\"'self'\"]",
+        '["\'self\'", "data:"]',
         json.loads,
         "Set the CSP img-src directive",
     ],
