@@ -118,7 +118,7 @@
             {% if share and not share.share.isOwned %}
             OME.preview_viewport = $.WeblitzViewport($("#viewport"), "{% url 'webindex' %}{{ share.share.id }}", {'mediaroot': '{{ STATIC_URL }}' } );
             {% else %}
-            OME.preview_viewport = $.WeblitzViewport($("#viewport"), "{% url 'webindex' %}", {'mediaroot': '{{ STATIC_URL }}' } );
+            OME.preview_viewport = $.WeblitzViewport($("#viewport"), '{{ base_url }}', {'mediaroot': '{{ STATIC_URL }}' } );
             {% endif %}
 
             OME.preview_viewport.bind('imageLoad', _refresh_cb);
