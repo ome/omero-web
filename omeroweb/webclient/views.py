@@ -1808,16 +1808,17 @@ def load_metadata_preview(request, c_type, c_id, conn=None, share_id=None, **kwa
     size_x = manager.image.getSizeX()
     size_y = manager.image.getSizeY()
 
-    base_url = reverse('webindex')
+    base_url = reverse("webindex")
     big_image = (size_x * size_y) > (max_w * max_h)
     if not big_image:
         # if we have omero_web_zarr installed and s3 data is available, we
         # use that as data source for viewer via /zarr/render_image etc.
         try:
             from omero_web_zarr.views import get_zarr_s3_path
+
             zarr_path = get_zarr_s3_path(conn, manager.image.id)
             if zarr_path is not None and zarr_path.startswith("http"):
-                base_url = reverse('omero_web_zarr_index')
+                base_url = reverse("omero_web_zarr_index")
         except ImportError:
             pass
     context["base_url"] = base_url
