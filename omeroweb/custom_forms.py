@@ -61,12 +61,10 @@ class NonASCIIForm(forms.Form):
                     initial = self.initial.get(name, field.initial)
                     value = field.clean(value, initial)
                 elif isinstance(field, CharField):
-                    if (
-                        value is not None
-                        and isinstance(value, str)
-                        and len(value) > 0
-                    ):
-                        value = str(smart_str(value))  # TODO: This is probably a noop now
+                    if value is not None and isinstance(value, str) and len(value) > 0:
+                        value = str(
+                            smart_str(value)
+                        )  # TODO: This is probably a noop now
                     else:
                         value = field.clean(value)
                 else:
