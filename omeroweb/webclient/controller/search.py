@@ -23,7 +23,6 @@
 # Version: 1.0
 #
 
-from past.builtins import long
 import time
 import omero
 import logging
@@ -89,11 +88,11 @@ class BaseSearch(BaseController):
 
                     created = [
                         rtime(
-                            long(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond)
+                            int(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond)
                             * 1000
                         ),
                         rtime(
-                            long(time.mktime(d2.timetuple()) + 1e-6 * d2.microsecond)
+                            int(time.mktime(d2.timetuple()) + 1e-6 * d2.microsecond)
                             * 1000
                         ),
                     ]

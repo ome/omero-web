@@ -25,7 +25,6 @@
 
 import datetime
 import time
-from past.builtins import long
 
 from omero.rtypes import rtime
 
@@ -99,7 +98,7 @@ class BaseShare(BaseController):
                 expiration + " 23:59:59", "%Y-%m-%d %H:%M:%S"
             )
             expiration_date = (
-                long(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
+                int(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
             )
         image_objects = list(self.conn.getObjects("Image", images))
         member_objects = list(self.conn.getObjects("Experimenter", members))
@@ -114,7 +113,7 @@ class BaseShare(BaseController):
                 expiration + " 23:59:59", "%Y-%m-%d %H:%M:%S"
             )
             expiration_date = rtime(
-                long(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
+                int(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
             )
         member_objects = list(self.conn.getObjects("Experimenter", members))
         return self.conn.createShare(
@@ -128,7 +127,7 @@ class BaseShare(BaseController):
                 expiration + " 23:59:59", "%Y-%m-%d %H:%M:%S"
             )
             expiration_date = (
-                long(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
+                int(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
             )
 
         old_groups = [m._obj for m in self.conn.getAllMembers(self.share.id)]
