@@ -19,12 +19,6 @@ import logging
 from random import random
 from io import open
 import datetime
-
-# Support python2 and python3
-from past.builtins import basestring
-from builtins import str
-
-
 import struct
 import time
 import os
@@ -146,7 +140,7 @@ class FileCache(CacheBase):
         @param invalidateGroup:     Not used?
         """
 
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             raise ValueError("%s not a string, can't cache" % type(value))
         fname = self._key_to_file(key)
         dirname = os.path.dirname(fname)
@@ -231,7 +225,7 @@ class FileCache(CacheBase):
         @return True if entry is valid, False if expired
         """
         try:
-            if isinstance(fname, basestring):
+            if isinstance(fname, str):
                 f = open(fname, "rb")
                 exp = struct.unpack("d", f.read(size_of_double))[0]
             else:
