@@ -20,8 +20,6 @@
 """
    Library for Web integration tests
 """
-from __future__ import print_function
-
 from future import standard_library
 import json
 import warnings
