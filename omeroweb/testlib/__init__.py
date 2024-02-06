@@ -20,7 +20,6 @@
 """
    Library for Web integration tests
 """
-from future import standard_library
 import json
 import warnings
 
@@ -30,7 +29,6 @@ from django.urls import reverse
 
 from omero.testlib import ITest
 
-standard_library.install_aliases()  # noqa
 from urllib.parse import urlencode  # noqa
 
 
