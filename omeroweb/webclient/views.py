@@ -37,7 +37,6 @@ import sys
 import warnings
 from collections import defaultdict
 from past.builtins import unicode
-from future.utils import bytes_to_native_str
 from django.utils.html import escape
 from django.utils.http import url_has_allowed_host_and_scheme
 
@@ -1020,11 +1019,7 @@ def api_links(request, conn=None, **kwargs):
             {"Error": "Need to POST or DELETE JSON data to update links"}, status=405
         )
     # Handle link creation/deletion
-    try:
-        json_data = json.loads(request.body)
-    except TypeError:
-        # for Python 3.5
-        json_data = json.loads(bytes_to_native_str(request.body))
+    json_data = json.loads(request.body)
 
     if request.method == "POST":
         return _api_links_POST(conn, json_data)
@@ -3626,11 +3621,7 @@ def activities(request, conn=None, **kwargs):
         return rv
 
     elif request.method == "DELETE":
-        try:
-            json_data = json.loads(request.body)
-        except TypeError:
-            # for Python 3.5
-            json_data = json.loads(bytes_to_native_str(request.body))
+        json_data = json.loads(request.body)
         jobId = json_data.get("jobId", None)
         if jobId is not None:
             jobId = str(jobId)
