@@ -26,12 +26,7 @@
 
 import logging
 
-try:
-    # python2
-    from urlparse import urljoin
-except ImportError:
-    # python3
-    from urllib.parse import urljoin
+from urllib.parse import urljoin
 
 from django import template
 from django.templatetags.static import PrefixNode

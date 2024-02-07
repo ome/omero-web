@@ -25,11 +25,7 @@ import re
 import os
 import sys
 
-try:
-    from omero_ext.path import path
-except ImportError:
-    # Python 2
-    from path import path
+from omero_ext.path import path
 import getpass
 import Ice
 import omero.cli

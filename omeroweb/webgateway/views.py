@@ -94,23 +94,8 @@ from omeroweb.webgateway.util import get_longs, getIntOrDefault
 cache = CacheBase()
 logger = logging.getLogger(__name__)
 
-try:
-    from PIL import Image
-    from PIL import ImageDraw
-except Exception:  # pragma: nocover
-    try:
-        import Image
-        import ImageDraw
-    except Exception:
-        logger.error("No Pillow installed")
-
-try:
-    import numpy
-
-    numpyInstalled = True
-except ImportError:
-    logger.error("No numpy installed")
-    numpyInstalled = False
+from PIL import Image, ImageDraw
+import numpy
 
 
 def index(request):
@@ -800,8 +785,6 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
 def render_shape_mask(request, shapeId, conn=None, **kwargs):
     """Returns mask as a png (supports transparency)"""
 
-    if not numpyInstalled:
-        raise NotImplementedError("numpy not installed")
     params = omero.sys.Parameters()
     params.map = {"id": rlong(shapeId)}
     shape = conn.getQueryService().findByQuery(
@@ -3228,8 +3211,6 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
                         or with an array of bytes as described above
     """
 
-    if not numpyInstalled:
-        raise NotImplementedError("numpy not installed")
     col_name = request.GET.get("col_name", "object")
     if query is None:
         query = request.GET.get("query")
