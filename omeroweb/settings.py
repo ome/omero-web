@@ -38,7 +38,6 @@ import re
 import json
 import random
 import string
-from builtins import str as text
 import portalocker
 
 from omero.util.concurrency import get_event
@@ -1763,8 +1762,8 @@ for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
 # Load server list and freeze
 def load_server_list():
     for s in SERVER_LIST:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
-        server = (len(s) > 2) and text(s[2]) or None
-        Server(host=text(s[0]), port=int(s[1]), server=server)
+        server = (len(s) > 2) and str(s[2]) or None
+        Server(host=str(s[0]), port=int(s[1]), server=server)
     Server.freeze()
 
 

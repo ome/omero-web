@@ -20,7 +20,6 @@ import warnings
 from functools import wraps
 import omero
 import omero.clients
-from past.builtins import unicode
 
 from django.http import (
     HttpResponse,
@@ -104,7 +103,7 @@ def index(request):
 
 
 def _safestr(s):
-    return unicode(s).encode("utf-8")
+    return str(s).encode("utf-8")
 
 
 class UserProxy(object):
@@ -1965,7 +1964,7 @@ def searchOptFromRequest(request):
     try:
         r = request.GET
         opts = {
-            "search": unicode(r.get("text", "")).encode("utf8"),
+            "search": str(r.get("text", "")).encode("utf8"),
             "ctx": r.get("ctx", ""),
             "grabData": not not r.get("grabData", False),
             "parents": not not bool(r.get("parents", False)),

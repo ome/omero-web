@@ -36,7 +36,6 @@ import re
 import sys
 import warnings
 from collections import defaultdict
-from past.builtins import unicode
 from django.utils.html import escape
 from django.utils.http import url_has_allowed_host_and_scheme
 
@@ -287,7 +286,7 @@ class WebclientLoginView(LoginView):
         if form is None:
             server_id = request.GET.get("server", request.POST.get("server"))
             if server_id is not None:
-                initial = {"server": unicode(server_id)}
+                initial = {"server": str(server_id)}
                 form = LoginForm(initial=initial)
             else:
                 form = LoginForm()
@@ -2953,7 +2952,7 @@ def manage_action_containers(
         else:
             d = dict()
             for e in form.errors.items():
-                d.update({e[0]: unicode(e[1])})
+                d.update({e[0]: str(e[1])})
             rdict = {"bad": "true", "errs": d}
             return JsonResponse(rdict)
 
@@ -3045,7 +3044,7 @@ def manage_action_containers(
             else:
                 d = dict()
                 for e in form.errors.items():
-                    d.update({e[0]: unicode(e[1])})
+                    d.update({e[0]: str(e[1])})
                 rdict = {"bad": "true", "errs": d}
                 return JsonResponse(rdict)
         else:
@@ -3077,7 +3076,7 @@ def manage_action_containers(
             else:
                 d = dict()
                 for e in form.errors.items():
-                    d.update({e[0]: unicode(e[1])})
+                    d.update({e[0]: str(e[1])})
                 rdict = {"bad": "true", "errs": d}
                 return JsonResponse(rdict)
         else:
