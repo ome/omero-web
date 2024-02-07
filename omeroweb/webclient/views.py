@@ -3858,7 +3858,7 @@ def activities(request, conn=None, **kwargs):
                         if cb.returncode != 0:
                             kwargs["Message"] = (
                                 f"Script exited with failure."
-                                f" (returncode={ cb.returncode })"
+                                f" (returncode={cb.returncode})"
                             )
                         update_callback(request, cbString, **kwargs)
                         new_results.append(cbString)
