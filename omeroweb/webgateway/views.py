@@ -90,11 +90,12 @@ from omeroweb.decorators import login_required, ConnCleaningHttpResponse
 from omeroweb.webgateway.util import zip_archived_files, LUTS_IN_PNG
 from omeroweb.webgateway.util import get_longs, getIntOrDefault
 
-cache = CacheBase()
-logger = logging.getLogger(__name__)
-
 from PIL import Image, ImageDraw
 import numpy
+
+
+cache = CacheBase()
+logger = logging.getLogger(__name__)
 
 
 def index(request):
