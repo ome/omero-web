@@ -1258,11 +1258,6 @@ def check_worker_class(c):
     return str(c)
 
 
-def check_threading(t):
-    t = int(t)
-    return t
-
-
 # DEVELOPMENT_SETTINGS_MAPPINGS - WARNING: For each setting developer MUST open
 # a ticket that needs to be resolved before a release either by moving the
 # setting to CUSTOM_SETTINGS_MAPPINGS or by removing the setting at all.
@@ -1290,7 +1285,7 @@ DEVELOPMENT_SETTINGS_MAPPINGS = {
     "omero.web.wsgi_threads": [
         "WSGI_THREADS",
         1,
-        check_threading,
+        int,
         (
             "(SYNC WORKERS only) The number of worker threads for handling "
             "requests. Check Gunicorn Documentation "
