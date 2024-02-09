@@ -58,7 +58,7 @@ class SettingNode(template.Node):
                 if name.isdigit():
                     setting = setting[int(name)]
                 else:
-                    if type(setting) == dict:
+                    if isinstance(setting, dict):
                         setting = setting.get(name)
                     else:
                         setting = setting.__getattr__(name)

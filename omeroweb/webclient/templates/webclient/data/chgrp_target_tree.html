@@ -26,7 +26,7 @@
 
 <div id="hierarchyTree" class="jstree jstree-default">
     <ul>
-    {% ifequal target_type 'project' %}
+    {% if target_type == 'project' %}
         {% if not manager.containers.projects %}<li>[No Projects in Group]</li>{% endif %}
         {% for d in manager.containers.projects %}
             <li id='project-{{ d.id }}' rel="project" class="jstree-last jstree-leaf jstree-closed">
@@ -40,7 +40,7 @@
                         <span class="children_count">{{ d.countChildren_cached}}</span>
                     {% endif %}
                 </a>
-            {% ifequal target_type 'dataset' %}
+            {% if target_type == 'dataset' %}
                 <ul>
                 {% for c in d.listChildren %}
                     <li id='dataset-{{ c.id }}' rel="dataset" class="clear jstree-last jstree-open jstree-leaf">
@@ -55,13 +55,13 @@
                     </li>
                 {% endfor %}
                 </ul>
-            {% endifequal %}
+            {% endif %}
             </li>
         {% endfor %}
-    {% endifequal %}
+    {% endif %}
 
     <!-- Orphaned datasets (if target=='dataset') -->
-    {% ifequal target_type 'dataset' %}
+    {% if target_type == 'dataset' %}
         {% if not manager.containers.datasets %}<li>[No Datasets in Group]</li>{% endif %}
         {% for c in manager.containers.datasets %}
             <li id='dataset-{{ c.id }}' rel="dataset" class="clear jstree-last">
@@ -75,10 +75,10 @@
                 </a>
             </li>
         {% endfor %}
-    {% endifequal %}
+    {% endif %}
 
     <!-- Screens (if target=='screen') -->
-    {% ifequal target_type 'screen' %}
+    {% if target_type == 'screen' %}
         {% if not manager.containers.screens %}<li>[No Screens in Group]</li>{% endif %}
         {% for c in manager.containers.screens %}
             <li id='screen-{{ c.id }}' rel="screen" class="clear jstree-last">
@@ -92,6 +92,6 @@
                 </a>
             </li>
         {% endfor %}
-    {% endifequal %}
+    {% endif %}
     </ul>
 </div>

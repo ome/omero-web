@@ -41,7 +41,7 @@ from omeroweb.version import omeroweb_version as omero_version
 from django.urls import reverse
 from django.views.decorators.debug import sensitive_post_parameters
 from django.http import HttpResponseRedirect
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.encoding import smart_str
 from django.shortcuts import render
 
@@ -1037,6 +1037,7 @@ def my_account(request, action=None, conn=None, **kwargs):
         isLdapUser,
         hasAvatar,
     ) = prepare_experimenter(conn)
+    isSudo = conn.getEventContext().sudoerId is not None
     try:
         defaultGroupId = defaultGroup.id
     except Exception:
@@ -1092,6 +1093,7 @@ def my_account(request, action=None, conn=None, **kwargs):
     context = {
         "form": form,
         "ldapAuth": isLdapUser,
+        "isSudo": isSudo,
         "experimenter": experimenter,
         "ownedGroups": ownedGroups,
         "password_form": password_form,

@@ -89,7 +89,7 @@ def defaultThumbnail(size=(120, 120)):
     if len(size) == 1:
         size = (size[0], size[0])
     img = Image.open(settings.DEFAULT_IMG)
-    img.thumbnail(size, Image.ANTIALIAS)
+    img.thumbnail(size, Image.LANCZOS)
     f = BytesIO()
     img.save(f, "PNG")
     f.seek(0)
@@ -903,7 +903,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         """
 
         img = Image.open(settings.DEFAULT_USER)
-        img.thumbnail((150, 150), Image.ANTIALIAS)
+        img.thumbnail((150, 150), Image.LANCZOS)
         f = BytesIO()
         img.save(f, "PNG")
         f.seek(0)
@@ -1477,22 +1477,36 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
 
         """
 
-        up_gr = group._obj
-        up_gr.name = rstring(str(name))
-        up_gr.description = (
-            (description != "" and description is not None)
-            and rstring(str(description))
-            or None
-        )
+        temp_switch = False
+        if self.getEventContext().groupId == group.id:
+            # we can't update the current group
+            # unless it's the system group (form won't include name change)
+            sys_id = self.getAdminService().getSecurityRoles().systemGroupId
+            if self.getEventContext().groupId != sys_id:
+                # otherwise, temp switch to allow editing of 'current' group
+                self.setGroupForSession(sys_id)
+                temp_switch = True
 
         msgs = []
-        admin_serv = self.getAdminService()
-        admin_serv.updateGroup(up_gr)
+        try:
+            up_gr = group._obj
+            up_gr.name = rstring(str(name))
+            up_gr.description = (
+                (description != "" and description is not None)
+                and rstring(str(description))
+                or None
+            )
 
-        if str(permissions) != str(up_gr.details.getPermissions()):
-            err = self.updatePermissions(group, permissions)
-            if err is not None:
-                msgs.append(err)
+            admin_serv = self.getAdminService()
+            admin_serv.updateGroup(up_gr)
+
+            if str(permissions) != str(up_gr.details.getPermissions()):
+                err = self.updatePermissions(group, permissions)
+                if err is not None:
+                    msgs.append(err)
+        finally:
+            if temp_switch:
+                self.revertGroupForSession()
         return msgs
 
     def updateMyAccount(

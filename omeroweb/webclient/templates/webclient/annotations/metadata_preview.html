@@ -509,7 +509,7 @@
               <img class='rdef' src="
   {% if share.share.id and not share.share.isOwned %}{% url 'render_thumbnail'  manager.image.id share.share.id%}
   {% else %}{% url 'render_thumbnail' manager.image.id %}{% endif %}?rdefId={{ rdef.id }}"/><br>
-              <span {% ifequal manager.image.getDetails.owner.id.val rdef.owner.id %}class="owner"{% endifequal %}>
+              <span {% if manager.image.getDetails.owner.id.val == rdef.owner.id %}class="owner"{% endif %}>
                 {{ rdef.owner.firstName }} {{ rdef.owner.lastName }}
               </span>
             </button>

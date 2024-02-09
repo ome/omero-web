@@ -18,6 +18,10 @@
 -->
 {% endcomment %}
 
+<!-- allow apps to include custom html -->
+{% block right_panel_title %}
+{% endblock %}
+
 {% if obj.canEdit and not manager.well %}
     <div class="data_heading" id="{{ manager.obj_type }}name-{{ manager.obj_id }}">
         <div>
@@ -45,11 +49,11 @@
     {% endif %}
     <table style="width: 50%">
         <tr class="data_heading_id">
-            {% ifequal manager.obj_type "acquisition" %}
+            {% if manager.obj_type == "acquisition" %}
               <th>Run ID:</th>
             {% else %}
               <th>{{ manager.obj_type|title }} ID:</th>
-            {% endifequal %}
+            {% endif %}
             <td><strong>{{ manager.obj_id }}</strong></td>
         </tr>
         <tr>

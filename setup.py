@@ -48,23 +48,26 @@ setup(
     url="https://github.com/ome/omero-web/",
     license="GPLv2+",
     packages=find_packages(exclude=("test",)) + ["omero.plugins"],
-    python_requires=">=3",
+    python_requires=">=3.8",
     install_requires=[
         # requires Ice (use wheel for faster installs)
         "omero-py>=5.7.0",
         # minimum requirements for `omero web start`
         "concurrent-log-handler>=0.9.20",
-        "Django>=3.2.18,<4.0",
-        "django-pipeline==2.0.7",
+        "Django>=4.2.3,<4.3",
+        "django-pipeline==2.1.0",
         "django-cors-headers==3.7.0",
         "whitenoise>=5.3.0",
         "gunicorn>=19.3",
         "omero-marshal>=0.7.0",
         "Pillow",
+        "pytz",
+        "portalocker",
+        "packaging",
     ],
     include_package_data=True,
     tests_require=["pytest"],
     extras_require={
-        "redis": ["django-redis==5.0.0"],
+        "redis": ["django-redis==5.3.0"],
     },
 )

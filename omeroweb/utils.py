@@ -21,6 +21,8 @@
 
 import logging
 
+import pytz
+
 from django.utils.http import urlencode
 from django.urls import reverse
 from django.urls import NoReverseMatch
@@ -28,6 +30,57 @@ from past.builtins import basestring
 
 
 logger = logging.getLogger(__name__)
+
+
+def parse_boolean(s):
+    s = s.strip().lower()
+    if s in ("true", "1", "t"):
+        return True
+    return False
+
+
+def identity(x):
+    return x
+
+
+def check_timezone(s):
+    """
+    Checks that string is a valid time-zone. If not, raise Exception
+    """
+    pytz.timezone(s)
+    return s
+
+
+def str_slash(s):
+    if s is not None:
+        s = str(s)
+        if s and not s.endswith("/"):
+            s += "/"
+    return s
+
+
+class LeaveUnset(Exception):
+    pass
+
+
+def leave_none_unset(s):
+    if s is None:
+        raise LeaveUnset()
+    return s
+
+
+def leave_none_unset_int(s):
+    s = leave_none_unset(s)
+    if s is not None:
+        return int(s)
+
+
+def is_ajax(request):
+    """
+    Replicates the functionality of the Django 3.1 deprecated
+    HttpRequest.is_ajax() method for compatibility.
+    """
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
 
 
 def reverse_with_params(*args, **kwargs):

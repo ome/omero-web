@@ -36,14 +36,22 @@ import omero.clients
 import tempfile
 import re
 import json
-import pytz
 import random
 import string
 from builtins import str as text
+import portalocker
 
-from omero_ext import portalocker
 from omero.util.concurrency import get_event
-from omeroweb.utils import sort_properties_to_tuple
+from omeroweb.utils import (
+    LeaveUnset,
+    check_timezone,
+    identity,
+    parse_boolean,
+    leave_none_unset,
+    leave_none_unset_int,
+    sort_properties_to_tuple,
+    str_slash,
+)
 from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
@@ -186,7 +194,7 @@ DEVELOPMENT = "development"
 DEFAULT_SERVER_TYPE = WSGITCP
 ALL_SERVER_TYPES = (WSGI, WSGITCP, DEVELOPMENT)
 
-DEFAULT_SESSION_ENGINE = "omeroweb.filesessionstore"
+DEFAULT_SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_ENGINE_VALUES = (
     "omeroweb.filesessionstore",
     "django.contrib.sessions.backends.db",
@@ -194,13 +202,6 @@ SESSION_ENGINE_VALUES = (
     "django.contrib.sessions.backends.cache",
     "django.contrib.sessions.backends.cached_db",
 )
-
-
-def parse_boolean(s):
-    s = s.strip().lower()
-    if s in ("true", "1", "t"):
-        return True
-    return False
 
 
 def parse_paths(s):
@@ -222,42 +223,6 @@ def check_session_engine(s):
             % (s, SESSION_ENGINE_VALUES)
         )
     return s
-
-
-def identity(x):
-    return x
-
-
-def check_timezone(s):
-    """
-    Checks that string is a valid time-zone. If not, raise Exception
-    """
-    pytz.timezone(s)
-    return s
-
-
-def str_slash(s):
-    if s is not None:
-        s = str(s)
-        if s and not s.endswith("/"):
-            s += "/"
-    return s
-
-
-class LeaveUnset(Exception):
-    pass
-
-
-def leave_none_unset(s):
-    if s is None:
-        raise LeaveUnset()
-    return s
-
-
-def leave_none_unset_int(s):
-    s = leave_none_unset(s)
-    if s is not None:
-        return int(s)
 
 
 CUSTOM_HOST = CUSTOM_SETTINGS.get("Ice.Default.Host", "localhost")
@@ -468,6 +433,11 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "Controls where Django stores session data. See :djangodoc:"
             "`Configuring the session engine for more details <ref/settings"
             "/#session-engine>`."
+            "Allowed values are: ``omeroweb.filesessionstore`` (deprecated), "
+            "``django.contrib.sessions.backends.db``, "
+            "``django.contrib.sessions.backends.file``, "
+            "``django.contrib.sessions.backends.cache`` or "
+            "``django.contrib.sessions.backends.cached_db``."
         ),
     ],
     "omero.web.session_expire_at_browser_close": [
@@ -549,6 +519,40 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "Prevent CSRF cookie from being accessed in JavaScript. "
             "Currently disabled as it breaks background JavaScript POSTs in "
             "OMERO.web."
+        ),
+    ],
+    "omero.web.csrf_cookie_samesite": [
+        "CSRF_COOKIE_SAMESITE",
+        "Lax",
+        str,
+        (
+            "The value of the SameSite flag on the CSRF cookie. "
+            "This flag prevents the cookie from being sent in cross-site "
+            "requests thus preventing CSRF attacks and making some methods of "
+            "CSRF session cookie impossible."
+        ),
+    ],
+    "omero.web.csrf_trusted_origins": [
+        "CSRF_TRUSTED_ORIGINS",
+        "[]",
+        json.loads,
+        (
+            "A list of hosts which are trusted origins for unsafe requests. "
+            "When starting with '.', all subdomains are included. "
+            """Example ``'[".example.com", "another.example.net"]'``. """
+            "For more details see :djangodoc:`CSRF trusted origins <ref/"
+            "settings/#csrf-trusted-origins>`."
+        ),
+    ],
+    "omero.web.session_cookie_samesite": [
+        "SESSION_COOKIE_SAMESITE",
+        "Lax",
+        str,
+        (
+            "The value of the SameSite flag on the session cookie. This flag "
+            "prevents the cookie from being sent in cross-site requests thus "
+            "preventing CSRF attacks and making some methods of stealing "
+            "session cookie impossible."
         ),
     ],
     "omero.web.logdir": ["LOGDIR", LOGDIR, str, "A path to the custom log directory."],
@@ -1386,10 +1390,55 @@ if not DEBUG:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
     LOGGING["loggers"][""]["level"] = "INFO"
 
 
-def report_settings(module):
-    from django.views.debug import SafeExceptionReporterFilter
+class CallableSettingWrapper:
+    """
+    Object to wrap callable appearing in settings.
 
-    setting_filter = SafeExceptionReporterFilter()
+    Adapted from:
+      * `django.views.debug.CallableSettingWrapper()`
+    """
+
+    def __init__(self, callable_setting):
+        self._wrapped = callable_setting
+
+    def __repr__(self):
+        return repr(self._wrapped)
+
+
+def cleanse_setting(key, value):
+    """
+    Cleanse an individual setting key/value of sensitive content. If the
+    value is a dictionary, recursively cleanse the keys in that dictionary.
+
+    Adapted from:
+      * `django.views.debug.SafeExceptionReporterFilter.cleanse_setting()`
+    """
+    cleansed_substitute = "********************"
+    hidden_settings = re.compile("API|TOKEN|KEY|SECRET|PASS|SIGNATUREE", flags=re.I)
+
+    try:
+        is_sensitive = hidden_settings.search(key)
+    except TypeError:
+        is_sensitive = False
+
+    if is_sensitive:
+        cleansed = cleansed_substitute
+    elif isinstance(value, dict):
+        cleansed = {k: cleanse_setting(k, v) for k, v in value.items()}
+    elif isinstance(value, list):
+        cleansed = [cleanse_setting("", v) for v in value]
+    elif isinstance(value, tuple):
+        cleansed = tuple([cleanse_setting("", v) for v in value])
+    else:
+        cleansed = value
+
+    if callable(cleansed):
+        cleansed = CallableSettingWrapper(cleansed)
+
+    return cleansed
+
+
+def report_settings(module):
     custom_settings_mappings = getattr(module, "CUSTOM_SETTINGS_MAPPINGS", {})
     for key in sorted(custom_settings_mappings):
         values = custom_settings_mappings[key]
@@ -1400,7 +1449,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (source:%s)",
                 global_name,
-                setting_filter.cleanse_setting(global_name, global_value),
+                cleanse_setting(global_name, global_value),
                 source,
             )
 
@@ -1413,7 +1462,7 @@ def report_settings(module):
             logger.debug(
                 "%s = %r (deprecated:%s, %s)",
                 global_name,
-                setting_filter.cleanse_setting(global_name, global_value),
+                cleanse_setting(global_name, global_value),
                 key,
                 description,
             )

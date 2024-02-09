@@ -1024,6 +1024,7 @@ li.menu_back a {
 
 #center_panel {
     left:0px; right:0px; top:0px; bottom:0px;
+	z-index: 0;
 	background:hsl(210,1%,98%);
 	position:absolute;
 	/* I wish that background: hsl(220,8%,16%);*/

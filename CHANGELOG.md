@@ -1,3 +1,97 @@
+5.24.0 (December 2023)
+----------------------
+
+## Features
+
+- Add support for selecting fileset via URL [#514](https://github.com/ome/omero-web/pull/514)
+- Support inherited annotations [#508](https://github.com/ome/omero-web/pull/508)
+
+## Bug fixes
+
+- Disable account form to prevent server errors in sudo mode [#516](https://github.com/ome/omero-web/pull/516)
+- Avoid breakage from large numbers of file annotations [#519](https://github.com/ome/omero-web/pull/519)
+- Fix annotation count acquisition [#518](https://github.com/ome/omero-web/pull/518)
+
+## Other changes
+
+- Allow plugins to use settings utilities [#513](https://github.com/ome/omero-web/pull/513)
+- Manage Python versions [#509](https://github.com/ome/omero-web/pull/509), [#512](https://github.com/ome/omero-web/pull/512)
+
+5.23.0 (October 2023)
+---------------------
+
+## Features
+
+- Key value pairs height [#475](https://github.com/ome/omero-web/pull/475)
+- Cache script names [#498](https://github.com/ome/omero-web/pull/498)
+- Detect and display non-zero return code from scripts [#474](https://github.com/ome/omero-web/pull/474)
+- Add placeholder for right panel title [#463](https://github.com/ome/omero-web/pull/463)
+- Tiled image histograms [#456](https://github.com/ome/omero-web/pull/456)
+
+## Bug fixes
+
+- Make sure drag handle is visible [#503](https://github.com/ome/omero-web/pull/503)
+
+## Other changes
+
+- Force Django 4.2 and Python 3.8 [#491](https://github.com/ome/omero-web/pull/491)
+
+5.22.1 (July 2023)
+------------------
+
+## Other changes
+
+- Additional upgrade note about session storage [#492](https://github.com/ome/omero-web/pull/492) 
+
+## Bug fixes
+
+- Fix Django 4 refactoring [#495](https://github.com/ome/omero-web/pull/495)
+
+5.22.0 (July 2023)
+------------------
+
+## Features
+
+- New setting to configure CSRF trusted origins [#477](https://github.com/ome/omero-web/pull/477)
+
+## Other changes
+
+- Django 4.2 compatibility [#480](https://github.com/ome/omero-web/pull/480)
+- Deprecate custom in favor of Django session store [#486](https://github.com/ome/omero-web/pull/486)
+- Update Pillow constant [#487](https://github.com/ome/omero-web/pull/487)
+- Add packaging package [#478](https://github.com/ome/omero-web/pull/478)
+- Organize contributor names and emails [#482](https://github.com/ome/omero-web/pull/482) 
+
+5.21.0 (May 2023)
+-----------------
+
+## Features
+
+- New settings to configure SameSite property for CSRF and session cookies [#471](https://github.com/ome/omero-web/pull/471)
+
+## Other changes
+
+- Django 4.0 compatibility [#458](https://github.com/ome/omero-web/pull/458)
+- Plugin hooks [#425](https://github.com/ome/omero-web/pull/425)
+- Remove legacy form [#473](https://github.com/ome/omero-web/pull/473)
+
+## Bug fixes
+
+- Users can now edit their current group [#469](https://github.com/ome/omero-web/pull/469)
+- Handle null dates properly [#462](https://github.com/ome/omero-web/pull/462)
+
+5.20.0 (May 2023)
+-----------------
+
+## Other changes
+
+- Fix multi-file upload validation and support Django 3.2.19 security update [#465](https://github.com/ome/omero-web/pull/465)
+- Declare portalocker as external dependency [#457](https://github.com/ome/omero-web/pull/457)
+
+## Bug fixes
+
+- Avoid creation of empty file annotations [#466](https://github.com/ome/omero-web/pull/466)
+
 5.19.0 (March 2023)
 -------------------
 

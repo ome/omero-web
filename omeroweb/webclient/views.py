@@ -35,10 +35,11 @@ import json
 import re
 import sys
 import warnings
+from collections import defaultdict
 from past.builtins import unicode
 from future.utils import bytes_to_native_str
 from django.utils.html import escape
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from time import time
 
@@ -186,7 +187,9 @@ def validate_redirect_url(url):
     If url is a different host, not in settings.REDIRECT_ALLOWED_HOSTS
     we return webclient index URL.
     """
-    if not is_safe_url(url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS):
+    if not url_has_allowed_host_and_scheme(
+        url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+    ):
         url = reverse("webindex")
     return url
 
@@ -1339,35 +1342,74 @@ def api_tags_and_tagged_list_DELETE(request, conn=None, **kwargs):
 @login_required()
 def api_annotations(request, conn=None, **kwargs):
     r = request.GET
-    image_ids = get_list(request, "image")
-    dataset_ids = get_list(request, "dataset")
-    project_ids = get_list(request, "project")
-    screen_ids = get_list(request, "screen")
-    plate_ids = get_list(request, "plate")
-    run_ids = get_list(request, "acquisition")
-    well_ids = get_list(request, "well")
     page = get_long_or_default(request, "page", 1)
     limit = get_long_or_default(request, "limit", ANNOTATIONS_LIMIT)
-
     ann_type = r.get("type", None)
     ns = r.get("ns", None)
+    with_parents = r.get("parents", "false") == "true"
 
-    anns, exps = tree.marshal_annotations(
+    to_query = defaultdict(set)
+    for type_ in (
+        "Image",
+        "Dataset",
+        "Project",
+        "Well",
+        "Acquisition",
+        "Plate",
+        "Screen",
+    ):
+        ids = get_list(request, type_.lower())
+        if type_ == "Acquisition":
+            type_ = "PlateAcquisition"
+        # Important to cast to int to match marshal_lineage output
+        to_query[f"{type_}I"] = list(map(int, ids))
+
+    if with_parents:
+        requested = to_query.copy()
+        lineage_d, to_query = tree.marshal_lineage(
+            conn,
+            project_ids=to_query["ProjectI"],
+            dataset_ids=to_query["DatasetI"],
+            image_ids=to_query["ImageI"],
+            screen_ids=to_query["ScreenI"],
+            plate_ids=to_query["PlateI"],
+            run_ids=to_query["PlateAcquisitionI"],
+            well_ids=to_query["WellI"],
+        )
+
+    all_anns, exps = tree.marshal_annotations(
         conn,
-        project_ids=project_ids,
-        dataset_ids=dataset_ids,
-        image_ids=image_ids,
-        screen_ids=screen_ids,
-        plate_ids=plate_ids,
-        run_ids=run_ids,
-        well_ids=well_ids,
+        project_ids=to_query["ProjectI"],
+        dataset_ids=to_query["DatasetI"],
+        image_ids=to_query["ImageI"],
+        screen_ids=to_query["ScreenI"],
+        plate_ids=to_query["PlateI"],
+        run_ids=to_query["PlateAcquisitionI"],
+        well_ids=to_query["WellI"],
         ann_type=ann_type,
         ns=ns,
         page=page,
         limit=limit,
     )
+    if not with_parents:
+        return JsonResponse({"annotations": all_anns, "experimenters": exps})
 
-    return JsonResponse({"annotations": anns, "experimenters": exps})
+    anns = []
+    parent_anns = {"annotations": [], "lineage": defaultdict(dict)}
+    for ann in all_anns:
+        p = ann["link"]["parent"]
+        pclass, pid = p["class"], p["id"]
+        if pid in requested[pclass]:
+            anns.append(ann)
+        if pclass != "ImageI":
+            lineage = lineage_d[pclass][pid]
+            if len(lineage) > 0:
+                parent_anns["annotations"].append(ann)
+                parent_anns["lineage"][pclass][pid] = lineage
+
+    return JsonResponse(
+        {"annotations": anns, "parents": parent_anns, "experimenters": exps}
+    )
 
 
 @login_required()
@@ -1719,7 +1761,7 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
             context["canExportAsJpg"] = manager.canExportAsJpg(request)
             context["annotationCounts"] = manager.getAnnotationCounts()
             context["tableCountsOnParents"] = manager.countTablesOnParents()
-            figScripts = manager.listFigureScripts()
+            figScripts = manager.listFigureScripts(request=request)
     context["manager"] = manager
 
     if c_type in ("tag", "tagset"):
@@ -2261,7 +2303,7 @@ def batch_annotate(request, conn=None, **kwargs):
     conn.SERVICE_OPTS.setOmeroGroup(groupId)
 
     manager = BaseContainer(conn)
-    figScripts = manager.listFigureScripts(objs)
+    figScripts = manager.listFigureScripts(objs, request=request)
     iids = []
     if "image" in objs and len(objs["image"]) > 0:
         iids = [i.getId() for i in objs["image"]]
@@ -2283,6 +2325,7 @@ def batch_annotate(request, conn=None, **kwargs):
         )
         context["differentGroups"] = True  # E.g. don't run scripts etc
     context["webclient_path"] = reverse("webindex")
+    objs["plateacquisition"] = objs.pop("acquisition")
     context["annotationCounts"] = manager.getBatchAnnotationCounts(objs)
     return context
 
@@ -2322,6 +2365,9 @@ def download_menu(request, conn=None, **kwargs):
         "template": "webclient/annotations/includes/download_menu.html",
     }
     return context
+
+
+MAX_FILES_IN_FILE_ANNOTATION_DIALOG = 500
 
 
 @login_required()
@@ -2391,15 +2437,21 @@ def annotate_file(request, conn=None, **kwargs):
                 return handlerInternalError(request, x)
 
     if manager is not None:
-        files = manager.getFilesByObject()
+        total_files, files = manager.getFilesByObject(
+            offset=0,
+            limit=MAX_FILES_IN_FILE_ANNOTATION_DIALOG,
+        )
     else:
         manager = BaseContainer(conn)
         for dtype, objs in oids.items():
             if len(objs) > 0:
                 # NB: we only support a single data-type now. E.g. 'image' OR
                 # 'dataset' etc.
-                files = manager.getFilesByObject(
-                    parent_type=dtype, parent_ids=[o.getId() for o in objs]
+                total_files, files = manager.getFilesByObject(
+                    parent_type=dtype,
+                    parent_ids=[o.getId() for o in objs],
+                    offset=0,
+                    limit=MAX_FILES_IN_FILE_ANNOTATION_DIALOG,
                 )
                 break
 
@@ -2407,7 +2459,9 @@ def annotate_file(request, conn=None, **kwargs):
 
     if request.method == "POST":
         # handle form submission
-        form_file = FilesAnnotationForm(initial=initial, data=request.POST.copy())
+        form_file = FilesAnnotationForm(
+            initial=initial, data=request.POST.copy(), files=request.FILES
+        )
         if form_file.is_valid():
             # Link existing files...
             files = form_file.cleaned_data["files"]
@@ -2425,7 +2479,11 @@ def annotate_file(request, conn=None, **kwargs):
 
     else:
         form_file = FilesAnnotationForm(initial=initial)
-        context = {"form_file": form_file}
+        context = {
+            "form_file": form_file,
+            "total_files": total_files,
+            "max_files": MAX_FILES_IN_FILE_ANNOTATION_DIALOG,
+        }
         template = "webclient/annotations/files_form.html"
     context["template"] = template
     return context
@@ -3528,6 +3586,13 @@ def update_callback(request, cbString, **kwargs):
         request.session["callback"][cbString][key] = value
 
 
+# Subclass to handle returncode
+class ScriptsCallback(omero.scripts.ProcessCallbackI):
+    def processFinished(self, returncode, current=None):
+        super().processFinished(returncode, current)
+        self.returncode = returncode
+
+
 @login_required()
 @render_response()
 def activities(request, conn=None, **kwargs):
@@ -3803,14 +3868,23 @@ def activities(request, conn=None, **kwargs):
                         error=1,
                     )
                     continue
-                cb = omero.scripts.ProcessCallbackI(conn.c, proc)
+                cb = ScriptsCallback(conn.c, proc)
                 # check if we get something back from the handle...
                 if cb.block(0):  # ms.
                     cb.close()
                     try:
                         # we can only retrieve this ONCE - must save results
                         results = proc.getResults(0, conn.SERVICE_OPTS)
-                        update_callback(request, cbString, status="finished")
+                        kwargs = {
+                            "status": "finished",
+                            "returncode": cb.returncode,
+                        }
+                        if cb.returncode != 0:
+                            kwargs["Message"] = (
+                                f"Script exited with failure."
+                                f" (returncode={ cb.returncode })"
+                            )
+                        update_callback(request, cbString, **kwargs)
                         new_results.append(cbString)
                     except Exception:
                         update_callback(

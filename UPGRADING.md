@@ -4,6 +4,14 @@ This document highlights steps that may need to be taken by developers
 when upgrading OMERO.web to ensure plugins or other customizations
 continue to function as expected.
 
+## OMERO.web 5.22.0
+
+### Django 4.2 support
+
+OMERO.web 5.22.0 supports Django versions 3.2 to 4.2.
+
+Django 4.2 will be required in the next minor release.
+
 ## OMERO.web 5.19.0
 
 ### Partial channel lists in render_image and render_image_region web API calls
@@ -40,6 +48,11 @@ Any downstream implementation which was directly assigning and/or retrieving
   replaced by `connector.to_session(request)`
 
 More information at https://github.com/ome/omero-web/pull/435
+
+Due to the serialization change, the sessions store must be cleared before
+restarting OMERO.web following this upgrade - see
+https://omero.readthedocs.io/en/stable/sysadmins/omeroweb-upgrade.html#clear-the-sessions-store-optional
+for more information.
 
 ### Third-party JavaScript libraries
 

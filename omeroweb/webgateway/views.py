@@ -584,14 +584,14 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
     theT = theT if theT is not None else image.getDefaultT()
     theZ = unwrap(s.getTheZ())
     theZ = theZ if theZ is not None else image.getDefaultZ()
-    if type(s) == omero.model.RectangleI:
+    if isinstance(s, omero.model.RectangleI):
         shape["type"] = "Rectangle"
         shape["x"] = s.getX().getValue()
         shape["y"] = s.getY().getValue()
         shape["width"] = s.getWidth().getValue()
         shape["height"] = s.getHeight().getValue()
         bBox = (shape["x"], shape["y"], shape["width"], shape["height"])
-    elif type(s) == omero.model.MaskI:
+    elif isinstance(s, omero.model.MaskI):
         shape["type"] = "Mask"
         shape["x"] = s.getX().getValue()
         shape["y"] = s.getY().getValue()
@@ -599,7 +599,7 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
         shape["height"] = s.getHeight().getValue()
         bBox = (shape["x"], shape["y"], shape["width"], shape["height"])
         # TODO: support for mask
-    elif type(s) == omero.model.EllipseI:
+    elif isinstance(s, omero.model.EllipseI):
         shape["type"] = "Ellipse"
         shape["x"] = int(s.getX().getValue())
         shape["y"] = int(s.getY().getValue())
@@ -611,11 +611,11 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
             2 * shape["radiusX"],
             2 * shape["radiusY"],
         )
-    elif type(s) == omero.model.PolylineI:
+    elif isinstance(s, omero.model.PolylineI):
         shape["type"] = "PolyLine"
         shape["xyList"] = points_string_to_XY_list(s.getPoints().getValue())
         bBox = xy_list_to_bbox(shape["xyList"])
-    elif type(s) == omero.model.LineI:
+    elif isinstance(s, omero.model.LineI):
         shape["type"] = "Line"
         shape["x1"] = int(s.getX1().getValue())
         shape["x2"] = int(s.getX2().getValue())
@@ -629,16 +629,16 @@ def get_shape_thumbnail(request, conn, image, s, compress_quality):
             max(shape["x1"], shape["x2"]) - x,
             max(shape["y1"], shape["y2"]) - y,
         )
-    elif type(s) == omero.model.PointI:
+    elif isinstance(s, omero.model.PointI):
         shape["type"] = "Point"
         shape["x"] = s.getX().getValue()
         shape["y"] = s.getY().getValue()
         bBox = (shape["x"] - 50, shape["y"] - 50, 100, 100)
-    elif type(s) == omero.model.PolygonI:
+    elif isinstance(s, omero.model.PolygonI):
         shape["type"] = "Polygon"
         shape["xyList"] = points_string_to_XY_list(s.getPoints().getValue())
         bBox = xy_list_to_bbox(shape["xyList"])
-    elif type(s) == omero.model.LabelI:
+    elif isinstance(s, omero.model.LabelI):
         shape["type"] = "Label"
         shape["x"] = s.getX().getValue()
         shape["y"] = s.getY().getValue()
@@ -2836,25 +2836,25 @@ def histogram_json(request, iid, theC, conn=None, **kwargs):
     image = conn.getObject("Image", iid)
     if image is None:
         raise Http404
-    maxW, maxH = conn.getMaxPlaneSize()
-    sizeX = image.getSizeX()
-    sizeY = image.getSizeY()
-    if (sizeX * sizeY) > (maxW * maxH):
-        msg = "Histogram not supported for 'big' images (over %s * %s pixels)" % (
-            maxW,
-            maxH,
-        )
-        return JsonResponse({"error": msg})
 
     theZ = int(request.GET.get("theZ", 0))
     theT = int(request.GET.get("theT", 0))
     theC = int(theC)
     binCount = int(request.GET.get("bins", 256))
 
-    # TODO: handle projection when supported by OMERO
-    data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
-    histogram = data[theC]
+    if theZ >= image.getSizeZ() or theT >= image.getSizeT() or theC >= image.getSizeC():
+        raise Http404
 
+    # TODO: handle projection when supported by OMERO
+    try:
+        data = image.getHistogram([theC], binCount, theZ=theZ, theT=theT)
+        histogram = data[theC]
+    except omero.ApiUsageException as ex:
+        logger.warn(ex)
+        resObj = {"error": ex.message}
+        return HttpResponseBadRequest(
+            json.dumps(resObj), content_type="application/json"
+        )
     return JsonResponse({"data": histogram})
 
 
@@ -3274,7 +3274,7 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
 
 def rowsToByteArray(rows):
     maxval = 0
-    if len(rows) > 0 and type(rows[0][0]) == float:
+    if len(rows) > 0 and isinstance(rows[0][0], float):
         raise ValueError("Cannot have ID of float")
     for obj in rows:
         obj_id = int(obj[0])
