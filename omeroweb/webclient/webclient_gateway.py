@@ -2614,7 +2614,6 @@ omero.gateway.ImageWrapper = ImageWrapper
 
 
 class PlateWrapper(OmeroWebObjectWrapper, omero.gateway.PlateWrapper):
-
     """
     omero_model_PlateI class wrapper overwrite omero.gateway.PlateWrapper
     and extends OmeroWebObjectWrapper.
@@ -2655,7 +2654,6 @@ omero.gateway.WellWrapper = WellWrapper
 class PlateAcquisitionWrapper(
     OmeroWebObjectWrapper, omero.gateway.PlateAcquisitionWrapper
 ):
-
     """
     omero_model_PlateI class wrapper overwrite omero.gateway.PlateWrapper
     and extends OmeroWebObjectWrapper.
