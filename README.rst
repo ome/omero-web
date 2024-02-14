@@ -34,9 +34,8 @@ other options, please see `OMERO.py`_.
 
 ::
 
-    conda create -n myenv -c ome python=3.8 zeroc-ice36-python
+    conda create -n myenv -c conda-forge  python=3.8 omero-py
     conda activate myenv
-    conda install -c conda-forge omero-py
     pip install omero-web
 
 Setting of the environment variable ``OMERODIR`` is required.
