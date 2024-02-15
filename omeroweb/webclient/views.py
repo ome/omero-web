@@ -1710,56 +1710,34 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
 
     context = dict()
 
-    # we only expect a single object, but forms can take multiple objects
-    images = c_type == "image" and list(conn.getObjects("Image", [c_id])) or list()
-    datasets = (
-        c_type == "dataset" and list(conn.getObjects("Dataset", [c_id])) or list()
-    )
-    projects = (
-        c_type == "project" and list(conn.getObjects("Project", [c_id])) or list()
-    )
-    screens = c_type == "screen" and list(conn.getObjects("Screen", [c_id])) or list()
-    plates = c_type == "plate" and list(conn.getObjects("Plate", [c_id])) or list()
-    acquisitions = (
-        c_type == "acquisition"
-        and list(conn.getObjects("PlateAcquisition", [c_id]))
-        or list()
-    )
-    shares = (
-        (c_type == "share" or c_type == "discussion")
-        and [conn.getShare(c_id)]
-        or list()
-    )
-    wells = c_type == "well" and list(conn.getObjects("Well", [c_id])) or list()
-
-    # we simply set up the annotation form, passing the objects to be
-    # annotated.
-    selected = {
-        "images": c_type == "image" and [c_id] or [],
-        "datasets": c_type == "dataset" and [c_id] or [],
-        "projects": c_type == "project" and [c_id] or [],
-        "screens": c_type == "screen" and [c_id] or [],
-        "plates": c_type == "plate" and [c_id] or [],
-        "acquisitions": c_type == "acquisition" and [c_id] or [],
-        "wells": c_type == "well" and [c_id] or [],
-        "shares": ((c_type == "share" or c_type == "discussion") and [c_id] or []),
-    }
-
-    initial = {
-        "selected": selected,
-        "images": images,
-        "datasets": datasets,
-        "projects": projects,
-        "screens": screens,
-        "plates": plates,
-        "acquisitions": acquisitions,
-        "wells": wells,
-        "shares": shares,
-    }
-
     form_comment = None
     figScripts = None
     if c_type in ("share", "discussion"):
+        shares = [conn.getShare(c_id)]
+        # we simply set up the annotation form, passing the objects to be
+        # annotated.
+        selected = {
+            "images": [],
+            "datasets": [],
+            "projects": [],
+            "screens": [],
+            "plates": [],
+            "acquisitions": [],
+            "wells": [],
+            "shares": [c_id],
+        }
+
+        initial = {
+            "selected": selected,
+            "images": [],
+            "datasets": [],
+            "projects": [],
+            "screens": [],
+            "plates": [],
+            "acquisitions": [],
+            "wells": [],
+            "shares": shares,
+        }
         template = "webclient/annotations/annotations_share.html"
         manager = BaseShare(conn, c_id)
         manager.getAllUsers(c_id)
@@ -1768,6 +1746,11 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
     else:
         try:
             manager = BaseContainer(conn, **{str(c_type): long(c_id), "index": index})
+            obj = manager._get_object()
+            # Set group - makes any subsequent queries faster
+            if obj is not None:
+                gid = obj.getDetails().group.id.val
+                conn.SERVICE_OPTS.setOmeroGroup(gid)
         except AttributeError as x:
             return handlerInternalError(request, x)
         if share_id is not None:
@@ -2321,16 +2304,9 @@ def batch_annotate(request, conn=None, **kwargs):
 
     manager = BaseContainer(conn)
     figScripts = manager.listFigureScripts(objs, request=request)
-    canExportAsJpg = manager.canExportAsJpg(request, objs)
-    filesetInfo = None
     iids = []
     if "image" in objs and len(objs["image"]) > 0:
         iids = [i.getId() for i in objs["image"]]
-    if len(iids) > 0:
-        filesetInfo = conn.getFilesetFilesInfo(iids)
-        archivedInfo = conn.getArchivedFilesInfo(iids)
-        filesetInfo["count"] += archivedInfo["count"]
-        filesetInfo["size"] += archivedInfo["size"]
 
     context = {
         "iids": iids,
@@ -2339,21 +2315,55 @@ def batch_annotate(request, conn=None, **kwargs):
         "obj_labels": obj_labels,
         "batch_ann": True,
         "figScripts": figScripts,
-        "canExportAsJpg": canExportAsJpg,
-        "filesetInfo": filesetInfo,
         "annotationBlocked": annotationBlocked,
         "differentGroups": False,
     }
+    context["template"] = "webclient/annotations/batch_annotate.html"
     if len(groupIds) > 1:
         context["annotationBlocked"] = (
             "Can't add annotations because" " objects are in different groups"
         )
         context["differentGroups"] = True  # E.g. don't run scripts etc
-    context["canDownload"] = manager.canDownload(objs)
-    context["template"] = "webclient/annotations/batch_annotate.html"
     context["webclient_path"] = reverse("webindex")
     objs["plateacquisition"] = objs.pop("acquisition")
     context["annotationCounts"] = manager.getBatchAnnotationCounts(objs)
+    return context
+
+
+@login_required()
+@render_response()
+def download_menu(request, conn=None, **kwargs):
+    # objs = getObjects(request, conn)
+    image_query = request.GET.get("image")
+    if image_query is None:
+        raise Http404("Need to specify objects via e.g. ?image=1,2")
+    image_ids = image_query.split(",")
+    objs = {"image": list(conn.getObjects("Image", image_ids))}
+    manager = BaseContainer(conn)
+    canExportAsJpg = False
+    iids = []
+    if "image" in objs and len(objs["image"]) > 0:
+        iids = [i.getId() for i in objs["image"]]
+    if len(iids) > 0:
+        canExportAsJpg = manager.canExportAsJpg(request, iids)
+        filesetInfo = conn.getFilesetFilesInfo(iids)
+        print("filesetInfo", filesetInfo)
+        archivedInfo = conn.getArchivedFilesInfo(iids)
+        filesetInfo["count"] += archivedInfo["count"]
+        filesetInfo["size"] += archivedInfo["size"]
+    link_string = "image-" + ("|image-".join(image_ids))
+    image = None
+    if len(objs["image"]) == 1:
+        image = objs["image"][0]
+
+    context = {
+        "canExportAsJpg": canExportAsJpg,
+        "link_string": link_string,
+        "filesetInfo": filesetInfo,
+        "canDownload": manager.canDownload(objs),
+        "image": image,
+        "template": "webclient/annotations/includes/download_menu.html",
+    }
     return context
 
 

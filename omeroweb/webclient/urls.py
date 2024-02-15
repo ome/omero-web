@@ -270,6 +270,7 @@ urlpatterns = [
         name="manage_action_containers",
     ),
     re_path(r"^batch_annotate/$", views.batch_annotate, name="batch_annotate"),
+    re_path(r"^download_menu/$", views.download_menu, name="download_menu"),
     re_path(r"^annotate_tags/$", views.annotate_tags, name="annotate_tags"),
     re_path(
         r"^marshal_tagging_form_data/$",
