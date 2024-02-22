@@ -445,7 +445,7 @@ def graphResponseMarshal(conn, rsp):
     rv = {}
     if isinstance(rsp, omero.cmd.ERR):
         rsp_params = ", ".join(["%s: %s" % (k, v) for k, v in rsp.parameters.items()])
-        rv["error"] = rsp.message
+        rv["error"] = str(rsp.category)
         rv["report"] = "%s %s" % (rsp.name, rsp_params)
     else:
         included = rsp.responses[0].includedObjects
