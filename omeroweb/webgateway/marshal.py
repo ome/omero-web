@@ -36,6 +36,32 @@ INSIGHT_POINT_LIST_RE = re.compile(r"points\[([^\]]+)\]")
 # OME model point list regular expression
 OME_MODEL_POINT_LIST_RE = re.compile(r"([\d.]+),([\d.]+)")
 
+from omero.gateway import ChannelWrapper
+
+
+def getChannelsNoRe(image):
+    """
+    Returns a list of Channels.
+
+    This differs from image.getChannels(noRE=True) in that we load statsInfo
+    here which is used by channel.getWindowMin() and channel.getWindowMax()
+
+    :return:    Channels
+    :rtype:     List of :class:`ChannelWrapper`
+    """
+
+    conn = image._conn
+    pid = image.getPixelsId()
+    params = omero.sys.ParametersI()
+    params.addId(pid)
+    query = """select p from Pixels p join fetch p.channels as c
+                join fetch c.logicalChannel as lc
+                join fetch c.statsInfo
+                where p.id=:id"""
+    pixels = conn.getQueryService().findByQuery(query, params, conn.SERVICE_OPTS)
+    return [ChannelWrapper(conn, c, idx=n, img=image)
+            for n, c in enumerate(pixels.iterateChannels())]
+
 
 def eventContextMarshal(event_context):
     """
@@ -71,6 +97,38 @@ def eventContextMarshal(event_context):
     ctx["groupPermissions"] = encoder.encode(perms)
 
     return ctx
+
+
+def rdefMarshal(rdef, image):
+
+    channels = []
+
+    for rdef_ch, channel in zip(rdef['c'], getChannelsNoRe(image)):
+
+        chan = {
+            "emissionWave": channel.getEmissionWave(),
+            "label": channel.getLabel(),
+            "color": rdef_ch["color"],
+            # 'reverseIntensity' is deprecated. Use 'inverted'
+            "inverted": rdef_ch["inverted"],
+            "reverseIntensity": rdef_ch["inverted"],
+            "family": rdef_ch["family"],
+            "coefficient": rdef_ch["coefficient"],
+            "active": rdef_ch["active"],
+        }
+
+        chan["window"] = {
+            "min": channel.getWindowMin(),
+            "max": channel.getWindowMax(),
+            "start": rdef_ch["start"],
+            "end": rdef_ch["end"],
+        }
+
+        lut = channel.getLut()
+        if lut and len(lut) > 0:
+            chan["lut"] = lut
+        channels.append(chan)
+    return channels
 
 
 def channelMarshal(channel):
@@ -113,7 +171,13 @@ def imageMarshal(image, key=None, request=None):
     @param key:     key of specific attributes to select
     @return:        Dict
     """
+    get_resolution_levels = True
+    if request is not None:
+        get_res = request.GET.get("get_resolution_levels", "")
+        if get_res.lower() == "false":
+            get_resolution_levels = False
 
+    # projection / invertAxis etc from annotation
     image.loadRenderOptions()
     pr = image.getProject()
     ds = None
@@ -165,31 +229,40 @@ def imageMarshal(image, key=None, request=None):
             "canLink": image.canLink(),
         },
     }
-    try:
-        reOK = image._prepareRenderingEngine()
-        if not reOK:
-            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
+
+    exp_id = image._conn.getUserId()
+    rdefs = image.getAllRenderingDefs(exp_id)
+    print("rdefs", rdefs)
+    # Assume there is only 1 rdef
+    # TODO: handle case where user doesn't own any rendering settings (load image owners)
+    rdef = rdefs[0]
+
+    if get_resolution_levels:
+        try:
+            reOK = image._prepareRenderingEngine()
+            if not reOK:
+                logger.debug("Failed to prepare Rendering Engine for imageMarshal")
+                return rv
+        except omero.ConcurrencyException as ce:
+            backOff = ce.backOff
+            rv = {"ConcurrencyException": {"backOff": backOff}}
             return rv
-    except omero.ConcurrencyException as ce:
-        backOff = ce.backOff
-        rv = {"ConcurrencyException": {"backOff": backOff}}
-        return rv
-    except Exception as ex:  # Handle everything else.
-        rv["Exception"] = ex.message
-        logger.error(traceback.format_exc())
-        return rv  # Return what we have already, in case it's useful
+        except Exception as ex:  # Handle everything else.
+            rv["Exception"] = ex.message
+            logger.error(traceback.format_exc())
+            return rv  # Return what we have already, in case it's useful
 
-    # big images
-    levels = image._re.getResolutionLevels()
-    tiles = levels > 1
-    rv["tiles"] = tiles
-    if tiles:
-        width, height = image._re.getTileSize()
-        zoomLevelScaling = image.getZoomLevelScaling()
+        # big images
+        levels = image._re.getResolutionLevels()
+        tiles = levels > 1
+        rv["tiles"] = tiles
+        if tiles:
+            width, height = image._re.getTileSize()
+            zoomLevelScaling = image.getZoomLevelScaling()
 
-        rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
-        if zoomLevelScaling is not None:
-            rv["zoomLevelScaling"] = zoomLevelScaling
+            rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
+            if zoomLevelScaling is not None:
+                rv["zoomLevelScaling"] = zoomLevelScaling
 
     nominalMagnification = (
         image.getObjectiveSettings() is not None
@@ -242,7 +315,8 @@ def imageMarshal(image, key=None, request=None):
             rv.update({"nominalMagnification": nominalMagnification})
         try:
             rv["pixel_range"] = image.getPixelRange()
-            rv["channels"] = [channelMarshal(x) for x in image.getChannels()]
+            rv["channels"] = rdefMarshal(rdef, image)
+            # rv["channels"] = [channelMarshal(x) for x in image.getChannels()]
             rv["split_channel"] = image.splitChannelDims()
             rv["rdefs"] = {
                 "model": (image.isGreyscaleRenderingModel() and "greyscale" or "color"),
