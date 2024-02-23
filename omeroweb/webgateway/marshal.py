@@ -173,7 +173,7 @@ def imageMarshal(image, key=None, request=None):
     """
     get_resolution_levels = True
     if request is not None:
-        get_res = request.GET.get("get_resolution_levels", "")
+        get_res = request.GET.get("resolution_levels", "")
         if get_res.lower() == "false":
             get_resolution_levels = False
 
