@@ -30,6 +30,7 @@ from omero.model.enums import PixelsTypeuint16, PixelsTypeint32
 from omero.model.enums import PixelsTypeuint32, PixelsTypefloat
 from omero.model.enums import PixelsTypedouble
 
+from omero.gateway import ChannelWrapper
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
 
@@ -40,8 +41,6 @@ INSIGHT_POINT_LIST_RE = re.compile(r"points\[([^\]]+)\]")
 
 # OME model point list regular expression
 OME_MODEL_POINT_LIST_RE = re.compile(r"([\d.]+),([\d.]+)")
-
-from omero.gateway import ChannelWrapper
 
 
 def getChannelsNoRe(image):
