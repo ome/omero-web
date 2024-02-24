@@ -351,22 +351,28 @@ def imageMarshal(image, key=None, request=None):
         rv = None
         raise
 
-    # big images
-    if load_re(image, rv):
-        levels = image._re.getResolutionLevels()
-        tiles = levels > 1
-        rv["tiles"] = tiles
-        if tiles:
-            width, height = image._re.getTileSize()
-            zoomLevelScaling = image.getZoomLevelScaling()
-            rv.update(
-                {"tile_size": {"width": width, "height": height}, "levels": levels}
-            )
-            if zoomLevelScaling is not None:
-                rv["zoomLevelScaling"] = zoomLevelScaling
+    # If image is big - need to load RE to get resolution levels
+    # NB: some small images like OME-Zarr can have pyramids
+    # but these will be ignored
 
-        if init_zoom < 0:
-            init_zoom = levels + init_zoom
+    # TEMP - for A/B testing only use size test if ID is odd number!
+    if image.id % 1 == 0 and not image.requiresPixelsPyramid():
+        rv["tiles"] = False
+    else:
+        if load_re(image, rv):
+            levels = image._re.getResolutionLevels()
+            tiles = levels > 1
+            rv["tiles"] = tiles
+            if tiles:
+                width, height = image._re.getTileSize()
+                zoomLevelScaling = image.getZoomLevelScaling()
+                rv.update(
+                    {"tile_size": {"width": width, "height": height}, "levels": levels}
+                )
+                if zoomLevelScaling is not None:
+                    rv["zoomLevelScaling"] = zoomLevelScaling
+            if init_zoom < 0:
+                init_zoom = levels + init_zoom
     rv["init_zoom"] = init_zoom
 
     if key is not None and rv is not None:

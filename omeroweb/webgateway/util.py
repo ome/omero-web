@@ -249,13 +249,13 @@ def load_re(image, rsp_dict=None):
     try:
         reOK = image._prepareRenderingEngine()
         if not reOK:
-            # rsp_dict["Error"] = "Failed to prepare Rendering Engine for imageMarshal"
+            rsp_dict["Error"] = "Failed to prepare Rendering Engine for imageMarshal"
             logger.debug("Failed to prepare Rendering Engine for imageMarshal")
     except omero.ConcurrencyException as ce:
         backOff = ce.backOff
-        # rsp_dict["ConcurrencyException"] = {"backOff": backOff}
+        rsp_dict["ConcurrencyException"] = {"backOff": backOff}
     except Exception as ex:  # Handle everything else.
-        # rsp_dict["Exception"] = ex.message
+        rsp_dict["Exception"] = ex.message
         logger.error(traceback.format_exc())
     return reOK
 
