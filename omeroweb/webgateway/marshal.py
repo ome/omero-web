@@ -204,6 +204,40 @@ def channelMarshal(channel):
     return chan
 
 
+def load_re(image, rsp_dict=None):
+    rsp_dict = {} if rsp_dict is None else rsp_dict
+    reOK = False
+    try:
+        reOK = image._prepareRenderingEngine()
+        if not reOK:
+            rsp_dict["Error"] = "Failed to prepare Rendering Engine for imageMarshal"
+            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
+    except omero.ConcurrencyException as ce:
+        backOff = ce.backOff
+        rsp_dict["ConcurrencyException"] = {"backOff": backOff}
+    except Exception as ex:  # Handle everything else.
+        rsp_dict["Exception"] = ex.message
+        logger.error(traceback.format_exc())
+    return reOK
+
+
+def get_rendering_def(image, rsp_dict):
+    # Try to get user's rendering def
+    exp_id = image._conn.getUserId()
+    rdefs = image.getAllRenderingDefs(exp_id)
+    if len(rdefs) == 0 and image.canAnnotate():
+        # try to create our own rendering settings
+        if load_re(image, rsp_dict):
+            rdefs = image.getAllRenderingDefs(exp_id)
+    # otherwise use owners
+    if len(rdefs) == 0:  
+        owner_id = image.getDetails().getOwner().id
+        if owner_id != exp_id:
+            rdefs = image.getAllRenderingDefs(owner_id)
+
+    return rdefs[0] if len(rdefs) > 0 else None
+
+
 def imageMarshal(image, key=None, request=None):
     """
     return a dict with pretty much everything we know and care about an image,
@@ -313,11 +347,9 @@ def imageMarshal(image, key=None, request=None):
             }
         )
 
-        exp_id = image._conn.getUserId()
-        rdefs = image.getAllRenderingDefs(exp_id)
-        # Assume there is only 1 rdef
-        # TODO: handle case where user doesn't own any rendering settings (load image owners)
-        rdef = rdefs[0]
+        rdef = get_rendering_def(image, rv)
+        if not rdef:
+            return rv
 
         try:
             rv["pixel_range"] = getPixelRange(image)
@@ -343,25 +375,14 @@ def imageMarshal(image, key=None, request=None):
                 "defaultT": 0,
                 "invertAxis": image.isInvertedAxis(),
             }
+
     except AttributeError:
+        # Why do we do raise just for this exception?!
         rv = None
         raise
 
-    reOK = False
-    try:
-        reOK = image._prepareRenderingEngine()
-        if not reOK:
-            rv["Error"] = "Failed to prepare Rendering Engine for imageMarshal"
-            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
-    except omero.ConcurrencyException as ce:
-        backOff = ce.backOff
-        rv["ConcurrencyException"] = {"backOff": backOff}
-    except Exception as ex:  # Handle everything else.
-        rv["Exception"] = ex.message
-        logger.error(traceback.format_exc())
-
     # big images
-    if reOK:
+    if load_re(image, rv):
         levels = image._re.getResolutionLevels()
         tiles = levels > 1
         rv["tiles"] = tiles
