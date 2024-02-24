@@ -229,7 +229,7 @@ def get_rendering_def(image, rsp_dict):
     # Try to get user's rendering def
     exp_id = image._conn.getUserId()
     rdefs = image.getAllRenderingDefs(exp_id)
-    if len(rdefs) == 0 and image.canAnnotate():
+    if len(rdefs) == 0:
         # try to create our own rendering settings
         if load_re(image, rsp_dict):
             rdefs = image.getAllRenderingDefs(exp_id)
