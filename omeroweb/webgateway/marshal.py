@@ -208,7 +208,6 @@ def channelMarshal(channel):
     return chan
 
 
-
 def imageMarshal(image, key=None, request=None):
     """
     return a dict with pretty much everything we know and care about an image,
