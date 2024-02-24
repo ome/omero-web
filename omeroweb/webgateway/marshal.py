@@ -25,6 +25,11 @@ import logging
 import traceback
 from future.utils import isbytes, bytes_to_native_str
 
+from omero.model.enums import PixelsTypeint8, PixelsTypeuint8, PixelsTypeint16
+from omero.model.enums import PixelsTypeuint16, PixelsTypeint32
+from omero.model.enums import PixelsTypeuint32, PixelsTypefloat
+from omero.model.enums import PixelsTypedouble
+
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
 
@@ -56,7 +61,7 @@ def getChannelsNoRe(image):
     params.addId(pid)
     query = """select p from Pixels p join fetch p.channels as c
                 join fetch c.logicalChannel as lc
-                join fetch c.statsInfo
+                left outer join fetch c.statsInfo
                 where p.id=:id"""
     pixels = conn.getQueryService().findByQuery(query, params, conn.SERVICE_OPTS)
     return [ChannelWrapper(conn, c, idx=n, img=image)
@@ -99,7 +104,44 @@ def eventContextMarshal(event_context):
     return ctx
 
 
-def rdefMarshal(rdef, image):
+def getPixelRange(image):
+    minVals = {
+        PixelsTypeint8: -128,
+        PixelsTypeuint8: 0,
+        PixelsTypeint16: -32768,
+        PixelsTypeuint16: 0,
+        PixelsTypeint32: -2147483648,
+        PixelsTypeuint32: 0,
+        PixelsTypefloat: -2147483648,
+        PixelsTypedouble: -2147483648}
+    maxVals = {
+        PixelsTypeint8: 127,
+        PixelsTypeuint8: 255,
+        PixelsTypeint16: 32767,
+        PixelsTypeuint16: 65535,
+        PixelsTypeint32: 2147483647,
+        PixelsTypeuint32: 4294967295,
+        PixelsTypefloat: 2147483647,
+        PixelsTypedouble: 2147483647}
+    pixtype = image.getPrimaryPixels().getPixelsType().getValue()
+    return [minVals[pixtype], maxVals[pixtype]]
+
+
+def getWindowMin(channel):
+    si = channel._obj.getStatsInfo()
+    if si is None:
+        return None
+    return si.getGlobalMin().val
+
+
+def getWindowMax(channel):
+    si = channel._obj.getStatsInfo()
+    if si is None:
+        return None
+    return si.getGlobalMax().val
+
+
+def rdefMarshal(rdef, image, pixel_range):
 
     channels = []
 
@@ -118,8 +160,8 @@ def rdefMarshal(rdef, image):
         }
 
         chan["window"] = {
-            "min": channel.getWindowMin(),
-            "max": channel.getWindowMax(),
+            "min": getWindowMin(channel) or pixel_range[0],
+            "max": getWindowMax(channel) or pixel_range[1],
             "start": rdef_ch["start"],
             "end": rdef_ch["end"],
         }
@@ -171,11 +213,6 @@ def imageMarshal(image, key=None, request=None):
     @param key:     key of specific attributes to select
     @return:        Dict
     """
-    get_resolution_levels = True
-    if request is not None:
-        get_res = request.GET.get("resolution_levels", "")
-        if get_res.lower() == "false":
-            get_resolution_levels = False
 
     # projection / invertAxis etc from annotation
     image.loadRenderOptions()
@@ -230,54 +267,20 @@ def imageMarshal(image, key=None, request=None):
         },
     }
 
-    exp_id = image._conn.getUserId()
-    rdefs = image.getAllRenderingDefs(exp_id)
-    print("rdefs", rdefs)
-    # Assume there is only 1 rdef
-    # TODO: handle case where user doesn't own any rendering settings (load image owners)
-    rdef = rdefs[0]
-
-    if get_resolution_levels:
-        try:
-            reOK = image._prepareRenderingEngine()
-            if not reOK:
-                logger.debug("Failed to prepare Rendering Engine for imageMarshal")
-                return rv
-        except omero.ConcurrencyException as ce:
-            backOff = ce.backOff
-            rv = {"ConcurrencyException": {"backOff": backOff}}
-            return rv
-        except Exception as ex:  # Handle everything else.
-            rv["Exception"] = ex.message
-            logger.error(traceback.format_exc())
-            return rv  # Return what we have already, in case it's useful
-
-        # big images
-        levels = image._re.getResolutionLevels()
-        tiles = levels > 1
-        rv["tiles"] = tiles
-        if tiles:
-            width, height = image._re.getTileSize()
-            zoomLevelScaling = image.getZoomLevelScaling()
-
-            rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
-            if zoomLevelScaling is not None:
-                rv["zoomLevelScaling"] = zoomLevelScaling
-
     nominalMagnification = (
         image.getObjectiveSettings() is not None
         and image.getObjectiveSettings().getObjective().getNominalMagnification()
         or None
     )
 
+    if nominalMagnification is not None:
+        rv.update({"nominalMagnification": nominalMagnification})
+
     try:
         server_settings = request.session.get("server_settings", {}).get("viewer", {})
     except Exception:
         server_settings = {}
     init_zoom = server_settings.get("initial_zoom_level", 0)
-    if init_zoom < 0:
-        init_zoom = levels + init_zoom
-
     interpolate = server_settings.get("interpolate_pixels", True)
 
     try:
@@ -309,20 +312,22 @@ def imageMarshal(image, key=None, request=None):
                 },
             }
         )
-        if init_zoom is not None:
-            rv["init_zoom"] = init_zoom
-        if nominalMagnification is not None:
-            rv.update({"nominalMagnification": nominalMagnification})
+
+        exp_id = image._conn.getUserId()
+        rdefs = image.getAllRenderingDefs(exp_id)
+        # Assume there is only 1 rdef
+        # TODO: handle case where user doesn't own any rendering settings (load image owners)
+        rdef = rdefs[0]
+
         try:
-            rv["pixel_range"] = image.getPixelRange()
-            rv["channels"] = rdefMarshal(rdef, image)
-            # rv["channels"] = [channelMarshal(x) for x in image.getChannels()]
+            rv["pixel_range"] = getPixelRange(image)
+            rv["channels"] = rdefMarshal(rdef, image, rv["pixel_range"])
             rv["split_channel"] = image.splitChannelDims()
             rv["rdefs"] = {
-                "model": (image.isGreyscaleRenderingModel() and "greyscale" or "color"),
+                "model": (rdef["model"] == "greyscale" and "greyscale" or "color"),
                 "projection": image.getProjection(),
-                "defaultZ": image._re.getDefaultZ(),
-                "defaultT": image._re.getDefaultT(),
+                "defaultZ": rdef["z"],
+                "defaultT": rdef["t"],
                 "invertAxis": image.isInvertedAxis(),
             }
         except TypeError:
@@ -341,6 +346,36 @@ def imageMarshal(image, key=None, request=None):
     except AttributeError:
         rv = None
         raise
+
+    reOK = False
+    try:
+        reOK = image._prepareRenderingEngine()
+        if not reOK:
+            rv["Error"] = "Failed to prepare Rendering Engine for imageMarshal"
+            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
+    except omero.ConcurrencyException as ce:
+        backOff = ce.backOff
+        rv["ConcurrencyException"] = {"backOff": backOff}
+    except Exception as ex:  # Handle everything else.
+        rv["Exception"] = ex.message
+        logger.error(traceback.format_exc())
+
+    # big images
+    if reOK:
+        levels = image._re.getResolutionLevels()
+        tiles = levels > 1
+        rv["tiles"] = tiles
+        if tiles:
+            width, height = image._re.getTileSize()
+            zoomLevelScaling = image.getZoomLevelScaling()
+            rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
+            if zoomLevelScaling is not None:
+                rv["zoomLevelScaling"] = zoomLevelScaling
+
+        if init_zoom < 0:
+            init_zoom = levels + init_zoom
+    rv["init_zoom"] = init_zoom
+
     if key is not None and rv is not None:
         for k in key.split("."):
             rv = rv.get(k, {})
