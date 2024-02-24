@@ -64,8 +64,10 @@ def getChannelsNoRe(image):
                 left outer join fetch c.statsInfo
                 where p.id=:id"""
     pixels = conn.getQueryService().findByQuery(query, params, conn.SERVICE_OPTS)
-    return [ChannelWrapper(conn, c, idx=n, img=image)
-            for n, c in enumerate(pixels.iterateChannels())]
+    return [
+        ChannelWrapper(conn, c, idx=n, img=image)
+        for n, c in enumerate(pixels.iterateChannels())
+    ]
 
 
 def eventContextMarshal(event_context):
@@ -113,7 +115,8 @@ def getPixelRange(image):
         PixelsTypeint32: -2147483648,
         PixelsTypeuint32: 0,
         PixelsTypefloat: -2147483648,
-        PixelsTypedouble: -2147483648}
+        PixelsTypedouble: -2147483648,
+    }
     maxVals = {
         PixelsTypeint8: 127,
         PixelsTypeuint8: 255,
@@ -122,7 +125,8 @@ def getPixelRange(image):
         PixelsTypeint32: 2147483647,
         PixelsTypeuint32: 4294967295,
         PixelsTypefloat: 2147483647,
-        PixelsTypedouble: 2147483647}
+        PixelsTypedouble: 2147483647,
+    }
     pixtype = image.getPrimaryPixels().getPixelsType().getValue()
     return [minVals[pixtype], maxVals[pixtype]]
 
@@ -145,7 +149,7 @@ def rdefMarshal(rdef, image, pixel_range):
 
     channels = []
 
-    for rdef_ch, channel in zip(rdef['c'], getChannelsNoRe(image)):
+    for rdef_ch, channel in zip(rdef["c"], getChannelsNoRe(image)):
 
         chan = {
             "emissionWave": channel.getEmissionWave(),
@@ -230,7 +234,7 @@ def get_rendering_def(image, rsp_dict):
         if load_re(image, rsp_dict):
             rdefs = image.getAllRenderingDefs(exp_id)
     # otherwise use owners
-    if len(rdefs) == 0:  
+    if len(rdefs) == 0:
         owner_id = image.getDetails().getOwner().id
         if owner_id != exp_id:
             rdefs = image.getAllRenderingDefs(owner_id)
@@ -389,7 +393,9 @@ def imageMarshal(image, key=None, request=None):
         if tiles:
             width, height = image._re.getTileSize()
             zoomLevelScaling = image.getZoomLevelScaling()
-            rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
+            rv.update(
+                {"tile_size": {"width": width, "height": height}, "levels": levels}
+            )
             if zoomLevelScaling is not None:
                 rv["zoomLevelScaling"] = zoomLevelScaling
 
