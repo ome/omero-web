@@ -355,7 +355,7 @@ def imageMarshal(image, key=None, request=None):
     # NB: some small images like OME-Zarr can have pyramids
     # but these will be ignored
 
-    # TEMP - for A/B testing only use size test if ID is odd number!
+    # TEMP - for A/B testing only use size test if ID is EVEN number!
     if image.id % 2 == 0 and not image.requiresPixelsPyramid():
         rv["tiles"] = False
     else:
