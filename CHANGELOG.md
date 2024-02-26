@@ -1,3 +1,13 @@
+5.25.0 (March 2024)
+-------------------
+
+## Features
+
+## Bug fixes
+
+## Other changes
+
+
 5.24.0 (December 2023)
 ----------------------
 
