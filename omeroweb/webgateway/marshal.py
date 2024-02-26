@@ -354,9 +354,7 @@ def imageMarshal(image, key=None, request=None):
     # If image is big - need to load RE to get resolution levels
     # NB: some small images like OME-Zarr can have pyramids
     # but these will be ignored
-
-    # TEMP - for A/B testing only use size test if ID is odd number!
-    if image.id % 1 == 0 and not image.requiresPixelsPyramid():
+    if not image.requiresPixelsPyramid():
         rv["tiles"] = False
     else:
         if load_re(image, rv):
