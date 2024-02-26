@@ -23,6 +23,7 @@ import time
 import re
 import logging
 from future.utils import isbytes, bytes_to_native_str
+from datetime import datetime
 
 from omero.model.enums import PixelsTypeint8, PixelsTypeuint8, PixelsTypeint16
 from omero.model.enums import PixelsTypeuint16, PixelsTypeint32
@@ -355,10 +356,18 @@ def imageMarshal(image, key=None, request=None):
     # NB: some small images like OME-Zarr can have pyramids
     # but these will be ignored
 
-    # TEMP - for A/B testing only use size test if ID is EVEN number!
-    if image.id % 2 == 0 and not image.requiresPixelsPyramid():
+    # TEMP - for A/B/C testing based on image ID
+    starttime = datetime.now()
+    big_image = (rv["size"]["width"] * rv["size"]["height"]) > (3000 * 3000)
+    rv["tile_ABC"] = image.id % 3
+    if image.id % 3 == 0 and not big_image:
         rv["tiles"] = False
+        rv["tiles_test"] = "No"
+    elif image.id % 3 == 1 and not image.requiresPixelsPyramid():
+        rv["tiles"] = False
+        rv["tiles_test"] = "requiresPixelsPyramid"
     else:
+        rv["tiles_test"] = "re.getResolutionLevels"
         if load_re(image, rv):
             levels = image._re.getResolutionLevels()
             tiles = levels > 1
@@ -374,6 +383,7 @@ def imageMarshal(image, key=None, request=None):
             if init_zoom < 0:
                 init_zoom = levels + init_zoom
     rv["init_zoom"] = init_zoom
+    rv["tiles_time"] = str(datetime.now() - starttime)
 
     if key is not None and rv is not None:
         for k in key.split("."):
