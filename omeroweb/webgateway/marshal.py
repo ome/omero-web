@@ -379,7 +379,6 @@ def shapeMarshal(shape):
         # FIXME: units ignored for stroke width
         set_if("strokeWidth", shape.getStrokeWidth().getValue())
     if hasattr(shape, "getMarkerStart") and shape.getMarkerStart() is not None:
-        # Handle string for python2 and bytes python3. TODO: lower level fix
         rv["markerStart"] = decode(shape.getMarkerStart())
     if hasattr(shape, "getMarkerEnd") and shape.getMarkerEnd() is not None:
         rv["markerEnd"] = decode(shape.getMarkerEnd())
