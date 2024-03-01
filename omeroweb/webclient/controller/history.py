@@ -27,7 +27,6 @@ import calendar
 import datetime
 import time
 
-from past.builtins import long
 from django.conf import settings
 
 from omeroweb.webclient.controller import BaseController
@@ -172,8 +171,8 @@ class BaseCalendar(BaseController):
             ("%i-%s-%i 23:59:59" % (self.year, mn, monthrange)), "%Y-%m-%d %H:%M:%S"
         )
 
-        start = long(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
-        end = long(time.mktime(d2.timetuple()) + 1e-6 * d2.microsecond) * 1000
+        start = int(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
+        end = int(time.mktime(d2.timetuple()) + 1e-6 * d2.microsecond) * 1000
         all_logs = self.conn.getEventsByPeriod(start, end, self.eid)
 
         items = dict()
@@ -218,8 +217,8 @@ class BaseCalendar(BaseController):
             ("%i-%s-%s 23:59:59" % (self.year, mn, dy)), "%Y-%m-%d %H:%M:%S"
         )
 
-        start = long(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
-        end = long(time.mktime(d2.timetuple()) + 1e-6 * d2.microsecond) * 1000
+        start = int(time.mktime(d1.timetuple()) + 1e-6 * d1.microsecond) * 1000
+        end = int(time.mktime(d2.timetuple()) + 1e-6 * d2.microsecond) * 1000
 
         self.day_items = list()
         self.day_items_size = 0

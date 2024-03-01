@@ -31,8 +31,6 @@ import logging
 import json
 import random
 
-from past.builtins import basestring
-
 from django import template
 
 register = template.Library()
@@ -112,7 +110,7 @@ def truncateafter(value, arg):
         length = int(arg)
     except ValueError:  # invalid literal for int()
         return value  # Fail silently.
-    if not isinstance(value, basestring):
+    if not isinstance(value, str):
         value = str(value)
     if len(value) > length:
         return value[:length] + "..."
@@ -130,7 +128,7 @@ def truncatebefor(value, arg):
         length = int(arg)
     except ValueError:  # invalid literal for int()
         return value  # Fail silently.
-    if not isinstance(value, basestring):
+    if not isinstance(value, str):
         value = str(value)
     if len(value) > length:
         return "..." + value[len(value) - length :]
@@ -146,7 +144,7 @@ def shortening(value, arg):
         return value  # Fail silently.
     chunk = length // 2 - 3
 
-    if not isinstance(value, basestring):
+    if not isinstance(value, str):
         value = str(value)
     try:
         if len(value) < length:

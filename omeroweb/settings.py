@@ -38,7 +38,6 @@ import re
 import json
 import random
 import string
-from builtins import str as text
 import portalocker
 
 from omero.util.concurrency import get_event
@@ -1259,18 +1258,6 @@ def check_worker_class(c):
     return str(c)
 
 
-def check_threading(t):
-    t = int(t)
-    if t > 1:
-        try:
-            import concurrent.futures  # NOQA
-        except ImportError:
-            raise ImportError(
-                "You are using sync workers with " "multiple threads. Install futures"
-            )
-    return t
-
-
 # DEVELOPMENT_SETTINGS_MAPPINGS - WARNING: For each setting developer MUST open
 # a ticket that needs to be resolved before a release either by moving the
 # setting to CUSTOM_SETTINGS_MAPPINGS or by removing the setting at all.
@@ -1298,7 +1285,7 @@ DEVELOPMENT_SETTINGS_MAPPINGS = {
     "omero.web.wsgi_threads": [
         "WSGI_THREADS",
         1,
-        check_threading,
+        int,
         (
             "(SYNC WORKERS only) The number of worker threads for handling "
             "requests. Check Gunicorn Documentation "
@@ -1770,8 +1757,8 @@ for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
 # Load server list and freeze
 def load_server_list():
     for s in SERVER_LIST:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
-        server = (len(s) > 2) and text(s[2]) or None
-        Server(host=text(s[0]), port=int(s[1]), server=server)
+        server = (len(s) > 2) and str(s[2]) or None
+        Server(host=str(s[0]), port=int(s[1]), server=server)
     Server.freeze()
 
 

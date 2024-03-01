@@ -23,7 +23,6 @@ import logging
 import time
 import pytz
 import omero
-from builtins import bytes
 from collections import defaultdict
 
 from omero.rtypes import rlong, unwrap, wrap

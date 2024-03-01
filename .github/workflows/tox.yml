@@ -15,6 +15,7 @@ jobs:
           - '3.9'
           - '3.10'
           - '3.11'
+          - '3.12'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -22,7 +23,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        run: python -mpip install --upgrade wheel pytest tox
+        run: python -mpip install --upgrade wheel pytest tox setuptools
       - name: Get tox target
         id: toxtarget
         run: |

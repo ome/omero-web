@@ -26,7 +26,6 @@ import pytz
 from django.utils.http import urlencode
 from django.urls import reverse
 from django.urls import NoReverseMatch
-from past.builtins import basestring
 
 
 logger = logging.getLogger(__name__)
@@ -95,7 +94,7 @@ def reverse_with_params(*args, **kwargs):
     except NoReverseMatch:
         return url
     if qs:
-        if not isinstance(qs, basestring):
+        if not isinstance(qs, str):
             qs = urlencode(qs)
         url += "?" + qs
     return url

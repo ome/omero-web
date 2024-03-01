@@ -23,7 +23,6 @@ import time
 import re
 import logging
 import traceback
-from future.utils import isbytes, bytes_to_native_str
 
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
@@ -296,8 +295,8 @@ def shapeMarshal(shape):
 
     def decode(shape_field):
         value = shape_field.getValue()
-        if value and isbytes(value):
-            value = bytes_to_native_str(value)
+        if value and isinstance(value, bytes):
+            value = value.decode("utf-8")
         return value
 
     rv["id"] = shape.getId().getValue()
@@ -380,7 +379,6 @@ def shapeMarshal(shape):
         # FIXME: units ignored for stroke width
         set_if("strokeWidth", shape.getStrokeWidth().getValue())
     if hasattr(shape, "getMarkerStart") and shape.getMarkerStart() is not None:
-        # Handle string for python2 and bytes python3. TODO: lower level fix
         rv["markerStart"] = decode(shape.getMarkerStart())
     if hasattr(shape, "getMarkerEnd") and shape.getMarkerEnd() is not None:
         rv["markerEnd"] = decode(shape.getMarkerEnd())
