@@ -145,7 +145,6 @@ class ExperimenterForm(forms.Form):
 
         if "with_password" in kwargs["initial"] and kwargs["initial"]["with_password"]:
             self.fields["password"] = forms.CharField(
-                max_length=255,
                 widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
             )
             self.fields["confirmation"] = forms.CharField(
