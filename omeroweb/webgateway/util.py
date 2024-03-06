@@ -26,11 +26,6 @@ import logging
 import omero
 import traceback
 
-try:
-    import long
-except ImportError:
-    long = int
-
 logger = logging.getLogger(__name__)
 
 LUTS_IN_PNG = [
@@ -98,7 +93,7 @@ def get_longs(request, name):
     vals = []
     vals_raw = request.GET.getlist(name)
     for val_raw in vals_raw:
-        vals.append(long(val_raw))
+        vals.append(int(val_raw))
     return vals
 
 

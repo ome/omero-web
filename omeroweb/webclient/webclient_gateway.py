@@ -57,30 +57,13 @@ from omeroweb.webgateway.templatetags.common_filters import (
     lengthformat,
 )
 
+from hashlib import sha1 as hash_sha1
+from PIL import Image
+
+
 NSEXPERIMENTERPHOTO = omero.constants.namespaces.NSEXPERIMENTERPHOTO
 
-try:
-    import hashlib
-
-    hash_sha1 = hashlib.sha1
-except Exception:
-    import sha
-
-    hash_sha1 = sha.new
-
 logger = logging.getLogger(__name__)
-
-try:
-    from PIL import Image  # see ticket:2597
-except ImportError:
-    try:
-        import Image  # see ticket:2597
-    except Exception:
-        logger.error(
-            "You need to install the Python Imaging Library. Get it at"
-            " http://www.pythonware.com/products/pil/"
-        )
-        logger.error(traceback.format_exc())
 
 
 def defaultThumbnail(size=(120, 120)):

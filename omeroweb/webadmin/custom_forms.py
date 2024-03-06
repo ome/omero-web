@@ -34,8 +34,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import smart_str
 from django.core.validators import validate_email, EMPTY_VALUES
 
-from past.builtins import long
-
 
 ##################################################################
 # Fields
@@ -101,7 +99,7 @@ class ServerModelChoiceField(ModelChoiceField):
             return None
         res = False
         for q in self.queryset:
-            if long(value) == q.id:
+            if int(value) == q.id:
                 res = True
         if not res:
             raise ValidationError(self.error_messages["invalid_choice"])
@@ -167,10 +165,10 @@ class GroupModelChoiceField(ModelChoiceField):
             exps = self.queryset
         for experimenter in exps:
             if hasattr(experimenter.id, "val"):
-                if long(value) == experimenter.id.val:
+                if int(value) == experimenter.id.val:
                     res = True
             else:
-                if long(value) == experimenter.id:
+                if int(value) == experimenter.id:
                     res = True
         if not res:
             raise ValidationError(self.error_messages["invalid_choice"])
@@ -221,17 +219,17 @@ class GroupModelMultipleChoiceField(GroupModelChoiceField):
         final_values = []
         for val in value:
             try:
-                long(val)
+                int(val)
             except Exception:
                 raise ValidationError(self.error_messages["invalid_choice"])
             else:
                 res = False
                 for q in self.queryset:
                     if hasattr(q.id, "val"):
-                        if long(val) == q.id.val:
+                        if int(val) == q.id.val:
                             res = True
                     else:
-                        if long(val) == q.id:
+                        if int(val) == q.id:
                             res = True
                 if not res:
                     raise ValidationError(self.error_messages["invalid_choice"])
@@ -354,9 +352,9 @@ class ExperimenterModelChoiceField(ModelChoiceField):
             if not hasattr(q, "id"):
                 return False
             if hasattr(q.id, "val"):
-                if long(value) == q.id.val:
+                if int(value) == q.id.val:
                     return True
-            if long(value) == q.id:
+            if int(value) == q.id:
                 return True
 
         for q in self.queryset:
@@ -421,17 +419,17 @@ class ExperimenterModelMultipleChoiceField(ExperimenterModelChoiceField):
         final_values = []
         for val in value:
             try:
-                long(val)
+                int(val)
             except Exception:
                 raise ValidationError(self.error_messages["invalid_choice"])
             else:
                 res = False
                 for q in self.queryset:
                     if hasattr(q.id, "val"):
-                        if long(val) == q.id.val:
+                        if int(val) == q.id.val:
                             res = True
                     else:
-                        if long(val) == q.id:
+                        if int(val) == q.id:
                             res = True
                 if not res:
                     raise ValidationError(self.error_messages["invalid_choice"])
