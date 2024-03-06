@@ -66,6 +66,7 @@ class ForgottonPasswordForm(forms.Form):
         super(ForgottonPasswordForm, self).__init__(*args, **kwargs)
         self.fields["server"] = ServerModelChoiceField(Server, empty_label=None)
         f = forms.CharField(
+            max_length=255,
             widget=forms.TextInput(attrs={"size": 28, "autocomplete": "off"}),
         )
         self.fields["username"] = f
