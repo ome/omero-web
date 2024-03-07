@@ -3851,16 +3851,16 @@ def activities(request, conn=None, **kwargs):
                     try:
                         # we can only retrieve this ONCE - must save results
                         results = proc.getResults(0, conn.SERVICE_OPTS)
-                        kwargs = {
+                        update_kwargs = {
                             "status": "finished",
                             "returncode": cb.returncode,
                         }
                         if cb.returncode != 0:
-                            kwargs["Message"] = (
+                            update_kwargs["Message"] = (
                                 f"Script exited with failure."
                                 f" (returncode={cb.returncode})"
                             )
-                        update_callback(request, cbString, **kwargs)
+                        update_callback(request, cbString, **update_kwargs)
                         new_results.append(cbString)
                     except Exception:
                         update_callback(
