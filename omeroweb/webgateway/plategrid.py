@@ -13,7 +13,7 @@
 import logging
 
 import omero.sys
-from omero.rtypes import rint
+from omero.rtypes import rint, rlong
 
 try:
     import long
@@ -29,7 +29,7 @@ class PlateGrid(object):
     methods useful for displaying the contents of the plate as a grid.
     """
 
-    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None):
+    def __init__(self, conn, pid, fid, acqid, thumbprefix="", plate_layout=None):
         """
         Constructor
 
@@ -39,6 +39,7 @@ class PlateGrid(object):
         self.plate = conn.getObject("plate", long(pid))
         self._conn = conn
         self.field = fid
+        self.acquisition = acqid
         self._thumbprefix = thumbprefix
         self._metadata = None
         self.plate_layout = plate_layout
@@ -63,6 +64,9 @@ class PlateGrid(object):
                 "where well.plate.id = :id "
                 "and index(ws) = :wsidx"
             )
+            if self.acquisition > 0:
+                params.add("acqid", rlong(self.acquisition))
+                query += " and ws.plateAcquisition.id = :acqid"
 
             results = q.projection(query, params, self._conn.SERVICE_OPTS)
             min_row = 0

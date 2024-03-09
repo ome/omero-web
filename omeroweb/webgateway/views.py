@@ -1663,7 +1663,7 @@ def wellData_json(request, conn=None, _internal=False, **kwargs):
 
 @login_required()
 @jsonp
-def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
+def plateGrid_json(request, pid, field=0, acquisition=0, conn=None, **kwargs):
     """
     Layout depends on settings 'omero.web.plate_layout' which
     can be overridden with request param e.g. ?layout=shrink.
@@ -1675,6 +1675,10 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         field = long(field or 0)
     except ValueError:
         field = 0
+    try:
+        acquisition = long(acquisition or 0)
+    except ValueError:
+        acquisition = 0
     prefix = kwargs.get("thumbprefix", "webgateway_render_thumbnail")
     thumbsize = getIntOrDefault(request, "size", None)
     logger.debug(thumbsize)
@@ -1693,7 +1697,8 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         conn,
         pid,
         field,
-        kwargs.get("urlprefix", get_thumb_url),
+        acquisition,
+        thumbprefix=kwargs.get("urlprefix", get_thumb_url),
         plate_layout=layout,
     )
 
