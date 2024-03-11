@@ -1654,7 +1654,7 @@ def plateGrid_json(request, pid, field=0, acquisition=0, conn=None, **kwargs):
     except ValueError:
         field = 0
     try:
-        acquisition = long(acquisition or 0)
+        acquisition = int(acquisition or 0)
     except ValueError:
         acquisition = 0
     prefix = kwargs.get("thumbprefix", "webgateway_render_thumbnail")
