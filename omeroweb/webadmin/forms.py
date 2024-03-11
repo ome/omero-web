@@ -23,10 +23,7 @@
 
 import logging
 
-try:
-    from collections import OrderedDict  # Python 2.7+ only
-except Exception:
-    pass
+from collections import OrderedDict
 
 from django import forms
 from django.forms.widgets import Textarea

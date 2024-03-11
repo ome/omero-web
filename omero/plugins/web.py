@@ -9,7 +9,6 @@
 """
 
 import traceback
-from future.utils import bytes_to_native_str
 from datetime import datetime
 from omero.cli import DiagnosticsControl
 from omero.cli import CLI
@@ -21,11 +20,7 @@ from io import open
 from functools import wraps
 from omero_ext.argparse import SUPPRESS
 
-try:
-    from omero_ext.path import path
-except ImportError:
-    # Python 2
-    from path import path
+from omero_ext.path import path
 from pkg_resources import resource_string
 
 from omero.install.windows_warning import windows_warning, WINDOWS_WARNING
@@ -348,9 +343,7 @@ class WebControl(DiagnosticsControl):
             self.ctx.die(679, "Web template configuration requires" "wsgi or wsgi-tcp.")
 
         template_file = "%s.conf.template" % server
-        c = bytes_to_native_str(
-            resource_string("omeroweb", "templates/" + template_file)
-        )
+        c = resource_string("omeroweb", "templates/" + template_file).decode("utf-8")
         self.ctx.out(c % d)
 
     def syncmedia(self, args):

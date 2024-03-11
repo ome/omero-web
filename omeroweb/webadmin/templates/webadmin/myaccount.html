@@ -280,9 +280,11 @@
             </div>
 
 
-        <form class="standard_form settings_form" action="{% url 'wamyaccount' "save" %}" method="POST">{% csrf_token %}
+        <form class="standard_form settings_form" action="{% url 'wamyaccount' "save" %}" method="POST"
+          {% if isSudo %} inert {% endif %}
+        >{% csrf_token %}
 
-           <div id="personal_details">
+           <div id="personal_details" {% if isSudo %} style="opacity: 50%;" {% endif %}>
 
                {% for field in form %}
                    {% if field.errors %}<div style="clear:both">{{ field.errors }}</div>{% endif %}
@@ -307,7 +309,6 @@
 
                </div>
                {% endif %}
-
 
                <input type="submit" value="{% trans 'Save' %}" />
              </div>

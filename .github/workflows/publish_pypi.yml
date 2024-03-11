@@ -9,6 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
       - name: Build a binary wheel and a source tarball
         run: |
           python -mpip install wheel

@@ -36,14 +36,21 @@ import omero.clients
 import tempfile
 import re
 import json
-import pytz
 import random
 import string
-from builtins import str as text
 import portalocker
 
 from omero.util.concurrency import get_event
-from omeroweb.utils import sort_properties_to_tuple
+from omeroweb.utils import (
+    LeaveUnset,
+    check_timezone,
+    identity,
+    parse_boolean,
+    leave_none_unset,
+    leave_none_unset_int,
+    sort_properties_to_tuple,
+    str_slash,
+)
 from omeroweb.connector import Server
 
 logger = logging.getLogger(__name__)
@@ -196,13 +203,6 @@ SESSION_ENGINE_VALUES = (
 )
 
 
-def parse_boolean(s):
-    s = s.strip().lower()
-    if s in ("true", "1", "t"):
-        return True
-    return False
-
-
 def parse_paths(s):
     return [os.path.normpath(path) for path in json.loads(s)]
 
@@ -222,42 +222,6 @@ def check_session_engine(s):
             % (s, SESSION_ENGINE_VALUES)
         )
     return s
-
-
-def identity(x):
-    return x
-
-
-def check_timezone(s):
-    """
-    Checks that string is a valid time-zone. If not, raise Exception
-    """
-    pytz.timezone(s)
-    return s
-
-
-def str_slash(s):
-    if s is not None:
-        s = str(s)
-        if s and not s.endswith("/"):
-            s += "/"
-    return s
-
-
-class LeaveUnset(Exception):
-    pass
-
-
-def leave_none_unset(s):
-    if s is None:
-        raise LeaveUnset()
-    return s
-
-
-def leave_none_unset_int(s):
-    s = leave_none_unset(s)
-    if s is not None:
-        return int(s)
 
 
 CUSTOM_HOST = CUSTOM_SETTINGS.get("Ice.Default.Host", "localhost")
@@ -1294,18 +1258,6 @@ def check_worker_class(c):
     return str(c)
 
 
-def check_threading(t):
-    t = int(t)
-    if t > 1:
-        try:
-            import concurrent.futures  # NOQA
-        except ImportError:
-            raise ImportError(
-                "You are using sync workers with " "multiple threads. Install futures"
-            )
-    return t
-
-
 # DEVELOPMENT_SETTINGS_MAPPINGS - WARNING: For each setting developer MUST open
 # a ticket that needs to be resolved before a release either by moving the
 # setting to CUSTOM_SETTINGS_MAPPINGS or by removing the setting at all.
@@ -1333,7 +1285,7 @@ DEVELOPMENT_SETTINGS_MAPPINGS = {
     "omero.web.wsgi_threads": [
         "WSGI_THREADS",
         1,
-        check_threading,
+        int,
         (
             "(SYNC WORKERS only) The number of worker threads for handling "
             "requests. Check Gunicorn Documentation "
@@ -1805,8 +1757,8 @@ for k, v in DJANGO_ADDITIONAL_SETTINGS:  # noqa
 # Load server list and freeze
 def load_server_list():
     for s in SERVER_LIST:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
-        server = (len(s) > 2) and text(s[2]) or None
-        Server(host=text(s[0]), port=int(s[1]), server=server)
+        server = (len(s) > 2) and str(s[2]) or None
+        Server(host=str(s[0]), port=int(s[1]), server=server)
     Server.freeze()
 
 

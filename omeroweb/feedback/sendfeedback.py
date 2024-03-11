@@ -29,19 +29,9 @@ import traceback
 import logging
 from urllib.parse import urlencode
 
-try:
-    # python2
-    from urllib2 import urlopen, Request, HTTPError, URLError
-except ImportError:
-    # python3
-    from urllib.request import urlopen, Request
-    from urllib.error import HTTPError, URLError
-try:
-    # python2
-    from urlparse import urljoin
-except ImportError:
-    # python3
-    from urllib.parse import urljoin
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError, URLError
+from urllib.parse import urljoin
 
 from omeroweb.version import omeroweb_version as omero_version
 

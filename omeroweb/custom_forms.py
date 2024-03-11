@@ -20,7 +20,6 @@
 #
 
 import warnings
-from past.builtins import basestring
 from django import forms
 from django.utils.encoding import smart_str
 
@@ -62,12 +61,10 @@ class NonASCIIForm(forms.Form):
                     initial = self.initial.get(name, field.initial)
                     value = field.clean(value, initial)
                 elif isinstance(field, CharField):
-                    if (
-                        value is not None
-                        and isinstance(value, basestring)
-                        and len(value) > 0
-                    ):
-                        value = str(smart_str(value))
+                    if value is not None and isinstance(value, str) and len(value) > 0:
+                        value = str(
+                            smart_str(value)
+                        )  # TODO: This is probably a noop now
                     else:
                         value = field.clean(value)
                 else:

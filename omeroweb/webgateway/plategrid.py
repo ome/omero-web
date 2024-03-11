@@ -15,10 +15,6 @@ import logging
 import omero.sys
 from omero.rtypes import rint, rlong
 
-try:
-    import long
-except ImportError:
-    long = int
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +32,7 @@ class PlateGrid(object):
         param:  plate_layout is "expand" to expand plate to multiple of 8 x 12
                 or "shrink" to ignore all wells before the first row/column
         """
-        self.plate = conn.getObject("plate", long(pid))
+        self.plate = conn.getObject("plate", int(pid))
         self._conn = conn
         self.field = fid
         self.acquisition = acqid

@@ -22,8 +22,6 @@
 import re
 import logging
 
-from future.utils import with_metaclass
-
 from omero import client_wrapper
 from omeroweb.version import omeroweb_version as omero_version
 
@@ -40,8 +38,7 @@ class IterRegistry(type):
         return iter(cls._registry.values())
 
 
-# with_metaclass to support python2 and python3
-class ServerBase(with_metaclass(IterRegistry)):
+class ServerBase(metaclass=IterRegistry):
     _next_id = 1
 
     def __init__(self, host, port, server=None):
