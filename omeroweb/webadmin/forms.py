@@ -48,11 +48,10 @@ class LoginForm(forms.Form):
         self.field_order = ["server", "username", "password"]
 
     username = forms.CharField(
-        max_length=50,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 22, "autofocus": "autofocus"}),
     )
     password = forms.CharField(
-        max_length=50,
         widget=forms.PasswordInput(attrs={"size": 22, "autocomplete": "off"}),
     )
 
@@ -67,7 +66,7 @@ class ForgottonPasswordForm(forms.Form):
         super(ForgottonPasswordForm, self).__init__(*args, **kwargs)
         self.fields["server"] = ServerModelChoiceField(Server, empty_label=None)
         f = forms.CharField(
-            max_length=50,
+            max_length=255,
             widget=forms.TextInput(attrs={"size": 28, "autocomplete": "off"}),
         )
         self.fields["username"] = f
@@ -147,11 +146,9 @@ class ExperimenterForm(forms.Form):
 
         if "with_password" in kwargs["initial"] and kwargs["initial"]["with_password"]:
             self.fields["password"] = forms.CharField(
-                max_length=50,
                 widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
             )
             self.fields["confirmation"] = forms.CharField(
-                max_length=50,
                 widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
             )
 
@@ -239,21 +236,21 @@ class ExperimenterForm(forms.Form):
                 field.widget.attrs["disabled"] = True
 
     omename = OmeNameField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
         label="Username",
     )
     first_name = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
     )
     middle_name = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
         required=False,
     )
     last_name = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
     )
     email = forms.EmailField(
@@ -261,7 +258,7 @@ class ExperimenterForm(forms.Form):
         required=False,
     )
     institution = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
         required=False,
     )
@@ -334,11 +331,10 @@ class GroupForm(forms.Form):
         self.name_check = name_check
         if can_modify_group:
             self.fields["name"] = forms.CharField(
-                max_length=100,
+                max_length=255,
                 widget=forms.TextInput(attrs={"size": 25, "autocomplete": "off"}),
             )
             self.fields["description"] = forms.CharField(
-                max_length=250,
                 required=False,
                 widget=forms.TextInput(attrs={"size": 25, "autocomplete": "off"}),
             )
@@ -470,31 +466,32 @@ class MyAccountForm(forms.Form):
         ]
 
     omename = forms.CharField(
-        max_length=50,
+        max_length=255,
         widget=forms.TextInput(
             attrs={"onfocus": "this.blur()", "size": 30, "autocomplete": "off"}
         ),
         label="Username",
     )
     first_name = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
     )
     middle_name = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
         required=False,
     )
     last_name = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
     )
     email = forms.EmailField(
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
         required=False,
     )
     institution = forms.CharField(
-        max_length=250,
+        max_length=255,
         widget=forms.TextInput(attrs={"size": 30, "autocomplete": "off"}),
         required=False,
     )
@@ -547,17 +544,14 @@ class UploadPhotoForm(forms.Form):
 
 class ChangePassword(forms.Form):
     old_password = forms.CharField(
-        max_length=50,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
         label="Current password",
     )
     password = forms.CharField(
-        max_length=50,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
         label="New password",
     )
     confirmation = forms.CharField(
-        max_length=50,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
         label="Confirm password",
     )
@@ -578,7 +572,7 @@ class ChangePassword(forms.Form):
 
 class EnumerationEntry(forms.Form):
     new_entry = forms.CharField(
-        max_length=250, widget=forms.TextInput(attrs={"size": 30})
+        max_length=255, widget=forms.TextInput(attrs={"size": 30})
     )
 
 
@@ -589,20 +583,20 @@ class EnumerationEntries(forms.Form):
             try:
                 if kwargs["initial"]["entries"]:
                     self.fields[str(e.id)] = forms.CharField(
-                        max_length=250,
+                        max_length=255,
                         initial=e.value,
                         widget=forms.TextInput(attrs={"size": 30}),
                         label=i + 1,
                     )
                 else:
                     self.fields[str(e.id)] = forms.CharField(
-                        max_length=250,
+                        max_length=255,
                         widget=forms.TextInput(attrs={"size": 30}),
                         label=i + 1,
                     )
             except Exception:
                 self.fields[str(e.id)] = forms.CharField(
-                    max_length=250,
+                    max_length=255,
                     widget=forms.TextInput(attrs={"size": 30}),
                     label=i + 1,
                 )

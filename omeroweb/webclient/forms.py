@@ -126,7 +126,7 @@ class ShareForm(forms.Form):
 
 
 class ContainerForm(forms.Form):
-    name = forms.CharField(max_length=250, widget=forms.TextInput(attrs={"size": 45}))
+    name = forms.CharField(widget=forms.TextInput(attrs={"size": 45}))
     description = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2, "cols": 49}), required=False
     )
@@ -134,7 +134,7 @@ class ContainerForm(forms.Form):
 
 
 class ContainerNameForm(forms.Form):
-    name = forms.CharField(max_length=250, widget=forms.TextInput(attrs={"size": 45}))
+    name = forms.CharField(widget=forms.TextInput(attrs={"size": 45}))
 
 
 class ContainerDescriptionForm(forms.Form):
@@ -428,7 +428,6 @@ class MetadataChannelForm(forms.Form):
         try:
             if logicalCh is not None:
                 self.fields["name"] = forms.CharField(
-                    max_length=100,
                     widget=forms.TextInput(
                         attrs={"size": 25, "onchange": save_metadata(logicalCh.id)}
                     ),
@@ -437,7 +436,6 @@ class MetadataChannelForm(forms.Form):
                 )
             else:
                 self.fields["name"] = forms.CharField(
-                    max_length=100,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -612,7 +610,7 @@ class MetadataChannelForm(forms.Form):
         try:
             if logicalCh is not None:
                 self.fields["fluor"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -624,7 +622,7 @@ class MetadataChannelForm(forms.Form):
                 )
             else:
                 self.fields["fluor"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -823,7 +821,7 @@ class MetadataDichroicForm(forms.Form):
         try:
             if kwargs["initial"]["dichroic"].manufacturer is not None:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -837,7 +835,7 @@ class MetadataDichroicForm(forms.Form):
                 )
             else:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -862,7 +860,7 @@ class MetadataDichroicForm(forms.Form):
         try:
             if kwargs["initial"]["dichroic"].model is not None:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -876,7 +874,7 @@ class MetadataDichroicForm(forms.Form):
                 )
             else:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -901,7 +899,7 @@ class MetadataDichroicForm(forms.Form):
         try:
             if kwargs["initial"]["dichroic"].serialNumber is not None:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -917,7 +915,7 @@ class MetadataDichroicForm(forms.Form):
                 )
             else:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -945,7 +943,7 @@ class MetadataDichroicForm(forms.Form):
         try:
             if kwargs["initial"]["dichroic"].lotNumber is not None:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -960,7 +958,7 @@ class MetadataDichroicForm(forms.Form):
                 )
             else:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -994,7 +992,7 @@ class MetadataMicroscopeForm(forms.Form):
         try:
             if kwargs["initial"]["microscope"].model is not None:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1008,7 +1006,7 @@ class MetadataMicroscopeForm(forms.Form):
                 )
             else:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1033,7 +1031,7 @@ class MetadataMicroscopeForm(forms.Form):
         try:
             if kwargs["initial"]["microscope"].manufacturer is not None:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1047,7 +1045,7 @@ class MetadataMicroscopeForm(forms.Form):
                 )
             else:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1072,7 +1070,7 @@ class MetadataMicroscopeForm(forms.Form):
         try:
             if kwargs["initial"]["microscope"].serialNumber is not None:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1087,7 +1085,7 @@ class MetadataMicroscopeForm(forms.Form):
                 )
             else:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1114,7 +1112,7 @@ class MetadataMicroscopeForm(forms.Form):
         try:
             if kwargs["initial"]["microscope"].lotNumber is not None:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1129,7 +1127,7 @@ class MetadataMicroscopeForm(forms.Form):
                 )
             else:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1208,7 +1206,7 @@ class MetadataObjectiveForm(forms.Form):
         try:
             if kwargs["initial"]["objective"].model is not None:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1222,7 +1220,7 @@ class MetadataObjectiveForm(forms.Form):
                 )
             else:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1247,7 +1245,7 @@ class MetadataObjectiveForm(forms.Form):
         try:
             if kwargs["initial"]["objective"].manufacturer is not None:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1261,7 +1259,7 @@ class MetadataObjectiveForm(forms.Form):
                 )
             else:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1286,7 +1284,7 @@ class MetadataObjectiveForm(forms.Form):
         try:
             if kwargs["initial"]["objective"].serialNumber is not None:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1301,7 +1299,7 @@ class MetadataObjectiveForm(forms.Form):
                 )
             else:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1328,7 +1326,7 @@ class MetadataObjectiveForm(forms.Form):
         try:
             if kwargs["initial"]["objective"].lotNumber is not None:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1343,7 +1341,7 @@ class MetadataObjectiveForm(forms.Form):
                 )
             else:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1853,7 +1851,7 @@ class MetadataFilterForm(forms.Form):
         try:
             if kwargs["initial"]["filter"].manufacturer is not None:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1867,7 +1865,7 @@ class MetadataFilterForm(forms.Form):
                 )
             else:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1892,7 +1890,7 @@ class MetadataFilterForm(forms.Form):
         try:
             if kwargs["initial"]["filter"].model is not None:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1906,7 +1904,7 @@ class MetadataFilterForm(forms.Form):
                 )
             else:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1931,7 +1929,7 @@ class MetadataFilterForm(forms.Form):
         try:
             if kwargs["initial"]["filter"].serialNumber is not None:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1946,7 +1944,7 @@ class MetadataFilterForm(forms.Form):
                 )
             else:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1973,7 +1971,7 @@ class MetadataFilterForm(forms.Form):
         try:
             if kwargs["initial"]["filter"].lotNumber is not None:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -1988,7 +1986,7 @@ class MetadataFilterForm(forms.Form):
                 )
             else:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2015,7 +2013,7 @@ class MetadataFilterForm(forms.Form):
         try:
             if kwargs["initial"]["filter"].filterWheel is not None:
                 self.fields["filterWheel"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2030,7 +2028,7 @@ class MetadataFilterForm(forms.Form):
                 )
             else:
                 self.fields["filterWheel"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2333,7 +2331,7 @@ class MetadataDetectorForm(forms.Form):
         try:
             if detector is not None:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2345,7 +2343,7 @@ class MetadataDetectorForm(forms.Form):
                 )
             else:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2368,7 +2366,7 @@ class MetadataDetectorForm(forms.Form):
         try:
             if detector is not None:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2380,7 +2378,7 @@ class MetadataDetectorForm(forms.Form):
                 )
             else:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2403,7 +2401,7 @@ class MetadataDetectorForm(forms.Form):
         try:
             if detector is not None:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2415,7 +2413,7 @@ class MetadataDetectorForm(forms.Form):
                 )
             else:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2439,7 +2437,7 @@ class MetadataDetectorForm(forms.Form):
         try:
             if detector is not None:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2451,7 +2449,7 @@ class MetadataDetectorForm(forms.Form):
                 )
             else:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2829,7 +2827,7 @@ class MetadataLightSourceForm(forms.Form):
         try:
             if lightSource.manufacturer is not None:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2841,7 +2839,7 @@ class MetadataLightSourceForm(forms.Form):
                 )
             else:
                 self.fields["manufacturer"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2864,7 +2862,7 @@ class MetadataLightSourceForm(forms.Form):
         try:
             if lightSource.model is not None:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2876,7 +2874,7 @@ class MetadataLightSourceForm(forms.Form):
                 )
             else:
                 self.fields["model"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2899,7 +2897,7 @@ class MetadataLightSourceForm(forms.Form):
         try:
             if lightSource.serialNumber is not None:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2912,7 +2910,7 @@ class MetadataLightSourceForm(forms.Form):
                 )
             else:
                 self.fields["serialNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2937,7 +2935,7 @@ class MetadataLightSourceForm(forms.Form):
         try:
             if lightSource.lotNumber is not None:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
@@ -2950,7 +2948,7 @@ class MetadataLightSourceForm(forms.Form):
                 )
             else:
                 self.fields["lotNumber"] = forms.CharField(
-                    max_length=100,
+                    max_length=255,
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
