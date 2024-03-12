@@ -3,10 +3,16 @@
 
 ## Features
 
+- Improved "Others" annotation display [#530](https://github.com/ome/omero-web/pull/530)
+
 ## Bug fixes
+
+- Fix activities API call [#541](https://github.com/ome/omero-web/pull/541)
+- Fix incorrect maximum length of form fields [#539](https://github.com/ome/omero-web/pull/539)
 
 ## Other changes
 
+- Add support for Python 3.12 and remove legacy Python 2 compatibility code [#531](https://github.com/ome/omero-web/pull/531)
 
 5.24.0 (December 2023)
 ----------------------
