@@ -1884,6 +1884,7 @@ def _marshal_annotation(conn, annotation, link=None):
     ownerId = annotation.details.owner.id.val
     ann["id"] = annotation.id.val
     ann["ns"] = unwrap(annotation.ns)
+    ann["name"] = unwrap(annotation.name)
     ann["description"] = unwrap(annotation.description)
     ann["owner"] = {"id": ownerId}
     creation = annotation.details.creationEvent._time

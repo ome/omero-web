@@ -21,6 +21,7 @@
 
 <span class="tooltip_html" style='display:none'>
     <b>ID:</b> {{ ann.id }}<br />
+    {% if ann.name %}<b>Name:</b> {{ ann.name }}<br />{% endif %}
     {% if ann.ns %}<b>Namespace:</b> {{ ann.ns }}<br />{% endif %}
     {% if ann.description %}<b>Description:</b> {{ ann.description }}<br />{% endif %}
     <b>Owner:</b> {{ ann.getOwner.getFullName }}<br />

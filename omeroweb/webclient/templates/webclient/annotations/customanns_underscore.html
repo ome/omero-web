@@ -9,14 +9,19 @@
             <div><% print(_.escape((ann.value + "").slice(0, 20))) %>...</div>
             <div class="show_xml">Open in new window</div>
             <div style="display: none"><%- ann.value %></div>
-        <% } else { %>
+        <% } else if (ann.value != null) { %>
             <div><%- ann.value %></div>
+        <% } else if (ann.type === 'List' && ann.name) { %>
+            <div><%- ann.name %></div>
+        <% } else { %>
+            <div>(No data)</div>
         <% } %>
         </div>
 
         <span class="tooltip_html" style='display:none'>
             <b>ID:</b> <%- ann.id %><br />
             <% if (ann.ns) { %><b>Namespace:</b> <%- ann.ns %><br /><% } %>
+            <% if (ann.name) { %><b>Name:</b> <%- ann.name %><br /><% } %>
             <% if (ann.description) { %><b>Description:</b> <%- ann.description %><br /><% } %>
             <b>Owner:</b> <%- ann.owner.firstName %> <%- ann.owner.lastName %><br />
             <b>Date:</b> <% print(OME.formatDate(ann.date)) %>
