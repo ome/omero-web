@@ -381,6 +381,7 @@ OME.refreshThumbnails = function(options) {
         spw_selector = "#image-" + options.imageId + ", #wellImages li[data-imageId='" + options.imageId + "']";
     }
 
+    var promise = Promise.resolve();
     // Try SPW data or Search data by directly updating thumb src...
     var $thumbs = $(spw_selector + ", " + search_selector);
     if ($thumbs.length > 0){
@@ -392,7 +393,7 @@ OME.refreshThumbnails = function(options) {
             // filter out empty wells etc.
             return img_id.length > 0;
         }).get();
-        OME.load_thumbnails(
+        promise = OME.load_thumbnails(
             options.thumbnail_url,
             iids, options.thumbnailsBatch,
             options.defaultThumbnail
@@ -407,59 +408,68 @@ OME.refreshThumbnails = function(options) {
             data = {'imageId': options.imageId};
         }
         var e = {'type': type};
-        update_thumbnails_panel(e, data);
+        promise = update_thumbnails_panel(e, data);
     }
 
     // Update viewport via global variable
     if (!options.ignorePreview && OME.preview_viewport && OME.preview_viewport.loadedImg.id) {
         OME.preview_viewport.load(OME.preview_viewport.loadedImg.id);
     }
+
+    return promise;
 };
 
-OME.load_thumbnails = function(thumbnails_url, input, batch, dthumb) {
+OME.load_thumbnails = function (thumbnails_url, input, batch, dthumb) {
     // load thumbnails in a batches
     if (input.length > 0 && batch > 0) {
-        var iids = input.slice(0 , batch)
+        var iids = input.slice(0, batch)
         if (iids.length > 0) {
-            $.ajax({
-                type: "GET",
-                url: thumbnails_url,
-                data: $.param( { id: iids }, true),
-                dataType: 'json',
-                success: function(data){
-                    var invalid_thumbs = [];
-                    $.each(data, function(key, value) {
-                        if (value !== null) {
-                            // SPW Plate and WellImages
-                            $("img#image-"+key).attr("src", value);
-                            $("#wellImages li[data-imageId='" + key + "'] img").attr("src", value);
-                            $("#well_birds_eye img[data-imageid='" + key + "']").attr("src", value);
-                            // Search results
-                            $("#image_icon-" + key + " img").attr("src", value);
-                        } else {
-                            invalid_thumbs.push(key);
-                        }
-                    });
-                    // If we got invalid thumbnails as a set and ALL failed, try re-loading 1 at a time
-                    if (invalid_thumbs.length === iids.length && batch > 1) {
-                        OME.load_thumbnails(thumbnails_url, invalid_thumbs, 1, dthumb);
-                    }
-                    // If only some thumbs failed (or single thumb failed), show placeholder
-                    if ((invalid_thumbs.length < iids.length) || (batch === 1 && invalid_thumbs.length === 1)) {
-                        // If batch > 1 then we try loading again, otherwise we failed...
-                        invalid_thumbs.forEach(function(key){
-                            $("img#image-"+key).attr("src", dthumb);
-                            $("#wellImages li[data-imageId='" + key + "'] img").attr("src", dthumb);
-                            $("#image_icon-" + key + " img").attr("src", dthumb);
+            var promise = new Promise(function (resolve) {
+                $.ajax({
+                    type: "GET",
+                    url: thumbnails_url,
+                    data: $.param({id: iids}, true),
+                    dataType: 'json',
+                    success: function (data) {
+                        var invalid_thumbs = [];
+                        $.each(data, function (key, value) {
+                            if (value !== null) {
+                                // SPW Plate and WellImages
+                                $("img#image-" + key).attr("src", value);
+                                $("#wellImages li[data-imageId='" + key + "'] img").attr("src", value);
+                                $("#well_birds_eye img[data-imageid='" + key + "']").attr("src", value);
+                                // Search results
+                                $("#image_icon-" + key + " img").attr("src", value);
+                            } else {
+                                invalid_thumbs.push(key);
+                            }
                         });
-                    }
-                }
+                        // If we got invalid thumbnails as a set and ALL failed, try re-loading 1 at a time
+                        if (invalid_thumbs.length === iids.length && batch > 1) {
+                            OME.load_thumbnails(thumbnails_url, invalid_thumbs, 1, dthumb).then(resolve);
+                        } else {
+                            // If only some thumbs failed (or single thumb failed), show placeholder
+                            if ((invalid_thumbs.length < iids.length) || (batch === 1 && invalid_thumbs.length === 1)) {
+                                // If batch > 1 then we try loading again, otherwise we failed...
+                                invalid_thumbs.forEach(function (key) {
+                                    $("img#image-" + key).attr("src", dthumb);
+                                    $("#wellImages li[data-imageId='" + key + "'] img").attr("src", dthumb);
+                                    $("#image_icon-" + key + " img").attr("src", dthumb);
+                                });
+                            }
+                            resolve();
+                        }
+                    },
+                    error: resolve,
+                });
             });
             input = input.slice(batch, input.length);
-            OME.load_thumbnails(thumbnails_url, input, batch, dthumb);
+            return Promise.all([promise, OME.load_thumbnails(thumbnails_url, input, batch, dthumb)]);
         }
     }
-}
+    return Promise.resolve();
+};
+
 OME.load_thumbnail = function(iid, thumbnails_url, callback) {
     // load thumbnails in a batches
     $.ajax({

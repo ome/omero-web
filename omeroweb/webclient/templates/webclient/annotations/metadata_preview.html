@@ -87,6 +87,16 @@
       .line {
         fill: none;
       }
+      
+      .ome-modal-progress button {
+          display: none;
+      }
+      .ome-modal-progress .ui-dialog-content {
+          justify-content: center;
+          align-items: center;
+          font-size: larger;
+          display: flex;
+      }
     </style>
 
 
@@ -322,6 +332,18 @@
                 .attr('title', "Apply and Save settings to all images in " + pid)
                 .prop('disabled', false).removeClass("button-disabled")
                 .on('click', function(){
+                  var progress = $('<div><img class="loader" alt="Loading" src="{% static "webgateway/img/spinner.gif" %}"/>&nbsp;Saving to all...</div>')
+                    .appendTo(document.body)
+                    .dialog({
+                      modal: true,
+                      autoOpen: true,
+                      closeOnEscape: false,
+                      draggable: false,
+                      resizable: false,
+                      classes: {
+                        'ui-dialog': 'ome-modal-progress',
+                      }
+                    });
                   var $span = $('span', this),
                     spanTxt = $span.text();
                   $span.text("Saving...");
@@ -348,6 +370,8 @@
                             'thumbnail_url': "{% url 'get_thumbnails_json' %}",
                             'defaultThumbnail': "{% static 'webgateway/img/image128.png' %}",
                             'thumbnailsBatch': 1
+                          }).finally(function () {
+                            progress.dialog('destroy').remove();
                           });
                           updateMyRdef(OME.preview_viewport.getQuery());
                       }
