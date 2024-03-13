@@ -25,12 +25,15 @@ class PlateGrid(object):
     methods useful for displaying the contents of the plate as a grid.
     """
 
-    def __init__(self, conn, pid, fid, acqid, thumbprefix="", plate_layout=None):
+    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None, acqid=0):
         """
         Constructor
 
         param:  plate_layout is "expand" to expand plate to multiple of 8 x 12
                 or "shrink" to ignore all wells before the first row/column
+
+                acqid: the acquisition ID. Using it, the field index (fid) must
+                be in the range [0, max_sample_per_well] for that acquisition.
         """
         self.plate = conn.getObject("plate", int(pid))
         self._conn = conn
@@ -58,11 +61,22 @@ class PlateGrid(object):
                 "join ws.image img "
                 "join img.details.owner author "
                 "where well.plate.id = :id "
-                "and index(ws) = :wsidx"
             )
             if self.acquisition > 0:
+                # Offseting index per well for the plateacquisition
+                query += (
+                    "and ws.plateAcquisition.id = :acqid "
+                    "and index(ws) - ("
+                    "    SELECT MIN(index(ws_inner)) "
+                    "    FROM Well well_inner "
+                    "    JOIN well_inner.wellSamples ws_inner "
+                    "    WHERE ws_inner.plateAcquisition.id = :acqid "
+                    "    AND well_inner.id = well.id "
+                    ") = :wsidx "
+                )
                 params.add("acqid", rlong(self.acquisition))
-                query += " and ws.plateAcquisition.id = :acqid"
+            else:
+                query += "and index(ws) = :wsidx "
 
             results = q.projection(query, params, self._conn.SERVICE_OPTS)
             min_row = 0
