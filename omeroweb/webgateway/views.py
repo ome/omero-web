@@ -1677,7 +1677,7 @@ def plateGrid_json(request, pid, field=0, acquisition=0, conn=None, **kwargs):
         field,
         thumbprefix=kwargs.get("urlprefix", get_thumb_url),
         plate_layout=layout,
-        acqid=acquisition
+        acqid=acquisition,
     )
 
     plate = plateGrid.plate
