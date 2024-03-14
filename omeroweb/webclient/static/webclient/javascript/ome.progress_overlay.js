@@ -25,3 +25,22 @@ OME.progress_overlay = function (promise, message) {
   promise.finally(() => dialog.dialog('destroy').remove());
   return dialog;
 };
+
+// add styles
+(function () {
+  'use strict';
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = `
+    .ome-modal-progress button {
+        display: none;
+    }
+    
+    .ome-modal-progress .ui-dialog-content {
+        justify-content: center;
+        align-items: center;
+        font-size: larger;
+        display: flex;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+})();
