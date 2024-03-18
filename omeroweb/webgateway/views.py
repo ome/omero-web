@@ -1825,6 +1825,8 @@ def listWellImages_json(request, did, conn=None, **kwargs):
                 d[x] = {"value": p.getValue(), "unit": str(p.getUnit())}
         return d
 
+    plate = well.getParent()
+    run_d = {r.getId(): r.getName() for r in plate.listPlateAcquisitions()}
     wellImgs = []
     for ws in well.listChildren():
         # optionally filter by acquisition 'run'
@@ -1840,6 +1842,8 @@ def listWellImages_json(request, did, conn=None, **kwargs):
             pos = marshal_pos(ws)
             if len(pos.keys()) > 0:
                 m["position"] = pos
+            if ws.plateAcquisition is not None:
+                m["name"] += f" [Run: {run_d[ws.plateAcquisition._id._val]}]"
             wellImgs.append(m)
     return wellImgs
 
