@@ -355,9 +355,19 @@ def imageMarshal(image, key=None, request=None):
     # If image is big - need to load RE to get resolution levels
     # NB: some small images like OME-Zarr can have pyramids
     # but these will be ignored
-    if not image.requiresPixelsPyramid():
+
+    # TEMP - for A/B/C testing based on image ID
+    starttime = datetime.now()
+    big_image = (rv["size"]["width"] * rv["size"]["height"]) > (3000 * 3000)
+    rv["tile_ABC"] = image.id % 3
+    if image.id % 3 == 0 and not big_image:
         rv["tiles"] = False
+        rv["tiles_test"] = "No"
+    elif image.id % 3 == 1 and not image.requiresPixelsPyramid():
+        rv["tiles"] = False
+        rv["tiles_test"] = "requiresPixelsPyramid"
     else:
+        rv["tiles_test"] = "re.getResolutionLevels"
         if load_re(image, rv):
             levels = image._re.getResolutionLevels()
             tiles = levels > 1
@@ -373,6 +383,7 @@ def imageMarshal(image, key=None, request=None):
             if init_zoom < 0:
                 init_zoom = levels + init_zoom
     rv["init_zoom"] = init_zoom
+    rv["tiles_time"] = str(datetime.now() - starttime)
 
     if key is not None and rv is not None:
         for k in key.split("."):
