@@ -1574,7 +1574,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         try:
             cb = self.c.submit(command, loops=120)
         except omero.CmdError as ex:
-            message = ex.err.message
+            message = str(ex)
         finally:
             if cb:
                 cb.close(True)

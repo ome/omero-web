@@ -443,8 +443,8 @@ def graphResponseMarshal(conn, rsp):
     rv = {}
     if isinstance(rsp, omero.cmd.ERR):
         rsp_params = ", ".join(["%s: %s" % (k, v) for k, v in rsp.parameters.items()])
-        rv["error"] = rsp.message
-        rv["report"] = "%s %s" % (rsp.name, rsp_params)
+        rv["error"] = str(rsp.name)
+        rv["report"] = rsp_params
     else:
         included = rsp.responses[0].includedObjects
         deleted = rsp.responses[0].deletedObjects
