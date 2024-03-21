@@ -161,14 +161,14 @@ $(document).ready(function() {
             $("#content_details").html("");
             parentId = undefined;
             clearThumbnailsPanel();
-            return;
+            return Promise.resolve();
         }
         var dtype = selected[0].type;
         if (selected.length > 1 && dtype !== "image") {
             $("#content_details").html("");
             parentId = undefined;
             clearThumbnailsPanel();
-            return;
+            return Promise.resolve();
         }
 
         // parent node could be dataset, orphaned, share or tag
@@ -182,12 +182,12 @@ $(document).ready(function() {
         } else if (dtype === "plate" || dtype === "acquisition") {
             parentId = undefined;
             load_spw(event, data);
-            return;
+            return Promise.resolve();
         // All other types have blank centre panel
         } else {
             parentId = undefined;
             clearThumbnailsPanel();
-            return;
+            return Promise.resolve();
         }
 
         if (!parentNode) {
@@ -206,7 +206,7 @@ $(document).ready(function() {
 
             highlightSelectedThumbs(selected);
 
-            return;
+            return Promise.resolve();
         }
         // update single thumbnail, see OME.refreshThumbnails
         if (event.type === "refreshThumb") {
@@ -217,7 +217,7 @@ $(document).ready(function() {
                     $("li#image_icon-"+data.imageId+ " img").attr("src", thumb);
                 }
             );
-            return;
+            return Promise.resolve();
         }
 
         parentId = newParentId;
@@ -312,7 +312,7 @@ $(document).ready(function() {
         if (parentNode.type === "share") {
             thumbnailsBatch = 1;
         }
-        OME.load_thumbnails(
+        var promise = OME.load_thumbnails(
             thumbUrl, iids, thumbnailsBatch,
             "{% static 'webgateway/img/image128.png' %}"
         );
@@ -331,7 +331,7 @@ $(document).ready(function() {
         // scroll to selected thumbnail (if any)
         focusThumbnail();
 
-        return;
+        return promise;
     }
 
     // Update thumbnails when we switch between plugins
