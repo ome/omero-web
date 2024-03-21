@@ -269,6 +269,31 @@ def imageMarshal(image, key=None, request=None):
             "canLink": image.canLink(),
         },
     }
+    try:
+        reOK = image._prepareRenderingEngine()
+        if not reOK:
+            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
+            return rv
+    except omero.ConcurrencyException as ce:
+        backOff = ce.backOff
+        rv = {"ConcurrencyException": {"backOff": backOff}}
+        return rv
+    except Exception as ex:  # Handle everything else.
+        rv["Exception"] = ex.message
+        logger.error(traceback.format_exc())
+        return rv  # Return what we have already, in case it's useful
+
+    # big images
+    levels = image._re.getResolutionLevels()
+    tiles = levels > 1
+    rv["tiles"] = tiles
+    if tiles:
+        width, height = image._re.getTileSize()
+        zoomLevelScaling = image.getZoomLevelScaling()
+
+        rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
+        if zoomLevelScaling is not None:
+            rv["zoomLevelScaling"] = zoomLevelScaling
 
     nominalMagnification = (
         image.getObjectiveSettings() is not None
@@ -276,14 +301,14 @@ def imageMarshal(image, key=None, request=None):
         or None
     )
 
-    if nominalMagnification is not None:
-        rv.update({"nominalMagnification": nominalMagnification})
-
     try:
         server_settings = request.session.get("server_settings", {}).get("viewer", {})
     except Exception:
         server_settings = {}
     init_zoom = server_settings.get("initial_zoom_level", 0)
+    if init_zoom < 0:
+        init_zoom = levels + init_zoom
+
     interpolate = server_settings.get("interpolate_pixels", True)
 
     try:
@@ -315,6 +340,10 @@ def imageMarshal(image, key=None, request=None):
                 },
             }
         )
+        if init_zoom is not None:
+            rv["init_zoom"] = init_zoom
+        if nominalMagnification is not None:
+            rv.update({"nominalMagnification": nominalMagnification})
 
         rdef = get_rendering_def(image, rv)
         if not rdef:
@@ -344,34 +373,10 @@ def imageMarshal(image, key=None, request=None):
                 "defaultT": 0,
                 "invertAxis": image.isInvertedAxis(),
             }
-
     except AttributeError:
         # Why do we do raise just for this exception?!
         rv = None
         raise
-
-    # If image is big - need to load RE to get resolution levels
-    # NB: some small images like OME-Zarr can have pyramids
-    # but these will be ignored
-    if not image.requiresPixelsPyramid():
-        rv["tiles"] = False
-    else:
-        if load_re(image, rv):
-            levels = image._re.getResolutionLevels()
-            tiles = levels > 1
-            rv["tiles"] = tiles
-            if tiles:
-                width, height = image._re.getTileSize()
-                zoomLevelScaling = image.getZoomLevelScaling()
-                rv.update(
-                    {"tile_size": {"width": width, "height": height}, "levels": levels}
-                )
-                if zoomLevelScaling is not None:
-                    rv["zoomLevelScaling"] = zoomLevelScaling
-            if init_zoom < 0:
-                init_zoom = levels + init_zoom
-    rv["init_zoom"] = init_zoom
-
     if key is not None and rv is not None:
         for k in key.split("."):
             rv = rv.get(k, {})
