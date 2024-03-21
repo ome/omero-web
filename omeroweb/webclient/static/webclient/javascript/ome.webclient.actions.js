@@ -1152,17 +1152,23 @@ OME.applyRenderingSettings = function(rdef_url, selected) {
         function() {
             var clicked_button_text = rdef_confirm_dialog.data("clicked_button");
             if (clicked_button_text === "OK") {
-                $.ajax({
-                    type: "POST",
-                    dataType: 'text',
-                    traditional: true,
-                    url: rdef_url,
-                    data: data,
-                    success: function(data){
-                        // update thumbnails
-                        OME.refreshThumbnails();
-                    }
-                });
+                OME.progress_overlay(
+                  new Promise((resolve) => {
+                    $.ajax({
+                        type: "POST",
+                        dataType: 'text',
+                        traditional: true,
+                        url: rdef_url,
+                        data: data,
+                        success: function(data){
+                            // update thumbnails
+                            OME.refreshThumbnails().finally(() => resolve());
+                        },
+                        error: resolve,
+                    });
+                  }),
+                'Applying rendering settings...'
+            );
             }
         },
         "Change Rendering Settings?",
