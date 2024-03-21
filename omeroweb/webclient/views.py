@@ -43,6 +43,7 @@ from time import time
 
 from omeroweb.version import omeroweb_buildyear as build_year
 from omeroweb.version import omeroweb_version as omero_version
+from omeroweb.webgateway.util import get_rendering_def
 
 import omero
 import omero.scripts
@@ -1803,7 +1804,8 @@ def load_metadata_preview(request, c_type, c_id, conn=None, share_id=None, **kwa
 
     allRdefs = manager.image.getAllRenderingDefs()
     rdefs = {}
-    rdefId = manager.image.getRenderingDefId()
+    rdef = get_rendering_def(manager.image)
+    rdefId = rdef["id"] if rdef is not None else None
     # remove duplicates per user
     for r in allRdefs:
         ownerId = r["owner"]["id"]

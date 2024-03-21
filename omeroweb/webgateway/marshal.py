@@ -24,8 +24,16 @@ import re
 import logging
 import traceback
 
+from omero.model.enums import PixelsTypeint8, PixelsTypeuint8, PixelsTypeint16
+from omero.model.enums import PixelsTypeuint16, PixelsTypeint32
+from omero.model.enums import PixelsTypeuint32, PixelsTypefloat
+from omero.model.enums import PixelsTypedouble
+
+from omero.gateway import ChannelWrapper
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
+
+from .util import get_rendering_def
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +42,32 @@ INSIGHT_POINT_LIST_RE = re.compile(r"points\[([^\]]+)\]")
 
 # OME model point list regular expression
 OME_MODEL_POINT_LIST_RE = re.compile(r"([\d.]+),([\d.]+)")
+
+
+def getChannelsNoRe(image):
+    """
+    Returns a list of Channels.
+
+    This differs from image.getChannels(noRE=True) in that we load statsInfo
+    here which is used by channel.getWindowMin() and channel.getWindowMax()
+
+    :return:    Channels
+    :rtype:     List of :class:`ChannelWrapper`
+    """
+
+    conn = image._conn
+    pid = image.getPixelsId()
+    params = omero.sys.ParametersI()
+    params.addId(pid)
+    query = """select p from Pixels p join fetch p.channels as c
+                join fetch c.logicalChannel as lc
+                left outer join fetch c.statsInfo
+                where p.id=:id"""
+    pixels = conn.getQueryService().findByQuery(query, params, conn.SERVICE_OPTS)
+    return [
+        ChannelWrapper(conn, c, idx=n, img=image)
+        for n, c in enumerate(pixels.iterateChannels())
+    ]
 
 
 def eventContextMarshal(event_context):
@@ -70,6 +104,77 @@ def eventContextMarshal(event_context):
     ctx["groupPermissions"] = encoder.encode(perms)
 
     return ctx
+
+
+def getPixelRange(image):
+    minVals = {
+        PixelsTypeint8: -128,
+        PixelsTypeuint8: 0,
+        PixelsTypeint16: -32768,
+        PixelsTypeuint16: 0,
+        PixelsTypeint32: -2147483648,
+        PixelsTypeuint32: 0,
+        PixelsTypefloat: -2147483648,
+        PixelsTypedouble: -2147483648,
+    }
+    maxVals = {
+        PixelsTypeint8: 127,
+        PixelsTypeuint8: 255,
+        PixelsTypeint16: 32767,
+        PixelsTypeuint16: 65535,
+        PixelsTypeint32: 2147483647,
+        PixelsTypeuint32: 4294967295,
+        PixelsTypefloat: 2147483647,
+        PixelsTypedouble: 2147483647,
+    }
+    pixtype = image.getPrimaryPixels().getPixelsType().getValue()
+    return [minVals[pixtype], maxVals[pixtype]]
+
+
+def getWindowMin(channel):
+    si = channel._obj.getStatsInfo()
+    if si is None:
+        return None
+    return si.getGlobalMin().val
+
+
+def getWindowMax(channel):
+    si = channel._obj.getStatsInfo()
+    if si is None:
+        return None
+    return si.getGlobalMax().val
+
+
+def rdefMarshal(rdef, image, pixel_range):
+
+    channels = []
+
+    for rdef_ch, channel in zip(rdef["c"], getChannelsNoRe(image)):
+
+        chan = {
+            "emissionWave": channel.getEmissionWave(),
+            "label": channel.getLabel(),
+            "color": rdef_ch["color"],
+            # 'reverseIntensity' is deprecated. Use 'inverted'
+            "inverted": rdef_ch["inverted"],
+            "reverseIntensity": rdef_ch["inverted"],
+            "family": rdef_ch["family"],
+            "coefficient": rdef_ch["coefficient"],
+            "active": rdef_ch["active"],
+        }
+
+        chan["window"] = {
+            "min": getWindowMin(channel) or pixel_range[0],
+            "max": getWindowMax(channel) or pixel_range[1],
+            "start": rdef_ch["start"],
+            "end": rdef_ch["end"],
+        }
+
+        lut = channel.getLut()
+        if lut and len(lut) > 0:
+            chan["lut"] = lut
+        channels.append(chan)
+    return channels
 
 
 def channelMarshal(channel):
@@ -113,6 +218,7 @@ def imageMarshal(image, key=None, request=None):
     @return:        Dict
     """
 
+    # projection / invertAxis etc from annotation
     image.loadRenderOptions()
     pr = image.getProject()
     ds = None
@@ -164,11 +270,9 @@ def imageMarshal(image, key=None, request=None):
             "canLink": image.canLink(),
         },
     }
+    reOK = False
     try:
         reOK = image._prepareRenderingEngine()
-        if not reOK:
-            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
-            return rv
     except omero.ConcurrencyException as ce:
         backOff = ce.backOff
         rv = {"ConcurrencyException": {"backOff": backOff}}
@@ -179,8 +283,10 @@ def imageMarshal(image, key=None, request=None):
         return rv  # Return what we have already, in case it's useful
 
     # big images
-    levels = image._re.getResolutionLevels()
-    tiles = levels > 1
+    tiles = False
+    if reOK:
+        levels = image._re.getResolutionLevels()
+        tiles = levels > 1
     rv["tiles"] = tiles
     if tiles:
         width, height = image._re.getTileSize()
@@ -239,15 +345,20 @@ def imageMarshal(image, key=None, request=None):
             rv["init_zoom"] = init_zoom
         if nominalMagnification is not None:
             rv.update({"nominalMagnification": nominalMagnification})
+
+        rdef = get_rendering_def(image, rv)
+        if not rdef:
+            return rv
+
         try:
-            rv["pixel_range"] = image.getPixelRange()
-            rv["channels"] = [channelMarshal(x) for x in image.getChannels()]
+            rv["pixel_range"] = getPixelRange(image)
+            rv["channels"] = rdefMarshal(rdef, image, rv["pixel_range"])
             rv["split_channel"] = image.splitChannelDims()
             rv["rdefs"] = {
-                "model": (image.isGreyscaleRenderingModel() and "greyscale" or "color"),
+                "model": (rdef["model"] == "greyscale" and "greyscale" or "color"),
                 "projection": image.getProjection(),
-                "defaultZ": image._re.getDefaultZ(),
-                "defaultT": image._re.getDefaultT(),
+                "defaultZ": rdef["z"],
+                "defaultT": rdef["t"],
                 "invertAxis": image.isInvertedAxis(),
             }
         except TypeError:
@@ -264,6 +375,7 @@ def imageMarshal(image, key=None, request=None):
                 "invertAxis": image.isInvertedAxis(),
             }
     except AttributeError:
+        # Why do we do raise just for this exception?!
         rv = None
         raise
     if key is not None and rv is not None:

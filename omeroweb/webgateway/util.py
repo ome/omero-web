@@ -23,6 +23,9 @@ import zipfile
 import shutil
 import logging
 
+import omero
+import traceback
+
 logger = logging.getLogger(__name__)
 
 LUTS_IN_PNG = [
@@ -233,3 +236,38 @@ def points_string_to_XY_list(string):
         x, y = xy.split(",")
         xyList.append((float(x.strip()), float(y.strip())))
     return xyList
+
+
+def load_re(image, rsp_dict=None):
+    rsp_dict = {} if rsp_dict is None else rsp_dict
+    reOK = False
+    try:
+        reOK = image._prepareRenderingEngine()
+        if not reOK:
+            rsp_dict["Error"] = "Failed to prepare Rendering Engine for imageMarshal"
+            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
+    except omero.ConcurrencyException as ce:
+        backOff = ce.backOff
+        rsp_dict["ConcurrencyException"] = {"backOff": backOff}
+    except Exception as ex:  # Handle everything else.
+        rsp_dict["Exception"] = ex.message
+        logger.error(traceback.format_exc())
+    return reOK
+
+
+def get_rendering_def(image, rsp_dict=None):
+    # rsp_dict allows errors to be added
+    # Try to get user's rendering def
+    exp_id = image._conn.getUserId()
+    rdefs = image.getAllRenderingDefs(exp_id)
+    if len(rdefs) == 0:
+        # try to create our own rendering settings
+        if load_re(image, rsp_dict):
+            rdefs = image.getAllRenderingDefs(exp_id)
+    # otherwise use owners
+    if len(rdefs) == 0:
+        owner_id = image.getDetails().getOwner().id
+        if owner_id != exp_id:
+            rdefs = image.getAllRenderingDefs(owner_id)
+
+    return rdefs[0] if len(rdefs) > 0 else None
