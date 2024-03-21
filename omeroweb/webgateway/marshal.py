@@ -22,6 +22,7 @@ import omero
 import time
 import re
 import logging
+import traceback
 
 from omero.model.enums import PixelsTypeint8, PixelsTypeuint8, PixelsTypeint16
 from omero.model.enums import PixelsTypeuint16, PixelsTypeint32
@@ -32,7 +33,7 @@ from omero.gateway import ChannelWrapper
 from omero.rtypes import unwrap
 from omero_marshal import get_encoder
 
-from .util import get_rendering_def, load_re
+from .util import get_rendering_def
 
 logger = logging.getLogger(__name__)
 
@@ -269,11 +270,9 @@ def imageMarshal(image, key=None, request=None):
             "canLink": image.canLink(),
         },
     }
+    reOK = False
     try:
         reOK = image._prepareRenderingEngine()
-        if not reOK:
-            logger.debug("Failed to prepare Rendering Engine for imageMarshal")
-            return rv
     except omero.ConcurrencyException as ce:
         backOff = ce.backOff
         rv = {"ConcurrencyException": {"backOff": backOff}}
@@ -284,8 +283,10 @@ def imageMarshal(image, key=None, request=None):
         return rv  # Return what we have already, in case it's useful
 
     # big images
-    levels = image._re.getResolutionLevels()
-    tiles = levels > 1
+    tiles = False
+    if reOK:
+        levels = image._re.getResolutionLevels()
+        tiles = levels > 1
     rv["tiles"] = tiles
     if tiles:
         width, height = image._re.getTileSize()
