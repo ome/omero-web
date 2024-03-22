@@ -4,7 +4,7 @@
  * Depends on jquery
  *
  * Copyright (c) 2011 Glencoe Software, Inc. All rights reserved.
- * 
+ *
  * This software is distributed under the terms described by the LICENCE file
  * you can find at the root of the distribution bundle, which states you are
  * free to use it only for non commercial purposes.
@@ -39,14 +39,14 @@
  * - adds the pv-focus css class to the thumb pointed to by the elm jQuery object
  *   removing it from any other thumbnail eventually focused on this plate
  * - elm is the jQuery object for the thumb to be focused
- * 
+ *
  * plate.rmFocus(elm)
  * - removes the pv-focus css class to the thumb pointed to by the elm jQuery object
  *   or from any thumbnail in this plate if elm is null or undefined
  * - elm is the optional jQuery object for the thumb to loose focused
  *
  * - Events -
- * 
+ *
  * thumbClick(ev, welldata, thumb)
  * - triggered when there's a mouse click on a thumb.
  * - welldata holds a dictionary holding metadata for the clicked well
@@ -65,7 +65,7 @@
  * - thumb is the jQuery object for the thumb image
  *
  * - jQuery obj data attributes -
- * 
+ *
  * noFocus
  * - if true, prevents css pv-focus class to be added on setFocus
  *
@@ -205,13 +205,17 @@ jQuery._WeblitzPlateview = function (container, options) {
     _this.self.trigger('_resetLoaded');
   };
 
-  this.load = function (pid,field) {
+  this.load = function (pid,field,acquisition) {
     $('table img', _this.self).remove();
     $('table div.placeholder', _this.self).removeClass('placeholder').addClass('loading');
     if (field === undefined) {
       field = 0;
     }
-    var url = opts.baseurl+'/plate/'+pid+'/'+field+'/';
+
+    var url = opts.baseurl+'/plate/'+pid+'/'+field+'/'
+    if (acquisition) {
+      url += acquisition+'/';
+    }
     if (opts.size) {
       url += '?size='+opts.size;
     }

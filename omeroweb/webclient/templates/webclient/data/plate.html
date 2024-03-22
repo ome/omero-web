@@ -22,11 +22,11 @@
 -->
 {% endcomment %}
 
-    
+
     <link rel="stylesheet" type="text/css" href="{% static "webgateway/css/ome.plateview.css"|add:url_suffix %}" media="all" />
 
     <script type="text/javascript">
-        
+
         $(document).ready(function() {
 
             // Drag to resize #wellImagesContainer bottom panel
@@ -169,7 +169,7 @@
             wpv.self.selectable({
                 filter: 'td.well',
                 distance: 2,
-                stop: function(){  
+                stop: function(){
                     var $selected = $('td.ui-selected', this);
                     syncTreeSelection($selected, {{ index }}, '{{ manager.getPermsCss }}');
                     showImagesInWell();
@@ -218,7 +218,7 @@
             {% endif %}
 
             // Kick-off loading...
-            wpv.load({{ manager.getPlateId }}, {{ index }});
+            wpv.load({{ manager.getPlateId }}, {{ index }}, {{ acquisition }});
 
 
             // Lower panel.....
@@ -297,7 +297,7 @@
 
     </script>
 
-    
+
     <!--content-->
 <!-- We add/remove class .showWellImages to #content_details expose #wellImages panel -->
 <div class='fillSpace' style="top: 0px; height: 29px">
