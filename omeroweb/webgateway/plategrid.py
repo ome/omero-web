@@ -32,8 +32,14 @@ class PlateGrid(object):
         param:  plate_layout is "expand" to expand plate to multiple of 8 x 12
                 or "shrink" to ignore all wells before the first row/column
 
-                acqid: the acquisition ID. Using it, the field index (fid) must
-                be in the range [0, max_sample_per_well] for that acquisition.
+                fid: the field index relative to the lowest "absolute field index"
+                for that well. When filtering the image samples with an
+                acquisition ID (acqid), the lowest field index may be
+                different for each well.
+                In the range [0, max_sample_per_well]
+                (or [0, max_sample_per_well_per_acquisition] with an acqid)
+
+                acqid: the acquisition ID to filter the WellSamples.
         """
         self.plate = conn.getObject("plate", int(pid))
         self._conn = conn
@@ -63,7 +69,7 @@ class PlateGrid(object):
                 "where well.plate.id = :id "
             )
             if self.acquisition > 0:
-                # Offseting index per well for the plateacquisition
+                # Offseting field index per well for the plateacquisition
                 query += (
                     "and ws.plateAcquisition.id = :acqid "
                     "and index(ws) - ("
