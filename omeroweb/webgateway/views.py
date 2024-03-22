@@ -1653,10 +1653,12 @@ def plateGrid_json(request, pid, field=0, acquisition=None, conn=None, **kwargs)
         field = int(field or 0)
     except ValueError:
         field = 0
-    try:
-        acquisition = int(acquisition)
-    except:
-        acquisition = None
+
+    if acquisition is not None:
+        try:
+            acquisition = int(acquisition)
+        except ValueError:
+            acquisition = None
 
     prefix = kwargs.get("thumbprefix", "webgateway_render_thumbnail")
     thumbsize = getIntOrDefault(request, "size", None)
