@@ -25,7 +25,7 @@ class PlateGrid(object):
     methods useful for displaying the contents of the plate as a grid.
     """
 
-    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None, acqid=0):
+    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None, acqid=None):
         """
         Constructor
 
@@ -68,7 +68,7 @@ class PlateGrid(object):
                 "join img.details.owner author "
                 "where well.plate.id = :id "
             )
-            if self.acquisition > 0:
+            if self.acquisition is not None:
                 # Offseting field index per well for the plateacquisition
                 query += (
                     "and ws.plateAcquisition.id = :acqid "

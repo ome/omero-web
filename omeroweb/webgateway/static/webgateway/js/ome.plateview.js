@@ -211,10 +211,11 @@ jQuery._WeblitzPlateview = function (container, options) {
     if (field === undefined) {
       field = 0;
     }
-    if (acquisition === undefined) {
-      acquisition = 0;
+
+    var url = opts.baseurl+'/plate/'+pid+'/'+field+'/'
+    if (acquisition) {
+      url += acquisition+'/';
     }
-    var url = opts.baseurl+'/plate/'+pid+'/'+field+'/'+acquisition+'/';
     if (opts.size) {
       url += '?size='+opts.size;
     }
