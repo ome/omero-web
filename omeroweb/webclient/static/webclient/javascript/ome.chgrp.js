@@ -151,7 +151,14 @@ $(function() {
                                 var id = imageId.replace("Image[", "").replace("]", "");
                                 return "<a href='" + webindex_url + "?show=image-" + id + "'>" + imageId + "</a>";
                             };
-                            errHtml += errMsg.replace(/Image\[([0-9]*)\]/g, getLinkHtml);
+                            var getLogicalChannelLink = function(lcId) {
+                                var id = lcId.replace("LogicalChannel[", "").replace("]", "");
+                                return "<a target='_blank' href='" + webindex_url + "logical_channel/" + id + "/'>" + lcId + "</a>";
+                            };
+                            errMsg = errMsg.replace(/Image\[([0-9]*)\]/g, getLinkHtml);
+                            errMsg = errMsg.replace(/LogicalChannel\[([0-9]*)\]/g, getLogicalChannelLink);
+                            console.log('errMsg', errMsg);
+                            errHtml += errMsg;
                             $dryRunSpinner.html(errHtml);
                             $okbtn.hide();
                             return;
