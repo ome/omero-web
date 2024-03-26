@@ -89,10 +89,10 @@ $(function() {
     };
 
     var permsIcon = function(perms) {
-        if (perms.write) return static_url + "/image/group_green16.png";
-        if (perms.annotate) return static_url + "/image/group_orange16.png";
-        if (perms.read) return static_url + "/image/group_red16.png";
-        return static_url + "/image/personal16.png";
+        if (perms.write) return static_url + "image/group_green16.png";
+        if (perms.annotate) return static_url + "image/group_orange16.png";
+        if (perms.read) return static_url + "image/group_red16.png";
+        return static_url + "image/personal16.png";
     };
 
     var checkFilesetSplit = function checkFilesetSplit () {
