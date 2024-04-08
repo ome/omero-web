@@ -8,7 +8,7 @@ import pytest
 from django.http import HttpResponseBadRequest
 
 from omeroweb.webgateway.webgateway_cache import FileCache, WebGatewayCache
-from omeroweb.webgateway.webgateway_cache import WebGatewayTempFile
+from omeroweb.webgateway.webgateway_tempfile import WebGatewayTempFile
 from omeroweb.webgateway import views
 import omero.gateway
 
