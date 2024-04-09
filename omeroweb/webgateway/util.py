@@ -93,7 +93,7 @@ def get_longs(request, name):
     vals = []
     vals_raw = request.GET.getlist(name)
     for val_raw in vals_raw:
-        vals.append(long(val_raw))
+        vals.append(int(val_raw))
     return vals
 
 
