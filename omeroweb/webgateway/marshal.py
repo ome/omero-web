@@ -163,9 +163,12 @@ def rdefMarshal(rdef, image, pixel_range):
             "active": rdef_ch["active"],
         }
 
+        window_min = getWindowMin(channel)
+        window_max = getWindowMax(channel)
+
         chan["window"] = {
-            "min": getWindowMin(channel) or pixel_range[0],
-            "max": getWindowMax(channel) or pixel_range[1],
+            "min": pixel_range[0] if window_min is None else window_min,
+            "max": pixel_range[1] if window_max is None else window_max,
             "start": rdef_ch["start"],
             "end": rdef_ch["end"],
         }
