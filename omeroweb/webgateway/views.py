@@ -398,9 +398,7 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
         else:
             raise Http404("Failed to render thumbnail")
     else:
-        jpeg_data = img.getThumbnail(
-            size=size, direct=direct, rdefId=rdefId, z=z, t=t
-        )
+        jpeg_data = img.getThumbnail(size=size, direct=direct, rdefId=rdefId, z=z, t=t)
         if jpeg_data is None:
             logger.debug("(c)Image %s not found..." % (str(iid)))
             if _defcb:
