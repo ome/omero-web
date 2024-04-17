@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# webgateway/webgateway_tempfile - temporary files for webgateway
+#
+# Copyright (c) 2008-2024 Glencoe Software, Inc. All rights reserved.
+#
+# This software is distributed under the terms described by the LICENCE file
+# you can find at the root of the distribution bundle, which states you are
+# free to use it only for non commercial purposes.
+# If the file is missing please request a copy by contacting
+# jason@glencoesoftware.com.
+
+
 import logging
 import os
 import shutil
