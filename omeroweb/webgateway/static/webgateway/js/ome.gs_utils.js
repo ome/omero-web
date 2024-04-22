@@ -155,25 +155,3 @@ function gs_json (url, data, callback) {
         traditional: true
         });
 }
-
-function downloadLandingDialog (anchor, msg, cb) {
-    if (!msg) {
-	msg = "<h2>Your download will start in a few moments</h2>";
-    }
-    var ccb = function (e) {
-	cb && cb(e);
-    }
-    gs_choiceModalDialog(msg,
-                         [{label: 'close', data: 1}],
-			 ccb,
-			 {css: {width: '50%', left: '25%'}}
-			); 
-    if (anchor) {
-	var dliframe = $('iframe[name=dliframe]');
-	if (!dliframe.length) {
-	    dliframe = $('<iframe name="dliframe" width="0" height="0"></iframe>').appendTo('body');
-	}
-	dliframe.attr('src', $(anchor).attr('href'));
-	  }
-    return false;
-}
