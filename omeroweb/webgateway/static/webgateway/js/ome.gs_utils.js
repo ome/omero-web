@@ -118,24 +118,6 @@ function gs_choiceModalDialog (message, choices, callback, blockui_opts, cancel_
   return;
 }
 
-/**
- * Calls a jsonp url, just like $.getJson, but also looks out for errors.
- * The call is made in a make-believe synchronous fashion, by adding a semi-transparent overlay and disabling controls.
- */
-function gs_modalJson (url, data, callback) {
-  if (!gs_loadBlockUI (function () {gs_modalJson(url,data,callback);})) {
-    return;
-  }
-  jQuery.blockUI();
-  var cb = function (result, rv) {
-    jQuery.unblockUI();
-    if (callback) {
-      callback(result, rv);
-    }
-  }
-  gs_json (url, data, cb);
-}
-
 function gs_json (url, data, callback) {
   var cb = function (result) {
     return function (data, textStatus, errorThrown) {
