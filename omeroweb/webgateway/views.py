@@ -102,6 +102,14 @@ def _safestr(s):
     return str(s).encode("utf-8")
 
 
+# Regular expression that represents the characters in ASCII that are
+# allowed in a valid JavaScript variable name.  Function names adhere to
+# the same rules.
+# See:
+#   https://stackoverflow.com/questions/1661197/what-characters-are-valid-for-javascript-variable-names
+VALID_JS_VARIABLE = re.compile(r"^[a-zA-Z_$][0-9a-zA-Z_$]*$")
+
+
 class UserProxy(object):
     """
     Represents the current user of the connection, with methods delegating to
@@ -1443,6 +1451,8 @@ def jsonp(f):
                 return rv
             c = request.GET.get("callback", None)
             if c is not None and not kwargs.get("_internal", False):
+                if not VALID_JS_VARIABLE.match(c):
+                    return HttpResponseBadRequest("Invalid callback")
                 rv = json.dumps(rv)
                 rv = "%s(%s)" % (c, rv)
                 # mimetype for JSONP is application/javascript
