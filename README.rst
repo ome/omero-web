@@ -47,7 +47,7 @@ Setting of the environment variable ``OMERODIR`` is required.
 Usage
 -----
 
-For running omero-web in production with nginx, see See: `OMERO.web install`_ documentation.
+For running omero-web in production with NGINX, see See: `OMERO.web install`_ documentation.
 To run in development mode, see below.
 
 Contributing
