@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # coding=utf-8
 
-import time
 import os
 import pytest
 from django.http import HttpResponseBadRequest

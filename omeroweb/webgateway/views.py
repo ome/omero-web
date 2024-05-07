@@ -371,8 +371,6 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
     @param h:           Thumbnail max height
     @return:            http response containing jpeg
     """
-    server_id = request.session["connector"]["server_id"]
-
     server_settings = request.session.get("server_settings", {}).get("browser", {})
     defaultSize = server_settings.get("thumb_default_size", 96)
 
@@ -386,7 +384,6 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
             size = (int(w), int(h))
     if size == (defaultSize,):
         direct = False
-    user_id = conn.getUserId()
     z = getIntOrDefault(request, "z", None)
     t = getIntOrDefault(request, "t", None)
     rdefId = getIntOrDefault(request, "rdefId", None)
@@ -1151,7 +1148,6 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                         if dryrun is True, returns count of images that would
                         be exported
     """
-    server_id = request.session["connector"]["server_id"]
     imgs = []
     if ctx == "p":
         obj = conn.getObject("Project", cid)
@@ -1621,7 +1617,6 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
     prefix = kwargs.get("thumbprefix", "webgateway_render_thumbnail")
     thumbsize = getIntOrDefault(request, "size", None)
     logger.debug(thumbsize)
-    server_id = kwargs["server_id"]
 
     def get_thumb_url(iid):
         if thumbsize is not None:
@@ -2247,7 +2242,6 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
     @return:            json dict of Boolean:[Image-IDs]
     """
 
-    server_id = request.session["connector"]["server_id"]
     json_data = False
 
     fromid = request.GET.get("fromid", None)
