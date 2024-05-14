@@ -4,9 +4,11 @@
 
 import time
 import os
+import numpy
 import pytest
 from django.http import HttpResponseBadRequest
 
+from omero.columns import LongColumnI
 from omeroweb.webgateway.webgateway_cache import FileCache, WebGatewayCache
 from omeroweb.webgateway.webgateway_cache import WebGatewayTempFile
 from omeroweb.webgateway import views
@@ -389,9 +391,10 @@ class TestWebGatewayCache(object):
 
 
 class TestViews(object):
-    def testRowstoByteArray(self):
-        rows = [[1], [2], [7], [11], [12]]
-        data = views.rowsToByteArray(rows)
+    def testColumnToPackedBits(self):
+        column = LongColumnI("test")
+        column.values = [1, 2, 7, 11, 12]
+        data = numpy.frombuffer(views.column_to_packed_bits(column), dtype="uint8")
         assert data[0] == 97  # 01100001 First, Second and 7th bits
         assert data[1] == 24  # 00011000 11th and 12th bits
 
