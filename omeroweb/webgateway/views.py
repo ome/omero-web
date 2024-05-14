@@ -3228,42 +3228,35 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
             else None
         )
 
-    rsp_data = perform_table_query(
-        conn,
-        fileid,
-        query,
-        [col_name],
-        offset=offset,
-        limit=limit,
-        lazy=False,
-        check_max_rows=False,
-    )
-    if "error" in rsp_data:
-        return rsp_data
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    sr = conn.getSharedResources()
+    table = sr.openTable(omero.model.OriginalFileI(fileid, False), ctx)
+    if not table:
+        return dict(error="Table %s not found" % fileid)
+
+    column_names = [column.name for column in table.getHeaders()]
+    if col_name not in column_names:
+        return dict(error="Unknown column %s" % col_name)
     try:
-        data = rowsToByteArray(rsp_data["data"]["rows"])
-        return HttpResponse(bytes(data), content_type="application/octet-stream")
+        row_numbers = table.getWhereList(query, None, 0, 0, 0)
+        (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
+        return HttpResponse(
+            column_to_packed_bits(column), content_type="application/octet-stream"
+        )
     except ValueError:
         logger.error("ValueError when getting obj_id_bitmask")
         return {"error": "Specified column has invalid type"}
 
 
-def rowsToByteArray(rows):
-    maxval = 0
-    if len(rows) > 0 and isinstance(rows[0][0], float):
+def column_to_packed_bits(column):
+    if len(column.values) > 0 and isinstance(column.values[0], float):
         raise ValueError("Cannot have ID of float")
-    for obj in rows:
-        obj_id = int(obj[0])
-        maxval = max(obj_id, maxval)
-    bitArray = numpy.zeros(maxval + 1, dtype="uint8")
-    for obj in rows:
-        obj_id = int(obj[0])
-        bitArray[obj_id] = 1
-    packed = numpy.packbits(bitArray, bitorder="big")
-    data = bytearray()
-    for val in packed:
-        data.append(val)
-    return data
+    # Coerce strings to uint64 if required
+    indexes = numpy.array(column.values, dtype="uint64")
+    bits = numpy.zeros(int(indexes.max() + 1), dtype="uint8")
+    bits[indexes] = 1
+    return numpy.packbits(bits, bitorder="big").tobytes()
 
 
 @login_required()
