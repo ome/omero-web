@@ -3239,7 +3239,7 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
     if col_name not in column_names:
         return dict(error="Unknown column %s" % col_name)
     try:
-        row_numbers = table.getWhereList(query, None, 0, 0, 0)
+        row_numbers = table.getWhereList(query, None, 0, 0, 1)
         (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
         return HttpResponse(
             column_to_packed_bits(column), content_type="application/octet-stream"
