@@ -702,7 +702,6 @@ CUSTOM_SETTINGS_MAPPINGS = {
         int,
         "Size, in bytes, of the “chunk”",
     ],
-    "omero.web.webgateway_cache": ["WEBGATEWAY_CACHE", None, leave_none_unset, None],
     "omero.web.maximum_multifile_download_size": [
         "MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE",
         1024**3,

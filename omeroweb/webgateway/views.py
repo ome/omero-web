@@ -73,11 +73,7 @@ import glob
 
 # from models import StoredConnection
 
-from omeroweb.webgateway.webgateway_cache import (
-    webgateway_cache,
-    CacheBase,
-    webgateway_tempfile,
-)
+from omeroweb.webgateway.webgateway_tempfile import webgateway_tempfile
 
 import logging
 import os
@@ -94,7 +90,6 @@ from PIL import Image, ImageDraw
 import numpy
 
 
-cache = CacheBase()
 logger = logging.getLogger(__name__)
 
 
@@ -376,8 +371,6 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
     @param h:           Thumbnail max height
     @return:            http response containing jpeg
     """
-    server_id = request.session["connector"]["server_id"]
-
     server_settings = request.session.get("server_settings", {}).get("browser", {})
     defaultSize = server_settings.get("thumb_default_size", 96)
 
@@ -391,39 +384,24 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
             size = (int(w), int(h))
     if size == (defaultSize,):
         direct = False
-    user_id = conn.getUserId()
     z = getIntOrDefault(request, "z", None)
     t = getIntOrDefault(request, "t", None)
     rdefId = getIntOrDefault(request, "rdefId", None)
-    # TODO - cache handles rdefId
-    jpeg_data = webgateway_cache.getThumb(request, server_id, user_id, iid, size)
-    if jpeg_data is None:
-        prevent_cache = False
-        img = conn.getObject("Image", iid)
-        if img is None:
-            logger.debug("(b)Image %s not found..." % (str(iid)))
+    img = conn.getObject("Image", iid)
+    if img is None:
+        logger.debug("(b)Image %s not found..." % (str(iid)))
+        if _defcb:
+            jpeg_data = _defcb(size=size)
+        else:
+            raise Http404("Failed to render thumbnail")
+    else:
+        jpeg_data = img.getThumbnail(size=size, direct=direct, rdefId=rdefId, z=z, t=t)
+        if jpeg_data is None:
+            logger.debug("(c)Image %s not found..." % (str(iid)))
             if _defcb:
                 jpeg_data = _defcb(size=size)
-                prevent_cache = True
             else:
                 raise Http404("Failed to render thumbnail")
-        else:
-            jpeg_data = img.getThumbnail(
-                size=size, direct=direct, rdefId=rdefId, z=z, t=t
-            )
-            if jpeg_data is None:
-                logger.debug("(c)Image %s not found..." % (str(iid)))
-                if _defcb:
-                    jpeg_data = _defcb(size=size)
-                    prevent_cache = True
-                else:
-                    raise Http404("Failed to render thumbnail")
-            else:
-                prevent_cache = img._thumbInProgress
-        if not prevent_cache:
-            webgateway_cache.setThumb(request, server_id, user_id, iid, jpeg_data, size)
-    else:
-        pass
     return jpeg_data
 
 
@@ -1070,15 +1048,11 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     else:
         return HttpResponseBadRequest("tile or region argument required")
 
-    # region details in request are used as key for caching.
-    jpeg_data = webgateway_cache.getImage(request, server_id, img, z, t)
+    jpeg_data = img.renderJpegRegion(
+        z, t, x, y, w, h, level=level, compression=compress_quality
+    )
     if jpeg_data is None:
-        jpeg_data = img.renderJpegRegion(
-            z, t, x, y, w, h, level=level, compression=compress_quality
-        )
-        if jpeg_data is None:
-            raise Http404
-        webgateway_cache.setImage(request, server_id, img, z, t, jpeg_data)
+        raise Http404
 
     rsp = HttpResponse(jpeg_data, content_type="image/jpeg")
     return rsp
@@ -1106,12 +1080,9 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     if pi is None:
         raise Http404
     img, compress_quality = pi
-    jpeg_data = webgateway_cache.getImage(request, server_id, img, z, t)
+    jpeg_data = img.renderJpeg(z, t, compression=compress_quality)
     if jpeg_data is None:
-        jpeg_data = img.renderJpeg(z, t, compression=compress_quality)
-        if jpeg_data is None:
-            raise Http404
-        webgateway_cache.setImage(request, server_id, img, z, t, jpeg_data)
+        raise Http404
 
     format = request.GET.get("format", "jpeg")
     rsp = HttpResponse(jpeg_data, content_type="image/jpeg")
@@ -1177,7 +1148,6 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                         if dryrun is True, returns count of images that would
                         be exported
     """
-    server_id = request.session["connector"]["server_id"]
     imgs = []
     if ctx == "p":
         obj = conn.getObject("Project", cid)
@@ -1246,17 +1216,14 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
             return HttpResponseRedirect(
                 settings.STATIC_URL + "webgateway/tfiles/" + rpath
             )
-        tiff_data = webgateway_cache.getOmeTiffImage(request, server_id, imgs[0])
+        try:
+            tiff_data = imgs[0].exportOmeTiff()
+        except Exception:
+            logger.debug("Failed to export image (2)", exc_info=True)
+            tiff_data = None
         if tiff_data is None:
-            try:
-                tiff_data = imgs[0].exportOmeTiff()
-            except Exception:
-                logger.debug("Failed to export image (2)", exc_info=True)
-                tiff_data = None
-            if tiff_data is None:
-                webgateway_tempfile.abort(fpath)
-                raise Http404
-            webgateway_cache.setOmeTiffImage(request, server_id, imgs[0], tiff_data)
+            webgateway_tempfile.abort(fpath)
+            raise Http404
         if fobj is None:
             rsp = HttpResponse(tiff_data, content_type="image/tiff")
             rsp["Content-Disposition"] = 'attachment; filename="%s.ome.tiff"' % (
@@ -1289,12 +1256,9 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                 fobj = BytesIO()
             zobj = zipfile.ZipFile(fobj, "w", zipfile.ZIP_STORED)
             for obj in imgs:
-                tiff_data = webgateway_cache.getOmeTiffImage(request, server_id, obj)
+                tiff_data = obj.exportOmeTiff()
                 if tiff_data is None:
-                    tiff_data = obj.exportOmeTiff()
-                    if tiff_data is None:
-                        continue
-                    webgateway_cache.setOmeTiffImage(request, server_id, obj, tiff_data)
+                    continue
                 # While ZIP itself doesn't have the 255 char limit for
                 # filenames, the FS where these get unarchived might, so trim
                 # names
@@ -1426,12 +1390,9 @@ def render_split_channel(request, iid, z, t, conn=None, **kwargs):
         raise Http404
     img, compress_quality = pi
     compress_quality = compress_quality and float(compress_quality) or 0.9
-    jpeg_data = webgateway_cache.getSplitChannelImage(request, server_id, img, z, t)
+    jpeg_data = img.renderSplitChannel(z, t, compression=compress_quality)
     if jpeg_data is None:
-        jpeg_data = img.renderSplitChannel(z, t, compression=compress_quality)
-        if jpeg_data is None:
-            raise Http404
-        webgateway_cache.setSplitChannelImage(request, server_id, img, z, t, jpeg_data)
+        raise Http404
     rsp = HttpResponse(jpeg_data, content_type="image/jpeg")
     return rsp
 
@@ -1656,7 +1617,6 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
     prefix = kwargs.get("thumbprefix", "webgateway_render_thumbnail")
     thumbsize = getIntOrDefault(request, "size", None)
     logger.debug(thumbsize)
-    server_id = kwargs["server_id"]
 
     def get_thumb_url(iid):
         if thumbsize is not None:
@@ -1679,14 +1639,7 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
     if plate is None:
         return Http404
 
-    cache_key = "plategrid-%d-%s" % (field, thumbsize)
-    rv = webgateway_cache.getJson(request, server_id, plate, cache_key)
-
-    if rv is None:
-        rv = plateGrid.metadata
-        webgateway_cache.setJson(request, server_id, plate, json.dumps(rv), cache_key)
-    else:
-        rv = json.loads(rv)
+    rv = plateGrid.metadata
     return rv
 
 
@@ -2084,8 +2037,6 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     if pi is None:
         json_data = "false"
     else:
-        user_id = pi[0]._conn.getEventContext().userId
-        webgateway_cache.invalidateObject(server_id, user_id, pi[0])
         pi[0].getThumbnail()
         json_data = "true"
     if request.GET.get("callback", None):
@@ -2291,7 +2242,6 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
     @return:            json dict of Boolean:[Image-IDs]
     """
 
-    server_id = request.session["connector"]["server_id"]
     json_data = False
 
     fromid = request.GET.get("fromid", None)
@@ -2370,15 +2320,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         except ValueError:
             fromid = None
         if fromid is not None and len(toids) > 0:
-            fromimg = conn.getObject("Image", fromid)
-            userid = fromimg.getOwner().getId()
             json_data = conn.applySettingsToSet(fromid, to_type, toids)
-            if json_data and True in json_data:
-                for iid in json_data[True]:
-                    img = conn.getObject("Image", iid)
-                    img is not None and webgateway_cache.invalidateObject(
-                        server_id, userid, img
-                    )
 
         # finally - if we temporarily saved rdef to original image, revert
         # if we're sure that from-image is not in the target set (Dataset etc)
