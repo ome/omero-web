@@ -1602,7 +1602,7 @@ def wellData_json(request, conn=None, _internal=False, **kwargs):
 
 @login_required()
 @jsonp
-def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
+def plateGrid_json(request, pid, field=0, acquisition=None, conn=None, **kwargs):
     """
     Layout depends on settings 'omero.web.plate_layout' which
     can be overridden with request param e.g. ?layout=shrink.
@@ -1614,6 +1614,13 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         field = int(field or 0)
     except ValueError:
         field = 0
+
+    if acquisition is not None:
+        try:
+            acquisition = int(acquisition)
+        except ValueError:
+            acquisition = None
+
     prefix = kwargs.get("thumbprefix", "webgateway_render_thumbnail")
     thumbsize = getIntOrDefault(request, "size", None)
     logger.debug(thumbsize)
@@ -1631,8 +1638,9 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         conn,
         pid,
         field,
-        kwargs.get("urlprefix", get_thumb_url),
+        thumbprefix=kwargs.get("urlprefix", get_thumb_url),
         plate_layout=layout,
+        acqid=acquisition,
     )
 
     plate = plateGrid.plate
@@ -1773,6 +1781,8 @@ def listWellImages_json(request, did, conn=None, **kwargs):
                 d[x] = {"value": p.getValue(), "unit": str(p.getUnit())}
         return d
 
+    plate = well.getParent()
+    run_d = {r.getId(): r.getName() for r in plate.listPlateAcquisitions()}
     wellImgs = []
     for ws in well.listChildren():
         # optionally filter by acquisition 'run'
@@ -1788,6 +1798,8 @@ def listWellImages_json(request, did, conn=None, **kwargs):
             pos = marshal_pos(ws)
             if len(pos.keys()) > 0:
                 m["position"] = pos
+            if ws.plateAcquisition is not None:
+                m["name"] += f" [Run: {run_d[ws.plateAcquisition._id._val]}]"
             wellImgs.append(m)
     return wellImgs
 

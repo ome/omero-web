@@ -666,7 +666,7 @@ $(document).ready(function() {
             html = "<option value='0'>Choose Tag</option>" + html;
             $("#filter_by_tag").html(html);
 
-            // hide filtered images 
+            // hide filtered images
             $("#dataIcons li.row").each(function() {
                 var $this = $(this),
                     iid = parseInt($this.attr("data-id"), 10);
@@ -1005,14 +1005,9 @@ $(document).ready(function() {
 
             switch(nodeType) {
                 case 'plate':
-                    // Only load plates if it has a single 'Run' (or none)
-                    if (node.children.length < 2) {
-                        url += 'load_plate/' + nodeType + '/' + nodeId + '/?index=' + newField;
-                        if (show) {
-                            url += "&show=" + show;
-                        }
-                    } else {
-                        url = undefined;
+                    url += 'load_plate/' + nodeType + '/' + nodeId + '/?index=' + newField;
+                    if (show) {
+                        url += "&show=" + show;
                     }
                     break;
                 case 'acquisition':

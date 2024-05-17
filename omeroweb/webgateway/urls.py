@@ -365,7 +365,7 @@ L{views.listWellImages_json}. Returns E.g list of
 """
 
 webgateway_plategrid_json = re_path(
-    r"^plate/(?P<pid>[0-9]+)/(?:(?P<field>[0-9]+)/)?$",
+    r"^plate/(?P<pid>[0-9]+)/(?:(?P<field>[0-9]+)/)?(?:(?P<acquisition>[0-9]+)/)?$",
     views.plateGrid_json,
     name="webgateway_plategrid_json",
 )
