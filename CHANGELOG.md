@@ -10,6 +10,7 @@
 
 - Reviewed instructions to use conda-forge channel [#533](https://github.com/ome/omero-web/pull/533)
 - Remove non-performant cache [#549](https://github.com/ome/omero-web/pull/549)
+- Validate JSONP callback parameter [CVE-2024-35180](https://github.com/ome/omero-web/security/advisories/GHSA-vr85-5pwx-c6gq)
 
 5.25.0 (March 2024)
 -------------------
