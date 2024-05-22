@@ -3235,10 +3235,10 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
     if not table:
         return dict(error="Table %s not found" % fileid)
 
-    column_names = [column.name for column in table.getHeaders()]
-    if col_name not in column_names:
-        return dict(error="Unknown column %s" % col_name)
     try:
+        column_names = [column.name for column in table.getHeaders()]
+        if col_name not in column_names:
+            return dict(error="Unknown column %s" % col_name)
         row_numbers = table.getWhereList(query, None, 0, 0, 1)
         (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
         return HttpResponse(
@@ -3247,6 +3247,8 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
     except ValueError:
         logger.error("ValueError when getting obj_id_bitmask")
         return {"error": "Specified column has invalid type"}
+    finally:
+        table.close()
 
 
 def column_to_packed_bits(column):
