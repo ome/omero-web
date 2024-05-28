@@ -552,7 +552,7 @@ def _marshal_image(
     image_id, archived, name, owner_id, permissions, fileset_id = row
     image = dict()
     image["id"] = unwrap(image_id)
-    image["archived"] = unwrap(archived)
+    image["archived"] = unwrap(archived) is True
     image["name"] = unwrap_to_str(name)
     image["ownerId"] = unwrap(owner_id)
     image["permsCss"] = parse_permissions_css(permissions, unwrap(owner_id), conn)
