@@ -158,7 +158,7 @@ Copyright
 .. _OMERO: https://www.openmicroscopy.org/omero
 .. _OMERO.web install: https://omero.readthedocs.io/en/stable/sysadmins/unix/install-web/web-deployment.html
 .. _OMERO.py: https://pypi.python.org/pypi/omero-py
-.. _ZeroC IcePy: https://zeroc.com/
+.. _ZeroC IcePy: https://zeroc.com/downloads/ice/3.6
 .. _Pillow: https://python-pillow.org/
 .. _NumPy: http://matplotlib.org/
 .. _Running and writing tests: https://omero.readthedocs.io/en/stable//omero/developers/testing.html
