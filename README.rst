@@ -34,15 +34,16 @@ Before installing ``omero-web``, we recommend to install the `ZeroC IcePy`_ Pyth
 Our commercial partner `Glencoe Software <https://www.glencoesoftware.com/blog/2023/12/08/ice-binaries-for-omero.html>`_ has produced several Python wheels to install the Ice-Python bindings depending on the desired Python version and the operating system. Please visit `OMERO Python language bindings <https://omero.readthedocs.io/en/stable/developers/Python.html>`_ for a list of supported platforms and Python versions.
 
 When the wheel is installed, activate the virtual environment and install ``omero-web`` from `PyPI <https://pypi.org/>`_.
+
 ::
 
-    pip install -U omero-web
+    $  pip install -U omero-web
 
 Setting of the environment variable ``OMERODIR`` is required.
 ``$OMERODIR/var/log/`` directory will contain log files.
 ``$OMERODIR/etc/grid/config.xml`` is used to store config::
 
-    export OMERODIR=$(pwd)
+    $ export OMERODIR=$(pwd)
 
 Usage
 -----
@@ -64,30 +65,30 @@ to source files will be reflected in your installation.
 
 ::
 
-    git clone https://github.com/ome/omero-web
-    cd omero-web
-    pip install -e .
+    $ git clone https://github.com/ome/omero-web
+    $ cd omero-web
+    $ pip install -e .
 
 Note some ``omero-web`` tests may not run when this module and/or ``omero-py`` are installed in editable mode.
 
 Configuration for developer usage::
 
-    omero config set omero.web.debug True
-    omero config set omero.web.application_server development
+    $ omero config set omero.web.debug True
+    $ omero config set omero.web.application_server development
 
     # If you want to connect to OMERO.server other than 'localhost'
-    omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
+    $ omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
 
 Then run omero-web in the foreground with::
 
-    omero web start
+    $ omero web start
     ...
     Starting development server at http://127.0.0.1:4080/
 
 Or, run Django directly::
 
-    cd omero-web
-    python omeroweb/manage.py runserver 4080
+    $ cd omero-web
+    $ python omeroweb/manage.py runserver 4080
     ...
     Starting development server at http://127.0.0.1:4080/
 
