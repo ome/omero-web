@@ -1518,6 +1518,7 @@ def marshal_tagged(
 
     q = """
         select distinct new map(obj.id as id,
+               obj.archived as archived,
                obj.name as name,
                lower(obj.name) as lowername,
                obj.details.owner.id as ownerId,
@@ -1538,6 +1539,7 @@ def marshal_tagged(
         e = unwrap(e)
         row = [
             e[0]["id"],
+            e[0]["archived"],
             e[0]["name"],
             e[0]["ownerId"],
             e[0]["image_details_permissions"],
