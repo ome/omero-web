@@ -531,6 +531,7 @@ def _marshal_image(
     """Given an Image row (list) marshals it into a dictionary.  Order
     and type of columns in row is:
       * id (rlong)
+      * archived (boolean)
       * name (rstring)
       * details.owner.id (rlong)
       * details.permissions (dict)
