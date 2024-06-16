@@ -95,7 +95,7 @@ var CommentsPane = function CommentsPane($element, opts) {
             });
             request = request.join("&");
 
-            $.getJSON(WEBCLIENT.URLS.webindex + "api/annotations/?type=comment&" + request, function(data){
+            $.getJSON(WEBCLIENT.URLS.webindex + "api/annotations/?parents=true&type=comment&" + request, function(data){
 
 
                 // manipulate data...
@@ -115,9 +115,40 @@ var CommentsPane = function CommentsPane($element, opts) {
                     return ann;
                 });
 
+                var inh_anns = []
+                if (data.hasOwnProperty("parents")){
+                    inh_anns = data.parents.annotations.map(function(ann) {
+                        ann.owner = experimenters[ann.owner.id];
+                        if (ann.link && ann.link.owner) {
+                            ann.link.owner = experimenters[ann.link.owner.id];
+                        }
+                        ann.addedBy = [ann.link.owner.id];
+                        let class_ = ann.link.parent.class;
+                        let id_ = '' + ann.link.parent.id;
+                        children = data.parents.lineage[class_][id_];
+                        class_ = children[0].class;
+                        ann.childClass = class_.substring(0, class_.length - 1);
+                        ann.childNames = [];
+                        if (children[0].hasOwnProperty("name")){
+                            for(j = 0; j < children.length; j++){
+                                ann.childNames.push(children[j].name);
+                            }
+                        }
+                        return ann;
+                    });
+                }
+
                 // Show most recent comments at the top
                 anns.sort(function(a, b) {
                     return a.date < b.date ? 1 : -1;
+                });
+                hierarchy = {"ProjectI":0, "DatasetI":1, "ScreenI":2, "PlateI":3, "PlateAcquisitionI":4, "WellI":5}
+                inh_anns.sort(function(a, b) {
+                    if (hierarchy[a.link.parent.class] != hierarchy[b.link.parent.class]){
+                        return hierarchy[a.link.parent.class] > hierarchy[b.link.parent.class] ? 1 : -1;
+                    } else{
+                        return a.date < b.date ? 1 : -1;
+                    }
                 });
 
                 // Remove duplicates (same comment on multiple objects)
@@ -131,8 +162,17 @@ var CommentsPane = function CommentsPane($element, opts) {
                 if (anns.length > 0) {
                     html = commentsTempl({'anns': anns,
                                           'static': WEBCLIENT.URLS.static_webclient,
-                                          'webindex': WEBCLIENT.URLS.webindex});
+                                          'webindex': WEBCLIENT.URLS.webindex,
+                                          'isInherited': false});
                 }
+                if (inh_anns.length > 0) {
+                    html = html + commentsTempl({'anns': inh_anns,
+                                                  'static': WEBCLIENT.URLS.static_webclient,
+                                                  'webindex': WEBCLIENT.URLS.webindex,
+                                                  'isInherited': true});
+                }
+
+
                 $("#comments_spinner").hide();
                 $comments_container.html(html);
 

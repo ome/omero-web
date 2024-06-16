@@ -1,3 +1,7 @@
+<% if (isInherited) { %>
+    <hr /><h2>Inherited comments</h2><br /><br />
+  <% } %>
+
 <% _.each(anns, function(ann) { %>
 <div class="ann_comment_wrapper" data-added-by="<% print(_.escape(ann.addedBy.join(','))) %>">
 
@@ -12,11 +16,16 @@
             <strong>
                 <%- ann.owner.firstName %> <%- ann.owner.lastName %>
             </strong>
-            at
-            <% print(OME.formatDate(ann.link.date)) %>
+            <% if (isInherited) { %>
+                on
+                <%- ann.link.parent.class.substring(0, ann.link.parent.class.length - 1) %> <%- ann.link.parent.name.slice(0, 30) %>
+            <% } else { %>
+                at
+                <% print(OME.formatDate(ann.link.date)) %>
+            <% } %>
         </div>
 
-        <% if (ann.permissions.canDelete) { %>
+        <% if (ann.permissions.canDelete && !isInherited) { %>
             <img class='removeComment' id="<%- ann.id %>-comment"
                 src="<%= static %>image/icon_basic_delete.png"
                 url='<%= webindex %>action/remove/comment/<%- ann.id %>/'
@@ -26,13 +35,17 @@
         <div class='commentText'><%- ann.textValue %></div>
     </div>
 
-    <% if (ann.ns || ann.description) { %>
     <span class="tooltip_html" style='display:none'>
         <b>ID:</b> <%- ann.id %><br />
         <% if (ann.ns) { %><b>Namespace:</b> <%- ann.ns %><br /><% } %>
         <% if (ann.description) { %><b>Description:</b> <%- ann.description %><br /><% } %>
+        <% if (isInherited) { %>
+            <b>Inherited by:</b><br />
+            <% _.each(ann.childNames, function(cname) { %>
+                &nbsp <%- cname %><br />
+            <% }) %>
+        <% } %>
     </span>
-    <% } %>
 
 </div>
 <% }) %>
