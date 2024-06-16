@@ -1,3 +1,6 @@
+<% if (isInherited) { %>
+    <hr /><h2>Inherited tags</h2><br /><br />
+  <% } %>
 
 <% _.each(tags, function(tag) { %>
 <span class="tag_annotation_wrapper"
@@ -19,7 +22,9 @@
         <span class="tooltip_html" style='display:none'>
         <!-- show different tooltip for batch_annotate panel -->
         <% if (tag.links) { %>
-            Can remove Tag from <b><%- tag.canRemoveCount %> object<% if(tag.canRemoveCount !== 1) {print('s')} %></b>:<br/>
+            <% if (!isInherited) { %>
+                Can remove Tag from <b><%- tag.canRemoveCount %> object<% if(tag.canRemoveCount !== 1) {print('s')} %></b>:<br/>
+            <% } %>
             <% _.each(tag.links, function(link, idx) { %>
                 <div>
                     <% if (idx < 20) { %>
@@ -33,12 +38,27 @@
                     <% } %>
                 </div>
             <% }) %>
+            <% if (isInherited) { %>
+                <br /><b>Inherited by:</b><br />
+                <% _.each(tag.childNames, function(cname) { %>
+                    &nbsp <%- cname %><br />
+                <% }) %>
+            <% } %>
         <% } else { %>
+            <% if (isInherited) { %>
+                Added on <%- tag.link.parent.class.substring(0, tag.link.parent.class.length - 1) %> <%- tag.link.parent.name.slice(0, 30) %><br />
+            <% } %>
             <b>ID:</b> <%- tag.id %><br />
             <b>Owner:</b> <%- tag.owner.firstName %> <%- tag.owner.lastName %><br />
             <b>Linked by:</b> <%- tag.link.owner.firstName %> <%- tag.link.owner.lastName %><br />
             <b>On:</b> <% print(OME.formatDate(tag.link.date)) %><br />
-            <b>Description:</b> <%- tag.description %>
+            <b>Description:</b> <%- tag.description %><br />
+            <% if (isInherited) { %>
+                <b>Inherited by:</b><br />
+                <% _.each(tag.childNames, function(cname) { %>
+                    &nbsp <%- cname %><br />
+                <% }) %>
+            <% } %>
         <% } %>
         </span>
     </div>
