@@ -28,21 +28,22 @@ Direct dependencies of OMERO.web are:
 Installation
 ------------
 
-We recommend installing omero-web in a Python virtual environment.
-Here we show the install using `Conda`_. For more details and
-other options, please see `OMERO.py`_.
+We recommend installing ``omero-web`` in a Python virtual environment.
+
+Before installing ``omero-web``, we recommend to install the `ZeroC IcePy`_ Python bindings.
+Our commercial partner `Glencoe Software <https://www.glencoesoftware.com/blog/2023/12/08/ice-binaries-for-omero.html>`_ has produced several Python wheels to install the Ice-Python bindings depending on the desired Python version and the operating system. Please visit `OMERO Python language bindings <https://omero.readthedocs.io/en/stable/developers/Python.html>`_ for a list of supported platforms and Python versions.
+
+When the wheel is installed, activate the virtual environment and install ``omero-web`` from `PyPI <https://pypi.org/>`_.
 
 ::
 
-    conda create -n myenv python=3.9 conda-forge::zeroc-ice==3.6.5 omero-py
-    conda activate myenv
-    pip install omero-web
+    $  pip install -U omero-web
 
 Setting of the environment variable ``OMERODIR`` is required.
 ``$OMERODIR/var/log/`` directory will contain log files.
 ``$OMERODIR/etc/grid/config.xml`` is used to store config::
 
-    export OMERODIR=$(pwd)
+    $ export OMERODIR=$(pwd)
 
 Usage
 -----
@@ -64,30 +65,30 @@ to source files will be reflected in your installation.
 
 ::
 
-    git clone https://github.com/ome/omero-web
-    cd omero-web
-    pip install -e .
+    $ git clone https://github.com/ome/omero-web
+    $ cd omero-web
+    $ pip install -e .
 
-Note some omero-web tests may not run when this module and/or omero-py are installed in editable mode.
+Note some ``omero-web`` tests may not run when this module and/or ``omero-py`` are installed in editable mode.
 
 Configuration for developer usage::
 
-    omero config set omero.web.debug True
-    omero config set omero.web.application_server development
+    $ omero config set omero.web.debug True
+    $ omero config set omero.web.application_server development
 
     # If you want to connect to OMERO.server other than 'localhost'
-    omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
+    $ omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
 
 Then run omero-web in the foreground with::
 
-    omero web start
+    $ omero web start
     ...
     Starting development server at http://127.0.0.1:4080/
 
 Or, run Django directly::
 
-    cd omero-web
-    python omeroweb/manage.py runserver 4080
+    $ cd omero-web
+    $ python omeroweb/manage.py runserver 4080
     ...
     Starting development server at http://127.0.0.1:4080/
 
@@ -156,10 +157,9 @@ Copyright
 2009-2024, The Open Microscopy Environment, Glencoe Software, Inc.
 
 .. _OMERO: https://www.openmicroscopy.org/omero
-.. _OMERO.web install: https://docs.openmicroscopy.org/latest/omero/sysadmins/unix/install-web/web-deployment.html
+.. _OMERO.web install: https://omero.readthedocs.io/en/stable/sysadmins/unix/install-web/web-deployment.html
 .. _OMERO.py: https://pypi.python.org/pypi/omero-py
-.. _ZeroC IcePy: https://zeroc.com/
+.. _ZeroC IcePy: https://zeroc.com/downloads/ice/3.6
 .. _Pillow: https://python-pillow.org/
 .. _NumPy: http://matplotlib.org/
-.. _Running and writing tests: https://docs.openmicroscopy.org/latest/omero/developers/testing.html
-.. _Conda: https://docs.conda.io/en/latest/
+.. _Running and writing tests: https://omero.readthedocs.io/en/stable//omero/developers/testing.html
