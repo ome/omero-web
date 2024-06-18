@@ -145,6 +145,7 @@ def imageMarshal(image, key=None, request=None):
             "imageName": image.name or "",
             "imageDescription": image.description or "",
             "imageAuthor": image.getAuthor(),
+            "imageArchived": image.archived or False,
             "projectName": pr and pr.name or "Multiple",
             "projectId": pr and pr.id or None,
             "projectDescription": pr and pr.description or "",

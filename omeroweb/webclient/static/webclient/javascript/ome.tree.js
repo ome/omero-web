@@ -619,6 +619,9 @@ $(function() {
                                     rv.children = true;
                                     rv.type = value.set ? 'tagset' : 'tag';
                                     rv.text = value.value;
+                                } else if (type === 'image' && value.archived) {
+                                    rv.a_attr = {title: 'Image is archived'};
+                                    rv.icon = WEBCLIENT.URLS.static_webclient + 'image/image_locked16.png';
                                 }
                                 return rv;
                             }

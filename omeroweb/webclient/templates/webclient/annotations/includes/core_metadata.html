@@ -32,6 +32,12 @@
         <th>Import Date:</th>
         <td id='import_date' data-isodate='{{ image.creationEventDate|date:"r" }}'></td>
     </tr>
+    {% if image.archived %}
+    <tr>
+        <th>Archived:</th>
+        <td id='is_archived'>{{ image.archived }}</td>
+    </tr>
+    {% endif %}
     <tr>
         <th>Dimensions (XY):</th>
         <td id='dims_xy'>{{ image.getSizeX }} x {{ image.getSizeY }}</td>
