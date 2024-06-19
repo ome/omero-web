@@ -3216,6 +3216,10 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
 
 
 def column_to_packed_bits(column):
+    """
+    Convert a column of integer values (strings will be coerced) to a bit mask
+    where each value present will be set to 1.
+    """
     if len(column.values) > 0 and isinstance(column.values[0], float):
         raise ValueError("Cannot have ID of float")
     # Coerce strings to uint64 if required
