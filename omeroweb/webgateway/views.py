@@ -3197,20 +3197,23 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
     sr = conn.getSharedResources()
     table = sr.openTable(omero.model.OriginalFileI(fileid, False), ctx)
     if not table:
-        return dict(error="Table %s not found" % fileid)
-
+        return {"error": "Table %s not found" % fileid}
     try:
         column_names = [column.name for column in table.getHeaders()]
         if col_name not in column_names:
-            return dict(error="Unknown column %s" % col_name)
+            return {"error": "Unknown column %s" % col_name}
         row_numbers = table.getWhereList(query, None, 0, 0, 1)
         (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
-        return HttpResponse(
-            column_to_packed_bits(column), content_type="application/octet-stream"
-        )
-    except ValueError:
-        logger.error("ValueError when getting obj_id_bitmask")
-        return {"error": "Specified column has invalid type"}
+        try:
+            return HttpResponse(
+                column_to_packed_bits(column), content_type="application/octet-stream"
+            )
+        except ValueError:
+            logger.error("ValueError when getting obj_id_bitmask")
+            return {"error": "Specified column has invalid type"}
+    except Exception:
+        logger.error("Error when getting obj_id_bitmask", exc_info=True)
+        return {"error", "Unexpected error getting obj_id_bitmask"}
     finally:
         table.close()
 
