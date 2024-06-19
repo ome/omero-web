@@ -3008,7 +3008,7 @@ def perform_table_query(
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
             idx = 0
-            batch = settings.MAX_TABLE_DOWNLOAD_ROWS
+            batch = 1000
             while idx < len(h):
                 batch = min(batch, len(h) - idx)
                 res = table.slice(col_indices, h[idx : idx + batch])
