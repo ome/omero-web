@@ -3477,6 +3477,30 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
 @login_required()
 @jsonp
 def perform_get_where_list(request, fileid, conn=None, **kwargs):
+    """
+    Retrieves matching row numbers for a table query
+
+    Example: /webgateway/table/123/rows/?query=object<100&start=50
+
+    Query arguments:
+    query: table query in PyTables syntax
+    start: row number to start searching
+
+    Uses MAX_TABLE_SLICE_SIZE to determine how many rows will be searched.
+
+    @param request:     http request.
+    @param img_id:      the id of the image in question
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'rows' and 'meta' in the success case,
+                        one with key 'error' if something went wrong.
+                        'rows' is an array of matching row numbers.
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - start: row on which search was started
+                            - end: row on which search ended (exclusive), can be used for
+                                   follow-up query as new start value if end<rowCount
+    """
     query = request.GET.get('query')
     if not query:
         return {'error': 'Must specify query'}
@@ -3517,6 +3541,29 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
 @login_required()
 @jsonp
 def perform_slice(request, fileid, conn=None, **kwargs):
+    """
+    Performs a table slice
+
+    Example: /webgateway/table/123/slice/?rows=1,2,5-10&columns=0,3-4
+
+    Query arguments:
+    rows: row numbers to retrieve in comma-separated list, hyphen-separated ranges allowed
+    columns: column numbers to retrieve in comma-separated list, hyphen-separated ranges allowed
+
+    At most MAX_TABLE_SLICE_SIZE data points (number of rows * number of columns) can be retrieved,
+    if more are requested, an error is returned.
+
+    @param request:     http request.
+    @param img_id:      the id of the image in question
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'columns' and 'meta' in the success case,
+                        one with key 'error' if something went wrong.
+                        'columns' is an array of column data arrays
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columns: names of columns in same order as data arrays
+    """
 
     def parse(item):
         try:
