@@ -600,6 +600,22 @@ This url will retrieve all rendering definitions for a given image (id)
 """
 
 
+perform_get_where_list = re_path(
+    r"^table/(?P<fileid>\d+)/rows/$", views.perform_get_where_list, name="webgateway_perform_get_where_list"
+)
+"""
+Query a table specified by fileid and return the matching rows
+"""
+
+
+perform_slice = re_path(
+    r"^table/(?P<fileid>\d+)/slice/$", views.perform_slice, name="webgateway_perform_slice"
+)
+"""
+Fetch a table slice specified by rows and columns
+"""
+
+
 urlpatterns = [
     webgateway,
     render_image,
@@ -657,4 +673,7 @@ urlpatterns = [
     table_obj_id_bitmask,
     object_table_query,
     open_with_options,
+
+    perform_get_where_list,
+    perform_slice,
 ]

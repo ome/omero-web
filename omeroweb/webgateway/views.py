@@ -3472,3 +3472,87 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
     except Exception:
         logger.debug(traceback.format_exc())
         return {"error": "Failed to retrieve rdefs"}
+
+
+@login_required()
+@jsonp
+def perform_get_where_list(request, fileid, conn=None, **kwargs):
+    query = request.GET.get('query')
+    if not query:
+        return {'error': 'Must specify query'}
+    try:
+        start = int(request.GET.get('start'))
+    except (ValueError, TypeError):
+        start = 0
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup('-1')
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {'error': 'Table %s not found' % fileid}
+    try:
+        rows = table.getNumberOfRows()
+        end = min(rows, start + settings.MAX_TABLE_SLICE_SIZE)
+        if start >= end:
+            hits = []
+        else:
+            logger.info(query)
+            hits = table.getWhereList(query, None, start, end, 1)
+            # TODO: start and end may be ignored, filter here - remove once backend is fixed
+            hits = [hit for hit in hits if start <= hit < end]
+        return {
+            'rows': hits,
+            'meta': {
+                'rowCount': rows,
+                'start': start,
+                'end': end,
+            }
+        }
+    except Exception:
+        return {'error': 'Error executing query: %s' % query}
+    finally:
+        table.close()
+
+
+@login_required()
+@jsonp
+def perform_slice(request, fileid, conn=None, **kwargs):
+
+    def parse(item):
+        try:
+            yield int(item)
+        except ValueError:
+            start, end = item.split('-')
+            yield from range(int(start), int(end) + 1)
+
+    source = request.POST if request.method == 'POST' else request.GET
+    try:
+        rows = [row for item in source.get('rows').split(',') for row in parse(item)]
+        columns = [column for item in source.get('columns').split(',') for column in parse(item)]
+    except ValueError:
+        return {'error': 'Need to specify comma-separated list of rows and columns'}
+    count = len(rows) * len(columns)
+    if count > settings.MAX_TABLE_SLICE_SIZE:
+        return {'error': 'Invalid slice cell count'}
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup('-1')
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {'error': 'Table %s not found' % fileid}
+    try:
+        try:
+            columns = table.slice(columns, rows).columns
+        except:
+            logger.exception('Error slicing table %s with %d columns and %d rows' % (fileid, len(columns), len(rows)))
+            return {'error': 'Error slicing table'}
+        return {
+            'columns': [column.values for column in columns],
+            'meta': {
+                'columns': [column.name for column in columns],
+                'rowCount': table.getNumberOfRows(),
+            },
+        }
+    finally:
+        table.close()
+

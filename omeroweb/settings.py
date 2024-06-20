@@ -716,6 +716,14 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "Prevent download of OMERO.tables exceeding this number of rows "
         "in a single request.",
     ],
+    "omero.web.max_table_slice_size": [
+        "MAX_TABLE_SLICE_SIZE",
+        1_000_000,
+        int,
+        "Prevent download of OMERO.tables exceeding this number of cells "
+        "in a single request.",
+    ],
+
     # VIEWER
     "omero.web.viewer.view": [
         "VIEWER_VIEW",
