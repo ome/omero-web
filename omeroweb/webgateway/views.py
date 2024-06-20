@@ -3588,11 +3588,7 @@ def perform_slice(request, fileid, conn=None, **kwargs):
     if not table:
         return {'error': 'Table %s not found' % fileid}
     try:
-        try:
-            columns = table.slice(columns, rows).columns
-        except:
-            logger.exception('Error slicing table %s with %d columns and %d rows' % (fileid, len(columns), len(rows)))
-            return {'error': 'Error slicing table'}
+        columns = table.slice(columns, rows).columns
         return {
             'columns': [column.values for column in columns],
             'meta': {
@@ -3600,6 +3596,9 @@ def perform_slice(request, fileid, conn=None, **kwargs):
                 'rowCount': table.getNumberOfRows(),
             },
         }
+    except:
+        logger.exception('Error slicing table %s with %d columns and %d rows' % (fileid, len(columns), len(rows)))
+        return {'error': 'Error slicing table'}
     finally:
         table.close()
 
