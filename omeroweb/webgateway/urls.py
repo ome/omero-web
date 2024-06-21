@@ -673,7 +673,7 @@ urlpatterns = [
     table_obj_id_bitmask,
     object_table_query,
     open_with_options,
-
+    # low-level table API
     perform_get_where_list,
     perform_slice,
 ]
