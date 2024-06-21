@@ -1463,7 +1463,9 @@ def jsonp(f):
             # NB: To support old api E.g. /get_rois_json/
             # We need to support lists
             safe = type(rv) is dict
-            return JsonResponse(rv, safe=safe)
+            # Allow optional JSON dumps parameters
+            json_params = kwargs.get("_json_dumps_params", None)
+            return JsonResponse(rv, safe=safe, json_dumps_params=json_params)
         except Exception as ex:
             # Default status is 500 'server error'
             # But we try to handle all 'expected' errors appropriately
