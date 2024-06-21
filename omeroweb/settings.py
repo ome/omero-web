@@ -723,7 +723,6 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "Prevent download of OMERO.tables exceeding this number of cells "
         "in a single request.",
     ],
-
     # VIEWER
     "omero.web.viewer.view": [
         "VIEWER_VIEW",

@@ -3500,22 +3500,22 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                         'meta' includes:
                             - rowCount: total number of rows in table
                             - start: row on which search was started
-                            - end: row on which search ended (exclusive), can be used for
-                                   follow-up query as new start value if end<rowCount
+                            - end: row on which search ended (exclusive), can be used
+                              for follow-up query as new start value if end<rowCount
     """
-    query = request.GET.get('query')
+    query = request.GET.get("query")
     if not query:
-        return {'error': 'Must specify query'}
+        return {"error": "Must specify query"}
     try:
-        start = int(request.GET.get('start'))
+        start = int(request.GET.get("start"))
     except (ValueError, TypeError):
         start = 0
     ctx = conn.createServiceOptsDict()
-    ctx.setOmeroGroup('-1')
+    ctx.setOmeroGroup("-1")
     resources = conn.getSharedResources()
     table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
     if not table:
-        return {'error': 'Table %s not found' % fileid}
+        return {"error": "Table %s not found" % fileid}
     try:
         rows = table.getNumberOfRows()
         end = min(rows, start + settings.MAX_TABLE_SLICE_SIZE)
@@ -3524,18 +3524,18 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         else:
             logger.info(query)
             hits = table.getWhereList(query, None, start, end, 1)
-            # TODO: start and end may be ignored, filter here - remove once backend is fixed
+            # TODO: getWhereList may ignore start and end - remove once fixed
             hits = [hit for hit in hits if start <= hit < end]
         return {
-            'rows': hits,
-            'meta': {
-                'rowCount': rows,
-                'start': start,
-                'end': end,
-            }
+            "rows": hits,
+            "meta": {
+                "rowCount": rows,
+                "start": start,
+                "end": end,
+            },
         }
     except Exception:
-        return {'error': 'Error executing query: %s' % query}
+        return {"error": "Error executing query: %s" % query}
     finally:
         table.close()
 
@@ -3549,18 +3549,20 @@ def perform_slice(request, fileid, conn=None, **kwargs):
     Example: /webgateway/table/123/slice/?rows=1,2,5-10&columns=0,3-4
 
     Query arguments:
-    rows: row numbers to retrieve in comma-separated list, hyphen-separated ranges allowed
-    columns: column numbers to retrieve in comma-separated list, hyphen-separated ranges allowed
+    rows: row numbers to retrieve in comma-separated list,
+          hyphen-separated ranges allowed
+    columns: column numbers to retrieve in comma-separated list,
+             hyphen-separated ranges allowed
 
-    At most MAX_TABLE_SLICE_SIZE data points (number of rows * number of columns) can be retrieved,
-    if more are requested, an error is returned.
+    At most MAX_TABLE_SLICE_SIZE data points (number of rows * number of columns) can
+    be retrieved, if more are requested, an error is returned.
 
     @param request:     http request.
     @param img_id:      the id of the image in question
     @param conn:        L{omero.gateway.BlitzGateway}
     @param **kwargs:    unused
-    @return:            A dictionary with keys 'columns' and 'meta' in the success case,
-                        one with key 'error' if something went wrong.
+    @return:            A dictionary with keys 'columns' and 'meta' in the success
+                        case, one with key 'error' if something went wrong.
                         'columns' is an array of column data arrays
                         'meta' includes:
                             - rowCount: total number of rows in table
@@ -3571,36 +3573,42 @@ def perform_slice(request, fileid, conn=None, **kwargs):
         try:
             yield int(item)
         except ValueError:
-            start, end = item.split('-')
+            start, end = item.split("-")
             yield from range(int(start), int(end) + 1)
 
-    source = request.POST if request.method == 'POST' else request.GET
+    source = request.POST if request.method == "POST" else request.GET
     try:
-        rows = [row for item in source.get('rows').split(',') for row in parse(item)]
-        columns = [column for item in source.get('columns').split(',') for column in parse(item)]
+        rows = [row for item in source.get("rows").split(",") for row in parse(item)]
+        columns = [
+            column
+            for item in source.get("columns").split(",")
+            for column in parse(item)
+        ]
     except ValueError:
-        return {'error': 'Need to specify comma-separated list of rows and columns'}
+        return {"error": "Need to specify comma-separated list of rows and columns"}
     count = len(rows) * len(columns)
     if count > settings.MAX_TABLE_SLICE_SIZE:
-        return {'error': 'Invalid slice cell count'}
+        return {"error": "Invalid slice cell count"}
     ctx = conn.createServiceOptsDict()
-    ctx.setOmeroGroup('-1')
+    ctx.setOmeroGroup("-1")
     resources = conn.getSharedResources()
     table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
     if not table:
-        return {'error': 'Table %s not found' % fileid}
+        return {"error": "Table %s not found" % fileid}
     try:
         columns = table.slice(columns, rows).columns
         return {
-            'columns': [column.values for column in columns],
-            'meta': {
-                'columns': [column.name for column in columns],
-                'rowCount': table.getNumberOfRows(),
+            "columns": [column.values for column in columns],
+            "meta": {
+                "columns": [column.name for column in columns],
+                "rowCount": table.getNumberOfRows(),
             },
         }
-    except:
-        logger.exception('Error slicing table %s with %d columns and %d rows' % (fileid, len(columns), len(rows)))
-        return {'error': 'Error slicing table'}
+    except Exception:
+        logger.exception(
+            "Error slicing table %s with %d columns and %d rows"
+            % (fileid, len(columns), len(rows))
+        )
+        return {"error": "Error slicing table"}
     finally:
         table.close()
-
