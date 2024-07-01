@@ -3517,8 +3517,9 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
     if not table:
         return {"error": "Table %s not found" % fileid}
     try:
-        rows = table.getNumberOfRows()
-        end = min(rows, start + settings.MAX_TABLE_SLICE_SIZE)
+        row_count = table.getNumberOfRows()
+        column_count = len(table.getHeaders())
+        end = min(row_count, start + settings.MAX_TABLE_SLICE_SIZE)
         if start >= end:
             hits = []
         else:
@@ -3529,7 +3530,8 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         return {
             "rows": hits,
             "meta": {
-                "rowCount": rows,
+                "rowCount": row_count,
+                "columnCount": column_count,
                 "start": start,
                 "end": end,
             },
@@ -3574,6 +3576,8 @@ def perform_slice(request, fileid, conn=None, **kwargs):
             yield int(item)
         except ValueError:
             start, end = item.split("-")
+            if start > end:
+                raise ValueError("Invalid range")
             yield from range(int(start), int(end) + 1)
 
     source = request.POST if request.method == "POST" else request.GET
@@ -3584,8 +3588,8 @@ def perform_slice(request, fileid, conn=None, **kwargs):
             for item in source.get("columns").split(",")
             for column in parse(item)
         ]
-    except ValueError:
-        return {"error": "Need to specify comma-separated list of rows and columns"}
+    except (ValueError, AttributeError) as error:
+        return {"error": f"Need to specify comma-separated list of rows and columns ({str(error)})"}
     count = len(rows) * len(columns)
     if count > settings.MAX_TABLE_SLICE_SIZE:
         return {"error": "Invalid slice cell count"}
@@ -3595,6 +3599,9 @@ def perform_slice(request, fileid, conn=None, **kwargs):
     table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
     if not table:
         return {"error": "Table %s not found" % fileid}
+    column_count = len(table.getHeaders())
+    if any(column >= column_count for column in columns):
+        return {"error": "Columns out of range"}
     try:
         columns = table.slice(columns, rows).columns
         return {
@@ -3602,13 +3609,14 @@ def perform_slice(request, fileid, conn=None, **kwargs):
             "meta": {
                 "columns": [column.name for column in columns],
                 "rowCount": table.getNumberOfRows(),
+                "columnCount": column_count,
             },
         }
-    except Exception:
+    except Exception as error:
         logger.exception(
             "Error slicing table %s with %d columns and %d rows"
             % (fileid, len(columns), len(rows))
         )
-        return {"error": "Error slicing table"}
+        return {"error": f"Error slicing table ({str(error)})"}
     finally:
         table.close()
