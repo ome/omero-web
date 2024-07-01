@@ -3589,22 +3589,22 @@ def perform_slice(request, fileid, conn=None, **kwargs):
     source = request.POST if request.method == "POST" else request.GET
     try:
         # Limit number of items to avoid problems when given massive ranges
-        rows = list(limit_generator(
-            (
-                row
-                for item in source.get("rows").split(",")
-                for row in parse(item)
-            ),
-            settings.MAX_TABLE_SLICE_SIZE
-        ))
-        columns = list(limit_generator(
-            (
-                column
-                for item in source.get("columns").split(",")
-                for column in parse(item)
-            ),
-            settings.MAX_TABLE_SLICE_SIZE / len(rows)
-        ))
+        rows = list(
+            limit_generator(
+                (row for item in source.get("rows").split(",") for row in parse(item)),
+                settings.MAX_TABLE_SLICE_SIZE,
+            )
+        )
+        columns = list(
+            limit_generator(
+                (
+                    column
+                    for item in source.get("columns").split(",")
+                    for column in parse(item)
+                ),
+                settings.MAX_TABLE_SLICE_SIZE / len(rows),
+            )
+        )
     except (ValueError, AttributeError) as error:
         return {
             "error": f"Need comma-separated list of rows and columns ({str(error)})"
