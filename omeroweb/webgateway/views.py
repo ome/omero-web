@@ -3580,19 +3580,35 @@ def perform_slice(request, fileid, conn=None, **kwargs):
                 raise ValueError("Invalid range")
             yield from range(int(start), int(end) + 1)
 
+    def limit_generator(generator, max_items):
+        for counter, item in enumerate(generator):
+            if counter >= max_items:
+                raise ValueError("Too many items")
+            yield item
+
     source = request.POST if request.method == "POST" else request.GET
     try:
-        rows = [row for item in source.get("rows").split(",") for row in parse(item)]
-        columns = [
-            column
-            for item in source.get("columns").split(",")
-            for column in parse(item)
-        ]
+        # Limit number of items to avoid problems when given massive ranges
+        rows = list(limit_generator(
+            (
+                row
+                for item in source.get("rows").split(",")
+                for row in parse(item)
+            ),
+            settings.MAX_TABLE_SLICE_SIZE
+        ))
+        columns = list(limit_generator(
+            (
+                column
+                for item in source.get("columns").split(",")
+                for column in parse(item)
+            ),
+            settings.MAX_TABLE_SLICE_SIZE / len(rows)
+        ))
     except (ValueError, AttributeError) as error:
-        return {"error": f"Need to specify comma-separated list of rows and columns ({str(error)})"}
-    count = len(rows) * len(columns)
-    if count > settings.MAX_TABLE_SLICE_SIZE:
-        return {"error": "Invalid slice cell count"}
+        return {
+            "error": f"Need comma-separated list of rows and columns ({str(error)})"
+        }
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
     resources = conn.getSharedResources()
