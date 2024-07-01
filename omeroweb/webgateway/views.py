@@ -3534,6 +3534,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                 "columnCount": column_count,
                 "start": start,
                 "end": end,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
             },
         }
     except Exception:
@@ -3626,6 +3627,7 @@ def perform_slice(request, fileid, conn=None, **kwargs):
                 "columns": [column.name for column in columns],
                 "rowCount": table.getNumberOfRows(),
                 "columnCount": column_count,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
             },
         }
     except Exception as error:
