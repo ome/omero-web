@@ -3503,6 +3503,27 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                             - end: row on which search ended (exclusive), can be used
                               for follow-up query as new start value if end<rowCount
     """
+
+    def collapse_ranges(generator):
+        range_start = range_end = None
+
+        def dump_range():
+            if range_start is not None:
+                if range_start == range_end:
+                    yield range_start
+                elif range_start + 1 == range_end:
+                    yield from (range_start, range_end)
+                else:
+                    yield f'{range_start}-{range_end}'
+
+        for hit in generator:
+            if hit - 1 == range_end:
+                range_end = hit  # increase current range
+            else:  # start new range
+                yield from dump_range()
+                range_start = range_end = hit
+        yield from dump_range()
+
     query = request.GET.get("query")
     if not query:
         return {"error": "Must specify query"}
@@ -3510,6 +3531,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         start = int(request.GET.get("start"))
     except (ValueError, TypeError):
         start = 0
+    collapse = request.GET.get("collapse", None) is not None
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
     resources = conn.getSharedResources()
@@ -3526,7 +3548,9 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
             logger.info(query)
             hits = table.getWhereList(query, None, start, end, 1)
             # TODO: getWhereList may ignore start and end - remove once fixed
-            hits = [hit for hit in hits if start <= hit < end]
+            hits = (hit for hit in hits if start <= hit < end)
+            # Collapse if requested
+            hits = list(collapse_ranges(hits) if collapse else hits)
         return {
             "rows": hits,
             "meta": {
