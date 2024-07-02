@@ -3491,7 +3491,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
     Uses MAX_TABLE_SLICE_SIZE to determine how many rows will be searched.
 
     @param request:     http request.
-    @param img_id:      the id of the image in question
+    @param fileid:      the id of the table
     @param conn:        L{omero.gateway.BlitzGateway}
     @param **kwargs:    unused
     @return:            A dictionary with keys 'rows' and 'meta' in the success case,
@@ -3509,11 +3509,11 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
 
         def dump_range():
             if range_start is not None:
-                if range_start == range_end:
+                if range_start == range_end:  # single value
                     yield range_start
-                elif range_start + 1 == range_end:
+                elif range_start + 1 == range_end:  # two values
                     yield from (range_start, range_end)
-                else:
+                else:  # three or more values, collapse
                     yield f'{range_start}-{range_end}'
 
         for hit in generator:
@@ -3542,10 +3542,10 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         row_count = table.getNumberOfRows()
         column_count = len(table.getHeaders())
         end = min(row_count, start + settings.MAX_TABLE_SLICE_SIZE)
+        logger.info(f"Query '{query}' from rows {start} to {end}")
         if start >= end:
             hits = []
         else:
-            logger.info(query)
             hits = table.getWhereList(query, None, start, end, 1)
             # TODO: getWhereList may ignore start and end - remove once fixed
             hits = (hit for hit in hits if start <= hit < end)
@@ -3585,7 +3585,7 @@ def perform_slice(request, fileid, conn=None, **kwargs):
     be retrieved, if more are requested, an error is returned.
 
     @param request:     http request.
-    @param img_id:      the id of the image in question
+    @param fileid:      the id of the table
     @param conn:        L{omero.gateway.BlitzGateway}
     @param **kwargs:    unused
     @return:            A dictionary with keys 'columns' and 'meta' in the success
