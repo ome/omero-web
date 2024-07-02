@@ -1463,7 +1463,9 @@ def jsonp(f):
             # NB: To support old api E.g. /get_rois_json/
             # We need to support lists
             safe = type(rv) is dict
-            return JsonResponse(rv, safe=safe)
+            # Allow optional JSON dumps parameters
+            json_params = kwargs.get("_json_dumps_params", None)
+            return JsonResponse(rv, safe=safe, json_dumps_params=json_params)
         except Exception as ex:
             # Default status is 500 'server error'
             # But we try to handle all 'expected' errors appropriately
@@ -3472,3 +3474,219 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
     except Exception:
         logger.debug(traceback.format_exc())
         return {"error": "Failed to retrieve rdefs"}
+
+
+@login_required()
+@jsonp
+def perform_get_where_list(request, fileid, conn=None, **kwargs):
+    """
+    Retrieves matching row numbers for a table query
+
+    Example: /webgateway/table/123/rows/?query=object<100&start=50
+
+    Query arguments:
+    query: table query in PyTables syntax
+    start: row number to start searching
+    collapse: optional argument, if present, collapses three or more
+        sequential row numbers in the resulting array into strings formatted as
+        "start-end". The same format can be submitted back to the slice request.
+
+    Uses MAX_TABLE_SLICE_SIZE to determine how many rows will be searched.
+
+    @param request:     http request.
+    @param fileid:      the id of the table
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'rows' and 'meta' in the success case,
+                        one with key 'error' if something went wrong.
+                        'rows' is an array of matching row numbers.
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columnCount: total number of columns in table
+                            - start: row on which search was started
+                            - end: row on which search ended (exclusive), can be used
+                              for follow-up query as new start value if end<rowCount
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+                            - partialCount: number of matching rows returned in this
+                              response. Important: if start>0 and/or end<rowCount,
+                              this may not be the total number of matching rows in the
+                              table!
+    """
+
+    class ValueFetcher(object):
+        def __init__(self, generator):
+            self.generator = generator
+            self.value = None
+
+        def __iter__(self):
+            self.value = yield from self.generator
+
+    def collapse_ranges(generator, collapse=True):
+        range_start = range_end = None
+
+        def dump_range():
+            if range_start is not None:
+                if range_start == range_end:  # single value
+                    yield range_start
+                elif range_start + 1 == range_end:  # two values
+                    yield from (range_start, range_end)
+                else:  # three or more values, collapse
+                    yield f"{range_start}-{range_end}"
+
+        count = 0
+        for hit in generator:
+            count += 1
+            if not collapse:
+                yield hit
+                continue
+            if hit - 1 == range_end:
+                range_end = hit  # increase current range
+            else:  # start new range
+                yield from dump_range()
+                range_start = range_end = hit
+        yield from dump_range()
+        return count
+
+    query = request.GET.get("query")
+    if not query:
+        return {"error": "Must specify query"}
+    try:
+        start = int(request.GET.get("start"))
+    except (ValueError, TypeError):
+        start = 0
+    collapse_results = request.GET.get("collapse", None) is not None
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
+    try:
+        row_count = table.getNumberOfRows()
+        column_count = len(table.getHeaders())
+        end = min(row_count, start + settings.MAX_TABLE_SLICE_SIZE)
+        logger.info(f"Query '{query}' from rows {start} to {end}")
+        if start >= end:
+            hits = []
+        else:
+            hits = table.getWhereList(query, None, start, end, 1)
+            # TODO: getWhereList may ignore start and end - remove once fixed
+            hits = (hit for hit in hits if start <= hit < end)
+        # Collapse and wrap in fetcher so we can get count
+        counter = ValueFetcher(collapse_ranges(hits, collapse_results))
+        return {
+            "rows": list(counter),
+            "meta": {
+                "partialCount": counter.value,
+                "rowCount": row_count,
+                "columnCount": column_count,
+                "start": start,
+                "end": end,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
+            },
+        }
+    except Exception:
+        return {"error": "Error executing query: %s" % query}
+    finally:
+        table.close()
+
+
+@login_required()
+@jsonp
+def perform_slice(request, fileid, conn=None, **kwargs):
+    """
+    Performs a table slice
+
+    Example: /webgateway/table/123/slice/?rows=1,2,5-10&columns=0,3-4
+
+    Query arguments:
+    rows: row numbers to retrieve in comma-separated list,
+          hyphen-separated ranges allowed
+    columns: column numbers to retrieve in comma-separated list,
+             hyphen-separated ranges allowed
+
+    At most MAX_TABLE_SLICE_SIZE data points (number of rows * number of columns) can
+    be retrieved, if more are requested, an error is returned.
+
+    @param request:     http request.
+    @param fileid:      the id of the table
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'columns' and 'meta' in the success
+                        case, one with key 'error' if something went wrong.
+                        'columns' is an array of column data arrays
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columns: names of columns in same order as data arrays
+                            - columnCount: total number of columns in table
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+    """
+
+    def parse(item):
+        try:
+            yield int(item)
+        except ValueError:
+            start, end = item.split("-")
+            if start > end:
+                raise ValueError("Invalid range")
+            yield from range(int(start), int(end) + 1)
+
+    def limit_generator(generator, max_items):
+        for counter, item in enumerate(generator):
+            if counter >= max_items:
+                raise ValueError("Too many items")
+            yield item
+
+    source = request.POST if request.method == "POST" else request.GET
+    try:
+        # Limit number of items to avoid problems when given massive ranges
+        rows = list(
+            limit_generator(
+                (row for item in source.get("rows").split(",") for row in parse(item)),
+                settings.MAX_TABLE_SLICE_SIZE,
+            )
+        )
+        columns = list(
+            limit_generator(
+                (
+                    column
+                    for item in source.get("columns").split(",")
+                    for column in parse(item)
+                ),
+                settings.MAX_TABLE_SLICE_SIZE / len(rows),
+            )
+        )
+    except (ValueError, AttributeError) as error:
+        return {
+            "error": f"Need comma-separated list of rows and columns ({str(error)})"
+        }
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
+    column_count = len(table.getHeaders())
+    if any(column >= column_count for column in columns):
+        return {"error": "Columns out of range"}
+    try:
+        columns = table.slice(columns, rows).columns
+        return {
+            "columns": [column.values for column in columns],
+            "meta": {
+                "columns": [column.name for column in columns],
+                "rowCount": table.getNumberOfRows(),
+                "columnCount": column_count,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
+            },
+        }
+    except Exception as error:
+        logger.exception(
+            "Error slicing table %s with %d columns and %d rows"
+            % (fileid, len(columns), len(rows))
+        )
+        return {"error": f"Error slicing table ({str(error)})"}
+    finally:
+        table.close()
