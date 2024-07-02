@@ -3529,7 +3529,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                 elif range_start + 1 == range_end:  # two values
                     yield from (range_start, range_end)
                 else:  # three or more values, collapse
-                    yield f'{range_start}-{range_end}'
+                    yield f"{range_start}-{range_end}"
 
         count = 0
         for hit in generator:
