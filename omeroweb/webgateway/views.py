@@ -3519,7 +3519,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         def __iter__(self):
             self.value = yield from self.generator
 
-    def collapse_ranges(generator):
+    def collapse_ranges(generator, collapse=True):
         range_start = range_end = None
 
         def dump_range():
@@ -3534,6 +3534,9 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         count = 0
         for hit in generator:
             count += 1
+            if not collapse:
+                yield hit
+                continue
             if hit - 1 == range_end:
                 range_end = hit  # increase current range
             else:  # start new range
@@ -3549,7 +3552,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         start = int(request.GET.get("start"))
     except (ValueError, TypeError):
         start = 0
-    collapse = request.GET.get("collapse", None) is not None
+    collapse_results = request.GET.get("collapse", None) is not None
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
     resources = conn.getSharedResources()
@@ -3567,8 +3570,8 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
             hits = table.getWhereList(query, None, start, end, 1)
             # TODO: getWhereList may ignore start and end - remove once fixed
             hits = (hit for hit in hits if start <= hit < end)
-        # Collapse if requested, and wrap in fetcher so we can get count
-        counter = ValueFetcher(collapse_ranges(hits) if collapse else hits)
+        # Collapse and wrap in fetcher so we can get count
+        counter = ValueFetcher(collapse_ranges(hits, collapse_results))
         return {
             "rows": list(counter),
             "meta": {
