@@ -3499,9 +3499,16 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                         'rows' is an array of matching row numbers.
                         'meta' includes:
                             - rowCount: total number of rows in table
+                            - columnCount: total number of columns in table
                             - start: row on which search was started
                             - end: row on which search ended (exclusive), can be used
                               for follow-up query as new start value if end<rowCount
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+                            - partialCount: number of matching rows returned in this
+                              response. Important: if start>0 and/or end<rowCount,
+                              this may not be the total number of matching rows in the
+                              table!
     """
 
     class ValueFetcher(object):
@@ -3606,6 +3613,9 @@ def perform_slice(request, fileid, conn=None, **kwargs):
                         'meta' includes:
                             - rowCount: total number of rows in table
                             - columns: names of columns in same order as data arrays
+                            - columnCount: total number of columns in table
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
     """
 
     def parse(item):
