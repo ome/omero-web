@@ -3487,6 +3487,9 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
     Query arguments:
     query: table query in PyTables syntax
     start: row number to start searching
+    collapse: optional argument, if present, collapses three or more
+        sequential row numbers in the resulting array into strings formatted as
+        "start-end". The same format can be submitted back to the slice request.
 
     Uses MAX_TABLE_SLICE_SIZE to determine how many rows will be searched.
 
