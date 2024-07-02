@@ -3504,6 +3504,14 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                               for follow-up query as new start value if end<rowCount
     """
 
+    class ValueFetcher(object):
+        def __init__(self, generator):
+            self.generator = generator
+            self.value = None
+
+        def __iter__(self):
+            self.value = yield from self.generator
+
     def collapse_ranges(generator):
         range_start = range_end = None
 
@@ -3516,13 +3524,16 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                 else:  # three or more values, collapse
                     yield f'{range_start}-{range_end}'
 
+        count = 0
         for hit in generator:
+            count += 1
             if hit - 1 == range_end:
                 range_end = hit  # increase current range
             else:  # start new range
                 yield from dump_range()
                 range_start = range_end = hit
         yield from dump_range()
+        return count
 
     query = request.GET.get("query")
     if not query:
@@ -3549,11 +3560,12 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
             hits = table.getWhereList(query, None, start, end, 1)
             # TODO: getWhereList may ignore start and end - remove once fixed
             hits = (hit for hit in hits if start <= hit < end)
-            # Collapse if requested
-            hits = list(collapse_ranges(hits) if collapse else hits)
+        # Collapse if requested, and wrap in fetcher so we can get count
+        counter = ValueFetcher(collapse_ranges(hits) if collapse else hits)
         return {
-            "rows": hits,
+            "rows": list(counter),
             "meta": {
+                "partialCount": counter.value,
                 "rowCount": row_count,
                 "columnCount": column_count,
                 "start": start,
