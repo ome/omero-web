@@ -3529,12 +3529,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         column_count = len(table.getHeaders())
         end = min(row_count, start + settings.MAX_TABLE_SLICE_SIZE)
         logger.info(f"Query '{query}' from rows {start} to {end}")
-        if start >= end:
-            hits = []
-        else:
-            hits = table.getWhereList(query, None, start, end, 1)
-            # TODO: getWhereList may ignore start and end - remove once fixed
-            hits = [hit for hit in hits if start <= hit < end]
+        hits = table.getWhereList(query, None, start, end, 1) if start < end else []
         return {
             "rows": hits,
             "meta": {
