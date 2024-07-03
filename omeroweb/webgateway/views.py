@@ -3487,9 +3487,6 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
     Query arguments:
     query: table query in PyTables syntax
     start: row number to start searching
-    collapse: optional argument, if present, collapses three or more
-        sequential row numbers in the resulting array into strings formatted as
-        "start-end". The same format can be submitted back to the slice request.
 
     Uses MAX_TABLE_SLICE_SIZE to determine how many rows will be searched.
 
@@ -3514,40 +3511,6 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
                               table!
     """
 
-    class ValueFetcher(object):
-        def __init__(self, generator):
-            self.generator = generator
-            self.value = None
-
-        def __iter__(self):
-            self.value = yield from self.generator
-
-    def collapse_ranges(generator, collapse=True):
-        range_start = range_end = None
-
-        def dump_range():
-            if range_start is not None:
-                if range_start == range_end:  # single value
-                    yield range_start
-                elif range_start + 1 == range_end:  # two values
-                    yield from (range_start, range_end)
-                else:  # three or more values, collapse
-                    yield f"{range_start}-{range_end}"
-
-        count = 0
-        for hit in generator:
-            count += 1
-            if not collapse:
-                yield hit
-                continue
-            if hit - 1 == range_end:
-                range_end = hit  # increase current range
-            else:  # start new range
-                yield from dump_range()
-                range_start = range_end = hit
-        yield from dump_range()
-        return count
-
     query = request.GET.get("query")
     if not query:
         return {"error": "Must specify query"}
@@ -3555,7 +3518,6 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         start = int(request.GET.get("start"))
     except (ValueError, TypeError):
         start = 0
-    collapse_results = request.GET.get("collapse", None) is not None
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
     resources = conn.getSharedResources()
@@ -3572,13 +3534,11 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
         else:
             hits = table.getWhereList(query, None, start, end, 1)
             # TODO: getWhereList may ignore start and end - remove once fixed
-            hits = (hit for hit in hits if start <= hit < end)
-        # Collapse and wrap in fetcher so we can get count
-        counter = ValueFetcher(collapse_ranges(hits, collapse_results))
+            hits = [hit for hit in hits if start <= hit < end]
         return {
-            "rows": list(counter),
+            "rows": hits,
             "meta": {
-                "partialCount": counter.value,
+                "partialCount": len(hits),
                 "rowCount": row_count,
                 "columnCount": column_count,
                 "start": start,
