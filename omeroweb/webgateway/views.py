@@ -3234,8 +3234,10 @@ def column_to_packed_bits(column):
     """
     if len(column.values) > 0 and isinstance(column.values[0], float):
         raise ValueError("Cannot have ID of float")
-    # Coerce strings to uint64 if required
-    indexes = numpy.array(column.values, dtype="uint64")
+    # Coerce strings to int64 if required.  If we have values > 2**63 they
+    # wouldn't work anyway so signed is okay here.  Note that the
+    # implementation does get weird if the indexes are negative values.
+    indexes = numpy.array(column.values, dtype="int64")
     bits = numpy.zeros(int(indexes.max() + 1), dtype="uint8")
     bits[indexes] = 1
     return numpy.packbits(bits, bitorder="big").tobytes()
