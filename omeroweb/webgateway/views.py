@@ -3201,7 +3201,16 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
     try:
         column_names = [column.name for column in table.getHeaders()]
         if col_name not in column_names:
-            return {"error": "Unknown column %s" % col_name}
+            # Previous implementations used perform_table_query() which
+            # defaults to returning all columns if the requested column name
+            # is unknown.  We would have then packed the first column.  We
+            # mimic that here by only querying for the first column.
+            #
+            # FIXME: This is really weird behaviour, especially with this
+            # endpoint defaulting to using the "object" column, and likely
+            # deserves to be refactored and deprecated or changed
+            # accordingly.
+            col_name = column_names[0]
         row_numbers = table.getWhereList(query, None, 0, 0, 1)
         (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
         try:
