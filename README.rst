@@ -162,4 +162,4 @@ Copyright
 .. _ZeroC IcePy: https://zeroc.com/downloads/ice/3.6
 .. _Pillow: https://python-pillow.org/
 .. _NumPy: http://matplotlib.org/
-.. _Running and writing tests: https://omero.readthedocs.io/en/stable//omero/developers/testing.html
+.. _Running and writing tests: https://omero.readthedocs.io/en/stable/omero/developers/testing.html
