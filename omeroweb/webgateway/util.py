@@ -69,6 +69,7 @@ LUTS_IN_PNG = [
     "/luts/ncsa_paledit/thal.lut",
     "/luts/ncsa_paledit/thallium.lut",
     "/luts/thermal.lut",
+    "/luts/turbo.lut",
     "/luts/ncsa_paledit/unionjack.lut",
     "/luts/matplotlib/viridis.lut",
     "/luts/wcif/yellow_hot.lut",
