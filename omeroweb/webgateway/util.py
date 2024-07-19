@@ -32,6 +32,7 @@ LUTS_IN_PNG = [
     "/luts/ncsa_paledit/6_shades.lut",
     "/luts/ncsa_paledit/blue_orange_icb.lut",
     "/luts/ncsa_paledit/brgbcmyw.lut",
+    "/luts/cividis.lut",
     "/luts/ncsa_paledit/cool.lut",
     "/luts/wcif/cyan_hot.lut",
     "/luts/ncsa_paledit/edges.lut",
