@@ -47,10 +47,13 @@ LUTS_IN_PNG = [
     "/luts/wcif/ica2.lut",
     "/luts/wcif/ica3.lut",
     "/luts/ice.lut",
+    "/luts/matplotlib/inferno.lut",
     "/luts/wcif/magenta_hot.lut",
+    "/luts/matplotlib/magma.lut",
     "/luts/wcif/orange_hot.lut",
     "/luts/ncsa_paledit/phase.lut",
     "/luts/physics.lut",
+    "/luts/matplotlib/plasma.lut",
     "/luts/janelia/pup_br.lut",
     "/luts/janelia/pup_nr.lut",
     "/luts/wcif/rainbow_rgb.lut",
@@ -64,6 +67,7 @@ LUTS_IN_PNG = [
     "/luts/ncsa_paledit/thallium.lut",
     "/luts/thermal.lut",
     "/luts/ncsa_paledit/unionjack.lut",
+    "/luts/matplotlib/viridis.lut",
     "/luts/wcif/yellow_hot.lut",
     # NB: this is not a LUT but it is in the current png
     # Used for channel slider gradient when no lut chosen
