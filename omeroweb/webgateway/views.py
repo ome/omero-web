@@ -3192,42 +3192,55 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
             else None
         )
 
-    rsp_data = perform_table_query(
-        conn,
-        fileid,
-        query,
-        [col_name],
-        offset=offset,
-        limit=limit,
-        lazy=False,
-        check_max_rows=False,
-    )
-    if "error" in rsp_data:
-        return rsp_data
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    sr = conn.getSharedResources()
+    table = sr.openTable(omero.model.OriginalFileI(fileid, False), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
     try:
-        data = rowsToByteArray(rsp_data["data"]["rows"])
-        return HttpResponse(bytes(data), content_type="application/octet-stream")
-    except ValueError:
-        logger.error("ValueError when getting obj_id_bitmask")
-        return {"error": "Specified column has invalid type"}
+        column_names = [column.name for column in table.getHeaders()]
+        if col_name not in column_names:
+            # Previous implementations used perform_table_query() which
+            # defaults to returning all columns if the requested column name
+            # is unknown.  We would have then packed the first column.  We
+            # mimic that here by only querying for the first column.
+            #
+            # FIXME: This is really weird behaviour, especially with this
+            # endpoint defaulting to using the "object" column, and likely
+            # deserves to be refactored and deprecated or changed
+            # accordingly.
+            col_name = column_names[0]
+        row_numbers = table.getWhereList(query, None, 0, 0, 1)
+        (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
+        try:
+            return HttpResponse(
+                column_to_packed_bits(column), content_type="application/octet-stream"
+            )
+        except ValueError:
+            logger.error("ValueError when getting obj_id_bitmask")
+            return {"error": "Specified column has invalid type"}
+    except Exception:
+        logger.error("Error when getting obj_id_bitmask", exc_info=True)
+        return {"error", "Unexpected error getting obj_id_bitmask"}
+    finally:
+        table.close()
 
 
-def rowsToByteArray(rows):
-    maxval = 0
-    if len(rows) > 0 and isinstance(rows[0][0], float):
+def column_to_packed_bits(column):
+    """
+    Convert a column of integer values (strings will be coerced) to a bit mask
+    where each value present will be set to 1.
+    """
+    if len(column.values) > 0 and isinstance(column.values[0], float):
         raise ValueError("Cannot have ID of float")
-    for obj in rows:
-        obj_id = int(obj[0])
-        maxval = max(obj_id, maxval)
-    bitArray = numpy.zeros(maxval + 1, dtype="uint8")
-    for obj in rows:
-        obj_id = int(obj[0])
-        bitArray[obj_id] = 1
-    packed = numpy.packbits(bitArray, bitorder="big")
-    data = bytearray()
-    for val in packed:
-        data.append(val)
-    return data
+    # Coerce strings to int64 if required.  If we have values > 2**63 they
+    # wouldn't work anyway so signed is okay here.  Note that the
+    # implementation does get weird if the indexes are negative values.
+    indexes = numpy.array(column.values, dtype="int64")
+    bits = numpy.zeros(int(indexes.max() + 1), dtype="uint8")
+    bits[indexes] = 1
+    return numpy.packbits(bits, bitorder="big").tobytes()
 
 
 @login_required()
