@@ -720,8 +720,8 @@ CUSTOM_SETTINGS_MAPPINGS = {
         "MAX_TABLE_SLICE_SIZE",
         1_000_000,
         int,
-        "Prevent download of OMERO.tables exceeding this number of cells "
-        "in a single request.",
+        "Maximum number of cells that can be retrieved in a single call "
+        "to the table slicing endpoint.",
     ],
     # VIEWER
     "omero.web.viewer.view": [
