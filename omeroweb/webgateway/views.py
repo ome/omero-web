@@ -3624,15 +3624,18 @@ def perform_slice(request, fileid, conn=None, **kwargs):
     if not table:
         return {"error": "Table %s not found" % fileid}
     column_count = len(table.getHeaders())
-    if any(column >= column_count for column in columns):
+    row_count = table.getNumberOfRows()
+    if not all(0 <= column < column_count for column in columns):
         return {"error": "Columns out of range"}
+    if not all(0 <= row < row_count for row in rows):
+        return {"error": "Rows out of range"}
     try:
         columns = table.slice(columns, rows).columns
         return {
             "columns": [column.values for column in columns],
             "meta": {
                 "columns": [column.name for column in columns],
-                "rowCount": table.getNumberOfRows(),
+                "rowCount": row_count,
                 "columnCount": column_count,
                 "maxCells": settings.MAX_TABLE_SLICE_SIZE,
             },
