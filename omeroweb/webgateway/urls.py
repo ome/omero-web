@@ -604,10 +604,10 @@ This url will retrieve all rendering definitions for a given image (id)
 """
 
 
-perform_get_where_list = re_path(
+table_get_where_list = re_path(
     r"^table/(?P<fileid>\d+)/rows/$",
-    views.perform_get_where_list,
-    name="webgateway_perform_get_where_list",
+    views.table_get_where_list,
+    name="webgateway_table_get_where_list",
     kwargs=COMPACT_JSON,
 )
 """
@@ -615,10 +615,10 @@ Query a table specified by fileid and return the matching rows
 """
 
 
-perform_slice = re_path(
+table_slice = re_path(
     r"^table/(?P<fileid>\d+)/slice/$",
-    views.perform_slice,
-    name="webgateway_perform_slice",
+    views.table_slice,
+    name="webgateway_table_slice",
     kwargs=COMPACT_JSON,
 )
 """
@@ -684,6 +684,6 @@ urlpatterns = [
     object_table_query,
     open_with_options,
     # low-level table API
-    perform_get_where_list,
-    perform_slice,
+    table_get_where_list,
+    table_slice,
 ]

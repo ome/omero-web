@@ -3478,7 +3478,7 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
 
 @login_required()
 @jsonp
-def perform_get_where_list(request, fileid, conn=None, **kwargs):
+def table_get_where_list(request, fileid, conn=None, **kwargs):
     """
     Retrieves matching row numbers for a table query
 
@@ -3549,7 +3549,7 @@ def perform_get_where_list(request, fileid, conn=None, **kwargs):
 
 @login_required()
 @jsonp
-def perform_slice(request, fileid, conn=None, **kwargs):
+def table_slice(request, fileid, conn=None, **kwargs):
     """
     Performs a table slice
 
