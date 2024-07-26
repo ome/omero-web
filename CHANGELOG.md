@@ -15,6 +15,7 @@
 ## Other changes
 
 - Update installation instructions [#558](https://github.com/ome/omero-web/pull/558)
+- Limit numpy to version 1.9 [#561](https://github.com/ome/omero-web/pull/561)
 
 5.26.0 (May 2024)
 -----------------
