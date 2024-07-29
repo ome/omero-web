@@ -1,3 +1,23 @@
+5.27.0 (July 2024)
+------------------
+
+## Features
+
+- New API calls for table querying and slicing [#564](https://github.com/ome/omero-web/pull/564)
+- Improve table query performance [#563](https://github.com/ome/omero-web/pull/563),
+  [#554](https://github.com/ome/omero-web/pull/554)
+- Show archival status in tree [#555](https://github.com/ome/omero-web/pull/555)
+
+## Bug fixes
+
+- Make URLs containing `$` clickable [#560](https://github.com/ome/omero-web/pull/560)
+
+## Other changes
+
+- Update installation instructions [#558](https://github.com/ome/omero-web/pull/558)
+- Limit numpy to version 1.9 [#561](https://github.com/ome/omero-web/pull/561)
+- Bump flake8 [#562](https://github.com/ome/omero-web/pull/562)
+
 5.26.0 (May 2024)
 -----------------
 
