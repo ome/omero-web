@@ -531,6 +531,7 @@ def _marshal_image(
     """Given an Image row (list) marshals it into a dictionary.  Order
     and type of columns in row is:
       * id (rlong)
+      * archived (boolean)
       * name (rstring)
       * details.owner.id (rlong)
       * details.permissions (dict)
@@ -549,9 +550,10 @@ def _marshal_image(
     @param row_pixels The Image row pixels data to marshal
     @type row_pixels L{list}
     """
-    image_id, name, owner_id, permissions, fileset_id = row
+    image_id, archived, name, owner_id, permissions, fileset_id = row
     image = dict()
     image["id"] = unwrap(image_id)
+    image["archived"] = unwrap(archived) is True
     image["name"] = unwrap_to_str(name)
     image["ownerId"] = unwrap(owner_id)
     image["permsCss"] = parse_permissions_css(permissions, unwrap(owner_id), conn)
@@ -670,6 +672,7 @@ def marshal_images(
     q = (
         """
         select new map(image.id as id,
+               image.archived as archived,
                image.name as name,
                image.details.owner.id as ownerId,
                image as image_details_permissions,
@@ -753,12 +756,13 @@ def marshal_images(
         e = unwrap(e)[0]
         d = [
             e["id"],
+            e["archived"],
             e["name"],
             e["ownerId"],
             e["image_details_permissions"],
             e["filesetId"],
         ]
-        kwargs = {"conn": conn, "row": d[0:5]}
+        kwargs = {"conn": conn, "row": d[0:6]}
         if load_pixels:
             d = [e["sizeX"], e["sizeY"], e["sizeZ"], e["sizeT"]]
             kwargs["row_pixels"] = d
@@ -1514,6 +1518,7 @@ def marshal_tagged(
 
     q = """
         select distinct new map(obj.id as id,
+               obj.archived as archived,
                obj.name as name,
                lower(obj.name) as lowername,
                obj.details.owner.id as ownerId,
@@ -1534,6 +1539,7 @@ def marshal_tagged(
         e = unwrap(e)
         row = [
             e[0]["id"],
+            e[0]["archived"],
             e[0]["name"],
             e[0]["ownerId"],
             e[0]["image_details_permissions"],
