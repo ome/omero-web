@@ -16,6 +16,10 @@
 from django.urls import re_path
 from omeroweb.webgateway import views
 
+
+COMPACT_JSON = {"_json_dumps_params": {"separators": (",", ":")}}
+
+
 webgateway = re_path(r"^$", views.index, name="webgateway")
 """
 Returns a main prefix
@@ -600,6 +604,28 @@ This url will retrieve all rendering definitions for a given image (id)
 """
 
 
+table_get_where_list = re_path(
+    r"^table/(?P<fileid>\d+)/rows/$",
+    views.table_get_where_list,
+    name="webgateway_table_get_where_list",
+    kwargs=COMPACT_JSON,
+)
+"""
+Query a table specified by fileid and return the matching rows
+"""
+
+
+table_slice = re_path(
+    r"^table/(?P<fileid>\d+)/slice/$",
+    views.table_slice,
+    name="webgateway_table_slice",
+    kwargs=COMPACT_JSON,
+)
+"""
+Fetch a table slice specified by rows and columns
+"""
+
+
 urlpatterns = [
     webgateway,
     render_image,
@@ -657,4 +683,7 @@ urlpatterns = [
     table_obj_id_bitmask,
     object_table_query,
     open_with_options,
+    # low-level table API
+    table_get_where_list,
+    table_slice,
 ]
