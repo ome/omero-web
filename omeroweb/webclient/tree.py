@@ -23,6 +23,7 @@ import logging
 import time
 import pytz
 import omero
+import warnings
 from collections import defaultdict
 
 from omero.rtypes import rlong, unwrap, wrap
@@ -553,6 +554,9 @@ def _marshal_image(
     if len(row) == 6:
         image_id, archived, name, owner_id, permissions, fileset_id = row
     else:
+        # Likely this is being called by external code
+        warnings.warn("_marshal_image() is a 'private' function; "
+                      "row should have 6 elements", DeprecationWarning),
         image_id, name, owner_id, permissions, fileset_id = row
         archived = False
     image = dict()
