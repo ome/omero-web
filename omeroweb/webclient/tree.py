@@ -531,7 +531,7 @@ def _marshal_image(
     """Given an Image row (list) marshals it into a dictionary.  Order
     and type of columns in row is:
       * id (rlong)
-      * archived (boolean)
+      * archived (boolean) - optional. Defaults to False if only 5 in row
       * name (rstring)
       * details.owner.id (rlong)
       * details.permissions (dict)
@@ -550,7 +550,11 @@ def _marshal_image(
     @param row_pixels The Image row pixels data to marshal
     @type row_pixels L{list}
     """
-    image_id, archived, name, owner_id, permissions, fileset_id = row
+    if len(row) == 6:
+        image_id, archived, name, owner_id, permissions, fileset_id = row
+    else:
+        image_id, name, owner_id, permissions, fileset_id = row
+        archived = False
     image = dict()
     image["id"] = unwrap(image_id)
     image["archived"] = unwrap(archived) is True
