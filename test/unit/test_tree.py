@@ -263,10 +263,11 @@ class TestTree(object):
         date=None,
         acqDate=None,
         with_thumbVersion=False,
+        is_archived=False,
     ):
         expected = {
             "id": 1,
-            "archived": False,
+            "archived": is_archived,
             "ownerId": 10,
             "name": "name",
             "permsCss": "canEdit canAnnotate canLink canDelete canChgrp",
@@ -322,6 +323,11 @@ class TestTree(object):
     def test_marshal_image_map(self, mock_conn, image_data):
         marshaled = _marshal_image_map(mock_conn, image_data)
         self.assert_image(marshaled)
+
+    def test_marshal_image_map_archived(self, mock_conn, image_data):
+        image_data["archived"] = True
+        marshaled = _marshal_image_map(mock_conn, image_data)
+        self.assert_image(marshaled, is_archived=True)
 
     def test_marshal_image_map_with_pixels(self, mock_conn, image_data_with_pixels):
         marshaled = _marshal_image_map(mock_conn, image_data_with_pixels)
