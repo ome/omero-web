@@ -814,7 +814,7 @@ def marshal_images(
         # images mentioned in shares that are not in the results
         # because they have been deleted
         if share_id is not None and image_rids and data["id"] in image_rids:
-            image_rids.remove(e["id"])
+            image_rids.remove(data["id"])
             kwargs["share_id"] = share_id
 
         images.append(_marshal_image_map(conn, data, **kwargs))
