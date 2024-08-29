@@ -213,8 +213,6 @@ class TestTree(object):
         }
 
         marshaled = _marshal_plate(mock_conn, row)
-        print(marshaled)
-        print(expected)
         assert marshaled == expected
 
     # Add a lot of tests
