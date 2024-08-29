@@ -23,10 +23,13 @@ Simple unit tests for the "tree" module.
 
 import pytest
 
-from omero.rtypes import rlong, rstring, rtime
+from omero.rtypes import rlong, rstring, rtime, unwrap
 from omeroweb.webclient.tree import (
     _marshal_plate_acquisition,
     _marshal_dataset,
+    _marshal_date,
+    _marshal_image,
+    _marshal_image_map,
     _marshal_plate,
     parse_permissions_css,
 )
@@ -66,6 +69,43 @@ def start_time():
 def end_time():
     # 2014-05-08 10:38:30 UTC; server timestamps contain ms
     return rtime(1399545510 * 1000)
+
+
+@pytest.fixture(scope="module")
+def image_row(owner_permissions):
+    return [rlong(1), rstring("name"), rlong(10), owner_permissions, rlong(100)]
+
+
+@pytest.fixture(scope="module")
+def pixels_row():
+    return [rlong(1), rlong(2), rlong(3), rlong(4)]
+
+
+@pytest.fixture()
+def image_data(image_row):
+    image_id, name, owner_id, permissions, fileset_id = image_row
+    return {
+        "id": image_id,
+        "archived": False,
+        "name": name,
+        "ownerId": owner_id,
+        "image_details_permissions": permissions,
+        "filesetId": fileset_id,
+    }
+
+
+@pytest.fixture()
+def image_data_with_pixels(image_data, pixels_row):
+    sizeX, sizeY, sizeZ, sizeT = pixels_row
+    image_data.update(
+        {
+            "sizeX": sizeX,
+            "sizeY": sizeY,
+            "sizeZ": sizeZ,
+            "sizeT": sizeT,
+        }
+    )
+    return image_data
 
 
 class TestTree(object):
@@ -214,5 +254,97 @@ class TestTree(object):
 
         marshaled = _marshal_plate(mock_conn, row)
         assert marshaled == expected
+
+    def assert_image(
+        self,
+        marshaled,
+        with_pixels=False,
+        with_share=False,
+        date=None,
+        acqDate=None,
+        with_thumbVersion=False,
+    ):
+        expected = {
+            "id": 1,
+            "archived": False,
+            "ownerId": 10,
+            "name": "name",
+            "permsCss": "canEdit canAnnotate canLink canDelete canChgrp",
+            "filesetId": 100,
+        }
+        if with_pixels:
+            expected.update(
+                {
+                    "sizeX": 1,
+                    "sizeY": 2,
+                    "sizeZ": 3,
+                    "sizeT": 4,
+                }
+            )
+        if with_share:
+            expected.update({"shareId": 1})
+        if date:
+            # Cannot be static, will include local timezone
+            expected.update({"date": _marshal_date(unwrap(date))})
+        if acqDate:
+            # Cannot be static, will include local timezone
+            expected.update({"acqDate": _marshal_date(unwrap(acqDate))})
+        if with_thumbVersion:
+            expected.update({"thumbVersion": 1})
+        assert marshaled == expected
+
+    def test_marshal_image(self, mock_conn, image_row):
+        marshaled = _marshal_image(mock_conn, image_row)
+        self.assert_image(marshaled)
+
+    def test_marshal_image_with_pixels(self, mock_conn, image_row, pixels_row):
+        marshaled = _marshal_image(mock_conn, image_row, pixels_row)
+        self.assert_image(marshaled, with_pixels=True)
+
+    def test_marshal_image_with_share(self, mock_conn, image_row):
+        marshaled = _marshal_image(mock_conn, image_row, share_id=1)
+        self.assert_image(marshaled, with_share=True)
+
+    def test_marshal_image_with_date(self, mock_conn, image_row, end_time):
+        marshaled = _marshal_image(mock_conn, image_row, date=end_time)
+        self.assert_image(marshaled, date=end_time)
+
+    def test_marshal_image_with_acquisition_date(
+        self, mock_conn, image_row, start_time
+    ):
+        marshaled = _marshal_image(mock_conn, image_row, acqDate=start_time)
+        self.assert_image(marshaled, acqDate=start_time)
+
+    def test_marshal_image_with_thumb_version(self, mock_conn, image_row, start_time):
+        marshaled = _marshal_image(mock_conn, image_row, thumbVersion=1)
+        self.assert_image(marshaled, with_thumbVersion=True)
+
+    def test_marshal_image_map(self, mock_conn, image_data):
+        marshaled = _marshal_image_map(mock_conn, image_data)
+        self.assert_image(marshaled)
+
+    def test_marshal_image_map_with_pixels(self, mock_conn, image_data_with_pixels):
+        marshaled = _marshal_image_map(mock_conn, image_data_with_pixels)
+        self.assert_image(marshaled, with_pixels=True)
+
+    def test_marshal_image_map_with_share(self, mock_conn, image_data):
+        marshaled = _marshal_image_map(mock_conn, image_data, share_id=1)
+        self.assert_image(marshaled, with_share=True)
+
+    def test_marshal_image_map_with_date(self, mock_conn, image_data, end_time):
+        marshaled = _marshal_image_map(mock_conn, image_data, date=end_time)
+        self.assert_image(marshaled, date=end_time)
+
+    def test_marshal_image_map_with_acquisition_date(
+        self, mock_conn, image_data, start_time
+    ):
+        marshaled = _marshal_image_map(mock_conn, image_data, acqDate=start_time)
+        self.assert_image(marshaled, acqDate=start_time)
+
+    def test_marshal_image_map_with_thumb_version(
+        self, mock_conn, image_data, start_time
+    ):
+        marshaled = _marshal_image_map(mock_conn, image_data, thumbVersion=1)
+        self.assert_image(marshaled, with_thumbVersion=True)
 
     # Add a lot of tests
