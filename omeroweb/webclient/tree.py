@@ -531,7 +531,6 @@ def _marshal_image(
     """Given an Image row (list) marshals it into a dictionary.  Order
     and type of columns in row is:
       * id (rlong)
-      * archived (boolean)
       * name (rstring)
       * details.owner.id (rlong)
       * details.permissions (dict)
@@ -550,22 +549,74 @@ def _marshal_image(
     @param row_pixels The Image row pixels data to marshal
     @type row_pixels L{list}
     """
-    image_id, archived, name, owner_id, permissions, fileset_id = row
-    image = dict()
-    image["id"] = unwrap(image_id)
-    image["archived"] = unwrap(archived) is True
-    image["name"] = unwrap_to_str(name)
-    image["ownerId"] = unwrap(owner_id)
-    image["permsCss"] = parse_permissions_css(permissions, unwrap(owner_id), conn)
-    fileset_id_val = unwrap(fileset_id)
-    if fileset_id_val is not None:
-        image["filesetId"] = fileset_id_val
+    image_id, name, owner_id, permissions, fileset_id = row
+    data = {
+        "id": image_id,
+        "name": name,
+        "ownerId": owner_id,
+        "image_details_permissions": permissions,
+        "filesetId": fileset_id,
+    }
     if row_pixels:
         sizeX, sizeY, sizeZ, sizeT = row_pixels
-        image["sizeX"] = unwrap(sizeX)
-        image["sizeY"] = unwrap(sizeY)
-        image["sizeZ"] = unwrap(sizeZ)
-        image["sizeT"] = unwrap(sizeT)
+        data["sizeX"] = sizeX
+        data["sizeY"] = sizeY
+        data["sizeZ"] = sizeZ
+        data["sizeT"] = sizeT
+    return _marshal_image_map(
+        conn,
+        data,
+        share_id=share_id,
+        date=date,
+        acqDate=acqDate,
+        thumbVersion=thumbVersion,
+    )
+
+
+def _marshal_image_map(
+    conn,
+    data,
+    share_id=None,
+    date=None,
+    acqDate=None,
+    thumbVersion=None,
+):
+    """Given an Image data dictionary marshals it into a dictionary.  Suppored keys are:
+      * id (rlong)
+      * archived (boolean; optional)
+      * name (rstring)
+      * ownerId (rlong)
+      * image_details_permissions (dict)
+      * filesetId (rlong)
+      * sizeX (rlong; optional)
+      * sizeY (rlong; optional)
+      * sizeZ (rlong; optional)
+      * sizeT (rlong; optional)
+
+    @param conn OMERO gateway.
+    @type conn L{omero.gateway.BlitzGateway}
+    @param data The data to marshal
+    @type row L{dict}
+    """
+    image = dict()
+    image["id"] = unwrap(data["id"])
+    image["archived"] = unwrap(data.get("archived")) is True
+    image["name"] = unwrap_to_str(data["name"])
+    image["ownerId"] = unwrap(data["ownerId"])
+    image["permsCss"] = parse_permissions_css(
+        data["image_details_permissions"], unwrap(data["ownerId"]), conn
+    )
+    fileset_id_val = unwrap(data["filesetId"])
+    if fileset_id_val is not None:
+        image["filesetId"] = fileset_id_val
+    if "sizeX" in data:
+        image["sizeX"] = unwrap(data["sizeX"])
+    if "sizeY" in data:
+        image["sizeY"] = unwrap(data["sizeY"])
+    if "sizeZ" in data:
+        image["sizeZ"] = unwrap(data["sizeZ"])
+    if "sizeT" in data:
+        image["sizeT"] = unwrap(data["sizeT"])
     if share_id is not None:
         image["shareId"] = share_id
     if date is not None:
@@ -753,31 +804,20 @@ def marshal_images(
     )
 
     for e in qs.projection(q, params, service_opts):
-        e = unwrap(e)[0]
-        d = [
-            e["id"],
-            e["archived"],
-            e["name"],
-            e["ownerId"],
-            e["image_details_permissions"],
-            e["filesetId"],
-        ]
-        kwargs = {"conn": conn, "row": d[0:6]}
-        if load_pixels:
-            d = [e["sizeX"], e["sizeY"], e["sizeZ"], e["sizeT"]]
-            kwargs["row_pixels"] = d
+        data = unwrap(e)[0]
+        kwargs = {}
         if date:
-            kwargs["acqDate"] = e["acqDate"]
-            kwargs["date"] = e["date"]
+            kwargs["acqDate"] = data["acqDate"]
+            kwargs["date"] = data["date"]
 
         # While marshalling the images, determine if there are any
         # images mentioned in shares that are not in the results
         # because they have been deleted
-        if share_id is not None and image_rids and e["id"] in image_rids:
-            image_rids.remove(e["id"])
+        if share_id is not None and image_rids and data["id"] in image_rids:
+            image_rids.remove(data["id"])
             kwargs["share_id"] = share_id
 
-        images.append(_marshal_image(**kwargs))
+        images.append(_marshal_image_map(conn, data, **kwargs))
 
     # Load thumbnails separately
     # We want version of most recent thumbnail (max thumbId) owned by user
@@ -1536,23 +1576,12 @@ def marshal_tagged(
 
     images = []
     for e in qs.projection(q, params, service_opts):
-        e = unwrap(e)
-        row = [
-            e[0]["id"],
-            e[0]["archived"],
-            e[0]["name"],
-            e[0]["ownerId"],
-            e[0]["image_details_permissions"],
-            e[0]["filesetId"],
-        ]
+        data = unwrap(e)[0]
         kwargs = {}
-        if load_pixels:
-            d = [e[0]["sizeX"], e[0]["sizeY"], e[0]["sizeZ"], e[0]["sizeT"]]
-            kwargs["row_pixels"] = d
         if date:
-            kwargs["acqDate"] = e[0]["acqDate"]
-            kwargs["date"] = e[0]["date"]
-        images.append(_marshal_image(conn, row, **kwargs))
+            kwargs["acqDate"] = data["acqDate"]
+            kwargs["date"] = data["date"]
+        images.append(_marshal_image_map(conn, data, **kwargs))
     tagged["images"] = images
 
     # Screens
