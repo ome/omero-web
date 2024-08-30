@@ -1,3 +1,14 @@
+5.27.1 (August 2024)
+--------------------
+
+## Bug fixes
+
+- Fix internal API used by other plugins [#577](https://github.com/ome/omero-web/pull/577)
+
+## Other changes
+
+- Bump flake8 and black [#571](https://github.com/ome/omero-web/pull/571)
+
 5.27.0 (July 2024)
 ------------------
 
