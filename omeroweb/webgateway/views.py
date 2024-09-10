@@ -2096,6 +2096,32 @@ def listLuts_json(request, conn=None, **kwargs):
 
 
 @login_required()
+def binaryLuts_json(request, conn=None, **kwargs):
+    """
+    Returns the RGB values of all LUTs on the server, encoded in Base64
+    """
+    scriptService = conn.getScriptService()
+    rsp = {}
+
+    for lut in scriptService.getScriptsByMimetype("text/x-lut"):
+        orig_file = conn.getObject("OriginalFile", lut.getId()._val)
+        lut_data = bytearray()
+
+        # Collect the LUT data in byte form
+        for chunk in orig_file.getFileInChunks():
+            lut_data.extend(chunk)
+
+        # Base64 encode the binary LUT data
+        lut_base64 = base64.b64encode(lut_data).decode('utf-8')
+
+        # Store the Base64 string with the LUT name
+        rsp[lut.getName()._val] = lut_base64
+
+    # Return the JSON response with LUT names and encoded data
+    return JsonResponse({"luts": rsp})
+
+
+@login_required()
 def list_compatible_imgs_json(request, iid, conn=None, **kwargs):
     """
     Lists the images on the same project that would be viable targets for
