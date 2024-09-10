@@ -1,3 +1,11 @@
+5.27.2 (September 2024)
+-----------------------
+
+## Bug fixes
+
+- Fix login page scaling for mobile devices [#576](https://github.com/ome/omero-web/pull/576)
+- Fix wrapping of long names [#574](https://github.com/ome/omero-web/pull/574)
+
 5.27.1 (August 2024)
 --------------------
 
