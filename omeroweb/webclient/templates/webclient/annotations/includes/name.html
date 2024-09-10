@@ -26,7 +26,7 @@
     <div class="data_heading" id="{{ manager.obj_type }}name-{{ manager.obj_id }}">
         <div>
             <h1>
-                <span id="{{ manager.obj_type }}name-{{ manager.obj_id }}-name" style="word-wrap: break-word;">
+                <span id="{{ manager.obj_type }}name-{{ manager.obj_id }}-name">
                     {{ nameText|escape }}
                 </span>
             </h1>
@@ -37,7 +37,7 @@
     </div>
 {% else %}
     <div class="data_heading">
-      <h1 style="word-wrap: break-word;">{{ nameText|escape }}</h1>
+      <h1>{{ nameText|escape }}</h1>
     </div>
 {% endif %}
 

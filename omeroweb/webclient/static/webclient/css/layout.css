@@ -672,6 +672,7 @@
 			width:85%;
 			display:inline-block;
 			padding:5px 0;
+            word-wrap: break-word;
 	    }
     
 	        .data_heading span {
@@ -679,6 +680,7 @@
 	            line-height:1.2em;
 	            float:left;
 	            overflow:hidden;
+                width: 100%;
 	        }
             
 	            .data_heading img {
