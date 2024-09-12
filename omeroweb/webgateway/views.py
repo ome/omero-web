@@ -3214,6 +3214,12 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
             # accordingly.
             col_name = column_names[0]
         row_numbers = table.getWhereList(query, None, 0, 0, 1)
+        # If there are no matches for the query, don't call table.slice()
+        if len(row_numbers) == 0:
+            return HttpResponse(
+                numpy.packbits(numpy.array([0], dtype="int64")).tobytes(),
+                content_type="application/octet-stream",
+            )
         (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
         try:
             return HttpResponse(
