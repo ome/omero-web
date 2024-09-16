@@ -506,12 +506,11 @@ for rendering engine.
 E.g. list of {path: "/luts/", size: 800, id: 37, name: "cool.lut"},
 """
 
-binaryLuts_json = re_path(
-    r"^luts_bin/$", views.binaryLuts_json, name="webgateway_binaryLuts_json"
+luts_png = re_path(
+    r"^luts_png/$", views.luts_png, name="webgateway_luts_png"
 )
 """
-json method: returning list of all lookup tables available
-encoded in base64.
+json method: returning a png of all LUTs sorted by name
 """
 
 list_compatible_imgs_json = re_path(
@@ -648,7 +647,7 @@ urlpatterns = [
     get_image_rdef_json,
     get_image_rdefs_json,
     listLuts_json,
-    binaryLuts_json,
+    luts_png,
     list_compatible_imgs_json,
     copy_image_rdef_json,
     reset_rdef_json,

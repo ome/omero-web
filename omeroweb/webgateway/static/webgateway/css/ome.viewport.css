@@ -1,8 +1,8 @@
 /**
  * weblitz_viewport - style definitions
- * 
+ *
  * Copyright (c) 2007, 2008, 2009 Glencoe Software, Inc. All rights reserved.
- * 
+ *
  * This software is distributed under the terms described by the LICENCE file
  * you can find at the root of the distribution bundle, which states you are
  * free to use it only for non commercial purposes.
@@ -26,8 +26,8 @@ div.weblitz-viewport-tiles img {
  padding: 0;
  position: absolute;
 }*/
-  
-  
+
+
 .weblitz-viewport-vp {
   position: absolute;
   display: block;
@@ -42,12 +42,12 @@ div.weblitz-viewport-tiles img {
   left: 15px;
 }
 
-.weblitz-viewport-top { 
+.weblitz-viewport-top {
   position: relative;
   height: 100%;
 }
 
-.weblitz-viewport-bot { 
+.weblitz-viewport-bot {
   position: relative;
   left: 15px;
   height: 15px;
@@ -86,11 +86,11 @@ div.weblitz-viewport-tiles img {
 
 /* Customizing the jquery-plugin-viewportImage classes */
 
-.image-viewer { 
+.image-viewer {
   position: relative;
 }
 
-.vslider { 
+.vslider {
   position: absolute;
   width: 13px;
   height: 100%;
@@ -99,7 +99,7 @@ div.weblitz-viewport-tiles img {
   left: 1px;
 }
 
-.hslider { 
+.hslider {
   position: relative;
   height: 13px;
   /*bottom: -3px;*/
@@ -107,16 +107,16 @@ div.weblitz-viewport-tiles img {
   font-size: 0.1em;
 }
 
-.slider-line { 
+.slider-line {
   /* width: 100%; */
   background: #FFF;
   font-size: 0.1em;
 }
 
-.slider-handle { 
+.slider-handle {
   background: #184A89;
   font-size: 0.1em;
-  left: -1px; 
+  left: -1px;
   top: -1px;
 }
 
@@ -185,7 +185,7 @@ div.weblitz-viewport-tiles img {
 }
 
 .lutBackground {
-  background-image: url('../img/luts_10.png');
+  background-image: url('/webgateway/luts_png/');
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
