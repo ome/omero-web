@@ -510,7 +510,7 @@ luts_png = re_path(
     r"^luts_png/$", views.luts_png, name="webgateway_luts_png"
 )
 """
-json method: returning a png of all LUTs sorted by name
+returning a png of all LUTs on server sorted by name
 """
 
 list_compatible_imgs_json = re_path(
