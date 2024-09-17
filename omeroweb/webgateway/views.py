@@ -2093,6 +2093,7 @@ def listLuts_json(request, conn=None, **kwargs):
                 "png_index": i,
             }
         )
+    luts_in_png.append("gradient.png")
 
     return {"luts": rv, "png_luts": luts_in_png}
 
@@ -2112,8 +2113,8 @@ def luts_png(request, conn=None, **kwargs):
     if cached_image:
         return HttpResponse(cached_image, content_type='image/png')
 
-    # Generate the LUT
-    new_img = numpy.zeros((10*len(luts), 256, 3), dtype="uint8")
+    # Generate the LUT, fourth png channel set to 255
+    new_img = numpy.zeros((10*(len(luts)+1), 256, 4), dtype="uint8") + 255
     for i, lut in enumerate(luts):
         orig_file = conn.getObject("OriginalFile", lut.getId()._val)
         lut_data = bytearray()
@@ -2123,7 +2124,7 @@ def luts_png(request, conn=None, **kwargs):
 
         if len(lut_data) in [768, 800]:
             lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
-            new_img[i*10:(i+1)*10] = lut_arr.reshape(3, 256).T
+            new_img[i*10:(i+1)*10, :, :3] = lut_arr.reshape(3, 256).T
         else:
             lut_data = lut_data.decode()
             r, g, b = [], [], []
@@ -2142,6 +2143,10 @@ def luts_png(request, conn=None, **kwargs):
             new_img[i*10:(i+1)*10, :, 0] = numpy.array(r)
             new_img[i*10:(i+1)*10, :, 1] = numpy.array(g)
             new_img[i*10:(i+1)*10, :, 2] = numpy.array(b)
+
+    # Set the last row for the channel sliders transparent gradient
+    new_img[-10:, :, :3] = 0
+    new_img[-10:, :, 3] = numpy.arange(255, -1, -1)
 
     image = Image.fromarray(new_img)
     # Save the image to a BytesIO stream
