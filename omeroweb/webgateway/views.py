@@ -2077,25 +2077,34 @@ def listLuts_json(request, conn=None, **kwargs):
     We include 'png_index' which is the index of each LUT within the
     static/webgateway/img/luts_10.png or -1 if LUT is not found.
     """
+    version = int(request.GET.get("version", 1))
+
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
-    luts.sort(key=lambda x: x.name.val)
-    rv = []
-    luts_in_png = []
+    luts.sort(key=lambda x: x.name.val.lower())
+    rv, all_luts = [], []
     for i, lut in enumerate(luts):
-        luts_in_png.append(lut.path.val + lut.name.val)
+        lutsrc = lut.path.val + lut.name.val
+        all_luts.append(lutsrc)
+        idx = i
+        if version == 1:
+            # In case of v2, the lut_png is dynamically generated
+            idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
         rv.append(
             {
                 "id": lut.id.val,
                 "path": lut.path.val,
                 "name": lut.name.val,
                 "size": unwrap(lut.size),
-                "png_index": i,
+                "png_index": idx,
             }
         )
-    luts_in_png.append("gradient.png")
+    all_luts.append("gradient.png")
 
-    return {"luts": rv, "png_luts": luts_in_png}
+    if version == 2:
+        return {"luts": rv, "png_luts": all_luts, "version": 2}
+    else:
+        return {"luts": rv, "png_luts": LUTS_IN_PNG, "version": 1}
 
 
 @login_required()
