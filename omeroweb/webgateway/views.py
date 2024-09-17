@@ -2145,8 +2145,8 @@ def luts_png(request, conn=None, **kwargs):
             new_img[i*10:(i+1)*10, :, 2] = numpy.array(b)
 
     # Set the last row for the channel sliders transparent gradient
-    new_img[-10:, :, :3] = 0
-    new_img[-10:, :, 3] = numpy.arange(255, -1, -1)
+    new_img[-10:] = 0
+    new_img[-10:, :180, 3] = numpy.linspace(255, 0, 180, dtype="uint8")
 
     image = Image.fromarray(new_img)
     # Save the image to a BytesIO stream
