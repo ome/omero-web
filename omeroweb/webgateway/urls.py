@@ -506,9 +506,7 @@ for rendering engine.
 E.g. list of {path: "/luts/", size: 800, id: 37, name: "cool.lut"},
 """
 
-luts_png = re_path(
-    r"^luts_png/$", views.luts_png, name="webgateway_luts_png"
-)
+luts_png = re_path(r"^luts_png/$", views.luts_png, name="webgateway_luts_png")
 """
 returning a png of all LUTs on server sorted by name
 """
