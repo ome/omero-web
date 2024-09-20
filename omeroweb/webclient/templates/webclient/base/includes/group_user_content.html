@@ -28,7 +28,11 @@
 
 {% for grp in myGroups %}
     <li {% if grp.id == eContext.context.groupId %}class="current_group"{% endif %}>
-        <a href="#" data-gid="{{ grp.id }}">
+        {% if grp.id == active_group.id %}
+            <a href="{{ current_url }}?experimenter=-1" data-gid="{{ grp.id }}">
+        {% else %}
+            <a href="{% url 'change_active_group' %}?active_group={{grp.id}}&url={{ current_url }}?experimenter=-1" data-gid="{{ grp.id }}">
+        {% endif %}
             <img
             {% if grp.getDetails.getPermissions.isGroupWrite %} src="{% static 'webclient/image/group_green16.png' %}"
             {% else %}
