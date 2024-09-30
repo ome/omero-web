@@ -184,12 +184,4 @@ div.weblitz-viewport-tiles img {
   -ms-interpolation-mode:nearest-neighbor;   /* IE8+           */
 }
 
-.lutBackground {
-  background-image: url('/webgateway/luts_png/');
-  background-repeat: no-repeat;
-  image-rendering: pixelated;
-}
-button>.lutBackground {
-  opacity: 0.3;
-}
 

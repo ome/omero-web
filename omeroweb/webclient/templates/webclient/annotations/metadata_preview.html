@@ -108,7 +108,7 @@
 
             // Load the Lookup Tables straight off - need them ASAP
             if (!OME.LUTS) {
-              $.getJSON("{% url 'webgateway_listLuts_json' %}", function(data){
+              $.getJSON("{% url 'webgateway_listLuts_json' %}?version=2", function(data){
                 OME.LUTS = data.luts;
                 OME.PNG_LUTS = data.png_luts;
               });
@@ -390,7 +390,7 @@
 
 <!-- VIEWER "Preview"-->
 <div class="right_tab_inner">
-	
+
 <!-- open-image link -->
 
     <div>
@@ -399,7 +399,7 @@
         class="btn silver btn_text" alt="View"
         title="Open full viewer" rel="{% content_identifier 'preview' manager.image.id %}"> <!-- rel is used by robot framework, do not remove it! -->
 				<span>
-                {% trans "Full viewer" %} 
+                {% trans "Full viewer" %}
 				</span>
 			</a>
     </div>
@@ -447,7 +447,7 @@
         <img src="{% static "webclient/image/icon_redo16.png" %}" /><br>
         Redo
       </button></li>
-      
+
       <li class="seperator"></li>
 
       <li><button id="rdef-copy-btn" class="button" title="Copy Rendering Settings">
