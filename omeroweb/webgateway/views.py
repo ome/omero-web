@@ -2133,7 +2133,7 @@ def luts_png(request, conn=None, **kwargs):
 
         if len(lut_data) in [768, 800]:
             lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
-            new_img[i * 10: (i + 1) * 10, :, :3] = lut_arr.reshape(3, 256).T
+            new_img[i * 10 : (i + 1) * 10, :, :3] = lut_arr.reshape(3, 256).T
         else:
             lut_data = lut_data.decode()
             r, g, b = [], [], []
@@ -2149,9 +2149,9 @@ def luts_png(request, conn=None, **kwargs):
                 r.append(int(val[-3]))
                 g.append(int(val[-2]))
                 b.append(int(val[-1]))
-            new_img[i * 10: (i + 1) * 10, :, 0] = numpy.array(r)
-            new_img[i * 10: (i + 1) * 10, :, 1] = numpy.array(g)
-            new_img[i * 10: (i + 1) * 10, :, 2] = numpy.array(b)
+            new_img[i * 10 : (i + 1) * 10, :, 0] = numpy.array(r)
+            new_img[i * 10 : (i + 1) * 10, :, 1] = numpy.array(g)
+            new_img[i * 10 : (i + 1) * 10, :, 2] = numpy.array(b)
 
     # Set the last row for the channel sliders transparent gradient
     new_img[-10:] = 0
