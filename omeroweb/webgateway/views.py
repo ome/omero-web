@@ -1464,7 +1464,9 @@ def jsonp(f):
             # NB: To support old api E.g. /get_rois_json/
             # We need to support lists
             safe = type(rv) is dict
-            return JsonResponse(rv, safe=safe)
+            # Allow optional JSON dumps parameters
+            json_params = kwargs.get("_json_dumps_params", None)
+            return JsonResponse(rv, safe=safe, json_dumps_params=json_params)
         except Exception as ex:
             # Default status is 500 'server error'
             # But we try to handle all 'expected' errors appropriately
@@ -3083,7 +3085,7 @@ def perform_table_query(
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
             idx = 0
-            batch = 1000
+            batch = settings.MAX_TABLE_DOWNLOAD_ROWS
             while idx < len(h):
                 batch = min(batch, len(h) - idx)
                 res = table.slice(col_indices, h[idx : idx + batch])
@@ -3267,42 +3269,55 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
             else None
         )
 
-    rsp_data = perform_table_query(
-        conn,
-        fileid,
-        query,
-        [col_name],
-        offset=offset,
-        limit=limit,
-        lazy=False,
-        check_max_rows=False,
-    )
-    if "error" in rsp_data:
-        return rsp_data
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    sr = conn.getSharedResources()
+    table = sr.openTable(omero.model.OriginalFileI(fileid, False), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
     try:
-        data = rowsToByteArray(rsp_data["data"]["rows"])
-        return HttpResponse(bytes(data), content_type="application/octet-stream")
-    except ValueError:
-        logger.error("ValueError when getting obj_id_bitmask")
-        return {"error": "Specified column has invalid type"}
+        column_names = [column.name for column in table.getHeaders()]
+        if col_name not in column_names:
+            # Previous implementations used perform_table_query() which
+            # defaults to returning all columns if the requested column name
+            # is unknown.  We would have then packed the first column.  We
+            # mimic that here by only querying for the first column.
+            #
+            # FIXME: This is really weird behaviour, especially with this
+            # endpoint defaulting to using the "object" column, and likely
+            # deserves to be refactored and deprecated or changed
+            # accordingly.
+            col_name = column_names[0]
+        row_numbers = table.getWhereList(query, None, 0, 0, 1)
+        (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
+        try:
+            return HttpResponse(
+                column_to_packed_bits(column), content_type="application/octet-stream"
+            )
+        except ValueError:
+            logger.error("ValueError when getting obj_id_bitmask")
+            return {"error": "Specified column has invalid type"}
+    except Exception:
+        logger.error("Error when getting obj_id_bitmask", exc_info=True)
+        return {"error", "Unexpected error getting obj_id_bitmask"}
+    finally:
+        table.close()
 
 
-def rowsToByteArray(rows):
-    maxval = 0
-    if len(rows) > 0 and isinstance(rows[0][0], float):
+def column_to_packed_bits(column):
+    """
+    Convert a column of integer values (strings will be coerced) to a bit mask
+    where each value present will be set to 1.
+    """
+    if len(column.values) > 0 and isinstance(column.values[0], float):
         raise ValueError("Cannot have ID of float")
-    for obj in rows:
-        obj_id = int(obj[0])
-        maxval = max(obj_id, maxval)
-    bitArray = numpy.zeros(maxval + 1, dtype="uint8")
-    for obj in rows:
-        obj_id = int(obj[0])
-        bitArray[obj_id] = 1
-    packed = numpy.packbits(bitArray, bitorder="big")
-    data = bytearray()
-    for val in packed:
-        data.append(val)
-    return data
+    # Coerce strings to int64 if required.  If we have values > 2**63 they
+    # wouldn't work anyway so signed is okay here.  Note that the
+    # implementation does get weird if the indexes are negative values.
+    indexes = numpy.array(column.values, dtype="int64")
+    bits = numpy.zeros(int(indexes.max() + 1), dtype="uint8")
+    bits[indexes] = 1
+    return numpy.packbits(bits, bitorder="big").tobytes()
 
 
 @login_required()
@@ -3547,3 +3562,177 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
     except Exception:
         logger.debug(traceback.format_exc())
         return {"error": "Failed to retrieve rdefs"}
+
+
+@login_required()
+@jsonp
+def table_get_where_list(request, fileid, conn=None, **kwargs):
+    """
+    Retrieves matching row numbers for a table query
+
+    Example: /webgateway/table/123/rows/?query=object<100&start=50
+
+    Query arguments:
+    query: table query in PyTables syntax
+    start: row number to start searching
+
+    Uses MAX_TABLE_SLICE_SIZE to determine how many rows will be searched.
+
+    @param request:     http request.
+    @param fileid:      the id of the table
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'rows' and 'meta' in the success case,
+                        one with key 'error' if something went wrong.
+                        'rows' is an array of matching row numbers.
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columnCount: total number of columns in table
+                            - start: row on which search was started
+                            - end: row on which search ended (exclusive), can be used
+                              for follow-up query as new start value if end<rowCount
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+                            - partialCount: number of matching rows returned in this
+                              response. Important: if start>0 and/or end<rowCount,
+                              this may not be the total number of matching rows in the
+                              table!
+    """
+
+    query = request.GET.get("query")
+    if not query:
+        return {"error": "Must specify query"}
+    try:
+        start = int(request.GET.get("start"))
+    except (ValueError, TypeError):
+        start = 0
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
+    try:
+        row_count = table.getNumberOfRows()
+        column_count = len(table.getHeaders())
+        end = min(row_count, start + settings.MAX_TABLE_SLICE_SIZE)
+        logger.info(f"Query '{query}' from rows {start} to {end}")
+        hits = table.getWhereList(query, None, start, end, 1) if start < end else []
+        return {
+            "rows": hits,
+            "meta": {
+                "partialCount": len(hits),
+                "rowCount": row_count,
+                "columnCount": column_count,
+                "start": start,
+                "end": end,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
+            },
+        }
+    except Exception:
+        return {"error": "Error executing query: %s" % query}
+    finally:
+        table.close()
+
+
+@login_required()
+@jsonp
+def table_slice(request, fileid, conn=None, **kwargs):
+    """
+    Performs a table slice
+
+    Example: /webgateway/table/123/slice/?rows=1,2,5-10&columns=0,3-4
+
+    Query arguments:
+    rows: row numbers to retrieve in comma-separated list,
+          hyphen-separated ranges allowed
+    columns: column numbers to retrieve in comma-separated list,
+             hyphen-separated ranges allowed
+
+    At most MAX_TABLE_SLICE_SIZE data points (number of rows * number of columns) can
+    be retrieved, if more are requested, an error is returned.
+
+    @param request:     http request.
+    @param fileid:      the id of the table
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'columns' and 'meta' in the success
+                        case, one with key 'error' if something went wrong.
+                        'columns' is an array of column data arrays
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columns: names of columns in same order as data arrays
+                            - columnCount: total number of columns in table
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+    """
+
+    def parse(item):
+        try:
+            yield int(item)
+        except ValueError:
+            start, end = item.split("-")
+            if start > end:
+                raise ValueError("Invalid range")
+            yield from range(int(start), int(end) + 1)
+
+    def limit_generator(generator, max_items):
+        for counter, item in enumerate(generator):
+            if counter >= max_items:
+                raise ValueError("Too many items")
+            yield item
+
+    source = request.POST if request.method == "POST" else request.GET
+    try:
+        # Limit number of items to avoid problems when given massive ranges
+        rows = list(
+            limit_generator(
+                (row for item in source.get("rows").split(",") for row in parse(item)),
+                settings.MAX_TABLE_SLICE_SIZE,
+            )
+        )
+        columns = list(
+            limit_generator(
+                (
+                    column
+                    for item in source.get("columns").split(",")
+                    for column in parse(item)
+                ),
+                settings.MAX_TABLE_SLICE_SIZE / len(rows),
+            )
+        )
+    except (ValueError, AttributeError) as error:
+        return {
+            "error": f"Need comma-separated list of rows and columns ({str(error)})"
+        }
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
+    column_count = len(table.getHeaders())
+    row_count = table.getNumberOfRows()
+    if not all(0 <= column < column_count for column in columns):
+        return {"error": "Columns out of range"}
+    if not all(0 <= row < row_count for row in rows):
+        return {"error": "Rows out of range"}
+    try:
+        columns = table.slice(columns, rows).columns
+        return {
+            "columns": [column.values for column in columns],
+            "meta": {
+                "columns": [column.name for column in columns],
+                "rowCount": row_count,
+                "columnCount": column_count,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
+            },
+        }
+    except Exception as error:
+        logger.exception(
+            "Error slicing table %s with %d columns and %d rows"
+            % (fileid, len(columns), len(rows))
+        )
+        return {"error": f"Error slicing table ({str(error)})"}
+    finally:
+        table.close()

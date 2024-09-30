@@ -1,3 +1,42 @@
+5.27.2 (September 2024)
+-----------------------
+
+## Bug fixes
+
+- Fix login page scaling for mobile devices [#576](https://github.com/ome/omero-web/pull/576)
+- Fix wrapping of long names [#574](https://github.com/ome/omero-web/pull/574)
+
+5.27.1 (August 2024)
+--------------------
+
+## Bug fixes
+
+- Fix internal API used by other plugins [#577](https://github.com/ome/omero-web/pull/577)
+
+## Other changes
+
+- Bump flake8 and black [#571](https://github.com/ome/omero-web/pull/571)
+
+5.27.0 (July 2024)
+------------------
+
+## Features
+
+- New API calls for table querying and slicing [#564](https://github.com/ome/omero-web/pull/564)
+- Improve table query performance [#563](https://github.com/ome/omero-web/pull/563),
+  [#554](https://github.com/ome/omero-web/pull/554)
+- Show archival status in tree [#555](https://github.com/ome/omero-web/pull/555)
+
+## Bug fixes
+
+- Make URLs containing `$` clickable [#560](https://github.com/ome/omero-web/pull/560)
+
+## Other changes
+
+- Update installation instructions [#558](https://github.com/ome/omero-web/pull/558)
+- Limit numpy to version 1.9 [#561](https://github.com/ome/omero-web/pull/561)
+- Bump flake8 [#562](https://github.com/ome/omero-web/pull/562)
+
 5.26.0 (May 2024)
 -----------------
 
