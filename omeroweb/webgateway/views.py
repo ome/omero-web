@@ -2084,8 +2084,6 @@ def listLuts_json(request, conn=None, **kwargs):
     The png matching the new indexes and list of LUT is obtained from
     this url: /webgateway/luts_png/   (views.luts_png)
     """
-    version = int(request.GET.get("version", 1))
-
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
     luts.sort(key=lambda x: x.name.val.lower())
@@ -2150,7 +2148,7 @@ def luts_png(request, conn=None, **kwargs):
 
         if len(lut_data) in [768, 800]:
             lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
-            new_img[i * 10 : (i + 1) * 10, :, :3] = lut_arr.reshape(3, 256).T
+            new_img[(i*10): (i+1)*10, :, :3] = lut_arr.reshape(3, 256).T
         else:
             lut_data = lut_data.decode()
             r, g, b = [], [], []
@@ -2166,9 +2164,9 @@ def luts_png(request, conn=None, **kwargs):
                 r.append(int(val[-3]))
                 g.append(int(val[-2]))
                 b.append(int(val[-1]))
-            new_img[i * 10 : (i + 1) * 10, :, 0] = numpy.array(r)
-            new_img[i * 10 : (i + 1) * 10, :, 1] = numpy.array(g)
-            new_img[i * 10 : (i + 1) * 10, :, 2] = numpy.array(b)
+            new_img[(i*10): (i+1)*10, :, 0] = numpy.array(r)
+            new_img[(i*10): (i+1)*10, :, 1] = numpy.array(g)
+            new_img[(i*10): (i+1)*10, :, 2] = numpy.array(b)
 
     # Set the last row for the channel sliders transparent gradient
     new_img[-10:] = 0
