@@ -2088,10 +2088,7 @@ def listLuts_json(request, conn=None, **kwargs):
     for i, lut in enumerate(luts):
         lutsrc = lut.path.val + lut.name.val
         all_luts.append(lutsrc)
-        idx = i
-        if version == 1:
-            # In case of v2, the lut_png is generated dynamically
-            idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
+        idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
         rv.append(
             {
                 "id": lut.id.val,
@@ -2099,14 +2096,12 @@ def listLuts_json(request, conn=None, **kwargs):
                 "name": lut.name.val,
                 "size": unwrap(lut.size),
                 "png_index": idx,
+                "png_index_new": i,
             }
         )
     all_luts.append("gradient.png")
 
-    if version == 2:
-        return {"luts": rv, "png_luts": all_luts, "version": 2}
-    else:
-        return {"luts": rv, "png_luts": LUTS_IN_PNG, "version": 1}
+    return {"luts": rv, "png_luts": LUTS_IN_PNG, "png_luts_new": all_luts}
 
 
 @login_required()

@@ -1036,9 +1036,9 @@
   $(document).ready(function () {
 
     // Load Lookup Tables - need them ASAP
-    $.getJSON("{% url 'webgateway_listLuts_json' %}?version=2", function(data){
+    $.getJSON("{% url 'webgateway_listLuts_json' %}", function(data){
       OME.LUTS = data.luts;
-      OME.PNG_LUTS = data.png_luts;
+      OME.PNG_LUTS = data.png_luts_new;
     });
 
     /* Prepare the viewport */

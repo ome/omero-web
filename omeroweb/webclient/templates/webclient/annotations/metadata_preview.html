@@ -108,9 +108,10 @@
 
             // Load the Lookup Tables straight off - need them ASAP
             if (!OME.LUTS) {
-              $.getJSON("{% url 'webgateway_listLuts_json' %}?version=2", function(data){
+              $.getJSON("{% url 'webgateway_listLuts_json' %}", function(data){
+                // Since 5.28.0, LUTs list and image is generated dynamically
                 OME.LUTS = data.luts;
-                OME.PNG_LUTS = data.png_luts;
+                OME.PNG_LUTS = data.png_luts_new;
               });
             }
 
