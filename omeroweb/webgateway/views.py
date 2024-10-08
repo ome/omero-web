@@ -2073,11 +2073,16 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
 @jsonp
 def listLuts_json(request, conn=None, **kwargs):
     """
-    Lists lookup tables 'LUTs' availble for rendering
+    Lists lookup tables 'LUTs' availble for rendering.
 
-    This list is dynamic and will change if users add LUTs to their server.
     We include 'png_index' which is the index of each LUT within the
     static/webgateway/img/luts_10.png or -1 if LUT is not found.
+
+    Since 5.28.0, the list of LUTs is also generated dynamically.
+    The new LUT indexes and LUT list were added to
+    the response with the suffix '_new' (png_index_new and png_luts_new)
+    The png matching the new indexes and list of LUT is obtained from
+    this url: /webgateway/luts_png/   (views.luts_png)
     """
     version = int(request.GET.get("version", 1))
 
@@ -2106,6 +2111,21 @@ def listLuts_json(request, conn=None, **kwargs):
 
 @login_required()
 def luts_png(request, conn=None, **kwargs):
+    """
+    Generates the LUT png used for preview and selection of LUT. The png is
+    256px wide, and each LUT is 10px in height. The last portion of the png
+    is the channel sliders transparent gradient.
+
+    LUTs are listed in alphabetical order (lut name only from filename).
+
+    LUT files on the server are read with the script service, and
+    file content is parsed with a custom implementation.
+
+    This uses caching to prevent generating the png each time a LUT
+    menu is opened. The cache key is a hash of all LUTs path.
+    Change in the LUT name or path will force the generation of a new
+    png.
+    """
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
     luts.sort(key=lambda x: x.name.val)
