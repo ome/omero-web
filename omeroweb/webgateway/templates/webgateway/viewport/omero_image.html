@@ -87,7 +87,7 @@
     <script type="text/javascript" src="{% static "3rdparty/jquery.selectboxes-2.2.6.js" %}"></script>
     <script type="text/javascript" src="{% static "3rdparty/farbtastic-1.2/farbtastic.js" %}"></script>
     <script type="text/javascript" src="{% static "webgateway/js/ome.gs_utils.js"|add:url_suffix %}"></script>
-    
+
     <script type="text/javascript" src="{% static "webgateway/js/ome.scalebardisplay.js"|add:url_suffix %}"></script>
     <!-- for display of ROIs over the image -->
     <script type="text/javascript" src="{% static "webgateway/js/ome.roidisplay.js"|add:url_suffix %}"></script>
@@ -116,7 +116,7 @@
 
     <!-- hammer.js for tablet gestures -->
     <script type="text/javascript" src="{% static "3rdparty/hammer-2.0.8/hammer.min.js" %}"></script>
-    
+
 {% endblock %}
 
 
@@ -346,16 +346,16 @@
         }
         viewport.viewportimg.scalebar_display(options);
     }
-    
+
     viewport.viewportimg.get(0).setScalebarZoom(viewport.getZoom()/100 );
     viewport.viewportimg.get(0).show_scalebar();
     {% endif %}
   }
-  
+
   var hide_scalebar = function () {
       viewport.viewportimg.get(0).hide_scalebar();
   }
-  
+
   /**
   *     ROI load & table methods
   */
@@ -1038,7 +1038,7 @@
     // Load Lookup Tables - need them ASAP
     $.getJSON("{% url 'webgateway_listLuts_json' %}", function(data){
       OME.LUTS = data.luts;
-      OME.PNG_LUTS = data.png_luts;
+      OME.PNG_LUTS = data.png_luts_new;
     });
 
     /* Prepare the viewport */
@@ -1499,11 +1499,11 @@
         nextPrevImage(1);
       });
     }
-    
+
     // we can bind events to viewportimg for roi_display-plugin to trigger (plugin not created yet)
     viewport.viewportimg.on("shape_click", handle_shape_selection);
     viewport.viewportimg.on("rois_loaded", handle_rois_loaded);
-    
+
     // 'Scalebar' checkbox to left of image
     $("#wblitz-scalebar").on('change', function() {
         if(this.checked) {
@@ -1512,7 +1512,7 @@
             hide_scalebar();
         }
     });
-  
+
     // set up handlers for 'Save' button
     $("#rdef-setdef-btn").on('click', function(){
       setImageDefaults(viewport, this, function() {
