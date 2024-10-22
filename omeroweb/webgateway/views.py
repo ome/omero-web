@@ -2179,8 +2179,8 @@ def luts_png(request, conn=None, **kwargs):
     buffer.seek(0)
 
     # Cache the image using the version-based key
-    # Cache timeout shouldn't be too low, lut png generation takes time
-    cache.set(cache_key, buffer.getvalue(), 3600)
+    # Cache timeout set to None (no timeout)
+    cache.set(cache_key, buffer.getvalue(), None)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
