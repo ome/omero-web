@@ -24,7 +24,7 @@
 #
 
 import logging
-import importlib
+import importlib.util
 from django.conf import settings
 from django.apps import AppConfig
 from django.conf.urls import include
