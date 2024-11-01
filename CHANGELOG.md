@@ -1,3 +1,18 @@
+5.28.0 (November 2024)
+----------------------
+
+## Features
+
+- Dynamically generate LUTs [#581](https://github.com/ome/omero-web/pull/581)
+
+## Bug fixes
+
+- Correctly handle empty query results [#580](https://github.com/ome/omero-web/pull/580)
+
+## Other changes
+
+- Remove deprecated Python 2 compatibility import [#589](https://github.com/ome/omero-web/pull/589)
+
 5.27.2 (September 2024)
 -----------------------
 
