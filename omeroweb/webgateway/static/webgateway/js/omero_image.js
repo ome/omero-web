@@ -195,7 +195,7 @@
       if (OME && OME.LUTS) {
         for (var l=0; l<OME.LUTS.length; l++) {
           if (OME.LUTS[l].name === lutName) {
-            return OME.LUTS[l].png_index;
+            return OME.LUTS[l].png_index_new;
           }
         }
       }
