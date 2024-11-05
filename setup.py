@@ -64,6 +64,7 @@ setup(
         "pytz",
         "portalocker",
         "packaging",
+        "importlib-resources",
     ],
     include_package_data=True,
     tests_require=["pytest"],
