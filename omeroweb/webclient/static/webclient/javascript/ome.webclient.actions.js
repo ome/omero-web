@@ -61,8 +61,30 @@ OME.getURLParameter = function(key) {
 };
 
 var linkify = function(input) {
-    var regex = /(https?|ftp|file):\/\/[-a-zA-Z0-9+&@#/%?=~_{}[\]|!:,.;$]*[-a-zA-Z0-9+&@#/%=~_{}[\]|$]/g;
-    input = input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
+    // Define the regex to check for the specific OMERO HTML-escaped anchor tag format
+    // input user: <a href="https://example.com">Test</a> 
+    // OMERO HTML-escaped input: &lt;a href="https://example.com"&gt;Test&lt;/a&gt;
+    const anchorCheckRegex = /^&lt;a\s+href=([^&]+)&gt;([^&]+)&lt;\/a&gt;$/;
+
+
+    if(!anchorCheckRegex.test(input)){
+        var regex = /(https?|ftp|file):\/\/[-a-zA-Z0-9+&@#/%?=~_{}[\]|!:,.;$]*[-a-zA-Z0-9+&@#/%=~_{}[\]|$]/g;
+        input = input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
+    }else{  // given input is a html <a> tag
+        // unescape HTML entities of <a> tag
+        input= input.replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'");
+
+       // Use regex to match and transform the <a> tag
+       const anchorRegex = /<a\s+href="(.*?)">(.*?)<\/a>/i; 
+
+       // add target="_blank"
+       input = input.replace(anchorRegex, "<a href='$1' target='_blank'>$2</a>");
+    }
+
     return linkObjects(input);
 };
 var linkObjects = function(input) {
