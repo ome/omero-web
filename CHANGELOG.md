@@ -8,6 +8,7 @@
 ## Bug fixes
 
 - Correctly handle empty query results [#580](https://github.com/ome/omero-web/pull/580)
+- Fix infinite loop when downloading table [#594](https://github.com/ome/omero-web/pull/594)
 
 ## Other changes
 
