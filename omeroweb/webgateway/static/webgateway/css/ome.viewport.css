@@ -185,7 +185,7 @@ div.weblitz-viewport-tiles img {
 }
 
 .lutBackground {
-  background-image: url('/webgateway/luts_png/');
+  background-image: url('../../../webgateway/luts_png/');
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
