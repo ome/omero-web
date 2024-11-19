@@ -13,6 +13,7 @@
 ## Other changes
 
 - Remove deprecated Python 2 compatibility import [#589](https://github.com/ome/omero-web/pull/589)
+- Add Python 3.12 support [#592](https://github.com/ome/omero-web/pull/592)
 
 5.27.2 (September 2024)
 -----------------------
