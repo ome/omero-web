@@ -213,10 +213,11 @@
         enableDownloadButtons(false);
         const rowCount = filter ? parseInt("{{ meta.totalCount }}") : parseInt("{{ meta.rowCount }}");
         const tableName = "{{ data.name }}.csv";
-        // Use 10 batches, or max 3000 rows per batch
+        // Use 10 batches, or max 3000 rows per batch, with a minimum of 10
         const MAX_BATCH_ROWS = 3000;
+        const MIN_BATCH_ROWS = 10;
         const MAX_FAILED_CALLS = 5;
-        const batchSize = Math.min(parseInt(rowCount/10), MAX_BATCH_ROWS);
+        const batchSize = Math.max(Math.min(parseInt(rowCount/10), MAX_BATCH_ROWS), MIN_BATCH_ROWS);
 
         // load csv in batches...
         const csvUrl = "{% url 'omero_table' data.id 'csv' %}";
