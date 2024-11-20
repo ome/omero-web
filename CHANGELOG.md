@@ -1,3 +1,21 @@
+5.28.0 (November 2024)
+----------------------
+
+## Features
+
+- Dynamically generate LUTs [#581](https://github.com/ome/omero-web/pull/581)
+- Allow users to click group name to quick-switch to that group [#583](https://github.com/ome/omero-web/pull/583)
+
+## Bug fixes
+
+- Correctly handle empty query results [#580](https://github.com/ome/omero-web/pull/580)
+- Fix infinite loop when downloading table [#594](https://github.com/ome/omero-web/pull/594)
+
+## Other changes
+
+- Remove deprecated Python 2 compatibility import [#589](https://github.com/ome/omero-web/pull/589)
+- Add Python 3.12 support [#592](https://github.com/ome/omero-web/pull/592)
+
 5.27.2 (September 2024)
 -----------------------
 
