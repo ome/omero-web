@@ -693,7 +693,7 @@ class MetadataChannelForm(forms.Form):
                             )
                         }
                     ),
-                    initial=logicalCh.getContrastMethod(),
+                    initial=logicalCh.getContrastMethod().value,
                     label="Contrast method",
                     required=False,
                 )
