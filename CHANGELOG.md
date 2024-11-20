@@ -4,6 +4,7 @@
 ## Features
 
 - Dynamically generate LUTs [#581](https://github.com/ome/omero-web/pull/581)
+- Allow users to click group name to quick-switch to that group [#583](https://github.com/ome/omero-web/pull/583)
 
 ## Bug fixes
 
