@@ -36,6 +36,7 @@ from django.http import (
     HttpResponseNotFound,
 )
 
+from django.core.cache import cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
@@ -2072,29 +2073,116 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
 @jsonp
 def listLuts_json(request, conn=None, **kwargs):
     """
-    Lists lookup tables 'LUTs' availble for rendering
+    Lists lookup tables 'LUTs' availble for rendering.
 
-    This list is dynamic and will change if users add LUTs to their server.
     We include 'png_index' which is the index of each LUT within the
     static/webgateway/img/luts_10.png or -1 if LUT is not found.
+
+    Since 5.28.0, the list of LUTs is also generated dynamically.
+    The new LUT indexes and LUT list were added to
+    the response with the suffix '_new' (png_index_new and png_luts_new)
+    The png matching the new indexes and list of LUT is obtained from
+    this url: /webgateway/luts_png/   (views.luts_png)
     """
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
-    rv = []
-    for lut in luts:
+    luts.sort(key=lambda x: x.name.val.lower())
+    rv, all_luts = [], []
+    for i, lut in enumerate(luts):
         lutsrc = lut.path.val + lut.name.val
-        png_index = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
+        all_luts.append(lutsrc)
+        idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
         rv.append(
             {
                 "id": lut.id.val,
                 "path": lut.path.val,
                 "name": lut.name.val,
                 "size": unwrap(lut.size),
-                "png_index": png_index,
+                "png_index": idx,
+                "png_index_new": i,
             }
         )
-    rv.sort(key=lambda x: x["name"].lower())
-    return {"luts": rv, "png_luts": LUTS_IN_PNG}
+    all_luts.append("gradient.png")
+
+    return {"luts": rv, "png_luts": LUTS_IN_PNG, "png_luts_new": all_luts}
+
+
+@login_required()
+def luts_png(request, conn=None, **kwargs):
+    """
+    Generates the LUT png used for preview and selection of LUT. The png is
+    256px wide, and each LUT is 10px in height. The last portion of the png
+    is the channel sliders transparent gradient.
+
+    LUTs are listed in alphabetical order (lut name only from filename).
+
+    LUT files on the server are read with the script service, and
+    file content is parsed with a custom implementation.
+
+    This uses caching to prevent generating the png each time a LUT
+    menu is opened. The cache key is a hash of all LUTs path.
+    Change in the LUT name or path will force the generation of a new
+    png.
+    """
+    scriptService = conn.getScriptService()
+    luts = scriptService.getScriptsByMimetype("text/x-lut")
+    luts.sort(key=lambda x: x.name.val)
+    luts_path = []
+    for lut in luts:
+        luts_path.append(lut.path.val + lut.name.val)
+    luts_hash = hash("\n".join(luts_path))
+    cache_key = f"lut_hash_{luts_hash}"
+
+    cached_image = cache.get(cache_key)
+    if cached_image:
+        return HttpResponse(cached_image, content_type="image/png")
+
+    # Generate the LUT, fourth png channel set to 255
+    new_img = numpy.zeros((10 * (len(luts) + 1), 256, 4), dtype="uint8") + 255
+    for i, lut in enumerate(luts):
+        orig_file = conn.getObject("OriginalFile", lut.getId()._val)
+        lut_data = bytearray()
+        # Collect the LUT data in byte form
+        for chunk in orig_file.getFileInChunks():
+            lut_data.extend(chunk)
+
+        if len(lut_data) in [768, 800]:
+            lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
+            new_img[(i * 10) : (i + 1) * 10, :, :3] = lut_arr.reshape(3, 256).T
+        else:
+            lut_data = lut_data.decode()
+            r, g, b = [], [], []
+
+            lines = lut_data.split("\n")
+            sep = None
+            if "\t" in lines[0]:
+                sep = "\t"
+            for line in lines:
+                val = line.split(sep)
+                if len(val) < 3 or not val[-1].isnumeric():
+                    continue
+                r.append(int(val[-3]))
+                g.append(int(val[-2]))
+                b.append(int(val[-1]))
+            new_img[(i * 10) : (i + 1) * 10, :, 0] = numpy.array(r)
+            new_img[(i * 10) : (i + 1) * 10, :, 1] = numpy.array(g)
+            new_img[(i * 10) : (i + 1) * 10, :, 2] = numpy.array(b)
+
+    # Set the last row for the channel sliders transparent gradient
+    new_img[-10:] = 0
+    new_img[-10:, :180, 3] = numpy.linspace(255, 0, 180, dtype="uint8")
+
+    image = Image.fromarray(new_img)
+    # Save the image to a BytesIO stream
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    # Cache the image using the version-based key
+    # Cache timeout set to None (no timeout)
+    cache.set(cache_key, buffer.getvalue(), None)
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
 @login_required()

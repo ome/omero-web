@@ -510,6 +510,11 @@ for rendering engine.
 E.g. list of {path: "/luts/", size: 800, id: 37, name: "cool.lut"},
 """
 
+luts_png = re_path(r"^luts_png/$", views.luts_png, name="webgateway_luts_png")
+"""
+returning a png of all LUTs on server sorted by name
+"""
+
 list_compatible_imgs_json = re_path(
     r"^compatImgRDef/(?P<iid>[0-9]+)/$",
     views.list_compatible_imgs_json,
@@ -666,6 +671,7 @@ urlpatterns = [
     get_image_rdef_json,
     get_image_rdefs_json,
     listLuts_json,
+    luts_png,
     list_compatible_imgs_json,
     copy_image_rdef_json,
     reset_rdef_json,
