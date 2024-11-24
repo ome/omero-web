@@ -143,8 +143,8 @@ var TagPane = function TagPane($element, opts) {
                     }
                     // AddedBy IDs for filtering
                     tag.addedBy = [tag.link.owner.id];
-                    tag.textValue = tag.textValue;
-                    tag.description = tag.description;
+                    tag.textValue = _.escape(tag.textValue);
+                    tag.description = _.escape(tag.description);
                     tag.canRemove = tag.link.permissions.canDelete;
                     return tag;
                 });
@@ -158,8 +158,8 @@ var TagPane = function TagPane($element, opts) {
                         }
                         // AddedBy IDs for filtering
                         tag.addedBy = [tag.link.owner.id];
-                        tag.textValue = tag.textValue;
-                        tag.description = tag.description;
+                        tag.textValue = _.escape(tag.textValue);
+                        tag.description = _.escape(tag.description);
                         tag.canRemove = false;
                         let class_ = tag.link.parent.class;
                         let id_ = '' + tag.link.parent.id;
@@ -185,12 +185,14 @@ var TagPane = function TagPane($element, opts) {
                         var tagId = tag.id,
                             linkOwner = tag.link.owner.id;
                         if (summary[tagId] === undefined) {
-                            summary[tagId] = {'textValue': _.escape(tag.textValue),
+                            summary[tagId] = {'textValue': tag.textValue,
+                                              'description': tag.description,
                                               'id': tag.id,
                                               'canRemove': false,
                                               'canRemoveCount': 0,
                                               'links': [],
-                                              'addedBy': []
+                                              'addedBy': [],
+                                              'owner': experimenters[linkOwner]
                                              };
                         }
                         // Add link to list...
@@ -225,13 +227,15 @@ var TagPane = function TagPane($element, opts) {
                             linkOwner = tag.link.owner.id;
                         if (summary[tagId] === undefined) {
                             summary[tagId] = {'textValue': _.escape(tag.textValue),
+                                              'description': _.escape(tag.description),
                                               'id': tag.id,
                                               'canRemove': false,
                                               'canRemoveCount': 0,
                                               'links': [],
                                               'addedBy': [],
                                               'childClass': tag.childClass,
-                                              'childNames': tag.childNames
+                                              'childNames': tag.childNames,
+                                              'owner': experimenters[linkOwner]
                                             };
                         }
                         // Add link to list...
@@ -265,9 +269,6 @@ var TagPane = function TagPane($element, opts) {
                                     'userId': WEBCLIENT.USER.id,
                                     'isInherited': false});
                 if (inh_tags.length > 0) {
-                    if (tags.length > 0) {
-                        html = html + "<br/><br/>"
-                    }
                     html = html + tagTmpl({'tags': inh_tags,
                                         'webindex': WEBCLIENT.URLS.webindex,
                                         'userId': WEBCLIENT.USER.id,

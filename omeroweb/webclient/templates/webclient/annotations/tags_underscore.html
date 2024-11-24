@@ -3,7 +3,7 @@
   <% } %>
 
 <% _.each(tags, function(tag) { %>
-<span class="tag_annotation_wrapper"
+    <span class="tag_annotation_wrapper"
     data-tag-id="<%- tag.id %>"
     data-added-by="<% print(_.escape(tag.addedBy.join(','))) %>">
 
@@ -21,14 +21,20 @@
 
         <span class="tooltip_html" style='display:none'>
         <!-- show different tooltip for batch_annotate panel -->
+        <% if (tag.links && !isInherited) { %>
+            Can remove Tag from <b><%- tag.canRemoveCount %> object<% if(tag.canRemoveCount !== 1) {print('s')} %></b><br/>
+        <% } %>
+        <b>ID:</b> <%- tag.id %><br />
+        <b>Owner:</b> <%- tag.owner.firstName %> <%- tag.owner.lastName %><br />
+        <b>Description:</b> <%- tag.description %><br />
+        <b>Tagset:</b> PLACEHOLDER_TAGSET<br />
         <% if (tag.links) { %>
-            <% if (!isInherited) { %>
-                Can remove Tag from <b><%- tag.canRemoveCount %> object<% if(tag.canRemoveCount !== 1) {print('s')} %></b>:<br/>
-            <% } %>
+            <b>Attached to:</b><br />
             <% _.each(tag.links, function(link, idx) { %>
                 <div>
+                    &nbsp
                     <% if (idx < 20) { %>
-                        <b><%- link.parent.class %> <%- link.parent.id %></b>
+                        - <%- link.parent.class %> <%- link.parent.id %>:
                         <%- link.parent.name.slice(0, 28) %>
                         <% if (link.owner.id !== userId) {
                             print("(" + link.owner.firstName.slice(0, 1) + " " + _.escape(link.owner.lastName) + ")")
@@ -38,31 +44,18 @@
                     <% } %>
                 </div>
             <% }) %>
-            <% if (isInherited) { %>
-                <br /><b>Inherited by:</b><br />
-                <% _.each(tag.childNames, function(cname) { %>
-                    &nbsp <%- cname %><br />
-                <% }) %>
-            <% } %>
         <% } else { %>
-            <% if (isInherited) { %>
-                Added on <%- tag.link.parent.class.substring(0, tag.link.parent.class.length - 1) %> <%- tag.link.parent.name.slice(0, 30) %><br />
-            <% } %>
-            <b>ID:</b> <%- tag.id %><br />
-            <b>Owner:</b> <%- tag.owner.firstName %> <%- tag.owner.lastName %><br />
             <b>Linked by:</b> <%- tag.link.owner.firstName %> <%- tag.link.owner.lastName %><br />
             <b>On:</b> <% print(OME.formatDate(tag.link.date)) %><br />
-            <b>Description:</b> <%- tag.description %><br />
-            <% if (isInherited) { %>
-                <b>Inherited by:</b><br />
-                <% _.each(tag.childNames, function(cname) { %>
-                    &nbsp <%- cname %><br />
-                <% }) %>
-            <% } %>
+        <% } %>
+        <% if (isInherited) { %>
+            <b>Inherited by:</b><br />
+            <% _.each(tag.childNames, function(cname) { %>
+                &nbsp- <%- cname.slice(0, 28) %><br />
+            <% }) %>
         <% } %>
         </span>
     </div>
-
 </span>
 
 <% }) %>
