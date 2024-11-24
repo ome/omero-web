@@ -135,14 +135,6 @@ var RatingsPane = function RatingsPane($element, opts) {
                 });
                 var average = Math.round(sum/anns.length);
 
-                var sum_inh = inh_anns.reduce(function(prev, ann){
-                    return prev + ann.longValue;
-                }, 0);
-                var myRatings_inh = inh_anns.filter(function(ann){
-                    return ann.owner.id == WEBCLIENT.USER.id;
-                });
-                var average_inh = Math.round(sum_inh/inh_anns.length);
-
                 // Update html...
                 var html = ratingsTempl({'anns': anns,
                                          'canAnnotate': canAnnotate,
@@ -150,14 +142,6 @@ var RatingsPane = function RatingsPane($element, opts) {
                                          'count': anns.length,
                                          'static': WEBCLIENT.URLS.static_webclient,
                                          'isInherited': false});
-                if (inh_anns.length > 0) {
-                    html = html + ratingsTempl({'anns': inh_anns,
-                                                'canAnnotate': false,
-                                                'average': average_inh,
-                                                'count': inh_anns.length,
-                                                'static': WEBCLIENT.URLS.static_webclient,
-                                                'isInherited': true});
-                }
                 $("#ratings_spinner").hide();
                 $rating_annotations.html(html);
 
