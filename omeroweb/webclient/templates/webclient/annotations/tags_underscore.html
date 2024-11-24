@@ -32,7 +32,7 @@
                 <div>
                     &nbsp
                     <% if (idx < 20) { %>
-                        - <b><%- link.parent.class %> <%- link.parent.id %>:</b> <%- link.parent.name.slice(0, 28) %>
+                         <b><%- link.parent.class %> <%- link.parent.id %>:</b> <%- link.parent.name.slice(0, 28) %>
                         <% if (link.owner.id !== userId) {
                             print("(" + link.owner.firstName.slice(0, 1) + " " + _.escape(link.owner.lastName) + ")")
                         } %>
@@ -52,7 +52,7 @@
         <% if (isInherited && tag.links) { %>
             <b>Inherited by:</b><br />
             <% _.each(tag.childNames, function(cname) { %>
-                &nbsp- <%- cname.slice(0, 28) %><br />
+                &nbsp <%- cname.slice(0, 28) %><br />
             <% }) %>
         <% } %>
         </span>
