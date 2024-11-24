@@ -3,9 +3,9 @@
 <% } %>
 
 <% _.each(anns, function(ann) { %>
-<li class="file_ann_wrapper"
-    id="file_ann-<%- ann.id %>"
-    data-added-by="<% print(_.escape(ann.addedBy.join(','))) %>">
+    <li class="file_ann_wrapper"
+        id="file_ann-<%- ann.id %>"
+        data-added-by="<% print(_.escape(ann.addedBy.join(','))) %>">
 
     <a class='tooltip'
         href="<% if (ann.permissions.canDownload) { print(webindex + 'annotation/' + ann.id)} else {print('#') } %>">
@@ -17,14 +17,18 @@
 
     <span class="tooltip_html" style='display:none'>
         <!-- show different tooltip for batch_annotate panel -->
+        <% if (ann.links && !isInherited) { %>
+            Can remove File from <b><%- ann.canRemoveCount %> object<% if(ann.canRemoveCount !== 1) {print('s')} %></b>:<br/>
+        <% } %>
+        <b>Annotation ID:</b> <%- ann.id %><br />
+        <b>Owner:</b> <%- ann.owner.firstName %> <%- ann.owner.lastName %><br />
         <% if (ann.links) { %>
-            Can remove File from <b><%- ann.canRemoveCount %>
-            object<% if(ann.canRemoveCount !== 1) {print('s')} %></b>:<br/>
+            <b>Linked to:</b><br />
             <% _.each(ann.links, function(link, idx) { %>
                 <div>
+                    &nbsp
                     <% if (idx < 20) { %>
-                        <b><%- link.parent.class %> <%- link.parent.id %></b>
-                        <% print(_.escape(link.parent.name).slice(0, 28)) %>
+                        - <b><%- link.parent.class %> <%- link.parent.id %>:</b> <% print(_.escape(link.parent.name).slice(0, 28)) %>
                         <% if (link.owner.id !== userId){
                             print("(" + link.owner.firstName.slice(0, 1) + " " + _.escape(link.owner.lastName) + ")")
                         } %>
@@ -33,31 +37,25 @@
                     <% } %>
                 </div>
             <% }) %>
-            <% if (isInherited) { %>
-                <b>Inherited by:</b><br />
-                <% _.each(ann.childNames, function(cname) { %>
-                    &nbsp <%- cname %><br />
-                <% }) %>
-            <% } %>
+        <% } else if (isInherited) { %>
+            <b>Linked to:</b> <% print(_.escape(ann.link.parent.name).slice(0, 28)) %><br />
         <% } else { %>
-            <b>Annotation ID:</b> <%- ann.id %><br />
-            <b>Owner:</b> <%- ann.owner.firstName %> <%- ann.owner.lastName %><br />
             <b>Linked by:</b> <%- ann.link.owner.firstName %> <%- ann.link.owner.lastName %><br />
-            <b>On:</b> <% print(OME.formatDate(ann.link.date)) %> <br />
-            <b>Description:</b> <%- ann.description %>
-            <% if (ann.ns){ %>
-                <br/><b>Namespace:</b> <%- ann.ns %>
-            <% } %>
-            <% if (ann.file.mimetype){ %>
-                <br/><b>Mimetype:</b> <%- ann.file.mimetype %>
-            <% } %>
-            <br/><b>File ID:</b> <%- ann.file.id %>
-            <% if (isInherited) { %>
-                <br /><b>Inherited by:</b><br />
-                <% _.each(ann.childNames, function(cname) { %>
-                    &nbsp <%- cname %><br />
-                <% }) %>
-            <% } %>
+            <b>On:</b> <% print(OME.formatDate(ann.link.date)) %><br />
+        <% } %>
+        <b>Description:</b> <%- ann.description %><br/>
+        <% if (ann.ns){ %>
+            <b>Namespace:</b> <%- ann.ns %><br/>
+        <% } %>
+        <% if (ann.file.mimetype){ %>
+            <b>Mimetype:</b> <%- ann.file.mimetype %><br/>
+        <% } %>
+        <b>File ID:</b> <%- ann.file.id %><br/>
+        <% if (isInherited && ann.links) { %>
+            <b>Inherited by:</b><br />
+            <% _.each(ann.childNames, function(cname) { %>
+                &nbsp- <%- cname.slice(0, 28) %><br />
+            <% }) %>
         <% } %>
     </span>
 
