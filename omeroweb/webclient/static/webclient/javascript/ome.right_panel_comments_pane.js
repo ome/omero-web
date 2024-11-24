@@ -81,6 +81,13 @@ var CommentsPane = function CommentsPane($element, opts) {
         },
     });
 
+    var compareParentName = function(a, b){
+        if (!a.parent.name || !b.parent.name) {
+            return 1;
+        }
+        return a.parent.name.toLowerCase() > b.parent.name.toLowerCase() ? 1 : -1;
+    };
+
 
     this.render = function render() {
 
@@ -138,6 +145,83 @@ var CommentsPane = function CommentsPane($element, opts) {
                     });
                 }
 
+                // If we are batch annotating multiple objects, we show a summary of each ann
+                if (objects.length > 1) {
+
+                    // Map ann.id to summary for that ann
+                    var summary = {};
+                    anns.forEach(function(ann){
+                        var annId = ann.id,
+                            linkOwner = ann.link.owner.id;
+                        if (summary[annId] === undefined) {
+                            ann.canRemove = false;
+                            ann.canRemoveCount = 0;
+                            ann.links = [];
+                            ann.addedBy = [];
+                            summary[annId] = ann;
+                        }
+                        // Add link to list...
+                        var l = ann.link;
+                        // slice parent class 'ProjectI' > 'Project'
+                        l.parent.class = l.parent.class.slice(0, -1);
+                        summary[annId].links.push(l);
+
+                        // ...and summarise other properties on the ann
+                        if (l.permissions.canDelete) {
+                            summary[annId].canRemoveCount += 1;
+                        }
+                        summary[annId].canRemove = summary[annId].canRemove || l.permissions.canDelete;
+                        if (summary[annId].addedBy.indexOf(linkOwner) === -1) {
+                            summary[annId].addedBy.push(linkOwner);
+                        }
+                    });
+
+                    // convert summary back to list of 'anns'
+                    anns = [];
+                    for (var annId in summary) {
+                        if (summary.hasOwnProperty(annId)) {
+                            summary[annId].links.sort(compareParentName);
+                            anns.push(summary[annId]);
+                        }
+                    }
+
+                    // Map ann.id to summary for that ann
+                    summary = {};
+                    inh_anns.forEach(function(ann){
+                        var annId = ann.id,
+                            linkOwner = ann.link.owner.id;
+                        if (summary[annId] === undefined) {
+                            ann.canRemove = false;
+                            ann.canRemoveCount = 0;
+                            ann.links = [];
+                            ann.addedBy = [];
+                            summary[annId] = ann;
+                        }
+                        // Add link to list...
+                        var l = ann.link;
+                        // slice parent class 'ProjectI' > 'Project'
+                        l.parent.class = l.parent.class.slice(0, -1);
+                        summary[annId].links.push(l);
+
+                        // ...and summarise other properties on the ann
+                        if (summary[annId].addedBy.indexOf(linkOwner) === -1) {
+                            summary[annId].addedBy.push(linkOwner);
+                        }
+                        for(j = 0; j < ann.childNames; j++){
+                            summary[annId].childNames.push(ann.childNames[j]);
+                        }
+                    });
+
+                    // convert summary back to list of 'anns'
+                    inh_anns = [];
+                    for (var annId in summary) {
+                        if (summary.hasOwnProperty(annId)) {
+                            summary[annId].links.sort(compareParentName);
+                            inh_anns.push(summary[annId]);
+                        }
+                    }
+                }
+
                 // Show most recent comments at the top
                 anns.sort(function(a, b) {
                     return a.date < b.date ? 1 : -1;
@@ -151,24 +235,20 @@ var CommentsPane = function CommentsPane($element, opts) {
                     }
                 });
 
-                // Remove duplicates (same comment on multiple objects)
-                anns = anns.filter(function(ann, idx){
-                    // already sorted, so just compare with last item
-                    return (idx === 0 || anns[idx - 1].id !== ann.id);
-                });
-
                 // Update html...
                 var html = "";
                 if (anns.length > 0) {
                     html = commentsTempl({'anns': anns,
                                           'static': WEBCLIENT.URLS.static_webclient,
                                           'webindex': WEBCLIENT.URLS.webindex,
+                                          'userId': WEBCLIENT.USER.id,
                                           'isInherited': false});
                 }
                 if (inh_anns.length > 0) {
                     html = html + commentsTempl({'anns': inh_anns,
                                                   'static': WEBCLIENT.URLS.static_webclient,
                                                   'webindex': WEBCLIENT.URLS.webindex,
+                                                  'userId': WEBCLIENT.USER.id,
                                                   'isInherited': true});
                 }
 

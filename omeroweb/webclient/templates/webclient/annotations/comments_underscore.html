@@ -18,7 +18,7 @@
             </strong>
             <% if (isInherited) { %>
                 on
-                <%- ann.link.parent.class.substring(0, ann.link.parent.class.length - 1) %> <%- ann.link.parent.name.slice(0, 30) %>
+                <%- ann.link.parent.class %> <%- ann.link.parent.name.slice(0, 30) %>
             <% } else { %>
                 at
                 <% print(OME.formatDate(ann.link.date)) %>
@@ -36,13 +36,42 @@
     </div>
 
     <span class="tooltip_html" style='display:none'>
-        <b>ID:</b> <%- ann.id %><br />
-        <% if (ann.ns) { %><b>Namespace:</b> <%- ann.ns %><br /><% } %>
-        <% if (ann.description) { %><b>Description:</b> <%- ann.description %><br /><% } %>
-        <% if (isInherited) { %>
+        <!-- show different tooltip for batch_annotate panel -->
+        <% if (ann.links && !isInherited) { %>
+            Can remove File from <b><%- ann.canRemoveCount %> object<% if(ann.canRemoveCount !== 1) {print('s')} %></b>:<br/>
+        <% } %>
+        <b>Annotation ID:</b> <%- ann.id %><br />
+        <b>Owner:</b> <%- ann.owner.firstName %> <%- ann.owner.lastName %><br />
+        <% if (ann.links) { %>
+            <b>Linked to:</b><br />
+            <% _.each(ann.links, function(link, idx) { %>
+                <div>
+                    &nbsp
+                    <% if (idx < 20) { %>
+                        - <b><%- link.parent.class %> <%- link.parent.id %>:</b> <% print(_.escape(link.parent.name).slice(0, 28)) %>
+                        <% if (link.owner.id !== userId){
+                            print("(" + link.owner.firstName.slice(0, 1) + " " + _.escape(link.owner.lastName) + ")")
+                        } %>
+                    <% } else if (idx === 20) { %>
+                        and <b><% print(ann.links.length - 20) %></b> other objects...
+                    <% } %>
+                </div>
+            <% }) %>
+        <% } else if (isInherited) { %>
+            <b>Linked to:</b> <% print(_.escape(ann.link.parent.name).slice(0, 28)) %><br />
+        <% } else { %>
+            <b>Linked by:</b> <%- ann.link.owner.firstName %> <%- ann.link.owner.lastName %><br />
+            <b>On:</b> <% print(OME.formatDate(ann.link.date)) %><br />
+        <% } %>
+        <% if (ann.description){ %>
+            <b>Description:</b> <%- ann.description %><br/>
+        <% } %><% if (ann.ns){ %>
+            <b>Namespace:</b> <%- ann.ns %><br/>
+        <% } %>
+        <% if (isInherited && ann.links) { %>
             <b>Inherited by:</b><br />
             <% _.each(ann.childNames, function(cname) { %>
-                &nbsp <%- cname %><br />
+                &nbsp- <%- cname.slice(0, 28) %><br />
             <% }) %>
         <% } %>
     </span>
