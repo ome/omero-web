@@ -159,6 +159,7 @@ class TestWeb(object):
     def compare_with_reference(self, refname, generated):
         reffile = path(__file__).dirname() / "reference_templates" / refname
         generated = generated.split("\n")
+        # Temporarily uncomment the following line to regenerate the templates
         # reffile.write_lines(generated)
         ref = reffile.lines(retain=False)
         d = "\n".join(unified_diff(ref, generated))
