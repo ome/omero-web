@@ -61,7 +61,7 @@ OME.getURLParameter = function(key) {
 };
 
 var linkify = function(input) {
-    var regex = /(https?|ftp|file):\/\/[-a-zA-Z0-9+&@#/%?=~_|!:,.;$]*[-a-zA-Z0-9+&@#/%=~_|$]/g;
+    var regex = /(https?|ftp|file):\/\/[-a-zA-Z0-9+&@#/%?=~_{}[\]|!:,.;$]*[-a-zA-Z0-9+&@#/%=~_{}[\]|$]/g;
     input = input.replace(regex, "<a href='$&' target='_blank'>$&</a>");
     return linkObjects(input);
 };
