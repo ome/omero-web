@@ -1,3 +1,7 @@
+<% if (isInherited) { %>
+  <hr /><h2>Inherited key-value pairs</h2><br /><br />
+<% } %>
+
 <% _.each(anns, function(ann) { %>
 
 <table <% if (ann.id && ann.addedBy) { %>
