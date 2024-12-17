@@ -124,7 +124,7 @@ var TagPane = function TagPane($element, opts) {
             });
             request = request.join("&");
 
-            var annsUrl = WEBCLIENT.URLS.webindex + "api/annotations/?type=tag&" + request
+            var annsUrl = WEBCLIENT.URLS.webindex + "api/annotations/?parents=true&type=tag&" + request
             $.getJSON(annsUrl, function(data){
 
                 // manipulate data...
@@ -143,11 +143,38 @@ var TagPane = function TagPane($element, opts) {
                     }
                     // AddedBy IDs for filtering
                     tag.addedBy = [tag.link.owner.id];
-                    tag.textValue = tag.textValue;
-                    tag.description = tag.description;
+                    tag.textValue = _.escape(tag.textValue);
+                    tag.description = _.escape(tag.description);
                     tag.canRemove = tag.link.permissions.canDelete;
                     return tag;
                 });
+
+                var inh_tags = []
+                if (data.hasOwnProperty("parents")){
+                    inh_tags = data.parents.annotations.map(function(tag) {
+                        tag.owner = experimenters[tag.owner.id];
+                        if (tag.link && tag.link.owner) {
+                            tag.link.owner = experimenters[tag.link.owner.id];
+                        }
+                        // AddedBy IDs for filtering
+                        tag.addedBy = [tag.link.owner.id];
+                        tag.textValue = _.escape(tag.textValue);
+                        tag.description = _.escape(tag.description);
+                        tag.canRemove = false;
+                        let class_ = tag.link.parent.class;
+                        let id_ = '' + tag.link.parent.id;
+                        children = data.parents.lineage[class_][id_];
+                        class_ = children[0].class;
+                        tag.childClass = class_.substring(0, class_.length - 1);
+                        tag.childNames = [];
+                        if (children[0].hasOwnProperty("name")){
+                            for(j = 0; j < children.length; j++){
+                                tag.childNames.push(children[j].name);
+                            }
+                        }
+                        return tag;
+                    });
+                }
 
                 // If we are batch annotating multiple objects, we show a summary of each tag
                 if (objects.length > 1) {
@@ -158,12 +185,14 @@ var TagPane = function TagPane($element, opts) {
                         var tagId = tag.id,
                             linkOwner = tag.link.owner.id;
                         if (summary[tagId] === undefined) {
-                            summary[tagId] = {'textValue': _.escape(tag.textValue),
+                            summary[tagId] = {'textValue': tag.textValue,
+                                              'description': tag.description,
                                               'id': tag.id,
                                               'canRemove': false,
                                               'canRemoveCount': 0,
                                               'links': [],
-                                              'addedBy': []
+                                              'addedBy': [],
+                                              'owner': experimenters[linkOwner]
                                              };
                         }
                         // Add link to list...
@@ -190,19 +219,68 @@ var TagPane = function TagPane($element, opts) {
                             tags.push(summary[tagId]);
                         }
                     }
+
+                    // Map tag.id to summary for that tag
+                    summary = {};
+                    inh_tags.forEach(function(tag){
+                        var tagId = tag.id,
+                            linkOwner = tag.link.owner.id;
+                        if (summary[tagId] === undefined) {
+                            summary[tagId] = {'textValue': _.escape(tag.textValue),
+                                              'description': _.escape(tag.description),
+                                              'id': tag.id,
+                                              'canRemove': false,
+                                              'canRemoveCount': 0,
+                                              'links': [],
+                                              'addedBy': [],
+                                              'childClass': tag.childClass,
+                                              'childNames': tag.childNames,
+                                              'owner': experimenters[linkOwner]
+                                            };
+                        }
+                        // Add link to list...
+                        var l = tag.link;
+                        // slice parent class 'ProjectI' > 'Project'
+                        l.parent.class = l.parent.class.slice(0, -1);
+                        summary[tagId].links.push(l);
+
+                        // ...and summarise other properties on the tag
+                        if (summary[tagId].addedBy.indexOf(linkOwner) === -1) {
+                            summary[tagId].addedBy.push(linkOwner);
+                        }
+                        for(j = 0; j < tag.childNames; j++){
+                            summary[tagId].childNames.push(tag.childNames[j]);
+                        }
+                    });
+
+                    // convert summary back to list of 'tags'
+                    inh_tags = [];
+                    for (var tagId in summary) {
+                        if (summary.hasOwnProperty(tagId)) {
+                            summary[tagId].links.sort(compareParentName);
+                            inh_tags.push(summary[tagId]);
+                        }
+                    }
                 }
 
                 // Update html...
                 var html = tagTmpl({'tags': tags,
                                     'webindex': WEBCLIENT.URLS.webindex,
-                                    'userId': WEBCLIENT.USER.id});
+                                    'userId': WEBCLIENT.USER.id,
+                                    'isInherited': false});
+                if (inh_tags.length > 0) {
+                    html = html + tagTmpl({'tags': inh_tags,
+                                        'webindex': WEBCLIENT.URLS.webindex,
+                                        'userId': WEBCLIENT.USER.id,
+                                        'isInherited': true});
+                }
                 $tags_container.html(html);
 
                 // Finish up...
                 OME.filterAnnotationsAddedBy();
                 $(".tooltip", $tags_container).tooltip_init();
             });
-            
+
         }
     };
 

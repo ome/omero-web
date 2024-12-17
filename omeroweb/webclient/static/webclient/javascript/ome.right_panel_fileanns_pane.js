@@ -143,7 +143,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
             });
             request = request.join("&");
 
-            $.getJSON(WEBCLIENT.URLS.webindex + "api/annotations/?type=file&" + request, function(data){
+            $.getJSON(WEBCLIENT.URLS.webindex + "api/annotations/?parents=true&type=file&" + request, function(data){
 
                 var checkboxesAreVisible = $(
                     "#fileanns_container input[type=checkbox]:visible"
@@ -170,11 +170,36 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
                 // Don't show companion files
                 anns = anns.filter(isNotCompanionFile);
 
-                
-                // If we are batch annotating multiple objects, we show a summary of each tag
+                var inh_anns = []
+                if (data.hasOwnProperty("parents")){
+                    inh_anns = data.parents.annotations.map(function(ann) {
+                        ann.owner = experimenters[ann.owner.id];
+                        if (ann.link && ann.link.owner) {
+                            ann.link.owner = experimenters[ann.link.owner.id];
+                        }
+                        ann.addedBy = [ann.link.owner.id];
+                        ann.file.size = ann.file.size !== null ? ann.file.size.filesizeformat() : "";
+                        let class_ = ann.link.parent.class;
+                        let id_ = '' + ann.link.parent.id;
+                        children = data.parents.lineage[class_][id_];
+                        class_ = children[0].class;
+                        ann.childClass = class_.substring(0, class_.length - 1);
+                        ann.childNames = [];
+                        if (children[0].hasOwnProperty("name")){
+                            for(j = 0; j < children.length; j++){
+                                ann.childNames.push(children[j].name);
+                            }
+                        }
+                        return ann;
+                    });
+                    inh_anns = inh_anns.filter(isNotCompanionFile);
+                }
+
+
+                // If we are batch annotating multiple objects, we show a summary of each ann
                 if (objects.length > 1) {
 
-                    // Map tag.id to summary for that tag
+                    // Map ann.id to summary for that ann
                     var summary = {};
                     anns.forEach(function(ann){
                         var annId = ann.id,
@@ -210,6 +235,42 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
                             anns.push(summary[annId]);
                         }
                     }
+
+                    // Map ann.id to summary for that ann
+                    summary = {};
+                    inh_anns.forEach(function(ann){
+                        var annId = ann.id,
+                            linkOwner = ann.link.owner.id;
+                        if (summary[annId] === undefined) {
+                            ann.canRemove = false;
+                            ann.canRemoveCount = 0;
+                            ann.links = [];
+                            ann.addedBy = [];
+                            summary[annId] = ann;
+                        }
+                        // Add link to list...
+                        var l = ann.link;
+                        // slice parent class 'ProjectI' > 'Project'
+                        l.parent.class = l.parent.class.slice(0, -1);
+                        summary[annId].links.push(l);
+
+                        // ...and summarise other properties on the ann
+                        if (summary[annId].addedBy.indexOf(linkOwner) === -1) {
+                            summary[annId].addedBy.push(linkOwner);
+                        }
+                        for(j = 0; j < ann.childNames; j++){
+                            summary[annId].childNames.push(ann.childNames[j]);
+                        }
+                    });
+
+                    // convert summary back to list of 'anns'
+                    inh_anns = [];
+                    for (var annId in summary) {
+                        if (summary.hasOwnProperty(annId)) {
+                            summary[annId].links.sort(compareParentName);
+                            inh_anns.push(summary[annId]);
+                        }
+                    }
                 }
 
                 // Update html...
@@ -217,7 +278,14 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
                 if (anns.length > 0) {
                     html = filesTempl({'anns': anns,
                                        'webindex': WEBCLIENT.URLS.webindex,
-                                       'userId': WEBCLIENT.USER.id});
+                                       'userId': WEBCLIENT.USER.id,
+                                       'isInherited': false});
+                }
+                if (inh_anns.length > 0) {
+                    html = html + filesTempl({'anns': inh_anns,
+                                              'webindex': WEBCLIENT.URLS.webindex,
+                                              'userId': WEBCLIENT.USER.id,
+                                              'isInherited': true});
                 }
                 $fileanns_container.html(html);
 
@@ -228,7 +296,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
                 }
                 $(".tooltip", $fileanns_container).tooltip_init();
             });
-            
+
         }
     };
 
