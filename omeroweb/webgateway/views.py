@@ -2107,7 +2107,7 @@ def listLuts_json(request, conn=None, **kwargs):
     return {"luts": rv, "png_luts": LUTS_IN_PNG, "png_luts_new": all_luts}
 
 
-@login_required()
+@login_required(omero_group=None)
 def luts_png(request, conn=None, **kwargs):
     """
     Generates the LUT png used for preview and selection of LUT. The png is
