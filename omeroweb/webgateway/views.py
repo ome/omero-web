@@ -2133,7 +2133,10 @@ def luts_png(request, conn=None, **kwargs):
     luts_hash = hash("\n".join(luts_path))
     cache_key = f"lut_hash_{luts_hash}"
 
-    cached_image = cache.get(cache_key)
+    cached_image = None
+    # We can use /?cached=false to force the generation of a new image
+    if request.GET.get("cached") != "false":
+        cached_image = cache.get(cache_key)
     if cached_image:
         return HttpResponse(cached_image, content_type="image/png")
 
