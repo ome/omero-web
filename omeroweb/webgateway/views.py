@@ -2069,7 +2069,7 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     return HttpJavascriptResponse(json_data)
 
 
-@login_required()
+@login_required(omero_group=None)
 @jsonp
 def listLuts_json(request, conn=None, **kwargs):
     """
