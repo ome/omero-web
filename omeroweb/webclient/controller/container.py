@@ -82,72 +82,65 @@ class BaseContainer(BaseController):
         **kw,
     ):
         BaseController.__init__(self, conn)
+
         if project is not None:
             self.obj_type = "project"
-            self.project = self.conn.getObject("Project", project)
-            self.assertNotNone(self.project, project, "Project")
-            self.assertNotNone(self.project._obj, project, "Project")
+            self.project = self._getObject("Project", project)
         if dataset is not None:
             self.obj_type = "dataset"
-            self.dataset = self.conn.getObject("Dataset", dataset)
-            self.assertNotNone(self.dataset, dataset, "Dataset")
-            self.assertNotNone(self.dataset._obj, dataset, "Dataset")
+            self.dataset = self._getObject("Dataset", dataset)
         if screen is not None:
             self.obj_type = "screen"
-            self.screen = self.conn.getObject("Screen", screen)
-            self.assertNotNone(self.screen, screen, "Screen")
-            self.assertNotNone(self.screen._obj, screen, "Screen")
+            self.screen = self._getObject("Screen", screen)
         if plate is not None:
             self.obj_type = "plate"
-            self.plate = self.conn.getObject("Plate", plate)
-            self.assertNotNone(self.plate, plate, "Plate")
-            self.assertNotNone(self.plate._obj, plate, "Plate")
+            self.plate = self._getObject("Plate", plate)
         if acquisition is not None:
             self.obj_type = "acquisition"
-            self.acquisition = self.conn.getObject("PlateAcquisition", acquisition)
-            self.assertNotNone(self.acquisition, acquisition, "Plate Acquisition")
-            self.assertNotNone(self.acquisition._obj, acquisition, "Plate Acquisition")
+            self.acquisition = self._getObject("PlateAcquisition", acquisition)
         if image is not None:
             self.obj_type = "image"
-            self.image = self.conn.getObject("Image", image)
-            self.assertNotNone(self.image, image, "Image")
-            self.assertNotNone(self.image._obj, image, "Image")
+            self.image = self._getObject("Image", image)
         if well is not None:
             self.obj_type = "well"
-            self.well = self.conn.getObject("Well", well)
-            self.assertNotNone(self.well, well, "Well")
-            self.assertNotNone(self.well._obj, well, "Well")
+            self.well = self._getObject("Well", well)
         if tag is not None:
             self.obj_type = "tag"
-            self.tag = self.conn.getObject("Annotation", tag)
-            self.assertNotNone(self.tag, tag, "Tag")
-            self.assertNotNone(self.tag._obj, tag, "Tag")
+            self.tag = self._getObject("Annotation", tag)
         if tagset is not None:
             self.obj_type = "tagset"
-            self.tag = self.conn.getObject("Annotation", tagset)
+            self.tag = self._getObject("Annotation", tagset)
             # We need to check if tagset via hasattr(manager, o_type)
             self.tagset = self.tag
-            self.assertNotNone(self.tag, tagset, "Tag")
-            self.assertNotNone(self.tag._obj, tagset, "Tag")
         if comment is not None:
             self.obj_type = "comment"
-            self.comment = self.conn.getObject("Annotation", comment)
-            self.assertNotNone(self.comment, comment, "Comment")
-            self.assertNotNone(self.comment._obj, comment, "Comment")
+            self.comment = self._getObject("Annotation", comment)
         if file is not None:
             self.obj_type = "file"
-            self.file = self.conn.getObject("Annotation", file)
-            self.assertNotNone(self.file, file, "File")
-            self.assertNotNone(self.file._obj, file, "File")
+            self.file = self._getObject("Annotation", file)
         if annotation is not None:
             self.obj_type = "annotation"
-            self.annotation = self.conn.getObject("Annotation", annotation)
-            self.assertNotNone(self.annotation, annotation, "Annotation")
-            self.assertNotNone(self.annotation._obj, annotation, "Annotation")
+            self.annotation = self._getObject("Annotation", annotation)
         if orphaned:
             self.orphaned = True
         if index is not None:
             self.index = index
+
+    def _getObject(self, obj_type, obj_id):
+        # we wrap conn.getObject() to FIRST set the group context
+        # since conn.getObject() with group: -1 is slow if user's default group is big
+        rsp_obj = None
+        try:
+            if self.conn.SERVICE_OPTS.getOmeroGroup() == -1:
+                obj = self.conn.getQueryService().get(obj_type, int(obj_id),
+                    {'group': '-1'})
+                group_id = obj.getDetails().group.id.val
+                self.conn.SERVICE_OPTS.setOmeroGroup(group_id)
+            rsp_obj = self.conn.getObject(obj_type, obj_id)
+        except omero.ValidationException:
+            pass
+        self.assertNotNone(rsp_obj, obj_id, obj_type)
+        return rsp_obj
 
     def assertNotNone(self, obj, obj_id, obj_name):
         if obj is None:

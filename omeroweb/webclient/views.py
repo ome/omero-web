@@ -1743,8 +1743,6 @@ def load_metadata_details(request, c_type, c_id, conn=None, share_id=None, **kwa
         context["insight_ns"] = omero.rtypes.rstring(
             omero.constants.metadata.NSINSIGHTTAGSET
         ).val
-    if form_comment is not None:
-        context["form_comment"] = form_comment
 
     context["figScripts"] = figScripts
     context["template"] = template
