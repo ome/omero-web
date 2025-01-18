@@ -132,8 +132,9 @@ class BaseContainer(BaseController):
         rsp_obj = None
         try:
             if self.conn.SERVICE_OPTS.getOmeroGroup() == -1:
-                obj = self.conn.getQueryService().get(obj_type, int(obj_id),
-                    {'group': '-1'})
+                obj = self.conn.getQueryService().get(
+                    obj_type, int(obj_id), {"group": "-1"}
+                )
                 group_id = obj.getDetails().group.id.val
                 self.conn.SERVICE_OPTS.setOmeroGroup(group_id)
             rsp_obj = self.conn.getObject(obj_type, obj_id)
