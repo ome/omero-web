@@ -35,7 +35,7 @@ from django.http import (
     StreamingHttpResponse,
     HttpResponseNotFound,
 )
-
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
@@ -2140,45 +2140,24 @@ def luts_png(request, conn=None, **kwargs):
     if cached_image:
         return HttpResponse(cached_image, content_type="image/png")
 
-    # Generate the LUT, fourth png channel set to 255
-    new_img = numpy.zeros((10 * (len(luts) + 1), 256, 4), dtype="uint8") + 255
+    # Load the luts_10.png image, to crop known LUTs from it
+    png_path = staticfiles_storage.path('webgateway/img/luts_10.png')
+    luts_img = Image.open(png_path)
+
+    png_img = Image.new("RGBA", (256, 10 * (len(luts) + 1)), (255, 255, 255, 255))
     for i, lut in enumerate(luts):
-        orig_file = conn.getObject("OriginalFile", lut.getId()._val)
-        lut_data = bytearray()
-        # Collect the LUT data in byte form
-        for chunk in orig_file.getFileInChunks():
-            lut_data.extend(chunk)
+        path_name = lut.path.val + lut.name.val
+        png_index = LUTS_IN_PNG.index(path_name) if path_name in LUTS_IN_PNG else -1
+        if png_index > -1:
+            lut_crop = luts_img.crop((0, png_index * 10, 256, (png_index + 1) * 10))
+            png_img.paste(lut_crop, (0, i * 10))
 
-        if len(lut_data) in [768, 800]:
-            lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
-            new_img[(i * 10) : (i + 1) * 10, :, :3] = lut_arr.reshape(3, 256).T
-        else:
-            lut_data = lut_data.decode()
-            r, g, b = [], [], []
+    # last row for the channel sliders transparent gradient
+    lut_crop = luts_img.crop((0, luts_img.size[1] - 10, 256, luts_img.size[1]))
+    png_img.paste(lut_crop, (0, png_img.size[1] - 10))
 
-            lines = lut_data.split("\n")
-            sep = None
-            if "\t" in lines[0]:
-                sep = "\t"
-            for line in lines:
-                val = line.split(sep)
-                if len(val) < 3 or not val[-1].isnumeric():
-                    continue
-                r.append(int(val[-3]))
-                g.append(int(val[-2]))
-                b.append(int(val[-1]))
-            new_img[(i * 10) : (i + 1) * 10, :, 0] = numpy.array(r)
-            new_img[(i * 10) : (i + 1) * 10, :, 1] = numpy.array(g)
-            new_img[(i * 10) : (i + 1) * 10, :, 2] = numpy.array(b)
-
-    # Set the last row for the channel sliders transparent gradient
-    new_img[-10:] = 0
-    new_img[-10:, :180, 3] = numpy.linspace(255, 0, 180, dtype="uint8")
-
-    image = Image.fromarray(new_img)
-    # Save the image to a BytesIO stream
     buffer = BytesIO()
-    image.save(buffer, format="PNG")
+    png_img.save(buffer, format="PNG")
     buffer.seek(0)
 
     # Cache the image using the version-based key
