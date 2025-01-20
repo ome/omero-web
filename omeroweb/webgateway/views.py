@@ -2183,7 +2183,6 @@ def luts_png(request, conn=None, **kwargs):
                 new_img[0 : 10 * 10, :, 2] = numpy.array(b)
 
             lut_crop = Image.fromarray(new_img)
-            lut_crop.show()
         if lut_crop:
             png_img.paste(lut_crop, (0, i * 10))
 
