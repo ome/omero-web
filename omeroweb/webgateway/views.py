@@ -2141,7 +2141,7 @@ def luts_png(request, conn=None, **kwargs):
         return HttpResponse(cached_image, content_type="image/png")
 
     # Load the luts_10.png image, to crop known LUTs from it
-    png_path = staticfiles_storage.path('webgateway/img/luts_10.png')
+    png_path = staticfiles_storage.path("webgateway/img/luts_10.png")
     luts_img = Image.open(png_path)
 
     png_img = Image.new("RGBA", (256, 10 * (len(luts) + 1)), (255, 255, 255, 255))
@@ -2178,9 +2178,9 @@ def luts_png(request, conn=None, **kwargs):
                     r.append(int(val[-3]))
                     g.append(int(val[-2]))
                     b.append(int(val[-1]))
-                new_img[0:10 * 10, :, 0] = numpy.array(r)
-                new_img[0:10 * 10, :, 1] = numpy.array(g)
-                new_img[0:10 * 10, :, 2] = numpy.array(b)
+                new_img[0 : 10 * 10, :, 0] = numpy.array(r)
+                new_img[0 : 10 * 10, :, 1] = numpy.array(g)
+                new_img[0 : 10 * 10, :, 2] = numpy.array(b)
 
             lut_crop = Image.fromarray(new_img)
             lut_crop.show()
