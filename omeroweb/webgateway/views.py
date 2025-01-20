@@ -2148,8 +2148,43 @@ def luts_png(request, conn=None, **kwargs):
     for i, lut in enumerate(luts):
         path_name = lut.path.val + lut.name.val
         png_index = LUTS_IN_PNG.index(path_name) if path_name in LUTS_IN_PNG else -1
+        lut_crop = None
         if png_index > -1:
             lut_crop = luts_img.crop((0, png_index * 10, 256, (png_index + 1) * 10))
+        elif request.GET.get("new"):
+            # Load "new" LUTs from the server
+            orig_file = conn.getObject("OriginalFile", lut.getId()._val)
+            lut_data = bytearray()
+            # Collect the LUT data in byte form
+            for chunk in orig_file.getFileInChunks():
+                lut_data.extend(chunk)
+
+            new_img = numpy.zeros((10, 256, 4), dtype="uint8") + 255
+            if len(lut_data) in [768, 800]:
+                lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
+                new_img[0:10, :, :3] = lut_arr.reshape(3, 256).T
+            else:
+                lut_data = lut_data.decode()
+                r, g, b = [], [], []
+
+                lines = lut_data.split("\n")
+                sep = None
+                if "\t" in lines[0]:
+                    sep = "\t"
+                for line in lines:
+                    val = line.split(sep)
+                    if len(val) < 3 or not val[-1].isnumeric():
+                        continue
+                    r.append(int(val[-3]))
+                    g.append(int(val[-2]))
+                    b.append(int(val[-1]))
+                new_img[0:10 * 10, :, 0] = numpy.array(r)
+                new_img[0:10 * 10, :, 1] = numpy.array(g)
+                new_img[0:10 * 10, :, 2] = numpy.array(b)
+
+            lut_crop = Image.fromarray(new_img)
+            lut_crop.show()
+        if lut_crop:
             png_img.paste(lut_crop, (0, i * 10))
 
     # last row for the channel sliders transparent gradient
