@@ -36,7 +36,6 @@ from django.http import (
     HttpResponseNotFound,
 )
 from django.contrib.staticfiles.storage import staticfiles_storage
-from django.core.cache import cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
