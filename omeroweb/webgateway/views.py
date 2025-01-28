@@ -2105,13 +2105,13 @@ def listLuts_json(request, conn=None, **kwargs):
         idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
         # rgb = load_lut_to_rgb(conn, lut.id.val)
         lut_data = {
-                "id": lut.id.val,
-                "path": lut.path.val,
-                "name": lut.name.val,
-                "size": unwrap(lut.size),
-                "png_index": idx,
-                "png_index_new": i,
-            }
+            "id": lut.id.val,
+            "path": lut.path.val,
+            "name": lut.name.val,
+            "size": unwrap(lut.size),
+            "png_index": idx,
+            "png_index_new": i,
+        }
         if include_rgb:
             # If we have the LUT cached, use that...
             pathname = lut.path.val + lut.name.val
@@ -2164,7 +2164,7 @@ def luts_png(request, conn=None, **kwargs):
         pathname = lut.path.val + lut.name.val
         if pathname in luts_by_pathname:
             lut_rgb = luts_by_pathname[pathname].get("rgb")
-            new_img[(i * 10): ((i + 1) * 10), :, :3] = lut_rgb
+            new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
 
     # Set the last row for the channel sliders transparent gradient
     new_img[-10:] = 0
