@@ -22,6 +22,7 @@ import tempfile
 import zipfile
 import shutil
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -233,3 +234,41 @@ def points_string_to_XY_list(string):
         x, y = xy.split(",")
         xyList.append((float(x.strip()), float(y.strip())))
     return xyList
+
+
+def load_lut_to_rgb(conn, orig_file_id):
+    """
+    Loads the LUT original file and converts to numpy array
+
+    Returns numpy array with shape (256 x 3) for rgb values.
+    """
+    orig_file = conn.getObject("OriginalFile", orig_file_id)
+    lut_data = bytearray()
+    # Collect the LUT data in byte form
+    for chunk in orig_file.getFileInChunks():
+        lut_data.extend(chunk)
+
+    rgb_values = np.zeros((256, 3), dtype="uint8")
+    if len(lut_data) in [768, 800]:
+        lut_arr = np.array(lut_data, dtype="uint8")[-768:]
+        rgb_values = lut_arr.reshape(3, 256).T
+    else:
+        lut_data = lut_data.decode()
+        r, g, b = [], [], []
+
+        lines = lut_data.split("\n")
+        sep = None
+        if "\t" in lines[0]:
+            sep = "\t"
+        for line in lines:
+            val = line.split(sep)
+            if len(val) < 3 or not val[-1].isnumeric():
+                continue
+            r.append(int(val[-3]))
+            g.append(int(val[-2]))
+            b.append(int(val[-1]))
+        rgb_values[:, 0] = np.array(r)
+        rgb_values[:, 1] = np.array(g)
+        rgb_values[:, 2] = np.array(b)
+
+    return rgb_values
