@@ -51,6 +51,18 @@ Usage
 For running omero-web in production with NGINX, see See: `OMERO.web install`_ documentation.
 To run in development mode, see below.
 
+LUTs caching
+------------
+
+The look-up tables png available at `/webgateway/luts_png/` is generated from `rgb` values
+cached in https://github.com/ome/omero-web/blob/master/omeroweb/webgateway/static/webgateway/json/luts.json.
+The LUTs in the `/luts_png/` will always correspond to the LUTs on the server as available in JSON
+from `/webgateway/luts/`.
+If new LUTs are added to the server and are not found in the `luts.json` then the `/luts_png/` will
+show a blank placeholder for that LUT.
+If you wish to update the cached `luts.json`, you can copy the response from `/webgateway/luts/?rgb=true`
+and save it to `/webgateway/static/webgateway/json/luts.json`.
+
 Contributing
 ------------
 
