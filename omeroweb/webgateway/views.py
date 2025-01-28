@@ -45,7 +45,7 @@ from django.conf import settings
 from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
-from .util import points_string_to_XY_list, xy_list_to_bbox
+from .util import points_string_to_XY_list, xy_list_to_bbox, load_lut_to_rgb
 from .plategrid import PlateGrid
 from omeroweb.version import omeroweb_buildyear as build_year
 from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
@@ -2073,7 +2073,7 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
 @jsonp
 def listLuts_json(request, conn=None, **kwargs):
     """
-    Lists lookup tables 'LUTs' availble for rendering.
+    Lists lookup tables 'LUTs' available for rendering.
 
     We include 'png_index' which is the index of each LUT within the
     static/webgateway/img/luts_10.png or -1 if LUT is not found.
@@ -2088,12 +2088,23 @@ def listLuts_json(request, conn=None, **kwargs):
     luts = scriptService.getScriptsByMimetype("text/x-lut")
     luts.sort(key=lambda x: x.name.val.lower())
     rv, all_luts = [], []
+
+    luts_by_pathname = {}
+    include_rgb = request.GET.get("rgb") == "true"
+    if include_rgb:
+        json_path = staticfiles_storage.path("webgateway/json/luts.json")
+        with open(json_path) as json_file:
+            luts_json = json.load(json_file)
+            for lut in luts_json["luts"]:
+                pathname = lut["path"] + lut["name"]
+                luts_by_pathname[pathname] = lut
+
     for i, lut in enumerate(luts):
         lutsrc = lut.path.val + lut.name.val
         all_luts.append(lutsrc)
         idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
-        rv.append(
-            {
+        # rgb = load_lut_to_rgb(conn, lut.id.val)
+        lut_data = {
                 "id": lut.id.val,
                 "path": lut.path.val,
                 "name": lut.name.val,
@@ -2101,7 +2112,17 @@ def listLuts_json(request, conn=None, **kwargs):
                 "png_index": idx,
                 "png_index_new": i,
             }
-        )
+        if include_rgb:
+            # If we have the LUT cached, use that...
+            pathname = lut.path.val + lut.name.val
+            if pathname in luts_by_pathname:
+                lut_data["rgb"] = luts_by_pathname[pathname].get("rgb")
+            else:
+                # ...otherwise load the original file
+                rgb = load_lut_to_rgb(conn, lut.id.val)
+                lut_data["rgb"] = rgb.tolist()
+        rv.append(lut_data)
+
     all_luts.append("gradient.png")
 
     return {"luts": rv, "png_luts": LUTS_IN_PNG, "png_luts_new": all_luts}
@@ -2126,77 +2147,34 @@ def luts_png(request, conn=None, **kwargs):
     """
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
-    luts.sort(key=lambda x: x.name.val)
-    luts_path = []
-    for lut in luts:
-        luts_path.append(lut.path.val + lut.name.val)
-    luts_hash = hash("\n".join(luts_path))
-    cache_key = f"lut_hash_{luts_hash}"
+    luts.sort(key=lambda x: x.name.val.lower())
 
-    cached_image = None
-    # We can use /?cached=false to force the generation of a new image
-    if request.GET.get("cached") != "false":
-        cached_image = cache.get(cache_key)
-    if cached_image:
-        return HttpResponse(cached_image, content_type="image/png")
+    luts_by_pathname = {}
+    # Load cached LUTS json to get rgb values...
+    json_path = staticfiles_storage.path("webgateway/json/luts.json")
+    with open(json_path) as json_file:
+        luts_json = json.load(json_file)
+        for lut in luts_json["luts"]:
+            pathname = lut["path"] + lut["name"]
+            luts_by_pathname[pathname] = lut
 
-    # Load the luts_10.png image, to crop known LUTs from it
-    png_path = staticfiles_storage.path("webgateway/img/luts_10.png")
-    luts_img = Image.open(png_path)
-
-    png_img = Image.new("RGBA", (256, 10 * (len(luts) + 1)), (255, 255, 255, 255))
+    # Generate the LUT, fourth png channel set to 255
+    new_img = numpy.zeros((10 * (len(luts) + 1), 256, 4), dtype="uint8") + 255
     for i, lut in enumerate(luts):
-        path_name = lut.path.val + lut.name.val
-        png_index = LUTS_IN_PNG.index(path_name) if path_name in LUTS_IN_PNG else -1
-        lut_crop = None
-        if png_index > -1:
-            lut_crop = luts_img.crop((0, png_index * 10, 256, (png_index + 1) * 10))
-        elif request.GET.get("new"):
-            # Load "new" LUTs from the server
-            orig_file = conn.getObject("OriginalFile", lut.getId()._val)
-            lut_data = bytearray()
-            # Collect the LUT data in byte form
-            for chunk in orig_file.getFileInChunks():
-                lut_data.extend(chunk)
+        pathname = lut.path.val + lut.name.val
+        if pathname in luts_by_pathname:
+            lut_rgb = luts_by_pathname[pathname].get("rgb")
+            new_img[(i * 10): ((i + 1) * 10), :, :3] = lut_rgb
 
-            new_img = numpy.zeros((10, 256, 4), dtype="uint8") + 255
-            if len(lut_data) in [768, 800]:
-                lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
-                new_img[0:10, :, :3] = lut_arr.reshape(3, 256).T
-            else:
-                lut_data = lut_data.decode()
-                r, g, b = [], [], []
+    # Set the last row for the channel sliders transparent gradient
+    new_img[-10:] = 0
+    new_img[-10:, :180, 3] = numpy.linspace(255, 0, 180, dtype="uint8")
 
-                lines = lut_data.split("\n")
-                sep = None
-                if "\t" in lines[0]:
-                    sep = "\t"
-                for line in lines:
-                    val = line.split(sep)
-                    if len(val) < 3 or not val[-1].isnumeric():
-                        continue
-                    r.append(int(val[-3]))
-                    g.append(int(val[-2]))
-                    b.append(int(val[-1]))
-                new_img[0 : 10 * 10, :, 0] = numpy.array(r)
-                new_img[0 : 10 * 10, :, 1] = numpy.array(g)
-                new_img[0 : 10 * 10, :, 2] = numpy.array(b)
-
-            lut_crop = Image.fromarray(new_img)
-        if lut_crop:
-            png_img.paste(lut_crop, (0, i * 10))
-
-    # last row for the channel sliders transparent gradient
-    lut_crop = luts_img.crop((0, luts_img.size[1] - 10, 256, luts_img.size[1]))
-    png_img.paste(lut_crop, (0, png_img.size[1] - 10))
-
+    image = Image.fromarray(new_img)
+    # Save the image to a BytesIO stream
     buffer = BytesIO()
-    png_img.save(buffer, format="PNG")
+    image.save(buffer, format="PNG")
     buffer.seek(0)
-
-    # Cache the image using the version-based key
-    # Cache timeout set to None (no timeout)
-    cache.set(cache_key, buffer.getvalue(), None)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
