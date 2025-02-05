@@ -54,7 +54,7 @@ To run in development mode, see below.
 LUTs caching
 ------------
 
-The OMERO server ships with a set of look-up tables (LUTs) for rendering images. Users can also
+The OMERO server ships with a set of look-up tables (LUTs) for rendering images. Admins can also
 add their own LUTs to the server. The LUTs available on the server can be retrieved from the
 `/webgateway/luts/` endpoint as JSON data.
 
