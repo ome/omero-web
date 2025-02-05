@@ -1064,7 +1064,7 @@ jQuery._WeblitzViewport = function (container, server, options) {
   /**
    * @return {String} The current query with state information.
    */
-  this.getQuery = function (include_slider_pos, include_xy_pos, include_zoom) {
+  this.getQuery = function (include_slider_pos, include_xy_pos, include_zoom, remove_inactive_channels) {
       
     var query = [];
     /* Channels (verbose as IE7 does not support Array.filter */
@@ -1079,6 +1079,19 @@ jQuery._WeblitzViewport = function (container, server, options) {
       chs.push(ch);
       maps_json.push({'inverted': {'enabled': channels[i].inverted}});
     }
+
+    if (remove_inactive_channels) {
+      // remove inactive channels from chs and maps_json to avoid URL lengths exceeding the
+      // maximum for images with many channels. Always keep the first channel to avoid errors
+      // when all channels are disabled
+      for (var j=chs.length - 1; j > 0; j--) {
+        if (chs[j][0] === '-') {
+          chs.splice(j, 1);
+          maps_json.splice(j, 1);
+        }
+      }
+    }
+
     query.push('c=' + chs.join(','));
     /* Rendering Model */
     query.push('m=' + this.loadedImg.rdefs.model.toLowerCase().substring(0,1));
@@ -1200,7 +1213,7 @@ jQuery._WeblitzViewport = function (container, server, options) {
 
   this.getRelUrl = function (append) {
     append = append !== undefined ? '/'+append : '';
-    return this.loadedImg.id + '/' + this.loadedImg.current.z + '/' + this.loadedImg.current.t + append + '/?' + this.getQuery();
+    return this.loadedImg.id + '/' + this.loadedImg.current.z + '/' + this.loadedImg.current.t + append + '/?' + this.getQuery(undefined, undefined, undefined, true);
   };
 
   this.getUrl = function (base) {
