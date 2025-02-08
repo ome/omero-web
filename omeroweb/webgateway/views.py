@@ -2164,6 +2164,10 @@ def luts_png(request, conn=None, **kwargs):
         if pathname in luts_by_pathname:
             lut_rgb = luts_by_pathname[pathname].get("rgb")
             new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
+        elif request.GET.get("new") == "true":
+            # ...otherwise load the original file
+            lut_rgb = load_lut_to_rgb(conn, lut.id.val).tolist()
+            new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
 
     # Set the last row for the channel sliders transparent gradient
     new_img[-10:] = 0
