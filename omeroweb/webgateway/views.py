@@ -35,6 +35,7 @@ from django.http import (
     StreamingHttpResponse,
     HttpResponseNotFound,
 )
+from django.core.cache import cache
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
@@ -2147,6 +2148,15 @@ def luts_png(request, conn=None, **kwargs):
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
     luts.sort(key=lambda x: x.name.val.lower())
+    luts_path = []
+    for lut in luts:
+        luts_path.append(lut.path.val + lut.name.val)
+    luts_hash = hash("\n".join(luts_path))
+    cache_key = f"lut_hash_{luts_hash}"
+
+    cached_image = cache.get(cache_key)
+    if cached_image and request.GET.get("cached") != "false":
+        return HttpResponse(cached_image, content_type="image/png")
 
     luts_by_pathname = {}
     # Load cached LUTS json to get rgb values...
@@ -2178,6 +2188,10 @@ def luts_png(request, conn=None, **kwargs):
     buffer = BytesIO()
     image.save(buffer, format="PNG")
     buffer.seek(0)
+
+    # Cache the image using the version-based key
+    # Cache timeout set to None (no timeout)
+    cache.set(cache_key, buffer.getvalue(), None)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
