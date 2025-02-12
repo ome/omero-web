@@ -56,24 +56,30 @@ LUTs caching
 
 The OMERO server ships with a set of look-up tables (LUTs) for rendering images. Admins can also
 add their own LUTs to the server. The LUTs available on the server can be retrieved from the
-`/webgateway/luts/` endpoint as JSON data.
+``/webgateway/luts/`` endpoint as JSON data.
 
-To include the `rgb` values of each LUT in the JSON response, append `?rgb=true` to the URL.
+To include the ``rgb`` values of each LUT in the JSON response, append ``?rgb=true`` to the URL.
 
-A copy of the JSON output from `/webgateway/luts/?rgb=true` is included in the `omero-web` package
+A copy of the JSON output from ``/webgateway/luts/?rgb=true`` is included in the ``omero-web`` package
 as a static file at
 https://github.com/ome/omero-web/blob/master/omeroweb/webgateway/static/webgateway/json/luts.json.
 
-This is used to generate a LUT preview png at `/webgateway/luts_png/` that can be used by clients
+This is used to generate a LUT preview png at ``/webgateway/luts_png/`` that can be used by clients
 such as OMERO.ivewer and OMERO.figure to display the LUTs in a user-friendly way.
-By using the static `luts.json`, the `/luts_png/` can be quickly generated without needing to load LUTs from
+By using the static ``luts.json``, the ``/luts_png/`` can be quickly generated without needing to load LUTs from
 the server.
 
-The sequence of LUTs in `/webgateway/luts_png/` correspond to the dynamic list from `/webgateway/luts/`.
-If there are new LUTs on the server that are not found in the static `luts.json`, the `/luts_png/` will
+The sequence of LUTs in ``/webgateway/luts_png/`` corresponds to the dynamic list from ``/webgateway/luts/``.
+If there are new LUTs on the server that are not found in the static ``luts.json``, the ``/luts_png/`` will
 show a blank placeholder for that LUT.
-To fix this issue following addition of LUTs to the server, the JSON from `/webgateway/luts/?rgb=true`
-should be updated in the `luts.json` file in the `omero-web` package.
+
+If you have Django caching enabled on your server (e.g. with Redis) then you can cache the png *with* new
+LUTs by visiting ``/webgateway/luts_png/?cached=false&new=true``. This will then be read by other users when
+they visit ``/webgateway/luts_png/``.
+
+If caching isn't enabled, the JSON response from ``/webgateway/luts/?rgb=true``
+can instead be manually updated in the static ``luts.json`` file in the ``omero-web`` package.
+
 
 Contributing
 ------------
