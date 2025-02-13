@@ -3474,12 +3474,31 @@ class LoginView(View):
         and store that on the request.session OR handling login failures
         """
         error = None
-        form = self.form_class(request.POST.copy())
+        username = None
+        username = None
+        server_id = None
+        new_connection = False
+        if len(request.POST) > 0:
+            # Authentication posted using form data
+            form = self.form_class(request.POST.copy())
+            if form.is_valid():
+                username = form.cleaned_data["username"]
+                password = form.cleaned_data["password"]
+                server_id = form.cleaned_data["server"]
+                new_connection = True
+        else:
+            # Authentication posted using JSON data
+            try:
+                payload = json.loads(request.body)
+                username = payload.get("username")
+                password = payload.get("password")
+                server_id = payload.get("server")
+                new_connection = True
+            except Exception:
+                logger.debug(f"Invalid JSON data: {request.body}")
+
         userip = get_client_ip(request)
-        if form.is_valid():
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
-            server_id = form.cleaned_data["server"]
+        if new_connection:
             is_secure = settings.SECURE
 
             connector = Connector(server_id, is_secure)
