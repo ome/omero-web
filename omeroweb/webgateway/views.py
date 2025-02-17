@@ -3480,7 +3480,7 @@ class LoginView(View):
                 form = self.form_class(dict(payload))
             except Exception:
                 logger.debug(f"Invalid JSON data: {request.body}")
-                form = self.form_class(dict(payload))
+                form = self.form_class()
         else:
             form = self.form_class(request.POST.copy())
 
