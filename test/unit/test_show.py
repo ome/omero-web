@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-   Simple unit tests for the "show" module.
+Simple unit tests for the "show" module.
 
-   Copyright 2014 Glencoe Software, Inc. All rights reserved.
-   Use is subject to license terms supplied in LICENSE.txt
+Copyright 2014 Glencoe Software, Inc. All rights reserved.
+Use is subject to license terms supplied in LICENSE.txt
 
 """
 
