@@ -2137,13 +2137,16 @@ def luts_png(request, conn=None, **kwargs):
 
     LUTs are listed in alphabetical order (lut name only from filename).
 
-    LUT files on the server are read with the script service, and
-    file content is parsed with a custom implementation.
+    We use static "webgateway/json/luts.json" to get the RGB values of
+    the LUTS. If the LUT is not found in the json file, we load the LUT
+    from the server.
 
     This uses caching to prevent generating the png each time a LUT
     menu is opened. The cache key is a hash of all LUTs path.
     Change in the LUT name or path will force the generation of a new
     png.
+
+    Request must use ?cached=false to load LUTs from the server.
     """
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
@@ -2155,11 +2158,15 @@ def luts_png(request, conn=None, **kwargs):
     cache_key = f"lut_hash_{luts_hash}"
 
     cached_image = cache.get(cache_key)
-    if cached_image and request.GET.get("cached") != "false":
+
+    # If use_cached, then we don't load LUTs from the server...
+    # Either we use the Django cache...
+    use_cached = request.GET.get("cached") != "false"
+    if cached_image and use_cached:
         return HttpResponse(cached_image, content_type="image/png")
 
     luts_by_pathname = {}
-    # Load cached LUTS json to get rgb values...
+    # ... or use cached LUTS json to get rgb values...
     json_path = staticfiles_storage.path("webgateway/json/luts.json")
     with open(json_path) as json_file:
         luts_json = json.load(json_file)
@@ -2174,7 +2181,7 @@ def luts_png(request, conn=None, **kwargs):
         if pathname in luts_by_pathname:
             lut_rgb = luts_by_pathname[pathname].get("rgb")
             new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
-        elif request.GET.get("new") == "true":
+        elif not use_cached:
             # ...otherwise load the original file
             lut_rgb = load_lut_to_rgb(conn, lut.id.val).tolist()
             new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
@@ -2189,9 +2196,11 @@ def luts_png(request, conn=None, **kwargs):
     image.save(buffer, format="PNG")
     buffer.seek(0)
 
-    # Cache the image using the version-based key
-    # Cache timeout set to None (no timeout)
-    cache.set(cache_key, buffer.getvalue(), None)
+    # It's only worth caching IF we've loaded the LUTs from the server
+    if not use_cached:
+        # Cache the image using the version-based key
+        # Cache timeout set to None (no timeout)
+        cache.set(cache_key, buffer.getvalue(), None)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 

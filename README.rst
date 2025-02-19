@@ -74,10 +74,10 @@ If there are new LUTs on the server that are not found in the static ``luts.json
 show a blank placeholder for that LUT.
 
 If you have Django caching enabled on your server (e.g. with Redis) then you can cache the png *with* new
-LUTs by visiting ``/webgateway/luts_png/?cached=false&new=true``. This will then be read by other users when
+LUTs by visiting ``/webgateway/luts_png/?cached=false``. This will then be read by other users when
 they visit ``/webgateway/luts_png/``.
 
-If caching isn't enabled, the JSON response from ``/webgateway/luts/?rgb=true``
+If Django caching isn't enabled, the JSON response from ``/webgateway/luts/?rgb=true``
 can instead be manually updated in the static ``luts.json`` file in the ``omero-web`` package.
 
 
