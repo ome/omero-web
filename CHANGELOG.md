@@ -4,7 +4,7 @@
 ## Features
 
 - Add API support for login using JSON data [#607](https://github.com/ome/omero-web/pull/607)
-- Handle addition of new LUTs [#603](https://github.com/ome/omero-web/pull/603)
+- Improve performance of LUTs rendering [#603](https://github.com/ome/omero-web/pull/603)
 
 ## Bug fixes
 
