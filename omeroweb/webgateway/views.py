@@ -3494,7 +3494,16 @@ class LoginView(View):
         and store that on the request.session OR handling login failures
         """
         error = None
-        form = self.form_class(request.POST.copy())
+        if request.content_type == "application/json":
+            try:
+                payload = json.loads(request.body)
+                form = self.form_class(dict(payload))
+            except Exception:
+                logger.debug(f"Invalid JSON data: {request.body}")
+                form = self.form_class()
+        else:
+            form = self.form_class(request.POST.copy())
+
         userip = get_client_ip(request)
         if form.is_valid():
             username = form.cleaned_data["username"]
