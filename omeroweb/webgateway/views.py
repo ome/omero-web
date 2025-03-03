@@ -35,8 +35,8 @@ from django.http import (
     StreamingHttpResponse,
     HttpResponseNotFound,
 )
-
 from django.core.cache import cache
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
@@ -45,7 +45,7 @@ from django.conf import settings
 from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
-from .util import points_string_to_XY_list, xy_list_to_bbox
+from .util import points_string_to_XY_list, xy_list_to_bbox, load_lut_to_rgb
 from .plategrid import PlateGrid
 from omeroweb.version import omeroweb_buildyear as build_year
 from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
@@ -2069,11 +2069,11 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     return HttpJavascriptResponse(json_data)
 
 
-@login_required()
+@login_required(omero_group=None)
 @jsonp
 def listLuts_json(request, conn=None, **kwargs):
     """
-    Lists lookup tables 'LUTs' availble for rendering.
+    Lists lookup tables 'LUTs' available for rendering.
 
     We include 'png_index' which is the index of each LUT within the
     static/webgateway/img/luts_10.png or -1 if LUT is not found.
@@ -2088,26 +2088,47 @@ def listLuts_json(request, conn=None, **kwargs):
     luts = scriptService.getScriptsByMimetype("text/x-lut")
     luts.sort(key=lambda x: x.name.val.lower())
     rv, all_luts = [], []
+
+    luts_by_pathname = {}
+    include_rgb = request.GET.get("rgb") == "true"
+    if include_rgb:
+        json_path = staticfiles_storage.path("webgateway/json/luts.json")
+        with open(json_path) as json_file:
+            luts_json = json.load(json_file)
+            for lut in luts_json["luts"]:
+                pathname = lut["path"] + lut["name"]
+                luts_by_pathname[pathname] = lut
+
     for i, lut in enumerate(luts):
         lutsrc = lut.path.val + lut.name.val
         all_luts.append(lutsrc)
         idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
-        rv.append(
-            {
-                "id": lut.id.val,
-                "path": lut.path.val,
-                "name": lut.name.val,
-                "size": unwrap(lut.size),
-                "png_index": idx,
-                "png_index_new": i,
-            }
-        )
+        # rgb = load_lut_to_rgb(conn, lut.id.val)
+        lut_data = {
+            "id": lut.id.val,
+            "path": lut.path.val,
+            "name": lut.name.val,
+            "size": unwrap(lut.size),
+            "png_index": idx,
+            "png_index_new": i,
+        }
+        if include_rgb:
+            # If we have the LUT cached, use that...
+            pathname = lut.path.val + lut.name.val
+            if pathname in luts_by_pathname:
+                lut_data["rgb"] = luts_by_pathname[pathname].get("rgb")
+            else:
+                # ...otherwise load the original file
+                rgb = load_lut_to_rgb(conn, lut.id.val)
+                lut_data["rgb"] = rgb.tolist()
+        rv.append(lut_data)
+
     all_luts.append("gradient.png")
 
     return {"luts": rv, "png_luts": LUTS_IN_PNG, "png_luts_new": all_luts}
 
 
-@login_required()
+@login_required(omero_group=None)
 def luts_png(request, conn=None, **kwargs):
     """
     Generates the LUT png used for preview and selection of LUT. The png is
@@ -2116,17 +2137,20 @@ def luts_png(request, conn=None, **kwargs):
 
     LUTs are listed in alphabetical order (lut name only from filename).
 
-    LUT files on the server are read with the script service, and
-    file content is parsed with a custom implementation.
+    We use static "webgateway/json/luts.json" to get the RGB values of
+    the LUTS. If the LUT is not found in the json file, we load the LUT
+    from the server.
 
     This uses caching to prevent generating the png each time a LUT
     menu is opened. The cache key is a hash of all LUTs path.
     Change in the LUT name or path will force the generation of a new
     png.
+
+    Request must use ?cached=false to load LUTs from the server.
     """
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
-    luts.sort(key=lambda x: x.name.val)
+    luts.sort(key=lambda x: x.name.val.lower())
     luts_path = []
     for lut in luts:
         luts_path.append(lut.path.val + lut.name.val)
@@ -2134,39 +2158,33 @@ def luts_png(request, conn=None, **kwargs):
     cache_key = f"lut_hash_{luts_hash}"
 
     cached_image = cache.get(cache_key)
-    if cached_image:
+
+    # If use_cached, then we don't load LUTs from the server...
+    # Either we use the Django cache...
+    use_cached = request.GET.get("cached") != "false"
+    if cached_image and use_cached:
         return HttpResponse(cached_image, content_type="image/png")
+
+    luts_by_pathname = {}
+    # ... or use cached LUTS json to get rgb values...
+    json_path = staticfiles_storage.path("webgateway/json/luts.json")
+    with open(json_path) as json_file:
+        luts_json = json.load(json_file)
+        for lut in luts_json["luts"]:
+            pathname = lut["path"] + lut["name"]
+            luts_by_pathname[pathname] = lut
 
     # Generate the LUT, fourth png channel set to 255
     new_img = numpy.zeros((10 * (len(luts) + 1), 256, 4), dtype="uint8") + 255
     for i, lut in enumerate(luts):
-        orig_file = conn.getObject("OriginalFile", lut.getId()._val)
-        lut_data = bytearray()
-        # Collect the LUT data in byte form
-        for chunk in orig_file.getFileInChunks():
-            lut_data.extend(chunk)
-
-        if len(lut_data) in [768, 800]:
-            lut_arr = numpy.array(lut_data, dtype="uint8")[-768:]
-            new_img[(i * 10) : (i + 1) * 10, :, :3] = lut_arr.reshape(3, 256).T
-        else:
-            lut_data = lut_data.decode()
-            r, g, b = [], [], []
-
-            lines = lut_data.split("\n")
-            sep = None
-            if "\t" in lines[0]:
-                sep = "\t"
-            for line in lines:
-                val = line.split(sep)
-                if len(val) < 3 or not val[-1].isnumeric():
-                    continue
-                r.append(int(val[-3]))
-                g.append(int(val[-2]))
-                b.append(int(val[-1]))
-            new_img[(i * 10) : (i + 1) * 10, :, 0] = numpy.array(r)
-            new_img[(i * 10) : (i + 1) * 10, :, 1] = numpy.array(g)
-            new_img[(i * 10) : (i + 1) * 10, :, 2] = numpy.array(b)
+        pathname = lut.path.val + lut.name.val
+        if pathname in luts_by_pathname:
+            lut_rgb = luts_by_pathname[pathname].get("rgb")
+            new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
+        elif not use_cached:
+            # ...otherwise load the original file
+            lut_rgb = load_lut_to_rgb(conn, lut.id.val).tolist()
+            new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
 
     # Set the last row for the channel sliders transparent gradient
     new_img[-10:] = 0
@@ -2178,9 +2196,11 @@ def luts_png(request, conn=None, **kwargs):
     image.save(buffer, format="PNG")
     buffer.seek(0)
 
-    # Cache the image using the version-based key
-    # Cache timeout set to None (no timeout)
-    cache.set(cache_key, buffer.getvalue(), None)
+    # It's only worth caching IF we've loaded the LUTs from the server
+    if not use_cached:
+        # Cache the image using the version-based key
+        # Cache timeout set to None (no timeout)
+        cache.set(cache_key, buffer.getvalue(), None)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
