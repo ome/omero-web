@@ -235,6 +235,11 @@ urlpatterns = [
         views.fileset_check,
         name="fileset_check",
     ),
+    re_path(
+        r"^extinfo/image/(?P<iid>[0-9]+)/$",
+        views.extinfo_image,
+        name="extinfo_image",
+    ),
     # chgrp/chown dry run - 'group/owner_id', obj-types and ids in POST data.
     # E.g. Dataset=1,2,3 & Fileset=4. Multiple datatypes in one chgrp.
     re_path(
