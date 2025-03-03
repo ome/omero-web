@@ -64,8 +64,7 @@
 	 filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#73787d', endColorstr='#505357',GradientType=0 ); /* IE6-9 */
 	 background:linear-gradient(top, hsl(212,8%,49%) 0%,hsl(212,8%,34%) 100%); /* W3C */
 	 font-family: Helvetica,Arial,sans-serif;
-
-	 height: 35px;
+	 flex: 0 1 auto;
  }
 	
 	
@@ -100,12 +99,16 @@
 		 top:0;
 	 }
 	 
-	 #middle_header_left {
-		 
+	 #middle_header_left ul {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		width: calc(100% - 550px);
 	 }
 	 
 		#middle_header_left li{
-			float:left;
+			flex: 0 0 auto;
 			list-style-type: none;
 		} 
 
@@ -982,11 +985,9 @@ li.menu_back a {
 /* Content */
 
 #content {
-    position:absolute;
-    top:35px;
-    right:0px;
-    left:0px;
-    bottom:0px; /* Changed to eliminate footer */
+	overflow: auto;
+    flex: 1 1 auto;
+    position: relative;
     overflow:auto;
 }
 
