@@ -1,3 +1,21 @@
+5.29.0 (March 2025)
+-------------------
+
+## Features
+
+- Add API support for login using JSON data [#607](https://github.com/ome/omero-web/pull/607)
+- Improve performance of LUTs rendering [#603](https://github.com/ome/omero-web/pull/603)
+
+## Bug fixes
+
+- Do not strip whitespace from passwords [#605](https://github.com/ome/omero-web/pull/605)
+- Display ContrastMethod in OMERO.web [#598](https://github.com/ome/omero-web/pull/598)
+
+## Other changes
+
+- Improve error messages for CSRF failures [#608](https://github.com/ome/omero-web/pull/608)
+- Remove Python 3.8 from testing matrix [#600](https://github.com/ome/omero-web/pull/600)
+
 5.28.0 (November 2024)
 ----------------------
 
