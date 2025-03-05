@@ -16,10 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        - language: python
-          build-mode: none
-        - language: javascript
-          build-mode: none
+        include:
+          - language: python
+            build-mode: none
+          - language: javascript
+            build-mode: none
 
     steps:
     - name: Checkout repository
