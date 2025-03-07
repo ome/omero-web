@@ -49,6 +49,7 @@ import omero.scripts
 from omero.rtypes import wrap, unwrap, rlong, rlist
 
 from omero.gateway.utils import toBoolean
+from omero_marshal import get_encoder
 
 from django.conf import settings
 from django.template import loader as template_loader
@@ -4449,6 +4450,33 @@ def fileset_check(request, action, conn=None, **kwargs):
     context["template"] = "webclient/activities/" "fileset_check_dialog_content.html"
 
     return context
+
+
+@login_required()
+@render_response()
+def extinfo_image(request, iid, conn=None, **kwargs):
+    """
+    Get extended information about an image
+    """
+    image = conn.getObject("Image", iid)
+    if image is None:
+        raise Http404("No Image found for ID %s" % iid)
+    details = image.getDetails()
+    if details and details._externalInfo:
+        params = omero.sys.ParametersI()
+        params.addId(details._externalInfo._id)
+        query = """
+            select e from ExternalInfo as e
+            join fetch e.details.owner
+            join fetch e.details.creationEvent
+            where e.id = :id
+        """
+        extinfo = conn.getQueryService().findByQuery(query, params, conn.SERVICE_OPTS)
+        encoder = get_encoder(extinfo.__class__)
+        rsp = encoder.encode(extinfo)
+
+        return rsp
+    raise Http404("No ExternalInfo found for Image %s" % iid)
 
 
 def getAllObjects(
