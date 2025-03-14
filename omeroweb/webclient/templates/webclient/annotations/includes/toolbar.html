@@ -437,9 +437,9 @@
   {% if extinfo %}
   <details style="margin: 10px 5px; font-size: 12px;">
     <summary>External Info</summary>
-    <ul style="background: white; margin: 5px 0; padding: 5px; border: 1px solid rgb(221, 221, 221);">
+    <ul style="background: white; margin: 5px 0; padding: 5px; border: 1px solid rgb(221, 221, 221); overflow: auto;">
+        <li style="font-weight: bold;">{{ extinfo.lsid.val }}</li>
         <li>entityType: {{ extinfo.entityType.val }}</li>
-        <li>lsid: {{ extinfo.lsid.val }}</li>
         <li>entityId: {{ extinfo.entityId.val }}</li>
     </ul>
   </details>

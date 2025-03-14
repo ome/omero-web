@@ -571,7 +571,9 @@
             {% else %}
                 {% if manager.project %}
 
-                    {% include "webclient/annotations/includes/toolbar.html" %}
+                    {% with obj=manager.project %}
+                        {% include "webclient/annotations/includes/toolbar.html" %}
+                    {% endwith %}
 
                     <!-- Project Name, ID, Owner -->
                     {% with obj=manager.project nameText=manager.project.name %}
@@ -600,7 +602,7 @@
         {% endif %}
             
         {% if manager.well %}
-            {% with image=manager.getWellSampleImage %}
+            {% with obj=manager.well image=manager.getWellSampleImage %}
                 {% include "webclient/annotations/includes/toolbar.html" %}
             {% endwith %}
 
@@ -612,7 +614,9 @@
         {% else %}
             {% if manager.acquisition %}
 
-                {% include "webclient/annotations/includes/toolbar.html" %}
+                {% with obj=manager.acquisition %}
+                    {% include "webclient/annotations/includes/toolbar.html" %}
+                {% endwith %}
 
                 <!-- Acquisition Name -->
                 {% with obj=manager.acquisition nameText=manager.acquisition.name %}
@@ -648,7 +652,9 @@
             {% else %}
                 {% if manager.plate %}
 
-                    {% include "webclient/annotations/includes/toolbar.html" %}
+                    {% with obj=manager.plate %}
+                        {% include "webclient/annotations/includes/toolbar.html" %}
+                    {% endwith %}
 
                     <!-- Plate Name, ID, Owner -->
                     {% with obj=manager.plate nameText=manager.plate.name %}
@@ -682,7 +688,9 @@
                 {% else %}
                     {% if manager.screen %}
 
-                        {% include "webclient/annotations/includes/toolbar.html" %}
+                        {% with obj=manager.screen %}
+                            {% include "webclient/annotations/includes/toolbar.html" %}
+                        {% endwith %}
 
                         <!-- Screen Name, ID, Owner -->
                         {% with obj=manager.screen nameText=manager.screen.name %}
@@ -741,7 +749,9 @@
         <div id="general_tab" class="right_tab_inner" >
 
             <!-- Toolbar at the top -->
-            {% include "webclient/annotations/includes/toolbar.html" %}
+            {% with obj=manager.tag %}
+                {% include "webclient/annotations/includes/toolbar.html" %}
+            {% endwith %}
 
 
                 <!-- Tag TextValue, ID, Owner -->
