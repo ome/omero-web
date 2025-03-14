@@ -348,25 +348,30 @@
               </li>
               {% endwith %}
               {% endif %}
-            {% endif %}
+            {% endif %}  <!-- endif image -->
         </ul>
     </div>
 
-    {% if not share %}
-    {% if image.showOriginalFilePaths %}
-      <!-- show original file paths -->
-      <button id="show_fs_files_btn" class="btn silver btn_fspath" title="Show Fileset ID and file paths on server">
-        <span></span>
-      </button>
-    {% endif %}
+    {% endif %}   <!-- endif image or filesetInfo -->
+
+  {% if not share %}
+    {% with files=image.showOriginalFilePaths ext=obj.getExternalInfo %}
+      {% if files or ext %}
+        <!-- show original file paths -->
+        <button id="show_fs_files_btn" class="btn silver btn_fspath"
+          {% if files %}data-showfiles="true"{% endif %}
+          title="{% if files %}Show Fileset ID and file paths on server{% else %}Show External Info{% endif %}">
+          <span></span>
+        </button>
+      {% endif %}
+    {% endwith %}
 
       {% if image %}
       <button id="show_image_hierarchy" class="btn silver btn_hierarchy" title="Show parent Projects & Datasets">
         <span></span>
       </button>
       {% endif %}
-    {% endif %}
-    {% endif %}
+    {% endif %}   <!-- endif not share -->
 
 
     <!-- Publishing Options (Figure Scripts) -->
@@ -423,4 +428,21 @@
 <div id="link_info_popup" class="info_popup" style="right:0px; top:30px; padding:4px; display:none">
     <input type="text" size="30">
     <img title="Close" src="{% static 'webgateway/img/close.gif' %}" />
+</div>
+
+<!-- This is HIDDEN here, but cloned into the Fileset Info panel when shown -->
+<div id="externalInfo" style="display: none">
+<!-- This will return None if obj.getExternalInfo method doesn't exist (omero-py 5.19.6 and earlier) -->
+{% with extinfo=obj.getExternalInfo %}
+  {% if extinfo %}
+  <details style="margin: 10px 5px; font-size: 12px;">
+    <summary>External Info</summary>
+    <ul style="background: white; margin: 5px 0; padding: 5px; border: 1px solid rgb(221, 221, 221);">
+        <li>entityType: {{ extinfo.entityType.val }}</li>
+        <li>lsid: {{ extinfo.lsid.val }}</li>
+        <li>entityId: {{ extinfo.entityId.val }}</li>
+    </ul>
+  </details>
+  {% endif %}
+{% endwith %}
 </div>

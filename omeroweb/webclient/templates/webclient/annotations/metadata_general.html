@@ -141,9 +141,15 @@
                         return;
                     }
                     $("#toolbar_info_panel").show();
-                    $panel_title.html("Loading...");
+                    $panel_title.html("&nbsp");
                     $panel_div.empty();
-                    if (original_file_paths_url) {
+
+                    // Add the externalInfo (from below) which we already have in hand
+                    $panel_div.append($("#externalInfo").html());
+
+                    let hasOriginalFiles = $("#show_fs_files_btn").data('showfiles');
+                    if (original_file_paths_url && hasOriginalFiles) {
+                        $panel_title.html("Loading...");
                         $.getJSON(original_file_paths_url,
                             function(data) {
                                 var repo = data.repo,
@@ -498,7 +504,7 @@
            
         {% if manager.image %}
 
-            {% with image=manager.image canDownload=manager.image.canDownload %}
+            {% with obj=manager.image image=manager.image canDownload=manager.image.canDownload %}
                 {% include "webclient/annotations/includes/toolbar.html" %}
             {% endwith %}
 
@@ -536,7 +542,9 @@
         {% else %}
             {% if manager.dataset %}
 
-                {% include "webclient/annotations/includes/toolbar.html" %}
+                {% with obj=manager.dataset %}
+                    {% include "webclient/annotations/includes/toolbar.html" %}
+                {% endwith %}
 
                 <!-- Dataset Name, ID, Owner -->
                 {% with obj=manager.dataset nameText=manager.dataset.name %}

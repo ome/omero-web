@@ -72,17 +72,3 @@
     {% endif %}
 
 </div>
-
-<!-- This will return None if obj.getExternalInfo method doesn't exist (omero-py 5.19.6 and earlier) -->
-{% with extinfo=obj.getExternalInfo %}
-  {% if extinfo %}
-  <details>
-    <summary>External Info</summary>
-    <ul style="background: white; margin: 5px 0; padding: 5px; border: 1px solid rgb(221, 221, 221);">
-        <li>entityType: {{ extinfo.entityType.val }}</li>
-        <li>lsid: {{ extinfo.lsid.val }}</li>
-        <li>entityId: {{ extinfo.entityId.val }}</li>
-    </ul>
-  </details>
-  {% endif %}
-{% endwith %}
