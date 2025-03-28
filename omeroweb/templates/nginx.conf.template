@@ -8,6 +8,7 @@ server {
 
     sendfile on;
     client_max_body_size %(MAX_BODY_SIZE)s;
+    error_page 502 =502 @maintenance%(PREFIX_NAME)s;
 
 %(NGINX_SERVER_EXTRA_CONFIG)s
 
@@ -34,7 +35,6 @@ server {
 
     location %(FORCE_SCRIPT_NAME)s {
 
-        error_page 502 @maintenance%(PREFIX_NAME)s;
         # checks for static file, if not found proxy to app
         try_files $uri @proxy_to_app%(PREFIX_NAME)s;
     }
