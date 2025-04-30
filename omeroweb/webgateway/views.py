@@ -2416,7 +2416,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         if imageId:
             rdef["imageId"] = int(imageId)
 
-        if request.method == "GET":
+        if request.method == "GET" or req("store"):
             request.session.modified = True
             request.session["rdef"] = rdef
             # remove any previous rdef we may have via 'fromId'
