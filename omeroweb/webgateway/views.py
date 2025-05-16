@@ -2392,29 +2392,31 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
             del request.session["rdef"]
         return True
 
+    def req(field: str):
+        return request.GET.get(field, request.POST.get(field))
+
     # If we've got an rdef encoded in request instead of ImageId...
-    r = request.GET or request.POST
-    if r.get("c") is not None:
+    if req("c") is not None:
         # make a map of settings we need
-        rdef = {"c": str(r.get("c"))}  # channels
-        if r.get("maps"):
+        rdef = {"c": str(req("c"))}  # channels
+        if req("maps"):
             try:
-                rdef["maps"] = json.loads(r.get("maps"))
+                rdef["maps"] = json.loads(req("maps"))
             except Exception:
                 pass
-        if r.get("pixel_range"):
-            rdef["pixel_range"] = str(r.get("pixel_range"))
-        if r.get("m"):
-            rdef["m"] = str(r.get("m"))  # model (grey)
-        if r.get("z"):
-            rdef["z"] = str(r.get("z"))  # z & t pos
-        if r.get("t"):
-            rdef["t"] = str(r.get("t"))
-        imageId = request.GET.get("imageId", request.POST.get("imageId", None))
+        if req("pixel_range"):
+            rdef["pixel_range"] = str(req("pixel_range"))
+        if req("m"):
+            rdef["m"] = str(req("m"))  # model (grey)
+        if req("z"):
+            rdef["z"] = str(req("z"))  # z & t pos
+        if req("t"):
+            rdef["t"] = str(req("t"))
+        imageId = req("imageId")
         if imageId:
             rdef["imageId"] = int(imageId)
 
-        if request.method == "GET":
+        if request.method == "GET" or req("store"):
             request.session.modified = True
             request.session["rdef"] = rdef
             # remove any previous rdef we may have via 'fromId'
