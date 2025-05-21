@@ -25,8 +25,7 @@
 #
 # Version: 1.0
 #
-
-
+import importlib
 import os.path
 import sys
 import logging
@@ -1596,9 +1595,9 @@ for app in ADDITIONAL_APPS:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
         INSTALLED_APPS += (app,)
     try:
         logger.debug("Attempting to import additional app settings for app: %s" % app)
-        module = __import__("%s.settings" % app)
-        process_custom_settings(module.settings)
-        report_settings(module.settings)
+        module = importlib.import_module("%s.settings" % app)
+        process_custom_settings(module)
+        report_settings(module)
     except ImportError:
         logger.debug("Couldn't import settings from app: %s" % app)
 
