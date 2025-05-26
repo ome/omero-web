@@ -2822,6 +2822,8 @@ def original_file_paths(request, iid, conn=None, **kwargs):
     image = conn.getObject("Image", iid)
     if image is None:
         raise Http404
+    if image.fileset is None:
+        return {}
     paths = image.getImportedImageFilePaths()
     fileset_id = image.fileset.id.val
     return {
