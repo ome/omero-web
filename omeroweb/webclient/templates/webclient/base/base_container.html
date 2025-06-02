@@ -144,6 +144,8 @@
     <script type="text/javascript" src="{% static "webgateway/js/ome.spwgridview.js"|add:url_suffix %}"></script>
 
     <script>
+        // Tip for developers... E.g. shows ExternalInfo after loading right panel
+        console.log("For dev info, use: $('.debug').show();");
 
         // OMERO constants
         if (OMERO === undefined) {var OMERO = {};}
