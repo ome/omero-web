@@ -788,7 +788,7 @@ def render_shape_mask(request, shapeId, conn=None, **kwargs):
         fill = (color[0], color[1], color[2], int(color[3] * 255))
     mask_packed = shape.getBytes()
     # convert bytearray into something we can use
-    intarray = numpy.fromstring(mask_packed, dtype=numpy.uint8)
+    intarray = numpy.frombytes(mask_packed, dtype=numpy.uint8)
     binarray = numpy.unpackbits(intarray)
 
     # Couldn't get the 'proper' way of doing this to work,
