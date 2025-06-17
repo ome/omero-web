@@ -1,3 +1,18 @@
+5.29.1 (June 2025)
+------------------
+
+## Bug fixes
+
+- Fix high channel count issues [#606](https://github.com/ome/omero-web/pull/606)
+- Handle images without fileset [#621](https://github.com/ome/omero-web/pull/621)
+
+## Other changes
+
+- Bump flake [#617](https://github.com/ome/omero-web/pull/617)
+- CodeQL workflow updates [#614](https://github.com/ome/omero-web/pull/614)
+- NumPy 2.3.0 support [#623](https://github.com/ome/omero-web/pull/623)
+- Bump pypi-publish [#616](https://github.com/ome/omero-web/pull/616)
+
 5.29.0 (March 2025)
 -------------------
 
