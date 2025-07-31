@@ -390,14 +390,13 @@ def forgotten_password(request, **kwargs):
                         conn._waitOnCmd(handle)
                     finally:
                         handle.close()
-                    error = "Password was reset. Check your mailbox."
                     form = None
                 except omero.CmdError as exp:
                     logger.error(exp.err)
-                    try:
-                        error = exp.err.parameters[exp.err.parameters.keys()[0]]
-                    except Exception:
-                        error = exp
+
+                # always return the same message to prevent information leakage
+                error = "Password was reset. Check your mailbox."
+
     else:
         form = ForgottonPasswordForm()
 

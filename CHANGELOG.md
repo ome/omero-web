@@ -1,3 +1,10 @@
+5.29.2 (August 2025)
+------------------
+
+## Bug fixes
+
+- Security vulnerability fix [CVE-2025-54791](https://github.com/ome/omero-web/security/advisories/GHSA-gpmg-4x4g-mr5r)
+
 5.29.1 (June 2025)
 ------------------
 
