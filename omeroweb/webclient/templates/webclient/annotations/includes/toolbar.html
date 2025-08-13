@@ -348,9 +348,11 @@
               </li>
               {% endwith %}
               {% endif %}
-            {% endif %}
+            {% endif %}  <!-- endif image -->
         </ul>
     </div>
+
+    {% endif %}   <!-- endif image or filesetInfo -->
 
     {% if not share %}
     {% if image.showOriginalFilePaths %}
@@ -365,7 +367,6 @@
         <span></span>
       </button>
       {% endif %}
-    {% endif %}
     {% endif %}
 
 
@@ -423,4 +424,19 @@
 <div id="link_info_popup" class="info_popup" style="right:0px; top:30px; padding:4px; display:none">
     <input type="text" size="30">
     <img title="Close" src="{% static 'webgateway/img/close.gif' %}" />
+</div>
+
+<!-- This is HIDDEN here, but cloned into the Fileset Info panel when shown -->
+<div id="externalInfo" class="debug" style="display: none; margin-top: 20px; font-size: 13px;">
+<!-- This will return None if obj.getExternalInfo method doesn't exist (omero-py 5.19.6 and earlier) -->
+{% with extinfo=obj.getExternalInfo %}
+  {% if extinfo %}
+    <h3>External Info (ID: {{ extinfo.id.val }})</h3>
+    <ul style="background: white; margin: 5px 0; padding: 7px; border: 1px solid rgb(221, 221, 221); overflow: auto;">
+        <li>lsid: <strong>{{ extinfo.lsid.val }}</strong></li>
+        <li>entityType: <strong>{{ extinfo.entityType.val }}</strong></li>
+        <li>entityId: <strong>{{ extinfo.entityId.val }}</strong></li>
+    </ul>
+  {% endif %}
+{% endwith %}
 </div>
