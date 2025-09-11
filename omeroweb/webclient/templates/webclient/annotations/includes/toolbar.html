@@ -150,6 +150,12 @@
                 });
 
               {% endif %}
+
+              $("#show_ext_info").on("click", function() {
+                var $panel = $("#externalInfo");
+                console.log("externalInfo", $panel.length);
+                $panel.toggle();
+              });
             
         });
     </script>
@@ -376,6 +382,17 @@
     {% include "webclient/annotations/includes/figure_scripts_menu.html" %}
     {% endif %}
     {% endif %}
+
+    <!-- External Info (Zarr url)-->
+    {% with extinfo=obj.getExternalInfo %}
+      {% if extinfo %}
+        <button id="show_ext_info" class="btn silver btn_extinfo" title="Zarr url" >
+          <span style="width: 25px; margin: 3px 2px 1px 2px; background: transparent; box-shadow: none; font-size: 11px; padding: 0px;">
+            Zarr
+          </span>
+        </button>
+      {% endif %}
+    {% endwith %}
     
 
 
@@ -432,6 +449,13 @@
 {% with extinfo=obj.getExternalInfo %}
   {% if extinfo %}
     <h3>External Info (ID: {{ extinfo.id.val }})</h3>
+
+    <!-- slice 2: to remove "s3" and replace with https -->
+    <a href="https://biongff.github.io/biongff-viewer/?source=https{{ extinfo.lsid.val|slice:"2:" }}" target="_blank" 
+       style="font-size: 13px; text-decoration: underline; display: inline-block;">
+      Open with BioNGFF viewer
+    </a>
+
     <ul style="background: white; margin: 5px 0; padding: 7px; border: 1px solid rgb(221, 221, 221); overflow: auto;">
         <li>lsid: <strong>{{ extinfo.lsid.val }}</strong></li>
         <li>entityType: <strong>{{ extinfo.entityType.val }}</strong></li>
