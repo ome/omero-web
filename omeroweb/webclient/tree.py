@@ -2020,6 +2020,7 @@ def marshal_annotations(
     run_ids=None,
     well_ids=None,
     roi_ids=None,
+    shape_ids=None,
     ann_type=None,
     ns=None,
     group_id=-1,
@@ -2071,6 +2072,7 @@ def marshal_annotations(
         "PlateAcquisition",
         "Well",
         "Roi",
+        "Shape",
     ]
     obj_ids = [
         project_ids,
@@ -2081,6 +2083,7 @@ def marshal_annotations(
         run_ids,
         well_ids,
         roi_ids,
+        shape_ids,
     ]
 
     experimenters = {}

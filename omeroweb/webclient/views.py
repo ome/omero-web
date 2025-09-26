@@ -1347,6 +1347,8 @@ def api_annotations(request, conn=None, **kwargs):
         "Acquisition",
         "Plate",
         "Screen",
+        "Roi",
+        "Shape",
     ):
         ids = get_list(request, type_.lower())
         if type_ == "Acquisition":
@@ -1365,6 +1367,8 @@ def api_annotations(request, conn=None, **kwargs):
             plate_ids=to_query["PlateI"],
             run_ids=to_query["PlateAcquisitionI"],
             well_ids=to_query["WellI"],
+            roi_ids=to_query["RoiI"],
+            shape_ids=to_query["ShapeI"],
         )
 
     all_anns, exps = tree.marshal_annotations(
@@ -1376,6 +1380,8 @@ def api_annotations(request, conn=None, **kwargs):
         plate_ids=to_query["PlateI"],
         run_ids=to_query["PlateAcquisitionI"],
         well_ids=to_query["WellI"],
+        roi_ids=to_query["RoiI"],
+        shape_ids=to_query["ShapeI"],
         ann_type=ann_type,
         ns=ns,
         page=page,
