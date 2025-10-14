@@ -48,7 +48,7 @@ setup(
     url="https://github.com/ome/omero-web/",
     license="GPLv2+",
     packages=find_packages(exclude=("test",)) + ["omero.plugins"],
-    python_requires=">=3.8",
+    python_requires=">=3.10,<3.13",
     install_requires=[
         # requires Ice (use wheel for faster installs)
         "omero-py>=5.19.0",
