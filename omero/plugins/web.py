@@ -62,20 +62,11 @@ APACHE_MOD_WSGI_ERR = (
 
 
 def config_required(func):
-    """Decorator validating Django dependencies and omeroweb/settings.py"""
+    """Decorator validating and injecting omeroweb/settings.py"""
 
     def import_django_settings(func):
         @windows_warning
         def wrapper(self, *args, **kwargs):
-            try:
-                import django  # NOQA
-            except Exception:
-                self.ctx.die(681, "ERROR: Django not installed!")
-            if django.VERSION < (5, 2) or django.VERSION >= (5, 3):
-                self.ctx.err(
-                    "ERROR: Django version %s is not "
-                    "supported!" % django.get_version()
-                )
             if not os.environ.get("OMERODIR"):
                 self.ctx.die(101, "ERROR: OMERODIR not set")
             try:
