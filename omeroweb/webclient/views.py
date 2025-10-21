@@ -3946,8 +3946,9 @@ def activities(request, conn=None, **kwargs):
     # return json (used for testing)
     if "template" in kwargs and kwargs["template"] == "json":
         for cbString in request.session.get("callback").keys():
-            rv[cbString]["start_time"] = \
-                request.session["callback"][cbString]["start_time"]
+            rv[cbString]["start_time"] = request.session["callback"][cbString][
+                "start_time"
+            ]
         rv["inprogress"] = in_progress
         rv["failure"] = failure
         rv["jobs"] = len(request.session["callback"])
