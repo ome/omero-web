@@ -520,12 +520,12 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     #     ):
     #         # All users in group is allowed
     #         user_id = None
-    # if user_id is None:
-    #     # ... or check that current user is valid in active group
-    #     user_id = request.session.get("user_id", None)
-    #     if user_id is None or int(user_id) not in userIds:
-    #         if user_id != -1:  # All users in group is allowed
-    #             user_id = conn.getEventContext().userId
+    if user_id is None:
+        # ... or check that current user is valid in active group
+        user_id = request.session.get("user_id", None)
+        if user_id is None or int(user_id) not in userIds:
+            if user_id != -1:  # All users in group is allowed
+                user_id = conn.getEventContext().userId
 
     request.session["user_id"] = user_id
 
