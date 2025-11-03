@@ -263,14 +263,15 @@ def marshal_experimenter(conn, experimenter_id):
 
     join_clause = ""
     where_clause = ""
-    if not conn.isAdmin():
-        group_ids = conn.getEventContext().memberOfGroups
-        user_gid = conn.getAdminService().getSecurityRoles().userGroupId
-        if user_gid in group_ids:
-            group_ids.remove(user_gid)
-        params.addIds(group_ids)
-        join_clause = "join experimenter.groupExperimenterMap gem"
-        where_clause = "and gem.parent.id in :ids"
+    print("Is Admin: %s" % str(conn.isAdmin()))
+    # if not conn.isAdmin():
+    #     group_ids = conn.getEventContext().memberOfGroups
+    #     user_gid = conn.getAdminService().getSecurityRoles().userGroupId
+    #     if user_gid in group_ids:
+    #         group_ids.remove(user_gid)
+    #     params.addIds(group_ids)
+    #     join_clause = "join experimenter.groupExperimenterMap gem"
+    #     where_clause = "and gem.parent.id in :ids"
     q = """
         select distinct experimenter.id,
                experimenter.omeName,
@@ -285,6 +286,7 @@ def marshal_experimenter(conn, experimenter_id):
         join_clause,
         where_clause,
     )
+    print("Query: %s" % q)
     rows = qs.projection(q, params, service_opts)
     if len(rows) != 1:
         return None
