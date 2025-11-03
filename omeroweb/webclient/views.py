@@ -470,7 +470,9 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     if first_sel is not None:
         print("First selected: %s" % str(first_sel))
         group_id = first_sel.details.group.id.val
-        print("Group id: %s" % str(group_id), "valid group:", conn.isValidGroup(group_id))
+        print(
+            "Group id: %s" % str(group_id), "valid group:", conn.isValidGroup(group_id)
+        )
         if conn.isValidGroup(group_id):
             switch_active_group(request, group_id)
         else:
