@@ -259,7 +259,6 @@ $(document).ready(function() {
     });
 
     $Custom_Label.on('input', (e) => {
-        console.log('Live value:', e.target.value);
         $rowLabels.hide();
         $('.customLabel #customLabelText').text(e.target.value);
         $('.customLabel').show();     
