@@ -232,23 +232,40 @@ $(document).ready(function() {
 
     // Image Labels
     var $Image_Labels = $("select[name=Image_Labels]"),
+        $Custom_Label = $("input[name=Custom_Label]"),
         $rowLabels = $(".rowLabel>div"),
         $imgName = $("div.imgName"),
         $imgTags = $("div.imgTags"),
         $imgDatasets = $("div.imgDatasets");
+        $customLabel = $("div.customLabel");
+        $customLabelInput = $("div.customLabelInput");
     $Image_Labels.on('change', function(){
         var labels = $(this).val();
         $rowLabels.hide(); // hide all then show one...
         if (labels == "Image Name") {
             $imgName.show();
+            $customLabelInput.hide();
         } else if (labels == "Datasets") {
             $imgDatasets.show();
+            $customLabelInput.hide();
         } else if (labels == "Tags") {
             $imgTags.show();
+            $customLabelInput.hide();
+        } else if(labels == "Custom"){
+            $customLabel.show();
+            $customLabelInput.show();
         }
         updateColWidths();
     });
 
+    $Custom_Label.on('input', (e) => {
+        console.log('Live value:', e.target.value);
+        $rowLabels.hide();
+        $('.customLabel #customLabelText').text(e.target.value);
+        $('.customLabel').show();     
+        updateColWidths();
+    });
+       
 
     // Drag and Drop to re-order rows
     $('table tbody').sortable({

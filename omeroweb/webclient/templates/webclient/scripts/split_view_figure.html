@@ -199,6 +199,7 @@
                     <option value="Image Name"  selected="True"  >Image Name</option>
                     <option value="Datasets"  >Datasets</option>
                     <option value="Tags"  >Tags</option>
+                    <option value="Custom"  >Custom</option>
                 </select>
             </td>
         {% for c in channels %}
@@ -222,6 +223,14 @@
                         {% endfor %}
                     </tr>
                 </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div title="Custom label" class="customLabelInput" style="display:none">
+                    Custom label:
+                    <input type="text" name="Custom_Label" value="" />
+                </div>
             </td>
         </tr>
     </table>
@@ -269,6 +278,9 @@
                 {% for d in imgData.datasets %}
                     <div>{{ d }}</div>
                 {% endfor %}
+            </div>
+            <div class="customLabel" style="display:none">
+                 <span id="customLabelText"></span>
             </div>
         </td>
         {% for ch in channels %}

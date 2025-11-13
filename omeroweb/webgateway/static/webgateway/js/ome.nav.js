@@ -53,6 +53,7 @@ OME.nav.hide_right_panel = function() {
 }
 
 OME.nav.show_right_panel = function() {
+    console.log("mytesttt");
     var rp = $("#right_panel");
     var rp_width = rp.data('expand_width');
     rp.css('width', rp_width+'px');
