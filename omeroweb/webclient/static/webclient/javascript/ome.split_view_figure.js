@@ -332,10 +332,10 @@ $(document).ready(function() {
             var opt = labelList[0].options[i]
             var currentDiv = '.customLabel' + opt.value
             var text = $(currentDiv + ' #customLabelText').text();
-            allLabels.push(""+opt.value+":"+text)
+            allLabels.push(""+opt.value+"//s"+text)
         }
         var $allLabels = $("input[name=All_labels]")
-        $allLabels.val(allLabels.join("$"))
+        $allLabels.val(allLabels.join("//n"))
     }
 
 
