@@ -1,6 +1,6 @@
 /*!
  * jQuery Form Plugin
- * version: 4.3.0
+ * version: 4.3.1-custom
  * Requires jQuery v1.7.2 or later
  * Project repository: https://github.com/jquery-form/form
 
@@ -159,7 +159,7 @@
 		method = options.method || options.type || this.attr2('method');
 		action = options.url || this.attr2('action');
 
-		url = (typeof action === 'string') ? action.trim() : '';
+		url = (typeof action === 'string') ? $.trim(action) : '';
 		url = url || window.location.href || '';
 		if (url) {
 			// clean url (don't include hash vaue)
@@ -206,7 +206,7 @@
 		var qx, a = this.formToArray(options.semantic, elements, options.filtering);
 
 		if (options.data) {
-			var optionsData = typeof options.data === 'function' ? options.data(a) : options.data;
+			var optionsData = $.isFunction(options.data) ? options.data(a) : options.data;
 
 			options.extraData = optionsData;
 			qx = $.param(optionsData, traditional);
@@ -262,13 +262,17 @@
 				var successArguments = arguments,
 					fn = options.replaceTarget ? 'replaceWith' : 'html';
 
+				// Validate `data` through `HTML encoding` when passed `data` is passed
+				// to `html()`, as suggested in https://github.com/jquery-form/form/issues/464
+				fn == 'html' ? data = $.parseHTML($("<div>").text(data).html()) : '';
+
 				$(options.target)[fn](data).each(function(){
 					oldSuccess.apply(this, successArguments);
 				});
 			});
 
 		} else if (options.success) {
-			if (Array.isArray(options.success)) {
+			if ($.isArray(options.success)) {
 				$.merge(callbacks, options.success);
 			} else {
 				callbacks.push(options.success);
@@ -455,7 +459,11 @@
 				// ensure that every serialized input is still enabled
 				for (i = 0; i < elements.length; i++) {
 					el = $(elements[i]);
-					el.prop('disabled', false);
+					if (hasProp) {
+						el.prop('disabled', false);
+					} else {
+						el.removeAttr('disabled');
+					}
 				}
 			}
 
@@ -690,7 +698,7 @@
 					setTimeout(checkState, 15);
 
 					try {
-						form.trigger('submit');
+						form.submit();
 
 					} catch (err) {
 						// just in case form has element with name/id of 'submit'
@@ -919,8 +927,11 @@
 				return (doc && doc.documentElement && doc.documentElement.nodeName !== 'parsererror') ? doc : null;
 			};
 			var parseJSON = $.parseJSON || function(s) {
-				/* jslint evil:true */
-				return window['eval']('(' + s + ')');			// eslint-disable-line dot-notation
+				// Arise an error resolvable including jquery instead of
+				// making a new function using unsanitized inputs
+				window.console.error('jquery.parseJSON is undefined');
+
+				return null;
 			};
 
 			var httpData = function(xhr, type, s) { // mostly lifted from jq1.4.4
@@ -981,7 +992,7 @@
 		}
 
 		options = options || {};
-		options.delegation = options.delegation && typeof $.fn.on === 'function';
+		options.delegation = options.delegation && $.isFunction($.fn.on);
 
 		// in jQuery 1.3+ we can fix mistakes with the ready state
 		if (!options.delegation && this.length === 0) {
@@ -1119,7 +1130,7 @@
 			return a;
 		}
 
-		if (typeof filtering === 'function') {
+		if ($.isFunction(filtering)) {
 			els = $.map(els, filtering);
 		}
 
