@@ -1,3 +1,10 @@
+5.29.3 (November 2025)
+------------------
+
+## Bug fixes
+
+- Security vulnerability fix [GHSA-j4gv-6x9v-v23g](https://github.com/ome/omero-web/security/advisories/GHSA-j4gv-6x9v-v23g)
+
 5.29.2 (August 2025)
 ------------------
 
