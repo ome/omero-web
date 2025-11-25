@@ -702,7 +702,6 @@ CUSTOM_SETTINGS_MAPPINGS = {
         int,
         "Size, in bytes, of the “chunk”",
     ],
-    "omero.web.webgateway_cache": ["WEBGATEWAY_CACHE", None, leave_none_unset, None],
     "omero.web.maximum_multifile_download_size": [
         "MAXIMUM_MULTIFILE_DOWNLOAD_ZIP_SIZE",
         1024**3,
@@ -716,6 +715,13 @@ CUSTOM_SETTINGS_MAPPINGS = {
         int,
         "Prevent download of OMERO.tables exceeding this number of rows "
         "in a single request.",
+    ],
+    "omero.web.max_table_slice_size": [
+        "MAX_TABLE_SLICE_SIZE",
+        1_000_000,
+        int,
+        "Maximum number of cells that can be retrieved in a single call "
+        "to the table slicing endpoint.",
     ],
     # VIEWER
     "omero.web.viewer.view": [
@@ -1551,6 +1557,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.template.context_processors.media",
                 "django.template.context_processors.static",
+                "django.template.context_processors.request",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "omeroweb.custom_context_processor.url_suffix",

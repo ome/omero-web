@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-""" A view functions is simply a Python function that takes a Web request and
+"""A view functions is simply a Python function that takes a Web request and
 returns a Web response. This response can be the HTML contents of a Web page,
 or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything."""
@@ -1468,6 +1468,23 @@ def load_plate(request, o1_type=None, o1_id=None, conn=None, **kwargs):
     template = None
     if "plate" in kw or "acquisition" in kw:
         fields = manager.getNumberOfFields()
+        if "acquisition" in kw:
+            # need to offset the index for 0-indexing at acquisition level
+            qs = conn.getQueryService()
+            p = omero.sys.ParametersI()
+            p.add("acqid", rlong(o1_id))
+            query = (
+                "SELECT max(index(ws)) - min(index(ws)) "
+                "FROM Well w "
+                "JOIN w.wellSamples ws "
+                "WHERE ws.plateAcquisition.id = :acqid "
+                "GROUP BY w.id"
+            )
+            res = [r[0].getValue() for r in qs.projection(query, p, conn.SERVICE_OPTS)]
+            if len(res) >= 1:
+                # The range of the fields is set for the current acquisition
+                fields = (0, max(res))
+
         if fields is not None:
             form_well_index = WellIndexForm(initial={"index": index, "range": fields})
             if index == 0:

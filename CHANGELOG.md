@@ -1,3 +1,121 @@
+5.29.3 (November 2025)
+------------------
+
+## Bug fixes
+
+- Security vulnerability fix [GHSA-j4gv-6x9v-v23g](https://github.com/ome/omero-web/security/advisories/GHSA-j4gv-6x9v-v23g)
+
+5.29.2 (August 2025)
+------------------
+
+## Bug fixes
+
+- Security vulnerability fix [CVE-2025-54791](https://github.com/ome/omero-web/security/advisories/GHSA-gpmg-4x4g-mr5r)
+
+5.29.1 (June 2025)
+------------------
+
+## Bug fixes
+
+- Fix high channel count issues [#606](https://github.com/ome/omero-web/pull/606)
+- Handle images without fileset [#621](https://github.com/ome/omero-web/pull/621)
+
+## Other changes
+
+- Bump flake [#617](https://github.com/ome/omero-web/pull/617)
+- CodeQL workflow updates [#614](https://github.com/ome/omero-web/pull/614)
+- NumPy 2.3.0 support [#623](https://github.com/ome/omero-web/pull/623)
+- Bump pypi-publish [#616](https://github.com/ome/omero-web/pull/616)
+
+5.29.0 (March 2025)
+-------------------
+
+## Features
+
+- Add API support for login using JSON data [#607](https://github.com/ome/omero-web/pull/607)
+- Improve performance of LUTs rendering [#603](https://github.com/ome/omero-web/pull/603)
+
+## Bug fixes
+
+- Do not strip whitespace from passwords [#605](https://github.com/ome/omero-web/pull/605)
+- Display ContrastMethod in OMERO.web [#598](https://github.com/ome/omero-web/pull/598)
+
+## Other changes
+
+- Improve error messages for CSRF failures [#608](https://github.com/ome/omero-web/pull/608)
+- Remove Python 3.8 from testing matrix [#600](https://github.com/ome/omero-web/pull/600)
+
+5.28.0 (November 2024)
+----------------------
+
+## Features
+
+- Dynamically generate LUTs [#581](https://github.com/ome/omero-web/pull/581)
+- Allow users to click group name to quick-switch to that group [#583](https://github.com/ome/omero-web/pull/583)
+
+## Bug fixes
+
+- Correctly handle empty query results [#580](https://github.com/ome/omero-web/pull/580)
+- Fix infinite loop when downloading table [#594](https://github.com/ome/omero-web/pull/594)
+
+## Other changes
+
+- Remove deprecated Python 2 compatibility import [#589](https://github.com/ome/omero-web/pull/589)
+- Add Python 3.12 support [#592](https://github.com/ome/omero-web/pull/592)
+
+5.27.2 (September 2024)
+-----------------------
+
+## Bug fixes
+
+- Fix login page scaling for mobile devices [#576](https://github.com/ome/omero-web/pull/576)
+- Fix wrapping of long names [#574](https://github.com/ome/omero-web/pull/574)
+
+5.27.1 (August 2024)
+--------------------
+
+## Bug fixes
+
+- Fix internal API used by other plugins [#577](https://github.com/ome/omero-web/pull/577)
+
+## Other changes
+
+- Bump flake8 and black [#571](https://github.com/ome/omero-web/pull/571)
+
+5.27.0 (July 2024)
+------------------
+
+## Features
+
+- New API calls for table querying and slicing [#564](https://github.com/ome/omero-web/pull/564)
+- Improve table query performance [#563](https://github.com/ome/omero-web/pull/563),
+  [#554](https://github.com/ome/omero-web/pull/554)
+- Show archival status in tree [#555](https://github.com/ome/omero-web/pull/555)
+
+## Bug fixes
+
+- Make URLs containing `$` clickable [#560](https://github.com/ome/omero-web/pull/560)
+
+## Other changes
+
+- Update installation instructions [#558](https://github.com/ome/omero-web/pull/558)
+- Limit numpy to version 1.9 [#561](https://github.com/ome/omero-web/pull/561)
+- Bump flake8 [#562](https://github.com/ome/omero-web/pull/562)
+
+5.26.0 (May 2024)
+-----------------
+
+## Features
+
+- Plate acquisition filtering with plate display [#542](https://github.com/ome/omero-web/pull/542)
+- Block user interface for some long-running tasks [#543](https://github.com/ome/omero-web/pull/543)
+
+## Other changes
+
+- Reviewed instructions to use conda-forge channel [#533](https://github.com/ome/omero-web/pull/533)
+- Remove non-performant cache [#549](https://github.com/ome/omero-web/pull/549)
+- Validate JSONP callback parameter [CVE-2024-35180](https://github.com/ome/omero-web/security/advisories/GHSA-vr85-5pwx-c6gq)
+
 5.25.0 (March 2024)
 -------------------
 

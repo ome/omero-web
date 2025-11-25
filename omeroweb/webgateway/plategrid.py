@@ -6,14 +6,14 @@
 # Use is subject to license terms supplied in LICENSE.txt
 
 """
-   Module to encapsulate operations concerned with displaying the contents of a
-   plate as a grid.
+Module to encapsulate operations concerned with displaying the contents of a
+plate as a grid.
 """
 
 import logging
 
 import omero.sys
-from omero.rtypes import rint
+from omero.rtypes import rint, rlong
 
 
 logger = logging.getLogger(__name__)
@@ -25,16 +25,26 @@ class PlateGrid(object):
     methods useful for displaying the contents of the plate as a grid.
     """
 
-    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None):
+    def __init__(self, conn, pid, fid, thumbprefix="", plate_layout=None, acqid=None):
         """
         Constructor
 
         param:  plate_layout is "expand" to expand plate to multiple of 8 x 12
                 or "shrink" to ignore all wells before the first row/column
+
+                fid: the field index relative to the lowest "absolute field index"
+                for that well. When filtering the image samples with an
+                acquisition ID (acqid), the lowest field index may be
+                different for each well.
+                In the range [0, max_sample_per_well]
+                (or [0, max_sample_per_well_per_acquisition] with an acqid)
+
+                acqid: the acquisition ID to filter the WellSamples.
         """
         self.plate = conn.getObject("plate", int(pid))
         self._conn = conn
         self.field = fid
+        self.acquisition = acqid
         self._thumbprefix = thumbprefix
         self._metadata = None
         self.plate_layout = plate_layout
@@ -57,8 +67,22 @@ class PlateGrid(object):
                 "join ws.image img "
                 "join img.details.owner author "
                 "where well.plate.id = :id "
-                "and index(ws) = :wsidx"
             )
+            if self.acquisition is not None:
+                # Offseting field index per well for the plateacquisition
+                query += (
+                    "and ws.plateAcquisition.id = :acqid "
+                    "and index(ws) - ("
+                    "    SELECT MIN(index(ws_inner)) "
+                    "    FROM Well well_inner "
+                    "    JOIN well_inner.wellSamples ws_inner "
+                    "    WHERE ws_inner.plateAcquisition.id = :acqid "
+                    "    AND well_inner.id = well.id "
+                    ") = :wsidx "
+                )
+                params.add("acqid", rlong(self.acquisition))
+            else:
+                query += "and index(ws) = :wsidx "
 
             results = q.projection(query, params, self._conn.SERVICE_OPTS)
             min_row = 0

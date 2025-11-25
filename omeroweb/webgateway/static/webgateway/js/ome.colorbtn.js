@@ -8,7 +8,7 @@
  * Author: C. Neves <carlos@glencoesoftware.com>
  *
  * Copyright (c) 2007, 2008 Glencoe Software, Inc. All rights reserved.
- * 
+ *
  * This software is distributed under the terms described by the LICENCE file
  * you can find at the root of the distribution bundle, which states you are
  * free to use it only for non commercial purposes.
@@ -104,7 +104,7 @@ $.fn.colorbtn = function(cfg) {
       if (OME && OME.LUTS) {
         for (var l=0; l<OME.LUTS.length; l++) {
           if (OME.LUTS[l].name === lutName) {
-            return OME.LUTS[l].png_index;
+            return OME.LUTS[l].png_index_new;
           }
         }
       }

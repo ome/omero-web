@@ -24,7 +24,7 @@
 #
 
 import logging
-import pkgutil
+import importlib.util
 from django.conf import settings
 from django.apps import AppConfig
 from django.conf.urls import include
@@ -93,7 +93,7 @@ for app in settings.ADDITIONAL_APPS:
         urlmodule = "%s.urls" % app
 
     # Try to import module.urls.py if it exists (not for corsheaders etc)
-    urls_found = pkgutil.find_loader(urlmodule)
+    urls_found = importlib.util.find_spec(urlmodule)
     if urls_found is not None:
         try:
             __import__(urlmodule)

@@ -9,8 +9,8 @@ jobs:
     name: Install distribution from source
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.9'
       - name: Install dependencies
@@ -18,6 +18,6 @@ jobs:
       - name: Install Ice
         run: pip install https://github.com/ome/zeroc-ice-py-github-ci/releases/download/0.2.0/zeroc_ice-3.6.5-cp39-cp39-linux_x86_64.whl
       - name: Run tests
-        run: python setup.py sdist && pip install dist/omero-web*gz
+        run: pip install -e .
       - name: Test import
         run: python -c "import omeroweb.version as owv; print(owv.omeroweb_version)"

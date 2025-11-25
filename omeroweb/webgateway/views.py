@@ -35,7 +35,8 @@ from django.http import (
     StreamingHttpResponse,
     HttpResponseNotFound,
 )
-
+from django.core.cache import cache
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.utils.decorators import method_decorator
@@ -44,7 +45,7 @@ from django.conf import settings
 from wsgiref.util import FileWrapper
 from omero.rtypes import rlong, unwrap
 from omero.constants.namespaces import NSBULKANNOTATIONS
-from .util import points_string_to_XY_list, xy_list_to_bbox
+from .util import points_string_to_XY_list, xy_list_to_bbox, load_lut_to_rgb
 from .plategrid import PlateGrid
 from omeroweb.version import omeroweb_buildyear as build_year
 from .marshal import imageMarshal, shapeMarshal, rgb_int2rgba
@@ -73,11 +74,7 @@ import glob
 
 # from models import StoredConnection
 
-from omeroweb.webgateway.webgateway_cache import (
-    webgateway_cache,
-    CacheBase,
-    webgateway_tempfile,
-)
+from omeroweb.webgateway.webgateway_tempfile import webgateway_tempfile
 
 import logging
 import os
@@ -94,7 +91,6 @@ from PIL import Image, ImageDraw
 import numpy
 
 
-cache = CacheBase()
 logger = logging.getLogger(__name__)
 
 
@@ -105,6 +101,14 @@ def index(request):
 
 def _safestr(s):
     return str(s).encode("utf-8")
+
+
+# Regular expression that represents the characters in ASCII that are
+# allowed in a valid JavaScript variable name.  Function names adhere to
+# the same rules.
+# See:
+#   https://stackoverflow.com/questions/1661197/what-characters-are-valid-for-javascript-variable-names
+VALID_JS_VARIABLE = re.compile(r"^[a-zA-Z_$][0-9a-zA-Z_$]*$")
 
 
 class UserProxy(object):
@@ -376,8 +380,6 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
     @param h:           Thumbnail max height
     @return:            http response containing jpeg
     """
-    server_id = request.session["connector"]["server_id"]
-
     server_settings = request.session.get("server_settings", {}).get("browser", {})
     defaultSize = server_settings.get("thumb_default_size", 96)
 
@@ -391,39 +393,24 @@ def _render_thumbnail(request, iid, w=None, h=None, conn=None, _defcb=None, **kw
             size = (int(w), int(h))
     if size == (defaultSize,):
         direct = False
-    user_id = conn.getUserId()
     z = getIntOrDefault(request, "z", None)
     t = getIntOrDefault(request, "t", None)
     rdefId = getIntOrDefault(request, "rdefId", None)
-    # TODO - cache handles rdefId
-    jpeg_data = webgateway_cache.getThumb(request, server_id, user_id, iid, size)
-    if jpeg_data is None:
-        prevent_cache = False
-        img = conn.getObject("Image", iid)
-        if img is None:
-            logger.debug("(b)Image %s not found..." % (str(iid)))
+    img = conn.getObject("Image", iid)
+    if img is None:
+        logger.debug("(b)Image %s not found..." % (str(iid)))
+        if _defcb:
+            jpeg_data = _defcb(size=size)
+        else:
+            raise Http404("Failed to render thumbnail")
+    else:
+        jpeg_data = img.getThumbnail(size=size, direct=direct, rdefId=rdefId, z=z, t=t)
+        if jpeg_data is None:
+            logger.debug("(c)Image %s not found..." % (str(iid)))
             if _defcb:
                 jpeg_data = _defcb(size=size)
-                prevent_cache = True
             else:
                 raise Http404("Failed to render thumbnail")
-        else:
-            jpeg_data = img.getThumbnail(
-                size=size, direct=direct, rdefId=rdefId, z=z, t=t
-            )
-            if jpeg_data is None:
-                logger.debug("(c)Image %s not found..." % (str(iid)))
-                if _defcb:
-                    jpeg_data = _defcb(size=size)
-                    prevent_cache = True
-                else:
-                    raise Http404("Failed to render thumbnail")
-            else:
-                prevent_cache = img._thumbInProgress
-        if not prevent_cache:
-            webgateway_cache.setThumb(request, server_id, user_id, iid, jpeg_data, size)
-    else:
-        pass
     return jpeg_data
 
 
@@ -801,7 +788,7 @@ def render_shape_mask(request, shapeId, conn=None, **kwargs):
         fill = (color[0], color[1], color[2], int(color[3] * 255))
     mask_packed = shape.getBytes()
     # convert bytearray into something we can use
-    intarray = numpy.fromstring(mask_packed, dtype=numpy.uint8)
+    intarray = numpy.frombuffer(mask_packed, dtype=numpy.uint8)
     binarray = numpy.unpackbits(intarray)
 
     # Couldn't get the 'proper' way of doing this to work,
@@ -1070,15 +1057,11 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
     else:
         return HttpResponseBadRequest("tile or region argument required")
 
-    # region details in request are used as key for caching.
-    jpeg_data = webgateway_cache.getImage(request, server_id, img, z, t)
+    jpeg_data = img.renderJpegRegion(
+        z, t, x, y, w, h, level=level, compression=compress_quality
+    )
     if jpeg_data is None:
-        jpeg_data = img.renderJpegRegion(
-            z, t, x, y, w, h, level=level, compression=compress_quality
-        )
-        if jpeg_data is None:
-            raise Http404
-        webgateway_cache.setImage(request, server_id, img, z, t, jpeg_data)
+        raise Http404
 
     rsp = HttpResponse(jpeg_data, content_type="image/jpeg")
     return rsp
@@ -1106,12 +1089,9 @@ def render_image(request, iid, z=None, t=None, conn=None, **kwargs):
     if pi is None:
         raise Http404
     img, compress_quality = pi
-    jpeg_data = webgateway_cache.getImage(request, server_id, img, z, t)
+    jpeg_data = img.renderJpeg(z, t, compression=compress_quality)
     if jpeg_data is None:
-        jpeg_data = img.renderJpeg(z, t, compression=compress_quality)
-        if jpeg_data is None:
-            raise Http404
-        webgateway_cache.setImage(request, server_id, img, z, t, jpeg_data)
+        raise Http404
 
     format = request.GET.get("format", "jpeg")
     rsp = HttpResponse(jpeg_data, content_type="image/jpeg")
@@ -1177,7 +1157,6 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                         if dryrun is True, returns count of images that would
                         be exported
     """
-    server_id = request.session["connector"]["server_id"]
     imgs = []
     if ctx == "p":
         obj = conn.getObject("Project", cid)
@@ -1246,17 +1225,14 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
             return HttpResponseRedirect(
                 settings.STATIC_URL + "webgateway/tfiles/" + rpath
             )
-        tiff_data = webgateway_cache.getOmeTiffImage(request, server_id, imgs[0])
+        try:
+            tiff_data = imgs[0].exportOmeTiff()
+        except Exception:
+            logger.debug("Failed to export image (2)", exc_info=True)
+            tiff_data = None
         if tiff_data is None:
-            try:
-                tiff_data = imgs[0].exportOmeTiff()
-            except Exception:
-                logger.debug("Failed to export image (2)", exc_info=True)
-                tiff_data = None
-            if tiff_data is None:
-                webgateway_tempfile.abort(fpath)
-                raise Http404
-            webgateway_cache.setOmeTiffImage(request, server_id, imgs[0], tiff_data)
+            webgateway_tempfile.abort(fpath)
+            raise Http404
         if fobj is None:
             rsp = HttpResponse(tiff_data, content_type="image/tiff")
             rsp["Content-Disposition"] = 'attachment; filename="%s.ome.tiff"' % (
@@ -1289,12 +1265,9 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
                 fobj = BytesIO()
             zobj = zipfile.ZipFile(fobj, "w", zipfile.ZIP_STORED)
             for obj in imgs:
-                tiff_data = webgateway_cache.getOmeTiffImage(request, server_id, obj)
+                tiff_data = obj.exportOmeTiff()
                 if tiff_data is None:
-                    tiff_data = obj.exportOmeTiff()
-                    if tiff_data is None:
-                        continue
-                    webgateway_cache.setOmeTiffImage(request, server_id, obj, tiff_data)
+                    continue
                 # While ZIP itself doesn't have the 255 char limit for
                 # filenames, the FS where these get unarchived might, so trim
                 # names
@@ -1426,12 +1399,9 @@ def render_split_channel(request, iid, z, t, conn=None, **kwargs):
         raise Http404
     img, compress_quality = pi
     compress_quality = compress_quality and float(compress_quality) or 0.9
-    jpeg_data = webgateway_cache.getSplitChannelImage(request, server_id, img, z, t)
+    jpeg_data = img.renderSplitChannel(z, t, compression=compress_quality)
     if jpeg_data is None:
-        jpeg_data = img.renderSplitChannel(z, t, compression=compress_quality)
-        if jpeg_data is None:
-            raise Http404
-        webgateway_cache.setSplitChannelImage(request, server_id, img, z, t, jpeg_data)
+        raise Http404
     rsp = HttpResponse(jpeg_data, content_type="image/jpeg")
     return rsp
 
@@ -1482,6 +1452,8 @@ def jsonp(f):
                 return rv
             c = request.GET.get("callback", None)
             if c is not None and not kwargs.get("_internal", False):
+                if not VALID_JS_VARIABLE.match(c):
+                    return HttpResponseBadRequest("Invalid callback")
                 rv = json.dumps(rv)
                 rv = "%s(%s)" % (c, rv)
                 # mimetype for JSONP is application/javascript
@@ -1492,7 +1464,9 @@ def jsonp(f):
             # NB: To support old api E.g. /get_rois_json/
             # We need to support lists
             safe = type(rv) is dict
-            return JsonResponse(rv, safe=safe)
+            # Allow optional JSON dumps parameters
+            json_params = kwargs.get("_json_dumps_params", None)
+            return JsonResponse(rv, safe=safe, json_dumps_params=json_params)
         except Exception as ex:
             # Default status is 500 'server error'
             # But we try to handle all 'expected' errors appropriately
@@ -1641,7 +1615,7 @@ def wellData_json(request, conn=None, _internal=False, **kwargs):
 
 @login_required()
 @jsonp
-def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
+def plateGrid_json(request, pid, field=0, acquisition=None, conn=None, **kwargs):
     """
     Layout depends on settings 'omero.web.plate_layout' which
     can be overridden with request param e.g. ?layout=shrink.
@@ -1653,10 +1627,16 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         field = int(field or 0)
     except ValueError:
         field = 0
+
+    if acquisition is not None:
+        try:
+            acquisition = int(acquisition)
+        except ValueError:
+            acquisition = None
+
     prefix = kwargs.get("thumbprefix", "webgateway_render_thumbnail")
     thumbsize = getIntOrDefault(request, "size", None)
     logger.debug(thumbsize)
-    server_id = kwargs["server_id"]
 
     def get_thumb_url(iid):
         if thumbsize is not None:
@@ -1671,22 +1651,16 @@ def plateGrid_json(request, pid, field=0, conn=None, **kwargs):
         conn,
         pid,
         field,
-        kwargs.get("urlprefix", get_thumb_url),
+        thumbprefix=kwargs.get("urlprefix", get_thumb_url),
         plate_layout=layout,
+        acqid=acquisition,
     )
 
     plate = plateGrid.plate
     if plate is None:
         return Http404
 
-    cache_key = "plategrid-%d-%s" % (field, thumbsize)
-    rv = webgateway_cache.getJson(request, server_id, plate, cache_key)
-
-    if rv is None:
-        rv = plateGrid.metadata
-        webgateway_cache.setJson(request, server_id, plate, json.dumps(rv), cache_key)
-    else:
-        rv = json.loads(rv)
+    rv = plateGrid.metadata
     return rv
 
 
@@ -1820,6 +1794,8 @@ def listWellImages_json(request, did, conn=None, **kwargs):
                 d[x] = {"value": p.getValue(), "unit": str(p.getUnit())}
         return d
 
+    plate = well.getParent()
+    run_d = {r.getId(): r.getName() for r in plate.listPlateAcquisitions()}
     wellImgs = []
     for ws in well.listChildren():
         # optionally filter by acquisition 'run'
@@ -1835,6 +1811,8 @@ def listWellImages_json(request, did, conn=None, **kwargs):
             pos = marshal_pos(ws)
             if len(pos.keys()) > 0:
                 m["position"] = pos
+            if ws.plateAcquisition is not None:
+                m["name"] += f" [Run: {run_d[ws.plateAcquisition._id._val]}]"
             wellImgs.append(m)
     return wellImgs
 
@@ -2084,8 +2062,6 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     if pi is None:
         json_data = "false"
     else:
-        user_id = pi[0]._conn.getEventContext().userId
-        webgateway_cache.invalidateObject(server_id, user_id, pi[0])
         pi[0].getThumbnail()
         json_data = "true"
     if request.GET.get("callback", None):
@@ -2093,33 +2069,140 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     return HttpJavascriptResponse(json_data)
 
 
-@login_required()
+@login_required(omero_group=None)
 @jsonp
 def listLuts_json(request, conn=None, **kwargs):
     """
-    Lists lookup tables 'LUTs' availble for rendering
+    Lists lookup tables 'LUTs' available for rendering.
 
-    This list is dynamic and will change if users add LUTs to their server.
     We include 'png_index' which is the index of each LUT within the
     static/webgateway/img/luts_10.png or -1 if LUT is not found.
+
+    Since 5.28.0, the list of LUTs is also generated dynamically.
+    The new LUT indexes and LUT list were added to
+    the response with the suffix '_new' (png_index_new and png_luts_new)
+    The png matching the new indexes and list of LUT is obtained from
+    this url: /webgateway/luts_png/   (views.luts_png)
     """
     scriptService = conn.getScriptService()
     luts = scriptService.getScriptsByMimetype("text/x-lut")
-    rv = []
-    for lut in luts:
+    luts.sort(key=lambda x: x.name.val.lower())
+    rv, all_luts = [], []
+
+    luts_by_pathname = {}
+    include_rgb = request.GET.get("rgb") == "true"
+    if include_rgb:
+        json_path = staticfiles_storage.path("webgateway/json/luts.json")
+        with open(json_path) as json_file:
+            luts_json = json.load(json_file)
+            for lut in luts_json["luts"]:
+                pathname = lut["path"] + lut["name"]
+                luts_by_pathname[pathname] = lut
+
+    for i, lut in enumerate(luts):
         lutsrc = lut.path.val + lut.name.val
-        png_index = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
-        rv.append(
-            {
-                "id": lut.id.val,
-                "path": lut.path.val,
-                "name": lut.name.val,
-                "size": unwrap(lut.size),
-                "png_index": png_index,
-            }
-        )
-    rv.sort(key=lambda x: x["name"].lower())
-    return {"luts": rv, "png_luts": LUTS_IN_PNG}
+        all_luts.append(lutsrc)
+        idx = LUTS_IN_PNG.index(lutsrc) if lutsrc in LUTS_IN_PNG else -1
+        # rgb = load_lut_to_rgb(conn, lut.id.val)
+        lut_data = {
+            "id": lut.id.val,
+            "path": lut.path.val,
+            "name": lut.name.val,
+            "size": unwrap(lut.size),
+            "png_index": idx,
+            "png_index_new": i,
+        }
+        if include_rgb:
+            # If we have the LUT cached, use that...
+            pathname = lut.path.val + lut.name.val
+            if pathname in luts_by_pathname:
+                lut_data["rgb"] = luts_by_pathname[pathname].get("rgb")
+            else:
+                # ...otherwise load the original file
+                rgb = load_lut_to_rgb(conn, lut.id.val)
+                lut_data["rgb"] = rgb.tolist()
+        rv.append(lut_data)
+
+    all_luts.append("gradient.png")
+
+    return {"luts": rv, "png_luts": LUTS_IN_PNG, "png_luts_new": all_luts}
+
+
+@login_required(omero_group=None)
+def luts_png(request, conn=None, **kwargs):
+    """
+    Generates the LUT png used for preview and selection of LUT. The png is
+    256px wide, and each LUT is 10px in height. The last portion of the png
+    is the channel sliders transparent gradient.
+
+    LUTs are listed in alphabetical order (lut name only from filename).
+
+    We use static "webgateway/json/luts.json" to get the RGB values of
+    the LUTS. If the LUT is not found in the json file, we load the LUT
+    from the server.
+
+    This uses caching to prevent generating the png each time a LUT
+    menu is opened. The cache key is a hash of all LUTs path.
+    Change in the LUT name or path will force the generation of a new
+    png.
+
+    Request must use ?cached=false to load LUTs from the server.
+    """
+    scriptService = conn.getScriptService()
+    luts = scriptService.getScriptsByMimetype("text/x-lut")
+    luts.sort(key=lambda x: x.name.val.lower())
+    luts_path = []
+    for lut in luts:
+        luts_path.append(lut.path.val + lut.name.val)
+    luts_hash = hash("\n".join(luts_path))
+    cache_key = f"lut_hash_{luts_hash}"
+
+    cached_image = cache.get(cache_key)
+
+    # If use_cached, then we don't load LUTs from the server...
+    # Either we use the Django cache...
+    use_cached = request.GET.get("cached") != "false"
+    if cached_image and use_cached:
+        return HttpResponse(cached_image, content_type="image/png")
+
+    luts_by_pathname = {}
+    # ... or use cached LUTS json to get rgb values...
+    json_path = staticfiles_storage.path("webgateway/json/luts.json")
+    with open(json_path) as json_file:
+        luts_json = json.load(json_file)
+        for lut in luts_json["luts"]:
+            pathname = lut["path"] + lut["name"]
+            luts_by_pathname[pathname] = lut
+
+    # Generate the LUT, fourth png channel set to 255
+    new_img = numpy.zeros((10 * (len(luts) + 1), 256, 4), dtype="uint8") + 255
+    for i, lut in enumerate(luts):
+        pathname = lut.path.val + lut.name.val
+        if pathname in luts_by_pathname:
+            lut_rgb = luts_by_pathname[pathname].get("rgb")
+            new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
+        elif not use_cached:
+            # ...otherwise load the original file
+            lut_rgb = load_lut_to_rgb(conn, lut.id.val).tolist()
+            new_img[(i * 10) : ((i + 1) * 10), :, :3] = lut_rgb
+
+    # Set the last row for the channel sliders transparent gradient
+    new_img[-10:] = 0
+    new_img[-10:, :180, 3] = numpy.linspace(255, 0, 180, dtype="uint8")
+
+    image = Image.fromarray(new_img)
+    # Save the image to a BytesIO stream
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    # It's only worth caching IF we've loaded the LUTs from the server
+    if not use_cached:
+        # Cache the image using the version-based key
+        # Cache timeout set to None (no timeout)
+        cache.set(cache_key, buffer.getvalue(), None)
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
 @login_required()
@@ -2291,7 +2374,6 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
     @return:            json dict of Boolean:[Image-IDs]
     """
 
-    server_id = request.session["connector"]["server_id"]
     json_data = False
 
     fromid = request.GET.get("fromid", None)
@@ -2310,29 +2392,31 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
             del request.session["rdef"]
         return True
 
+    def req(field: str):
+        return request.GET.get(field, request.POST.get(field))
+
     # If we've got an rdef encoded in request instead of ImageId...
-    r = request.GET or request.POST
-    if r.get("c") is not None:
+    if req("c") is not None:
         # make a map of settings we need
-        rdef = {"c": str(r.get("c"))}  # channels
-        if r.get("maps"):
+        rdef = {"c": str(req("c"))}  # channels
+        if req("maps"):
             try:
-                rdef["maps"] = json.loads(r.get("maps"))
+                rdef["maps"] = json.loads(req("maps"))
             except Exception:
                 pass
-        if r.get("pixel_range"):
-            rdef["pixel_range"] = str(r.get("pixel_range"))
-        if r.get("m"):
-            rdef["m"] = str(r.get("m"))  # model (grey)
-        if r.get("z"):
-            rdef["z"] = str(r.get("z"))  # z & t pos
-        if r.get("t"):
-            rdef["t"] = str(r.get("t"))
-        imageId = request.GET.get("imageId", request.POST.get("imageId", None))
+        if req("pixel_range"):
+            rdef["pixel_range"] = str(req("pixel_range"))
+        if req("m"):
+            rdef["m"] = str(req("m"))  # model (grey)
+        if req("z"):
+            rdef["z"] = str(req("z"))  # z & t pos
+        if req("t"):
+            rdef["t"] = str(req("t"))
+        imageId = req("imageId")
         if imageId:
             rdef["imageId"] = int(imageId)
 
-        if request.method == "GET":
+        if request.method == "GET" or req("store"):
             request.session.modified = True
             request.session["rdef"] = rdef
             # remove any previous rdef we may have via 'fromId'
@@ -2370,15 +2454,7 @@ def copy_image_rdef_json(request, conn=None, **kwargs):
         except ValueError:
             fromid = None
         if fromid is not None and len(toids) > 0:
-            fromimg = conn.getObject("Image", fromid)
-            userid = fromimg.getOwner().getId()
             json_data = conn.applySettingsToSet(fromid, to_type, toids)
-            if json_data and True in json_data:
-                for iid in json_data[True]:
-                    img = conn.getObject("Image", iid)
-                    img is not None and webgateway_cache.invalidateObject(
-                        server_id, userid, img
-                    )
 
         # finally - if we temporarily saved rdef to original image, revert
         # if we're sure that from-image is not in the target set (Dataset etc)
@@ -2746,6 +2822,8 @@ def original_file_paths(request, iid, conn=None, **kwargs):
     image = conn.getObject("Image", iid)
     if image is None:
         raise Http404
+    if image.fileset is None:
+        return {}
     paths = image.getImportedImageFilePaths()
     fileset_id = image.fileset.id.val
     return {
@@ -3044,7 +3122,7 @@ def perform_table_query(
         def row_generator(table, h):
             # hits are all consecutive rows - can load them in batches
             idx = 0
-            batch = 1000
+            batch = settings.MAX_TABLE_DOWNLOAD_ROWS
             while idx < len(h):
                 batch = min(batch, len(h) - idx)
                 res = table.slice(col_indices, h[idx : idx + batch])
@@ -3228,42 +3306,61 @@ def obj_id_bitmask(request, fileid, conn=None, query=None, **kwargs):
             else None
         )
 
-    rsp_data = perform_table_query(
-        conn,
-        fileid,
-        query,
-        [col_name],
-        offset=offset,
-        limit=limit,
-        lazy=False,
-        check_max_rows=False,
-    )
-    if "error" in rsp_data:
-        return rsp_data
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    sr = conn.getSharedResources()
+    table = sr.openTable(omero.model.OriginalFileI(fileid, False), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
     try:
-        data = rowsToByteArray(rsp_data["data"]["rows"])
-        return HttpResponse(bytes(data), content_type="application/octet-stream")
-    except ValueError:
-        logger.error("ValueError when getting obj_id_bitmask")
-        return {"error": "Specified column has invalid type"}
+        column_names = [column.name for column in table.getHeaders()]
+        if col_name not in column_names:
+            # Previous implementations used perform_table_query() which
+            # defaults to returning all columns if the requested column name
+            # is unknown.  We would have then packed the first column.  We
+            # mimic that here by only querying for the first column.
+            #
+            # FIXME: This is really weird behaviour, especially with this
+            # endpoint defaulting to using the "object" column, and likely
+            # deserves to be refactored and deprecated or changed
+            # accordingly.
+            col_name = column_names[0]
+        row_numbers = table.getWhereList(query, None, 0, 0, 1)
+        # If there are no matches for the query, don't call table.slice()
+        if len(row_numbers) == 0:
+            return HttpResponse(
+                numpy.packbits(numpy.array([0], dtype="int64")).tobytes(),
+                content_type="application/octet-stream",
+            )
+        (column,) = table.slice([column_names.index(col_name)], row_numbers).columns
+        try:
+            return HttpResponse(
+                column_to_packed_bits(column), content_type="application/octet-stream"
+            )
+        except ValueError:
+            logger.error("ValueError when getting obj_id_bitmask")
+            return {"error": "Specified column has invalid type"}
+    except Exception:
+        logger.error("Error when getting obj_id_bitmask", exc_info=True)
+        return {"error", "Unexpected error getting obj_id_bitmask"}
+    finally:
+        table.close()
 
 
-def rowsToByteArray(rows):
-    maxval = 0
-    if len(rows) > 0 and isinstance(rows[0][0], float):
+def column_to_packed_bits(column):
+    """
+    Convert a column of integer values (strings will be coerced) to a bit mask
+    where each value present will be set to 1.
+    """
+    if len(column.values) > 0 and isinstance(column.values[0], float):
         raise ValueError("Cannot have ID of float")
-    for obj in rows:
-        obj_id = int(obj[0])
-        maxval = max(obj_id, maxval)
-    bitArray = numpy.zeros(maxval + 1, dtype="uint8")
-    for obj in rows:
-        obj_id = int(obj[0])
-        bitArray[obj_id] = 1
-    packed = numpy.packbits(bitArray, bitorder="big")
-    data = bytearray()
-    for val in packed:
-        data.append(val)
-    return data
+    # Coerce strings to int64 if required.  If we have values > 2**63 they
+    # wouldn't work anyway so signed is okay here.  Note that the
+    # implementation does get weird if the indexes are negative values.
+    indexes = numpy.array(column.values, dtype="int64")
+    bits = numpy.zeros(int(indexes.max() + 1), dtype="uint8")
+    bits[indexes] = 1
+    return numpy.packbits(bits, bitorder="big").tobytes()
 
 
 @login_required()
@@ -3401,7 +3498,16 @@ class LoginView(View):
         and store that on the request.session OR handling login failures
         """
         error = None
-        form = self.form_class(request.POST.copy())
+        if request.content_type == "application/json":
+            try:
+                payload = json.loads(request.body)
+                form = self.form_class(dict(payload))
+            except Exception:
+                logger.debug(f"Invalid JSON data: {request.body}")
+                form = self.form_class()
+        else:
+            form = self.form_class(request.POST.copy())
+
         userip = get_client_ip(request)
         if form.is_valid():
             username = form.cleaned_data["username"]
@@ -3508,3 +3614,177 @@ def get_image_rdefs_json(request, img_id=None, conn=None, **kwargs):
     except Exception:
         logger.debug(traceback.format_exc())
         return {"error": "Failed to retrieve rdefs"}
+
+
+@login_required()
+@jsonp
+def table_get_where_list(request, fileid, conn=None, **kwargs):
+    """
+    Retrieves matching row numbers for a table query
+
+    Example: /webgateway/table/123/rows/?query=object<100&start=50
+
+    Query arguments:
+    query: table query in PyTables syntax
+    start: row number to start searching
+
+    Uses MAX_TABLE_SLICE_SIZE to determine how many rows will be searched.
+
+    @param request:     http request.
+    @param fileid:      the id of the table
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'rows' and 'meta' in the success case,
+                        one with key 'error' if something went wrong.
+                        'rows' is an array of matching row numbers.
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columnCount: total number of columns in table
+                            - start: row on which search was started
+                            - end: row on which search ended (exclusive), can be used
+                              for follow-up query as new start value if end<rowCount
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+                            - partialCount: number of matching rows returned in this
+                              response. Important: if start>0 and/or end<rowCount,
+                              this may not be the total number of matching rows in the
+                              table!
+    """
+
+    query = request.GET.get("query")
+    if not query:
+        return {"error": "Must specify query"}
+    try:
+        start = int(request.GET.get("start"))
+    except (ValueError, TypeError):
+        start = 0
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
+    try:
+        row_count = table.getNumberOfRows()
+        column_count = len(table.getHeaders())
+        end = min(row_count, start + settings.MAX_TABLE_SLICE_SIZE)
+        logger.info(f"Query '{query}' from rows {start} to {end}")
+        hits = table.getWhereList(query, None, start, end, 1) if start < end else []
+        return {
+            "rows": hits,
+            "meta": {
+                "partialCount": len(hits),
+                "rowCount": row_count,
+                "columnCount": column_count,
+                "start": start,
+                "end": end,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
+            },
+        }
+    except Exception:
+        return {"error": "Error executing query: %s" % query}
+    finally:
+        table.close()
+
+
+@login_required()
+@jsonp
+def table_slice(request, fileid, conn=None, **kwargs):
+    """
+    Performs a table slice
+
+    Example: /webgateway/table/123/slice/?rows=1,2,5-10&columns=0,3-4
+
+    Query arguments:
+    rows: row numbers to retrieve in comma-separated list,
+          hyphen-separated ranges allowed
+    columns: column numbers to retrieve in comma-separated list,
+             hyphen-separated ranges allowed
+
+    At most MAX_TABLE_SLICE_SIZE data points (number of rows * number of columns) can
+    be retrieved, if more are requested, an error is returned.
+
+    @param request:     http request.
+    @param fileid:      the id of the table
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'columns' and 'meta' in the success
+                        case, one with key 'error' if something went wrong.
+                        'columns' is an array of column data arrays
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columns: names of columns in same order as data arrays
+                            - columnCount: total number of columns in table
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+    """
+
+    def parse(item):
+        try:
+            yield int(item)
+        except ValueError:
+            start, end = item.split("-")
+            if start > end:
+                raise ValueError("Invalid range")
+            yield from range(int(start), int(end) + 1)
+
+    def limit_generator(generator, max_items):
+        for counter, item in enumerate(generator):
+            if counter >= max_items:
+                raise ValueError("Too many items")
+            yield item
+
+    source = request.POST if request.method == "POST" else request.GET
+    try:
+        # Limit number of items to avoid problems when given massive ranges
+        rows = list(
+            limit_generator(
+                (row for item in source.get("rows").split(",") for row in parse(item)),
+                settings.MAX_TABLE_SLICE_SIZE,
+            )
+        )
+        columns = list(
+            limit_generator(
+                (
+                    column
+                    for item in source.get("columns").split(",")
+                    for column in parse(item)
+                ),
+                settings.MAX_TABLE_SLICE_SIZE / len(rows),
+            )
+        )
+    except (ValueError, AttributeError) as error:
+        return {
+            "error": f"Need comma-separated list of rows and columns ({str(error)})"
+        }
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
+    column_count = len(table.getHeaders())
+    row_count = table.getNumberOfRows()
+    if not all(0 <= column < column_count for column in columns):
+        return {"error": "Columns out of range"}
+    if not all(0 <= row < row_count for row in rows):
+        return {"error": "Rows out of range"}
+    try:
+        columns = table.slice(columns, rows).columns
+        return {
+            "columns": [column.values for column in columns],
+            "meta": {
+                "columns": [column.name for column in columns],
+                "rowCount": row_count,
+                "columnCount": column_count,
+                "maxCells": settings.MAX_TABLE_SLICE_SIZE,
+            },
+        }
+    except Exception as error:
+        logger.exception(
+            "Error slicing table %s with %d columns and %d rows"
+            % (fileid, len(columns), len(rows))
+        )
+        return {"error": f"Error slicing table ({str(error)})"}
+    finally:
+        table.close()

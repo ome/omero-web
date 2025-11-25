@@ -99,19 +99,32 @@
     window.setImageDefaults = function (viewport, obj, callback, skip_apply) {
         if (!skip_apply) applyRDCW(viewport);
         var old = $(obj).html();
-        gs_modalJson(viewport.viewport_server + '/saveImgRDef/'+viewport.loadedImg.id+'/?'+viewport.getQuery(true),
-            {},
-            function(success, rv) {
-                $(obj).html(old).prop('disabled', false);
-                if (!(success && rv)) {
-                    alert('Setting image defaults failed. Success: ' + success + ' Response: ' + rv);
+        OME.progress_overlay(new Promise(function (resolve) {
+            var cb = function (success) {
+                return function (data, textStatus, errorThrown) {
+                    resolve();
+                    var rv = success ? data : errorThrown || textStatus;
+                    $(obj).html(old).prop('disabled', false);
+                    if (!(success && rv)) {
+                        alert('Setting image defaults failed. Success: ' + success + ' Response: ' + rv);
+                    }
+                    if (callback) {
+                        callback();
+                    }
+                    viewport.setSaved();
+                    updateUndoRedo(viewport);
                 }
-                if (callback) {
-                    callback();
-                }
-                viewport.setSaved();
-                updateUndoRedo(viewport);
+            }
+            jQuery.ajax({
+                type: "POST",
+                url: viewport.viewport_server + '/saveImgRDef/'+viewport.loadedImg.id+'/?'+viewport.getQuery(true),
+                data: {},
+                success: cb(true),
+                error: cb(false),
+                dataType: "jsonp",
+                traditional: true
             });
+        }), 'Saving...');
         return false;
     };
 
@@ -182,7 +195,7 @@
       if (OME && OME.LUTS) {
         for (var l=0; l<OME.LUTS.length; l++) {
           if (OME.LUTS[l].name === lutName) {
-            return OME.LUTS[l].png_index;
+            return OME.LUTS[l].png_index_new;
           }
         }
       }

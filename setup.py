@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-   Copyright 2008-2020 The Open Microscopy Environment, Glencoe Software, Inc.
-   All rights reserved.
+Copyright 2008-2020 The Open Microscopy Environment, Glencoe Software, Inc.
+All rights reserved.
 
-   Use is subject to license terms supplied in LICENSE.txt
+Use is subject to license terms supplied in LICENSE.txt
 
 """
 
@@ -55,7 +55,7 @@ setup(
         # minimum requirements for `omero web start`
         "concurrent-log-handler>=0.9.20",
         "Django>=4.2.3,<4.3",
-        "django-pipeline==2.1.0",
+        "django-pipeline",
         "django-cors-headers==3.7.0",
         "whitenoise>=5.3.0",
         "gunicorn>=19.3",
@@ -64,6 +64,7 @@ setup(
         "pytz",
         "portalocker",
         "packaging",
+        "importlib-resources",
     ],
     include_package_data=True,
     tests_require=["pytest"],
