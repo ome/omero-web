@@ -159,6 +159,7 @@ class TestWeb(object):
     def compare_with_reference(self, refname, generated):
         reffile = path(__file__).dirname() / "reference_templates" / refname
         generated = generated.split("\n")
+        # Temporarily uncomment the following line to regenerate the templates
         # reffile.write_lines(generated)
         ref = reffile.lines(retain=False)
         d = "\n".join(unified_diff(ref, generated))
@@ -553,11 +554,16 @@ class TestWeb(object):
             "@@ -1,2 +0,0 @@\n",
             "-upstream omeroweb {",
             "-server 127.0.0.1:4080 fail_timeout=0;",
-            "@@ -7,0 +6 @@\n",
+            "@@ -8 +6 @@\n",
+            "-error_page 502 =502 @maintenance;",
             "+include /opt/omero/web/omero-web-location.include;",
-            "@@ -19 +18 @@\n",
+            "@@ -14,0 +13 @@\n",
+            "+error_page 502 =502 @maintenance;",
+            "@@ -20 +19 @@\n",
             "-proxy_pass http://omeroweb;",
             "+proxy_pass http://127.0.0.1:4080;",
+            "@@ -21,0 +21 @@\n",
+            "+error_page 502 =502 @maintenance;",
         ]
 
 
