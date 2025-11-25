@@ -554,11 +554,16 @@ class TestWeb(object):
             "@@ -1,2 +0,0 @@\n",
             "-upstream omeroweb {",
             "-server 127.0.0.1:4080 fail_timeout=0;",
-            "@@ -7,0 +6 @@\n",
+            "@@ -8 +6 @@\n",
+            "-error_page 502 =502 @maintenance;",
             "+include /opt/omero/web/omero-web-location.include;",
-            "@@ -19 +18 @@\n",
+            "@@ -14,0 +13 @@\n",
+            "+error_page 502 =502 @maintenance;",
+            "@@ -20 +19 @@\n",
             "-proxy_pass http://omeroweb;",
             "+proxy_pass http://127.0.0.1:4080;",
+            "@@ -21,0 +21 @@\n",
+            "+error_page 502 =502 @maintenance;",
         ]
 
 
