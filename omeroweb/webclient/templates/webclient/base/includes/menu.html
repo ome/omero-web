@@ -35,3 +35,41 @@
         <li class="admin"><a href="{% url 'waindex' %}" title="Web-Admin: Edit users and groups">{% trans "Admin" %}</a></li>
     {% endif %}
 </ul>
+
+<!-- Only shown if ul list scrollable -->
+<button id="more_button" style="display: none;height: 23px; border-radius: 4px; border: solid 1px hsl(210, 15%, 25%); background: transparent; color: hsl(210,20%,80%); min-width: none;">
+  More...
+</button>
+
+
+<script>
+  function showButtonIfScrollable() {
+    const menu = document.querySelector('#middle_header_left ul');
+    if (menu.scrollWidth > menu.clientWidth) {
+        // Menu is overflowing - show "more" button
+        document.getElementById('more_button').style.display = 'inline-block';
+    } else {
+        // Menu fits
+        document.getElementById('more_button').style.display = 'none';
+    }
+  }
+
+  $(function(){
+      // Initial check
+      showButtonIfScrollable();
+
+      // Handle more button click
+      $('#more_button').on('click', function(){
+          const menu = document.querySelector('#middle_header_left ul');
+          // Scroll right by 100px
+          menu.scrollTo({left: menu.scrollLeft + 200, behavior: 'smooth'});
+      });
+
+      // listen for window resize to show button if needed
+      $(window).on('resize', function(){
+        showButtonIfScrollable();
+      });
+  });
+
+
+</script>
