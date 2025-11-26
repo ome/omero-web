@@ -38,8 +38,6 @@ body {
     position: relative;
 	background:hsl(215,9%,88%);
 	-webkit-transition: color .2s linear;
-    display: flex;
-    flex-direction: column;
 }
 
 a:hover, a, a:visited {
