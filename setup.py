@@ -59,7 +59,7 @@ setup(
         "django-cors-headers==3.7.0",
         "whitenoise>=5.3.0",
         "gunicorn>=19.3",
-        "omero-marshal>=0.7.0",
+        "omero-marshal>=0.9.1",
         "Pillow",
         "pytz",
         "portalocker",
