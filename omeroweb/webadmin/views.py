@@ -1198,7 +1198,7 @@ def email(request, conn=None, **kwargs):
                     "job_type": "send_email",
                     "status": "in progress",
                     "error": 0,
-                    "start_time": datetime.datetime.now(),
+                    "start_time": str(datetime.datetime.now()),
                 }
             form = EmailForm(experimenter_list, group_list, conn, request)
             context["non_field_errors"] = "Email sent." " Check status in activities."
