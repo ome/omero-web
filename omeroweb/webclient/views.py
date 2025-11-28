@@ -468,11 +468,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     # need to be sure that tree will be correct omero.group
     # that we have permission to access (e.g. Admin or Group Member)
     if first_sel is not None:
-        print("First selected: %s" % str(first_sel))
         group_id = first_sel.details.group.id.val
-        print(
-            "Group id: %s" % str(group_id), "valid group:", conn.isValidGroup(group_id)
-        )
         if conn.isValidGroup(group_id):
             switch_active_group(request, group_id)
         else:
@@ -508,21 +504,11 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
         user_id = int(user_id)
     except Exception:
         user_id = None
-    # check if user_id is in a currnt group
-    print("user_id:", user_id)
-    # if user_id is not None:
-    #     if (
-    #         user_id
-    #         not in (
-    #             set(map(lambda x: x.id, leaders)) | set(map(lambda x: x.id, members))
-    #         )
-    #         and user_id != -1
-    #     ):
-    #         # All users in group is allowed
-    #         user_id = None
+
+    # If no User or 'show' object specified, use 'session' user...
     if user_id is None:
-        # ... or check that current user is valid in active group
         user_id = request.session.get("user_id", None)
+        # ... check that user is valid in active group
         if user_id is None or int(user_id) not in userIds:
             if user_id != -1:  # All users in group is allowed
                 user_id = conn.getEventContext().userId
