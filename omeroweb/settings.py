@@ -538,7 +538,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "A list of hosts which are trusted origins for unsafe requests. "
             "When starting with '.', all subdomains are included. "
-            """Example ``'["https://.example.com", "https://another.example.net"]'``."""
+            """Example ``'["https://*.example.com", "https://another.example.net"]'``."""
             " For more details see :djangodoc:`CSRF trusted origins <ref/"
             "settings/#csrf-trusted-origins>`."
         ),
