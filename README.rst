@@ -51,7 +51,7 @@ Setting of the environment variable ``OMERODIR`` is required.
 
 **Windows (Command Prompt):**
 
-.. code-block:: cmd
+.. code-block:: bash
 
    conda env config vars set OMERODIR=path\to\config\dir
 
@@ -129,13 +129,13 @@ If you want to connect to OMERO.server other than 'localhost':
 
 For windows, open the config file...
 
-.. code-block:: cmd
+.. code-block:: bash
 
     omero config edit
     
 ...and add the server details in a new line to the file:
 
-.. code-block:: txt
+.. code-block:: bash
 
     omero.web.server_list=[["demo.openmicroscopy.org", 4064, "demo"]]
 
