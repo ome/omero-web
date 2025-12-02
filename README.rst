@@ -35,15 +35,25 @@ Our commercial partner `Glencoe Software <https://www.glencoesoftware.com/blog/2
 
 When the wheel is installed, activate the virtual environment and install ``omero-web`` from `PyPI <https://pypi.org/>`_.
 
-::
+.. code-block:: bash
 
-    $  pip install -U omero-web
+   pip install -U omero-web
 
 Setting of the environment variable ``OMERODIR`` is required.
 ``$OMERODIR/var/log/`` directory will contain log files.
-``$OMERODIR/etc/grid/config.xml`` is used to store config::
+``$OMERODIR/etc/grid/config.xml`` is used to store config:
 
-    $ export OMERODIR=$(pwd)
+**Linux/macOS:**
+
+.. code-block:: bash
+
+   export OMERODIR=$(pwd)
+
+**Windows (Command Prompt):**
+
+.. code-block:: cmd
+
+   conda env config vars set OMERODIR=path\to\config\dir
 
 Usage
 -----
