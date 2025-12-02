@@ -3136,7 +3136,7 @@ def manage_action_containers(
                 "status": "in progress",
                 "error": 0,
                 "dreport": _formatReport(handle),
-                "start_time": datetime.datetime.now(),
+                "start_time": str(datetime.datetime.now()),
             }
             request.session.modified = True
         except Exception as x:
@@ -3172,7 +3172,7 @@ def manage_action_containers(
                         key = "Plate Run"  # for nicer user message
                     dMap = {
                         "job_type": "delete",
-                        "start_time": datetime.datetime.now(),
+                        "start_time": str(datetime.datetime.now()),
                         "status": "in progress",
                         "error": 0,
                         "dreport": _formatReport(handle),
@@ -3946,9 +3946,9 @@ def activities(request, conn=None, **kwargs):
     # return json (used for testing)
     if "template" in kwargs and kwargs["template"] == "json":
         for cbString in request.session.get("callback").keys():
-            rv[cbString]["start_time"] = str(
-                request.session["callback"][cbString]["start_time"]
-            )
+            rv[cbString]["start_time"] = request.session["callback"][cbString][
+                "start_time"
+            ]
         rv["inprogress"] = in_progress
         rv["failure"] = failure
         rv["jobs"] = len(request.session["callback"])
@@ -4737,7 +4737,7 @@ def chgrp(request, conn=None, **kwargs):
                 "dtype": dtype,
                 "obj_ids": obj_ids,
                 "job_name": "Change group",
-                "start_time": datetime.datetime.now(),
+                "start_time": str(datetime.datetime.now()),
                 "status": "in progress",
             }
             request.session.modified = True
@@ -4819,7 +4819,7 @@ def chown(request, conn=None, **kwargs):
                 "dtype": dtype,
                 "obj_ids": obj_ids,
                 "job_name": "Change owner",
-                "start_time": datetime.datetime.now(),
+                "start_time": str(datetime.datetime.now()),
                 "status": "in progress",
             }
             request.session.modified = True
@@ -5045,7 +5045,7 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
         request.session["callback"][jobId] = {
             "job_type": "script",
             "job_name": scriptName,
-            "start_time": datetime.datetime.now(),
+            "start_time": str(datetime.datetime.now()),
             "status": status,
         }
         request.session.modified = True
@@ -5071,7 +5071,7 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
         request.session["callback"][jobId] = {
             "job_type": "script",
             "job_name": scriptName,
-            "start_time": datetime.datetime.now(),
+            "start_time": str(datetime.datetime.now()),
             "status": status,
             "Message": message,
             "error": error,

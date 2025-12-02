@@ -598,7 +598,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.session_serializer": [
         "SESSION_SERIALIZER",
-        "django.contrib.sessions.serializers.PickleSerializer",
+        "django.contrib.sessions.serializers.JSONSerializer",
         str,
         (
             "You can use this setting to customize the session "
