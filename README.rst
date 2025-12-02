@@ -116,8 +116,28 @@ Configuration for developer usage::
     $ omero config set omero.web.debug True
     $ omero config set omero.web.application_server development
 
-    # If you want to connect to OMERO.server other than 'localhost'
-    $ omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
+
+If you want to connect to OMERO.server other than 'localhost':
+
+**Linux/macOS:**
+
+.. code-block:: bash
+    
+    omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
+
+**Windows (Command Prompt):**
+
+For windows, open the config file...
+
+.. code-block:: cmd
+
+    omero config edit
+    
+...and add the server details in a new line to the file:
+
+.. code-block:: txt
+
+    omero.web.server_list=[["demo.openmicroscopy.org", 4064, "demo"]]
 
 Then run omero-web in the foreground with::
 
