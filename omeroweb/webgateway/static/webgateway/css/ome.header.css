@@ -64,9 +64,24 @@
 	 filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#73787d', endColorstr='#505357',GradientType=0 ); /* IE6-9 */
 	 background:linear-gradient(top, hsl(212,8%,49%) 0%,hsl(212,8%,34%) 100%); /* W3C */
 	 font-family: Helvetica,Arial,sans-serif;
-
 	 height: 35px;
+
+	 display: flex;
+	 flex-direction: row;
+	 align-items: center;
  }
+
+    #middle_header_left {
+	    margin-left:10px;
+	    position:relative;
+	    flex: 1 1 auto;
+        overflow: auto;
+		height: 100%;
+		display: flex;
+		flex-direction: row;
+		gap: 10px;
+		align-items: center;
+    }
 	
 	
 	#middle_header_left a, #show_user_dropdown, #public_login_button {
@@ -88,32 +103,42 @@
 		
 
  	#logo {
- 	    float: left;
-		margin: 5px 6px 0 10px;
+		margin: 0 6px 0 10px;
 		position:relative;
  	}
 	 	
 	 	
-	 #middle_header_right {
-		 position:absolute;
-		 right:0;
-		 top:0;
-	 }
+	#middle_header_right {
+		flex: 0 0 auto;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 18px;
+		margin: 0 15px;
+	}
 	 
-	 #middle_header_left {
-		 
+	 #middle_header_left ul {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
+		overflow-x: auto;
+		gap: 24px;
+		height: 100%;
+		align-items: center;
 	 }
 	 
 		#middle_header_left li{
-			float:left;
+			flex: 0 0 auto;
 			list-style-type: none;
+			white-space: nowrap;
 		} 
 
 
-			#middle_header_left li a, #show_user_dropdown, #show_public_login_button {
-				display: block;
-				padding: .9em 1em 1.1em;
-			}
+	#show_user_dropdown, #show_public_login_button {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
 			
 
 			
@@ -137,17 +162,14 @@
 
 
 .header_toolbar {
-	float:left;
 	-webkit-border-radius:4px;
 	
 	-webkit-border-radius:4px; /* Saf3+, Chrome */
 	   -moz-border-radius:4px; /* FF1+ */
 	        border-radius:4px; /* Opera 10.5, IE 9 */ 
 	
-	margin-right:18px;
-	margin-top:5px;
 	border:solid 1px hsl(210,15%,25%);
-	border-bottom:solid 1px hsl(210,25%,25%);
+	height: fit-content;
 	
 	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.1); /* Saf3.0+, Chrome */
 	   -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.1); /* FF3.5+ */
@@ -825,9 +847,6 @@ li.menu_back a {
 		
 		
 	#middle_header #search {
-		float:left;
-		margin-top: 6px;
-		margin-right: 8px;
 		position:relative;
 	}
 		
@@ -840,9 +859,10 @@ li.menu_back a {
 
 	#user_dropdown, #public_login_button {
 		cursor:pointer;
-		float:left;
 		position:relative;
-		padding-top:1px;
+		display: flex;
+		align-items: center;
+		flex-direction: row;
 	}
 
 
@@ -866,9 +886,6 @@ li.menu_back a {
 			   -moz-border-radius:2px; /* FF1+ */
 			        border-radius:2px; /* Opera 10.5, IE 9 */ 
 			
-			top:-8px;
-			display:inline-block;
-			float:left;
 			position:relative;
 			border:solid 1px hsl(212,22%,24%);
 		}
@@ -982,12 +999,11 @@ li.menu_back a {
 /* Content */
 
 #content {
-    position:absolute;
+	position:absolute;
     top:35px;
     right:0px;
     left:0px;
     bottom:0px; /* Changed to eliminate footer */
-    overflow:auto;
 }
 
 
