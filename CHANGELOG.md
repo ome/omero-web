@@ -1,3 +1,21 @@
+5.30.0 (December 2025)
+----------------------
+
+## Features
+
+- Allow installation of sub-packages as plugins [#619](https://github.com/ome/omero-web/pull/619)
+- Make top links scrollable if they don't fit in one row [#612](https://github.com/ome/omero-web/pull/612)
+
+## Bug fixes
+
+- Fix documentation example [#628](https://github.com/ome/omero-web/pull/628)
+- Fix error handling [#534](https://github.com/ome/omero-web/pull/534)
+
+## Other changes
+
+- Add Django 5.2 support (in addition to 4.2) [#637](https://github.com/ome/omero-web/pull/637)
+- Bump flake8 and black [#629](https://github.com/ome/omero-web/pull/629)
+
 5.29.3 (November 2025)
 ------------------
 

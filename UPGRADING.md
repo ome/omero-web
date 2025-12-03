@@ -4,6 +4,29 @@ This document highlights steps that may need to be taken by developers
 when upgrading OMERO.web to ensure plugins or other customizations
 continue to function as expected.
 
+## OMERO.web 5.30.0
+
+### Python support
+
+Support for Python 3.9 has been dropped; supported versions are 3.10, 3.11, and 3.12.
+
+### Django 5.2 support
+
+OMERO.web 5.30.0 supports Django versions 4.2 to 5.2.
+
+Django 5.2 will be required in the next minor release.
+
+### Session serialization in Django
+
+Due to the deprecation and removal of the PickleSerializer session serializer in Django, the 
+sessions store must be cleared before restarting OMERO.web following this upgrade - see
+https://omero.readthedocs.io/en/stable/sysadmins/omeroweb-upgrade.html#clear-the-sessions-store-optional
+for more information.
+
+If you are using `django.contrib.sessions.serializers.PickleSerializer` as the value for
+`omero.web.session_serializer`, you will need to change it to another value or remove the setting
+to default to `django.contrib.sessions.serializers.JSONSerializer`. 
+
 ## OMERO.web 5.22.0
 
 ### Django 4.2 support
