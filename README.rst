@@ -51,9 +51,17 @@ Setting of the environment variable ``OMERODIR`` is required.
 
 **Windows (Command Prompt):**
 
+If you are using conda to manage environments, you can set the environment variable for the scope of the activated environment like this:
+
 .. code-block:: bash
 
    conda env config vars set OMERODIR=path\to\config\dir
+
+Otherwise, set the environment variable ``OMERODIR`` like this:
+
+.. code-block:: bash
+
+   set OMERODIR=path\to\config\dir
 
 Usage
 -----
