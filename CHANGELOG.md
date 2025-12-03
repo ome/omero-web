@@ -4,7 +4,7 @@
 ## Features
 
 - Allow installation of sub-packages as plugins [#619](https://github.com/ome/omero-web/pull/619)
-- Wrap top links if they don't fit in one row [#612](https://github.com/ome/omero-web/pull/612)
+- Make top links scrollable if they don't fit in one row [#612](https://github.com/ome/omero-web/pull/612)
 
 ## Bug fixes
 
