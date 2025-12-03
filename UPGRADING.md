@@ -6,6 +6,10 @@ continue to function as expected.
 
 ## OMERO.web 5.30.0
 
+### Python support
+
+Support for Python 3.9 has been dropped; supported versions are 3.10, 3.11, and 3.12.
+
 ### Django 5.2 support
 
 OMERO.web 5.30.0 supports Django versions 4.2 to 5.2.
