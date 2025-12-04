@@ -4,6 +4,16 @@ This document highlights steps that may need to be taken by developers
 when upgrading OMERO.web to ensure plugins or other customizations
 continue to function as expected.
 
+## OMERO.web 5.31.0
+
+### Django 5.2 support
+
+OMERO.web 5.31.0 requires Django version 5.2.
+
+The sessions store must be cleared before restarting OMERO.web following this upgrade - see
+https://omero.readthedocs.io/en/stable/sysadmins/omeroweb-upgrade.html#clear-the-sessions-store-optional
+for more information.
+
 ## OMERO.web 5.30.0
 
 ### Python support
