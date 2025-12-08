@@ -261,6 +261,7 @@ def load_lut_to_rgb(conn, orig_file_id):
         if "\t" in lines[0]:
             sep = "\t"
         for line in lines:
+            line = line.rstrip()
             val = line.split(sep)
             if len(val) < 3 or not val[-1].isnumeric():
                 continue
