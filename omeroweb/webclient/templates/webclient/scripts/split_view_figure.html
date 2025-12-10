@@ -199,7 +199,9 @@
                         <option value="Image Name"  selected="True"  >Image Name</option>
                         <option value="Datasets"  >Datasets</option>
                         <option value="Tags"  >Tags</option>
-                        <option value="Custom"  >Custom</option>
+                        {% if custom_labels_supported %}
+                            <option value="Custom"  >Custom</option>
+                        {% endif %}
                     </select>
                 </td>
             {% for c in channels %}
@@ -226,22 +228,24 @@
                 </td>
             </tr>
         </table>
+        {% if custom_labels_supported %}
+            <hr />
 
-        <hr />
-
-        <div title="Custom label" class="customLabelInput" align="center" style="display:none;position:relative;left:float;">
-            Custom label:
-            <input type="text" name="Custom_Label" value="" />
-            <select name="Image_Custom_Label_List" style="margin-right:20px;display:none;">
-                <option value="All" selected="True">All Images</option>
-                {% for imgData in imgDict %}
-                    <option value="{{ imgData.id }}">{{imgData.name}}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div title="All custom labels" class="allLabels" style="display:none">
-            <input type="text" name="All_labels" value="" />
-        </div>
+            <div title="Custom label" class="customLabelInput" align="center" style="display:none;position:relative;left:float;">
+                Custom label:
+                <input type="text" name="Custom_Label" value="" />
+                <select name="Image_Custom_Label_List" style="margin-right:20px;display:none;">
+                    <option value="All" selected="True">All Images</option>
+                    {% for imgData in imgDict %}
+                        <option value="{{ imgData.id }}">{{imgData.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div title="All custom labels" class="allLabels" style="display:none">
+                <input type="text" name="All_labels" value="" />
+            </div>
+        {% endif %}
+        custom_labels_supported {{ custom_labels_supported }}
     {% endblock %}
 
 <!---------------------------- FIGURE PREVIEW ---------------------->
