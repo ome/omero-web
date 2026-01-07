@@ -256,7 +256,7 @@ def load_lut_to_rgb(conn, orig_file_id):
         lut_data = lut_data.decode()
         r, g, b = [], [], []
 
-        lines = lut_data.split("\n")
+        lines = lut_data.splitlines()
         sep = None
         if "\t" in lines[0]:
             sep = "\t"
