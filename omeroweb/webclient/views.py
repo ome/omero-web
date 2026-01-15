@@ -365,7 +365,10 @@ def switch_active_group(request, active_group=None):
     queries.
     """
     if active_group is None:
-        active_group = get_long_or_default(request, "active_group", None)
+        try:
+            active_group = get_long_or_default(request, "active_group", None)
+        except ValueError:
+            pass
     if active_group is None:
         return
     active_group = int(active_group)
