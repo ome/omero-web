@@ -71,7 +71,6 @@ from omeroweb.connector import Connector, Server
 
 import glob
 
-
 # from models import StoredConnection
 
 from omeroweb.webgateway.webgateway_tempfile import webgateway_tempfile
@@ -89,7 +88,6 @@ from omeroweb.webgateway.util import get_longs, getIntOrDefault
 
 from PIL import Image, ImageDraw
 import numpy
-
 
 logger = logging.getLogger(__name__)
 
@@ -1029,11 +1027,8 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
             else:
                 level = levels - v
                 if level < 0:
-                    msg = (
-                        "Invalid resolution level, \
-                    %s > number of available levels %s "
-                        % (v, levels)
-                    )
+                    msg = "Invalid resolution level, \
+                    %s > number of available levels %s " % (v, levels)
                     logger.debug(msg, exc_info=True)
                     return HttpResponseBadRequest(msg)
             x = int(zxyt[1]) * w
@@ -3005,9 +3000,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
         join fetch links.details.owner
         join fetch links.details.creationEvent
         where obj%d.id=:id and
-        (f.ns=:ns or f.file.mimetype=:mt)""" % (
-        len(objtype) - 1
-    )
+        (f.ns=:ns or f.file.mimetype=:mt)""" % (len(objtype) - 1)
 
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")

@@ -20,6 +20,7 @@
 """
 Library for Web integration tests
 """
+
 import json
 import warnings
 
