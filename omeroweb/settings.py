@@ -25,8 +25,7 @@
 #
 # Version: 1.0
 #
-
-
+import importlib
 import os.path
 import sys
 import logging
@@ -538,8 +537,8 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "A list of hosts which are trusted origins for unsafe requests. "
             "When starting with '.', all subdomains are included. "
-            """Example ``'[".example.com", "another.example.net"]'``. """
-            "For more details see :djangodoc:`CSRF trusted origins <ref/"
+            """e.g. ``'["https://*.example.com", "https://another.example.net"]'``."""
+            " For more details see :djangodoc:`CSRF trusted origins <ref/"
             "settings/#csrf-trusted-origins>`."
         ),
     ],
@@ -599,7 +598,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
     ],
     "omero.web.session_serializer": [
         "SESSION_SERIALIZER",
-        "django.contrib.sessions.serializers.PickleSerializer",
+        "django.contrib.sessions.serializers.JSONSerializer",
         str,
         (
             "You can use this setting to customize the session "
@@ -1596,9 +1595,9 @@ for app in ADDITIONAL_APPS:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
         INSTALLED_APPS += (app,)
     try:
         logger.debug("Attempting to import additional app settings for app: %s" % app)
-        module = __import__("%s.settings" % app)
-        process_custom_settings(module.settings)
-        report_settings(module.settings)
+        module = importlib.import_module("%s.settings" % app)
+        process_custom_settings(module)
+        report_settings(module)
     except ImportError:
         logger.debug("Couldn't import settings from app: %s" % app)
 
