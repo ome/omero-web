@@ -667,7 +667,7 @@
 	}
 
     .description .data_heading {
-        max-height: 350px;
+        max-height: 40vh;
         overflow: auto;
     }
 	
