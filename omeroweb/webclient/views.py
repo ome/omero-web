@@ -127,7 +127,6 @@ from omeroweb.webgateway.views import LoginView
 
 from . import tree
 
-
 logger = logging.getLogger(__name__)
 
 logger.info("INIT '%s'" % os.getpid())
@@ -929,13 +928,10 @@ def get_object_links(conn, parent_type, parent_id, child_type, child_ids):
     qs = conn.getQueryService()
     # Need to fetch child and parent, otherwise
     # AnnotationAnnotationLink is not loaded
-    q = (
-        """
+    q = """
         from %s olink join fetch olink.child join fetch olink.parent
         where olink.child.id in (:ids)
-        """
-        % link_type
-    )
+        """ % link_type
     if parent_id:
         params.add("pid", rlong(parent_id))
         q += " and olink.parent.id = :pid"
@@ -4571,8 +4567,7 @@ def getAllObjects(
                                    )
                                """
 
-        q = (
-            """
+        q = """
             select distinct dilink.parent.id
             from Image image
             left outer join image.datasetLinks dilink
@@ -4582,9 +4577,7 @@ def getAllObjects(
                  from DatasetImageLink dilink2
                  where dilink2.parent.id = dilink.parent.id
                  and dilink2.child.id not in (:iids)) = 0
-            """
-            % exclude_datasets
-        )
+            """ % exclude_datasets
 
         for e in qs.projection(q, params, conn.SERVICE_OPTS):
             if e:
@@ -4604,8 +4597,7 @@ def getAllObjects(
             params.map["pids"] = rlist([rlong(x) for x in project_ids])
             exclude_projects = "and pdlink.parent.id not in (:pids)"
 
-        q = (
-            """
+        q = """
             select distinct pdlink.parent.id
             from ProjectDatasetLink pdlink
             where pdlink.child.id in (:dids)
@@ -4614,9 +4606,7 @@ def getAllObjects(
                  from ProjectDatasetLink pdlink2
                  where pdlink2.parent.id = pdlink.parent.id
                  and pdlink2.child.id not in (:dids)) = 0
-            """
-            % exclude_projects
-        )
+            """ % exclude_projects
 
         for e in qs.projection(q, params, conn.SERVICE_OPTS):
             extra_project_ids.add(e[0].val)

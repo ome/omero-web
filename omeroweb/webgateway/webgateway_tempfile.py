@@ -20,7 +20,6 @@ import time
 from io import open
 from django.conf import settings
 
-
 TMPROOT = getattr(settings, "WEBGATEWAY_TMPROOT", None)
 TMPDIR_TIME = 3600 * 12  # 12 hours
 

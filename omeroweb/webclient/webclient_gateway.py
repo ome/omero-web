@@ -60,7 +60,6 @@ from omeroweb.webgateway.templatetags.common_filters import (
 from hashlib import sha1 as hash_sha1
 from PIL import Image
 
-
 NSEXPERIMENTERPHOTO = omero.constants.namespaces.NSEXPERIMENTERPHOTO
 
 logger = logging.getLogger(__name__)
