@@ -178,53 +178,73 @@
 
     {% block custom_controls %}
 <!------------------- Custom Controls - in addition to script parameters ------------>
-    <table cellspacing='3' style="margin-left:auto; margin-right:auto">
-        <tr>
-            <td></td>
-            <td colspan="{{ channels|length }}" align="center">
-                <div title="If true, all split panels are greyscale">
-                    Split Panels Grey:
-                    <input type="checkbox" name="Split_Panels_Grey"  />
-                </div>
-            </td>
-            <td align="center">
-                <div style="height:20px" title="If true, label the merged panel with channel names. Otherwise label with &#39;Merged&#39;">
-                    Merged Names: <input type="checkbox" name="Merged_Names"  checked="True"/>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td title="Label images with Image name (default) or datasets or tags" valign="bottom">
-                <select name="Image_Labels" style="margin-right:20px">
-                    <option value="Image Name"  selected="True"  >Image Name</option>
-                    <option value="Datasets"  >Datasets</option>
-                    <option value="Tags"  >Tags</option>
+        <table cellspacing='3' style="margin-left:auto; margin-right:auto">
+            <tr>
+                <td></td>
+                <td colspan="{{ channels|length }}" align="center">
+                    <div title="If true, all split panels are greyscale">
+                        Split Panels Grey:
+                        <input type="checkbox" name="Split_Panels_Grey"  />
+                    </div>
+                </td>
+                <td align="center">
+                    <div style="height:20px" title="If true, label the merged panel with channel names. Otherwise label with &#39;Merged&#39;">
+                        Merged Names: <input type="checkbox" name="Merged_Names"  checked="True"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td title="Label images with Image name (default) or datasets or tags" valign="bottom">
+                    <select name="Image_Labels" style="margin-right:20px">
+                        <option value="Image Name"  selected="True"  >Image Name</option>
+                        <option value="Datasets"  >Datasets</option>
+                        <option value="Tags"  >Tags</option>
+                        {% if custom_labels_supported %}
+                            <option value="Custom"  >Custom</option>
+                        {% endif %}
+                    </select>
+                </td>
+            {% for c in channels %}
+                <td id="split_channels" valign="bottom">
+                    <div class="toggle_channel" style="background:#{{c.getColor.getHtml}}">
+                        <input type="text" size='10' name="{{ forloop.counter0 }}cName" value="{{ c.getLabel }}" />
+                        <input type="checkbox" name="{{ forloop.counter0 }}cActive" checked="true" />
+                    </div>
+                </td>
+            {% endfor %}
+                <td align="center" valign="bottom">
+                    <table style="padding-left:10px">
+                        <tr><td width="15"> </td>
+                            {% for c in channels %}
+                                <td>
+                                    <div id="merged_channels" class="toggle_channel" style="background:#{{c.getColor.getHtml}}">
+                                        <input type="checkbox" name="{{ forloop.counter0 }}cMerged" 
+                                            {% if c.isActive %}checked="true"{% endif %} value="{{c.getColor.getInt}}"/>
+                                    </div>
+                                </td> 
+                            {% endfor %}
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        {% if custom_labels_supported %}
+            <hr />
+
+            <div title="Custom label" class="customLabelInput" align="center" style="display:none;position:relative;left:float;">
+                Custom label:
+                <input type="text" name="Custom_Label" value="" />
+                <select name="Image_Custom_Label_List" style="margin-right:20px;display:none;">
+                    <option value="All" selected="True">All Images</option>
+                    {% for imgData in imgDict %}
+                        <option value="{{ imgData.id }}">{{imgData.name}}</option>
+                    {% endfor %}
                 </select>
-            </td>
-        {% for c in channels %}
-            <td id="split_channels" valign="bottom">
-                <div class="toggle_channel" style="background:#{{c.getColor.getHtml}}">
-                    <input type="text" size='10' name="{{ forloop.counter0 }}cName" value="{{ c.getLabel }}" />
-                    <input type="checkbox" name="{{ forloop.counter0 }}cActive" checked="true" />
-                </div>
-            </td>
-        {% endfor %}
-            <td align="center" valign="bottom">
-                <table style="padding-left:10px">
-                    <tr><td width="15"> </td>
-                        {% for c in channels %}
-                            <td>
-                                <div id="merged_channels" class="toggle_channel" style="background:#{{c.getColor.getHtml}}">
-                                    <input type="checkbox" name="{{ forloop.counter0 }}cMerged" 
-                                        {% if c.isActive %}checked="true"{% endif %} value="{{c.getColor.getInt}}"/>
-                                </div>
-                            </td> 
-                        {% endfor %}
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+            </div>
+            <div title="All custom labels" class="allLabels" style="display:none">
+                <input type="text" name="All_labels" value="" />
+            </div>
+        {% endif %}
     {% endblock %}
 
 <!---------------------------- FIGURE PREVIEW ---------------------->
@@ -269,6 +289,9 @@
                 {% for d in imgData.datasets %}
                     <div>{{ d }}</div>
                 {% endfor %}
+            </div>
+            <div class="customLabel{{ imgData.id }}" style="display:none">
+                 <span id="customLabelText"></span>
             </div>
         </td>
         {% for ch in channels %}

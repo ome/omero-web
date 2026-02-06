@@ -4410,6 +4410,11 @@ def figure_script(request, scriptName, conn=None, **kwargs):
     if scriptId < 0:
         raise AttributeError("No script found for path '%s'" % scriptPath)
 
+    if scriptName == "SplitView":
+        # Check we have script that supports custom labels
+        params = scriptService.getParams(scriptId)
+        context["custom_labels_supported"] = "All_labels" in params.inputs
+
     context["template"] = template
     context["scriptId"] = scriptId
     return context
