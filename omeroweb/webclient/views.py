@@ -465,6 +465,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
             return HttpResponseRedirect("%s?url=%s" % (reverse("weblogin"), url))
 
     # need to be sure that tree will be correct omero.group
+    # that we have permission to access (e.g. Admin or Group Member)
     if first_sel is not None:
         group_id = first_sel.details.group.id.val
         if conn.isValidGroup(group_id):
@@ -502,20 +503,11 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
         user_id = int(user_id)
     except Exception:
         user_id = None
-    # check if user_id is in a currnt group
-    if user_id is not None:
-        if (
-            user_id
-            not in (
-                set(map(lambda x: x.id, leaders)) | set(map(lambda x: x.id, members))
-            )
-            and user_id != -1
-        ):
-            # All users in group is allowed
-            user_id = None
+
+    # If no User or 'show' object specified, use 'session' user...
     if user_id is None:
-        # ... or check that current user is valid in active group
         user_id = request.session.get("user_id", None)
+        # ... check that user is valid in active group
         if user_id is None or int(user_id) not in userIds:
             if user_id != -1:  # All users in group is allowed
                 user_id = conn.getEventContext().userId
