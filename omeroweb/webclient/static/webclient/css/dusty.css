@@ -140,7 +140,7 @@ button::-moz-focus-inner {
     .btn_hierarchy {background: url('../../webgateway/img/iconmonstr-sitemap-6-icon-16.png') center center no-repeat;}
     .btn_link {background: url('../../webgateway/img/icon_link.png')center center no-repeat;}
 
-	.btn_fspath, .btn_link, .btn_add, .btn_hierarchy {
+	.btn_fspath, .btn_link, .btn_add, .btn_hierarchy, .btn_extinfo {
 	    float:right;
 	    position: relative;
 	    margin-left: 5px;
