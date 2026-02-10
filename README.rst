@@ -35,15 +35,33 @@ Our commercial partner `Glencoe Software <https://www.glencoesoftware.com/blog/2
 
 When the wheel is installed, activate the virtual environment and install ``omero-web`` from `PyPI <https://pypi.org/>`_.
 
-::
+.. code-block:: bash
 
-    $  pip install -U omero-web
+   pip install -U omero-web
 
 Setting of the environment variable ``OMERODIR`` is required.
 ``$OMERODIR/var/log/`` directory will contain log files.
-``$OMERODIR/etc/grid/config.xml`` is used to store config::
+``$OMERODIR/etc/grid/config.xml`` is used to store config:
 
-    $ export OMERODIR=$(pwd)
+**Linux/macOS:**
+
+.. code-block:: bash
+
+   export OMERODIR=$(pwd)
+
+**Windows (Command Prompt):**
+
+If you are using conda to manage environments, you can set the environment variable for the scope of the activated environment like this:
+
+.. code-block:: bash
+
+   conda env config vars set OMERODIR=path\to\config\dir
+
+Otherwise, set the environment variable ``OMERODIR`` like this:
+
+.. code-block:: bash
+
+   set OMERODIR=path\to\config\dir
 
 Usage
 -----
@@ -106,8 +124,28 @@ Configuration for developer usage::
     $ omero config set omero.web.debug True
     $ omero config set omero.web.application_server development
 
-    # If you want to connect to OMERO.server other than 'localhost'
-    $ omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
+
+If you want to connect to OMERO.server other than 'localhost':
+
+**Linux/macOS:**
+
+.. code-block:: bash
+    
+    omero config append omero.web.server_list '["demo.openmicroscopy.org", 4064, "demo"]'
+
+**Windows (Command Prompt):**
+
+For windows, open the config file...
+
+.. code-block:: bash
+
+    omero config edit
+    
+...and add the server details in a new line to the file:
+
+.. code-block:: bash
+
+    omero.web.server_list=[["demo.openmicroscopy.org", 4064, "demo"]]
 
 Then run omero-web in the foreground with::
 
