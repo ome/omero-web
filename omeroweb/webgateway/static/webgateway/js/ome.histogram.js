@@ -108,6 +108,10 @@ window.OME.Histogram = function(element, webgatewayUrl, graphWidth, graphHeight)
             url += "&p=" + proj;
         }
         $.getJSON(url, function(data){
+            if (data.error) {
+                alert("Error loading histogram: " + data.error);
+                return;
+            }
             plotJson(data.data, color);
             this.plotStartEnd(window, color);
         }.bind(this));
