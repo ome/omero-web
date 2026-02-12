@@ -371,9 +371,11 @@ def switch_active_group(request, active_group=None, conn=None):
             pass
     if active_group is None:
         return
-    # validate user is a member of this group (or admin)
-    if conn is not None and not conn.isValidGroup(active_group):
-        return
+    # validate group exists and user is a member of this group (or admin)
+    if conn is not None:
+        group = conn.getObject("ExperimenterGroup", active_group)
+        if group is None or not conn.isValidGroup(active_group):
+            return
     if (
         "active_group" not in request.session
         or active_group != request.session["active_group"]
