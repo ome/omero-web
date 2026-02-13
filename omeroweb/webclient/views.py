@@ -349,7 +349,7 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     queries.
     Finally this redirects to the 'url'.
     """
-    switch_active_group(request)
+    switch_active_group(request, conn=conn)
     # avoid recursive calls
     if url is None or url.startswith(reverse("change_active_group")):
         url = reverse("webindex")
@@ -357,17 +357,24 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     return HttpResponseRedirect(url)
 
 
-def switch_active_group(request, active_group=None):
+def switch_active_group(request, active_group=None, conn=None):
     """
     Simply changes the request.session['active_group'] which is then used by
     the @login_required decorator to configure conn for any group-based
     queries.
     """
     if active_group is None:
-        active_group = get_long_or_default(request, "active_group", None)
+        try:
+            active_group = get_long_or_default(request, "active_group", None)
+        except ValueError:
+            pass
     if active_group is None:
         return
-    active_group = int(active_group)
+    # validate group exists and user is a member of this group (or admin)
+    if conn is not None:
+        group = conn.getObject("ExperimenterGroup", active_group)
+        if group is None or not conn.isValidGroup(active_group):
+            return
     if (
         "active_group" not in request.session
         or active_group != request.session["active_group"]
