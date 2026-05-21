@@ -206,7 +206,6 @@ class BaseContainer(BaseController):
             "lsid": extinfo.lsid,
             "entityType": extinfo.entityType,
             "entityId": extinfo.entityId,
-            "is_zarr": extinfo.entityType == "com.glencoesoftware.ngff:multiscales",
         }
 
     def getWellSampleImage(self):

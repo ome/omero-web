@@ -381,17 +381,20 @@
     {% endif %}
     {% endif %}
 
-    <!-- External Info (Zarr url)-->
+    <!-- External Info -->
     {% with extinfo=manager.external_info %}
-      {% if extinfo and extinfo.is_zarr %}
-        <button id="show_ext_info" class="btn silver btn_extinfo" title="Zarr url" >
-          <span style="width: 25px; margin: 3px 2px 1px 2px; background: transparent; box-shadow: none; font-size: 11px; padding: 0px;">
-            Zarr
+      {% block extinfo_button %}
+      {% if extinfo %}
+        <button id="show_ext_info" class="btn silver btn_extinfo" title="External Info" >
+          <span style="margin: 3px 2px 1px 2px; background: transparent; box-shadow: none; font-size: 11px; padding: 0px;">
+          {% block extinfo_button_title %}
+            Ext&nbsp;Info
+          {% endblock extinfo_button_title %}
           </span>
         </button>
       {% endif %}
+      {% endblock extinfo_button %}
     {% endwith %}
-    
 
 
     <div style="position: absolute; left: 0">
@@ -444,20 +447,27 @@
 <!-- This is hidden initially -->
 <div id="externalInfo" style="display: none; margin-top: 15px; font-size: 13px;">
 {% with extinfo=manager.external_info %}
+  {% block extinfo %}
   {% if extinfo %}
-
     <div style="background: white; padding: 7px; border: 1px solid rgb(221, 221, 221); overflow: auto; border-radius: 4px;">
-      <h3>OME-Zarr Info</h3>
-      <div style="margin: 8px 0; word-wrap: break-word"><strong>{{ extinfo.lsid }}</strong></div>
+      <h3>External Info</h3>
+      <div style="margin: 8px 0; word-wrap: break-word"><strong>
+        {% block extinfo_lsid %}
+          {{ extinfo.lsid }}
+        {% endblock extinfo_lsid %}
+      </strong></div>
       <details>
         <summary>Details</summary>
-        <ul style="margin: 5px">
-          <li>externalInfo ID: <strong>{{ extinfo.id }}</strong></li>
-          <li>entityType: <strong>{{ extinfo.entityType }}</strong></li>
-          <li>entityId: <strong>{{ extinfo.entityId }}</strong></li>
-        </ul>
+        {% block extinfo_details %}
+          <ul style="margin: 5px">
+            <li>externalInfo ID: <strong>{{ extinfo.id }}</strong></li>
+            <li>entityType: <strong>{{ extinfo.entityType }}</strong></li>
+            <li>entityId: <strong>{{ extinfo.entityId }}</strong></li>
+          </ul>
+        {% endblock extinfo_details %}
       </details>
     </div>
   {% endif %}
+  {% endblock extinfo %}
 {% endwith %}
 </div>
