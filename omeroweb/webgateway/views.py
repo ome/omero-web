@@ -3714,6 +3714,7 @@ def table_slice(request, fileid, conn=None, **kwargs):
     json_data = _table_slice(request, fileid, conn, **kwargs)
     return json_data
 
+
 def _table_slice(request, fileid, conn=None, **kwargs):
     """
     Performs a table slice
@@ -3839,7 +3840,7 @@ def table_histogram(request, fileid, conn=None, **kwargs):
 
     # load the data with table_slice, then use numpy to calculate the histogram for the requested columns
     if "rows" not in request.GET:
-        kwargs["rows"] = '*'  # default to all rows if not specified
+        kwargs["rows"] = "*"  # default to all rows if not specified
     slice_result = _table_slice(request, fileid, conn, **kwargs)
     if "error" in slice_result:
         return slice_result
