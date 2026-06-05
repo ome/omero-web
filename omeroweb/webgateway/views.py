@@ -3838,7 +3838,6 @@ def table_histogram(request, fileid, conn=None, **kwargs):
                               in one request
     """
 
-    # load the data with table_slice, then use numpy to calculate the histogram for the requested columns
     if "rows" not in request.GET:
         kwargs["rows"] = "*"  # default to all rows if not specified
     slice_result = _table_slice(request, fileid, conn, **kwargs)
