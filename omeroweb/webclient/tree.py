@@ -1229,6 +1229,8 @@ def _marshal_tag(conn, row):
       * details.owner.id (rlong)
       * details.permissions (dict)
       * namespace (rstring)
+      * tag child count (rint)
+      * image child count (rint)
 
     @param conn OMERO gateway.
     @type conn L{omero.gateway.BlitzGateway}
@@ -1236,7 +1238,16 @@ def _marshal_tag(conn, row):
     @type row L{list}
 
     """
-    tag_id, text_value, description, owner_id, permissions, namespace, child_count = row
+    (
+        tag_id,
+        text_value,
+        description,
+        owner_id,
+        permissions,
+        namespace,
+        tag_child_count,
+        image_child_count,
+    ) = row
 
     tag = dict()
     tag["id"] = unwrap(tag_id)
@@ -1252,10 +1263,10 @@ def _marshal_tag(conn, row):
         and unwrap_to_str(namespace) == omero.constants.metadata.NSINSIGHTTAGSET
     ):
         tag["set"] = True
+        tag["childCount"] = unwrap(tag_child_count)
     else:
         tag["set"] = False
-
-    tag["childCount"] = unwrap(child_count)
+        tag["childCount"] = unwrap(image_child_count)
 
     return tag
 
@@ -1318,7 +1329,10 @@ def marshal_tags(
                    (select count(aalink2)
                     from AnnotationAnnotationLink aalink2
                     where aalink2.child.class=TagAnnotation
-                    and aalink2.parent.id=aalink.child.id) as childCount)
+                    and aalink2.parent.id=aalink.child.id) as tagChildCount,
+                   (select count(aalink3)
+                    from ImageAnnotationLink aalink3
+                    where aalink3.child.id=aalink.child.id) as imageChildCount)
             from AnnotationAnnotationLink aalink
             where aalink.parent.class=TagAnnotation
             and aalink.child.class=TagAnnotation
@@ -1348,7 +1362,10 @@ def marshal_tags(
                    (select count(aalink2)
                     from AnnotationAnnotationLink aalink2
                     where aalink2.child.class=TagAnnotation
-                    and aalink2.parent.id=tag.id) as childCount)
+                    and aalink2.parent.id=tag.id) as tagChildCount,
+                   (select count(aalink3)
+                    from ImageAnnotationLink aalink3
+                    where aalink3.child.id=tag.id) as imageChildCount)
             from TagAnnotation tag
             """
 
@@ -1381,9 +1398,10 @@ def marshal_tags(
             e[0]["ownerId"],
             e[0]["tag_details_permissions"],
             e[0]["ns"],
-            e[0]["childCount"],
+            e[0]["tagChildCount"],
+            e[0]["imageChildCount"],
         ]
-        tags.append(_marshal_tag(conn, e[0:7]))
+        tags.append(_marshal_tag(conn, e[0:8]))
 
     return tags
 
