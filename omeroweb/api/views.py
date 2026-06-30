@@ -86,6 +86,7 @@ def api_base(request, api_version=None, **kwargs):
         "url:screens": build_url(request, "api_screens", v),
         "url:plates": build_url(request, "api_plates", v),
         "url:rois": build_url(request, "api_rois", v),
+        "url:annotations": build_url(request, "api_annotations", v),
         "url:token": build_url(request, "api_token", v),
         "url:servers": build_url(request, "api_servers", v),
         "url:login": build_url(request, "api_login", v),
@@ -785,6 +786,31 @@ class ShapesView(ObjectsView):
             marshalled["url:roi"] = url
 
         return marshalled
+
+class AnnotationsView(ObjectsView):
+    """Handles GET for /annotations/ to list available Annotations."""
+
+    OMERO_TYPE = "Annotation"
+
+    def get_opts(self, request, **kwargs):
+        """Add extra parameters to the opts dict."""
+        opts = super(AnnotationsView, self).get_opts(request, **kwargs)
+
+        # TODO: add more types?
+        for key in ["image", "dataset", "project", "screen", "plate", "well",
+                    "plateacquisition", "roi"]:
+            ids = request.GET.getlist(key)
+            if len(ids) > 0:
+                opts["parent_type"] = key
+                opts["parent_ids"] = [int(i) for i in ids]
+                break
+        if request.GET.get("ns") is not None:
+            opts["ns"] = request.GET.get("ns")
+        ann_type = request.GET.get("type")
+        if ann_type in ("file", "map", "tag", "rating", "long", "comment"):
+            opts["ann_type"] = ann_type
+
+        return opts
 
 
 class ExperimentersView(ObjectsView):

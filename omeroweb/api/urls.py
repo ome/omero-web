@@ -400,6 +400,16 @@ api_experimenter_groups = re_path(
 GET Groups that an Experimenter is in, using omero-marshal to generate json
 """
 
+api_annotations = re_path(
+    r"^v(?P<api_version>%s)/m/annotations/$" % versions,
+    views.AnnotationsView.as_view(),
+    name="api_annotations",
+)
+"""
+GET Annotations, using omero-marshal to generate json
+"""
+
+
 urlpatterns = [
     api_versions,
     api_base,
@@ -443,4 +453,5 @@ urlpatterns = [
     api_groups,
     api_group,
     api_experimenter_groups,
+    api_annotations,
 ]
