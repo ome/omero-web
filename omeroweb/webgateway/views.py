@@ -211,6 +211,9 @@ def validate_rdef_query(func):
         r = None
         try:
             r = request.GET
+            # POST may include request params in URL (GET), so we check...
+            if "c" not in r and request.method == "POST":
+                r = request.POST
         except Exception:
             return HttpResponseServerError("Endpoint improperly configured")
 
@@ -890,6 +893,8 @@ def _get_prepared_image(
     @return:            Tuple (L{omero.gateway.ImageWrapper} image, quality)
     """
     r = request.GET
+    if "c" not in r and request.method == "POST":
+        r = request.POST
     logger.debug(
         "Preparing Image:%r saveDefs=%r "
         "retry=%r request=%r conn=%s" % (iid, saveDefs, retry, r, str(conn))
