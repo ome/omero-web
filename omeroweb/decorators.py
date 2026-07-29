@@ -288,7 +288,7 @@ class login_required(object):
                 )
                 settings.PUBLIC_ENABLED = False
                 return False
-            if self.allowPublicPost and request.method == 'POST':
+            if self.allowPublicPost and request.method == "POST":
                 return settings.PUBLIC_URL_FILTER.search(request.path) is not None
             if settings.PUBLIC_GET_ONLY and (request.method != "GET"):
                 return False

@@ -166,8 +166,28 @@ def test_is_valid_table_slice_call(monkeypatch):
     monkeypatch.setattr(settings, "PUBLIC_PASSWORD", "password", raising=False)
     monkeypatch.setattr(settings, "PUBLIC_GET_ONLY", True)
     monkeypatch.setattr(settings, "PUBLIC_URL_FILTER", re.compile("^/api"))
-    assert decorator_allow_public_post.is_valid_public_url(1, rf.get("/webgateway/table/123/slice")) is False
-    assert decorator_allow_public_post.is_valid_public_url(1, rf.post("/webgateway/table/123/slice")) is False
+    assert (
+        decorator_allow_public_post.is_valid_public_url(
+            1, rf.get("/webgateway/table/123/slice")
+        )
+        is False
+    )
+    assert (
+        decorator_allow_public_post.is_valid_public_url(
+            1, rf.post("/webgateway/table/123/slice")
+        )
+        is False
+    )
     monkeypatch.setattr(settings, "PUBLIC_URL_FILTER", re.compile("^/api|webgateway"))
-    assert decorator_allow_public_post.is_valid_public_url(1, rf.get("/webgateway/table/123/slice")) is True
-    assert decorator_allow_public_post.is_valid_public_url(1, rf.post("/webgateway/table/123/slice")) is True
+    assert (
+        decorator_allow_public_post.is_valid_public_url(
+            1, rf.get("/webgateway/table/123/slice")
+        )
+        is True
+    )
+    assert (
+        decorator_allow_public_post.is_valid_public_url(
+            1, rf.post("/webgateway/table/123/slice")
+        )
+        is True
+    )
