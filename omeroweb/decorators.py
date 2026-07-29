@@ -126,6 +126,15 @@ class login_required(object):
         raise an Exception since cleanup is intended to be immediate; if
         False, connection cleanup will be skipped ONLY when a
         ConnCleaningHttpResponse is returned.
+
+    allowPublicPost:
+        Makes the request available to the public user, independently of
+        any configured PUBLIC_GET_ONLY restriction. The PUBLIC_URL_FILTER
+        setting still applies.
+        Important: This should only be set to True for POST requests that
+        do not modify any data; usually this would be used for requests
+        that could be GET but require transmission of more request data
+        than allowed by usual URL length restrictions.
     """
 
     def __init__(
@@ -136,6 +145,7 @@ class login_required(object):
         doConnectionCleanup=True,
         omero_group="-1",
         allowPublic=None,
+        allowPublicPost=None,
     ):
         """
         Initialises the decorator.
@@ -146,6 +156,7 @@ class login_required(object):
         self.doConnectionCleanup = doConnectionCleanup
         self.omero_group = omero_group
         self.allowPublic = allowPublic
+        self.allowPublicPost = allowPublicPost
 
     # To make django's method_decorator work, this is required until
     # python/django sort out how argumented decorator wrapping should work
@@ -277,6 +288,8 @@ class login_required(object):
                 )
                 settings.PUBLIC_ENABLED = False
                 return False
+            if self.allowPublicPost and request.method == 'POST':
+                return settings.PUBLIC_URL_FILTER.search(request.path) is not None
             if settings.PUBLIC_GET_ONLY and (request.method != "GET"):
                 return False
             if self.allowPublic is None:
