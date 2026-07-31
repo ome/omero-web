@@ -23,6 +23,7 @@ from django.views.generic import View
 from django.middleware import csrf
 from django.utils.decorators import method_decorator
 from django.urls import reverse
+from requests import request
 from . import api_settings
 
 import traceback
@@ -442,6 +443,10 @@ class ExperimenterGroupView(ObjectView):
 class ObjectsView(ApiView):
     """Base class for listing objects."""
 
+    def get_omero_type(self, request):
+        """Allow dynamic omero type, e.g. for AnnotationsView."""
+        return self.OMERO_TYPE
+
     def get_opts(self, request, **kwargs):
         """Return an options dict based on request parameters."""
         try:
@@ -469,7 +474,8 @@ class ObjectsView(ApiView):
         group = getIntOrDefault(request, "group", -1)
         normalize = request.GET.get("normalize", False) == "true"
         # Get the data
-        marshalled = query_objects(conn, self.OMERO_TYPE, group, opts, normalize)
+        marshalled = query_objects(conn, self.get_omero_type(request),
+                                   group, opts, normalize)
         for m in marshalled["data"]:
             self.add_data(m, request, conn, self.urls, **kwargs)
         return marshalled
@@ -791,8 +797,6 @@ class ShapesView(ObjectsView):
 class AnnotationsView(ObjectsView):
     """Handles GET for /annotations/ to list available Annotations."""
 
-    # OMERO_TYPE is set to "Annotation" by default, but can be changed
-    # by get_opts() to a specific annotation type.
     OMERO_TYPE = "Annotation"
 
     def get_opts(self, request, **kwargs):
@@ -850,9 +854,19 @@ class AnnotationsView(ObjectsView):
 
         if request.GET.get("ns") is not None:
             opts["ns"] = request.GET.get("ns")
-        ann_type = request.GET.get("type")
 
-        # Not strictly a pure function, but we need to set the OMERO_TYPE
+        return opts
+
+    def get(self, request, conn=None, **kwargs):
+        """Override get() to allow filtering by annotation type."""
+
+        # set self.OMERO_TYPE, then call super().get() to get the list of Annotations
+        # E.g. conn.getObjects("TagAnnotation") - not actually case-sensitive
+        # We support /tagannotations/
+        ann_type = kwargs.get("ann_type", None)
+        # OR /annotations/?type=tag
+        if ann_type is None:
+            ann_type = request.GET.get("type")
         if ann_type in (
             "file",
             "map",
@@ -868,9 +882,7 @@ class AnnotationsView(ObjectsView):
             self.OMERO_TYPE = ann_type.capitalize() + "Annotation"
         elif ann_type is not None:
             raise BadRequestError("Invalid annotation type: %s" % ann_type)
-
-        return opts
-
+        return super(AnnotationsView, self).get(request, conn, **kwargs)
 
 class ExperimentersView(ObjectsView):
     """Handles GET for /experimenters/ to list Experimenters."""
