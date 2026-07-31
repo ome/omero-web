@@ -790,25 +790,49 @@ class ShapesView(ObjectsView):
 class AnnotationsView(ObjectsView):
     """Handles GET for /annotations/ to list available Annotations."""
 
+    # OMERO_TYPE is set to "Annotation" by default, but can be changed
+    # by get_opts() to a specific annotation type.
     OMERO_TYPE = "Annotation"
 
     def get_opts(self, request, **kwargs):
         """Add extra parameters to the opts dict."""
         opts = super(AnnotationsView, self).get_opts(request, **kwargs)
 
-        # TODO: add more types?
-        for key in ["image", "dataset", "project", "screen", "plate", "well",
-                    "plateacquisition", "roi"]:
+        # All annotatable objects
+        otypes = ["Annotation", "Channel", "Dataset", "Detector", "Dichroic",
+                  "Experimenter", "ExperimenterGroup", "Fileset", "Filter",
+                  "Folder", "Image", "Instrument", "LightPath", "LightSource",
+                  "Namespace", "Node", "Objective", "OriginalFile", "PlaneInfo",
+                  "PlateAcquisition", "Plate", "Project", "Reagent", "Roi",
+                  "Screen", "Session", "Shape", "Well"]
+        request_otypes = {}
+        for key in otypes:
+            # parent_type is case-insensitive...
+            # but the JSON api expects lower-case
+            key = key.lower()
             ids = request.GET.getlist(key)
             if len(ids) > 0:
-                opts["parent_type"] = key
-                opts["parent_ids"] = [int(i) for i in ids]
-                break
+                request_otypes[key] = [int(i) for i in ids]
+        # Check that only ONE parent type is specified
+        if len(request_otypes) > 1:
+            raise BadRequestError(
+                "Can only filter by one parent type at a time. "
+                "Found: %s" % ", ".join(request_otypes.keys())
+            )
+        elif len(request_otypes) == 1:
+            opts["parent_type"] = list(request_otypes.keys())[0]
+            opts["parent_ids"] = request_otypes[opts["parent_type"]]
+
         if request.GET.get("ns") is not None:
             opts["ns"] = request.GET.get("ns")
         ann_type = request.GET.get("type")
-        if ann_type in ("file", "map", "tag", "rating", "long", "comment"):
-            opts["ann_type"] = ann_type
+
+        # Not strictly a pure function, but we need to set the OMERO_TYPE
+        if ann_type in ("file", "map", "tag", "long", "timestamp",
+                        "comment", "boolean", "double", "xml", "term"):
+            self.OMERO_TYPE = ann_type.capitalize() + "Annotation"
+        elif ann_type is not None:
+            raise BadRequestError("Invalid annotation type: %s" % ann_type)
 
         return opts
 
