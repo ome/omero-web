@@ -410,7 +410,8 @@ GET Annotations, using omero-marshal to generate json
 """
 
 api_namedannotations = re_path(
-    r"^v(?P<api_version>%s)/m/(?P<ann_type>file|map|tag|long|timestamp|comment|boolean|double|xml|term)annotations/$" % versions,
+    r"^v(?P<api_version>%s)/m/(?P<ann_type>file|map|tag|long|timestamp|comment|boolean|double|xml|term)annotations/$"
+    % versions,
     views.AnnotationsView.as_view(),
     name="api_namedannotations",
 )

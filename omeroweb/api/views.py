@@ -474,8 +474,9 @@ class ObjectsView(ApiView):
         group = getIntOrDefault(request, "group", -1)
         normalize = request.GET.get("normalize", False) == "true"
         # Get the data
-        marshalled = query_objects(conn, self.get_omero_type(request),
-                                   group, opts, normalize)
+        marshalled = query_objects(
+            conn, self.get_omero_type(request), group, opts, normalize
+        )
         for m in marshalled["data"]:
             self.add_data(m, request, conn, self.urls, **kwargs)
         return marshalled
@@ -883,6 +884,7 @@ class AnnotationsView(ObjectsView):
         elif ann_type is not None:
             raise BadRequestError("Invalid annotation type: %s" % ann_type)
         return super(AnnotationsView, self).get(request, conn, **kwargs)
+
 
 class ExperimentersView(ObjectsView):
     """Handles GET for /experimenters/ to list Experimenters."""
