@@ -787,6 +787,7 @@ class ShapesView(ObjectsView):
 
         return marshalled
 
+
 class AnnotationsView(ObjectsView):
     """Handles GET for /annotations/ to list available Annotations."""
 
@@ -799,12 +800,36 @@ class AnnotationsView(ObjectsView):
         opts = super(AnnotationsView, self).get_opts(request, **kwargs)
 
         # All annotatable objects
-        otypes = ["Annotation", "Channel", "Dataset", "Detector", "Dichroic",
-                  "Experimenter", "ExperimenterGroup", "Fileset", "Filter",
-                  "Folder", "Image", "Instrument", "LightPath", "LightSource",
-                  "Namespace", "Node", "Objective", "OriginalFile", "PlaneInfo",
-                  "PlateAcquisition", "Plate", "Project", "Reagent", "Roi",
-                  "Screen", "Session", "Shape", "Well"]
+        otypes = [
+            "Annotation",
+            "Channel",
+            "Dataset",
+            "Detector",
+            "Dichroic",
+            "Experimenter",
+            "ExperimenterGroup",
+            "Fileset",
+            "Filter",
+            "Folder",
+            "Image",
+            "Instrument",
+            "LightPath",
+            "LightSource",
+            "Namespace",
+            "Node",
+            "Objective",
+            "OriginalFile",
+            "PlaneInfo",
+            "PlateAcquisition",
+            "Plate",
+            "Project",
+            "Reagent",
+            "Roi",
+            "Screen",
+            "Session",
+            "Shape",
+            "Well",
+        ]
         request_otypes = {}
         for key in otypes:
             # parent_type is case-insensitive...
@@ -828,8 +853,18 @@ class AnnotationsView(ObjectsView):
         ann_type = request.GET.get("type")
 
         # Not strictly a pure function, but we need to set the OMERO_TYPE
-        if ann_type in ("file", "map", "tag", "long", "timestamp",
-                        "comment", "boolean", "double", "xml", "term"):
+        if ann_type in (
+            "file",
+            "map",
+            "tag",
+            "long",
+            "timestamp",
+            "comment",
+            "boolean",
+            "double",
+            "xml",
+            "term",
+        ):
             self.OMERO_TYPE = ann_type.capitalize() + "Annotation"
         elif ann_type is not None:
             raise BadRequestError("Invalid annotation type: %s" % ann_type)
