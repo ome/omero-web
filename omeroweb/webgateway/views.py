@@ -3680,7 +3680,7 @@ def table_get_where_list(request, fileid, conn=None, **kwargs):
         table.close()
 
 
-@login_required()
+@login_required(allowPublicPost=True)
 @jsonp
 def table_slice(request, fileid, conn=None, **kwargs):
     """
