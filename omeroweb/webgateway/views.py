@@ -3695,7 +3695,7 @@ def table_slice(request, fileid, conn=None, **kwargs):
 
     Query arguments:
     rows: row numbers to retrieve in comma-separated list,
-          hyphen-separated ranges allowed
+          hyphen-separated ranges allowed, or * for all rows
     columns: column numbers to retrieve in comma-separated list,
              hyphen-separated ranges allowed
 
@@ -3716,6 +3716,16 @@ def table_slice(request, fileid, conn=None, **kwargs):
                             - maxCells: maximum number of cells that can be requested
                               in one request
     """
+    json_data = _table_slice(request, fileid, conn, **kwargs)
+    return json_data
+
+
+def _table_slice(request, fileid, conn=None, **kwargs):
+    """
+    Performs a table slice
+
+    See table_slice() above for details.
+    """
 
     def parse(item):
         try:
@@ -3733,11 +3743,28 @@ def table_slice(request, fileid, conn=None, **kwargs):
             yield item
 
     source = request.POST if request.method == "POST" else request.GET
+
+    ctx = conn.createServiceOptsDict()
+    ctx.setOmeroGroup("-1")
+    resources = conn.getSharedResources()
+    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
+    if not table:
+        return {"error": "Table %s not found" % fileid}
+    column_count = len(table.getHeaders())
+    row_count = table.getNumberOfRows()
+    # rows can come from request OR kwargs
+    rows = source.get("rows", kwargs.get("rows"))
+    if rows is None:
+        return {"error": "Must specify rows"}
+    elif rows == "*":
+        # Allow * to specify ALL rows
+        rows = "0-%d" % (row_count - 1)
+
     try:
         # Limit number of items to avoid problems when given massive ranges
         rows = list(
             limit_generator(
-                (row for item in source.get("rows").split(",") for row in parse(item)),
+                (row for item in rows.split(",") for row in parse(item)),
                 settings.MAX_TABLE_SLICE_SIZE,
             )
         )
@@ -3755,14 +3782,7 @@ def table_slice(request, fileid, conn=None, **kwargs):
         return {
             "error": f"Need comma-separated list of rows and columns ({str(error)})"
         }
-    ctx = conn.createServiceOptsDict()
-    ctx.setOmeroGroup("-1")
-    resources = conn.getSharedResources()
-    table = resources.openTable(omero.model.OriginalFileI(fileid), ctx)
-    if not table:
-        return {"error": "Table %s not found" % fileid}
-    column_count = len(table.getHeaders())
-    row_count = table.getNumberOfRows()
+
     if not all(0 <= column < column_count for column in columns):
         return {"error": "Columns out of range"}
     if not all(0 <= row < row_count for row in rows):
@@ -3786,3 +3806,71 @@ def table_slice(request, fileid, conn=None, **kwargs):
         return {"error": f"Error slicing table ({str(error)})"}
     finally:
         table.close()
+
+
+@login_required()
+@jsonp
+def table_histogram(request, fileid, conn=None, **kwargs):
+    """
+    Performs a table slice and returns histograms for the requested columns
+
+    Query arguments:
+    columns: column numbers to retrieve in comma-separated list,
+             hyphen-separated ranges allowed
+    rows: optional. Use all rows by default. But this can be used to
+          specify a subset if required, in the same format as columns.
+    bins: optional. Number of bins for the histogram, or a string to be passed
+            to numpy.histogram, e.g. "auto". Default is 10.
+
+    At most MAX_TABLE_SLICE_SIZE data points (number of rows * number of columns) can
+    be retrieved, if more are requested, an error is returned.
+
+    @param request:     http request.
+    @param fileid:      the id of the table
+    @param conn:        L{omero.gateway.BlitzGateway}
+    @param **kwargs:    unused
+    @return:            A dictionary with keys 'histograms' and 'meta' in the success
+                        case, one with key 'error' if something went wrong.
+                        'histograms' is a list of dictionaries with
+                            - column: name of column
+                            - histogram: list of counts for each bin
+                            - bin_edges: list of bin edges
+                        'meta' includes:
+                            - rowCount: total number of rows in table
+                            - columns: names of columns in same order as data arrays
+                            - columnCount: total number of columns in table
+                            - maxCells: maximum number of cells that can be requested
+                              in one request
+    """
+
+    if "rows" not in request.GET:
+        kwargs["rows"] = "*"  # default to all rows if not specified
+    slice_result = _table_slice(request, fileid, conn, **kwargs)
+    if "error" in slice_result:
+        return slice_result
+    columns = slice_result["columns"]
+    meta = slice_result["meta"]
+    bins = request.GET.get("bins", 10)
+    try:
+        bins = int(bins)
+    except ValueError:
+        # the string will be passed to numpy.histogram e.g. "auto"
+        pass
+    histograms = []
+    for i, column in enumerate(columns):
+        try:
+            hist, bin_edges = numpy.histogram(column, bins=bins)
+            histograms.append(
+                {
+                    "column": meta["columns"][i],
+                    "histogram": hist.tolist(),
+                    "bin_edges": bin_edges.tolist(),
+                }
+            )
+        except Exception as error:
+            logger.exception(
+                "Error calculating histogram for column %s in table %s"
+                % (meta["columns"][i], fileid)
+            )
+            return {"error": f"Error calculating histogram ({str(error)})"}
+    return {"histograms": histograms, "meta": meta}
