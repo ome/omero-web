@@ -2093,8 +2093,7 @@ def marshal_annotations(
             left outer join fetch oal.child as ch
             left outer join fetch oal.parent as pa
             join fetch ch.details.creationEvent
-            join fetch ch.details.owner 
-            %s
+            join fetch ch.details.owner %s
             left outer join fetch ch.file as file
             where %s
             order by %s
