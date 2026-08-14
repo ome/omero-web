@@ -222,6 +222,7 @@ def check_session_engine(s):
         )
     return s
 
+
 def parse_annotation_order(value):
     try:
         parsed = json.loads(value)
@@ -231,6 +232,7 @@ def parse_annotation_order(value):
         pass
 
     return str(value)
+
 
 CUSTOM_HOST = CUSTOM_SETTINGS.get("Ice.Default.Host", "localhost")
 CUSTOM_HOST = CUSTOM_SETTINGS.get("omero.master.host", CUSTOM_HOST)
@@ -1017,7 +1019,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "A value of 0 or -1 pre-selects All groups."
         ),
     ],
-    "omero.web.annotation_order":[
+    "omero.web.annotation_order": [
         "ANNOTATION_ORDER",
         "namespace",
         parse_annotation_order,
