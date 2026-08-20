@@ -23,7 +23,6 @@ from django.views.generic import View
 from django.middleware import csrf
 from django.utils.decorators import method_decorator
 from django.urls import reverse
-from requests import request
 from . import api_settings
 
 import traceback
