@@ -93,6 +93,10 @@ def api_base(request, api_version=None, **kwargs):
         "url:save": build_url(request, "api_save", v),
         "url:schema": OME_SCHEMA_URL,
     }
+    for atype in ("file", "map", "tag", "long", "timestamp", "comment",
+                  "boolean", "double", "xml", "term"):
+        rv["url:%sannotations" % atype] = build_url(
+            request, "api_namedannotations", v, ann_type=atype)
     return rv
 
 
