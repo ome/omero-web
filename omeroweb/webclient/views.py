@@ -135,6 +135,8 @@ logger.info("INIT '%s'" % os.getpid())
 # all the annotations expected for a PAGE of images
 ANNOTATIONS_LIMIT = settings.PAGE * 100
 
+annotation_order = getattr(settings, "ANNOTATION_ORDER", None)
+
 
 def get_long_or_default(request, name, default):
     """
@@ -568,6 +570,7 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
     context["member_of_groups"] = conn.getEventContext().memberOfGroups
     context["search_default_user"] = settings.SEARCH_DEFAULT_USER
     context["search_default_group"] = settings.SEARCH_DEFAULT_GROUP
+    context["annotation_order"] = annotation_order
 
     return context
 
