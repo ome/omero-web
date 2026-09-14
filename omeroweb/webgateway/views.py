@@ -2217,7 +2217,7 @@ def list_compatible_imgs_json(request, iid, conn=None, **kwargs):
     """
 
     json_data = "false"
-    r = request.GET
+    # r = request.GET
     if conn is None:
         img = None
     else:
