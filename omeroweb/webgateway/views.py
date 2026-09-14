@@ -2064,6 +2064,7 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
         json_data = "true"
     return json_data
 
+
 @login_required(omero_group=None)
 @jsonp
 def listLuts_json(request, conn=None, **kwargs):
@@ -2217,7 +2218,6 @@ def list_compatible_imgs_json(request, iid, conn=None, **kwargs):
     """
 
     json_data = "false"
-    r = request.GET
     if conn is None:
         img = None
     else:
