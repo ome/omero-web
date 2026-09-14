@@ -629,6 +629,16 @@ table_slice = re_path(
 Fetch a table slice specified by rows and columns
 """
 
+table_histogram = re_path(
+    r"^table/(?P<fileid>\d+)/histogram/$",
+    views.table_histogram,
+    name="webgateway_table_histogram",
+    kwargs=COMPACT_JSON,
+)
+"""
+Fetch a table histogram specified by columns
+"""
+
 
 urlpatterns = [
     webgateway,
@@ -691,4 +701,5 @@ urlpatterns = [
     # low-level table API
     table_get_where_list,
     table_slice,
+    table_histogram,
 ]
