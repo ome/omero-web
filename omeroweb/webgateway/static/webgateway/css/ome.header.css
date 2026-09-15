@@ -835,6 +835,14 @@ li.menu_back a {
 			    color: #666;
 			}
 
+			#activities_content tr.script .activity_title + .message {
+				clear: both;
+				display: block;
+				margin-top: 0.25rem;
+				white-space: pre-wrap;
+				font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+			}
+
 
 			#activities_panel tr.hidden {
 			    display: none;
@@ -1197,5 +1205,3 @@ li.menu_back a {
     left: 0;
     right: 0;
 }
-
-
