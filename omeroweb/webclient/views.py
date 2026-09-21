@@ -4783,7 +4783,6 @@ def chgrp(request, conn=None, **kwargs):
             }
             request.session.modified = True
 
-    print("chgrp: %s" % to_be_updated)
     return JsonResponse({"update": to_be_updated})
 
 
