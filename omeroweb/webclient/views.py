@@ -268,9 +268,13 @@ class WebclientLoginView(LoginView):
                 url = parse_url(settings.LOGIN_REDIRECT)
             except Exception:
                 url = reverse("webindex")
+
+        if url_has_allowed_host_and_scheme(
+            url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+        ):
+            return HttpResponseRedirect(url)
         else:
-            url = validate_redirect_url(url)
-        return HttpResponseRedirect(url)
+            return HttpResponseRedirect(reverse("webindex"))
 
     def handle_not_logged_in(self, request, error=None, form=None):
         """
@@ -353,8 +357,12 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     # avoid recursive calls
     if url is None or url.startswith(reverse("change_active_group")):
         url = reverse("webindex")
-    url = validate_redirect_url(url)
-    return HttpResponseRedirect(url)
+    if url_has_allowed_host_and_scheme(
+        url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+    ):
+        return HttpResponseRedirect(url)
+    else:
+        return HttpResponseRedirect(reverse("webindex"))
 
 
 def switch_active_group(request, active_group=None, conn=None):
@@ -469,7 +477,17 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
         ):
             # this is likely a regular user who needs to log in as themselves.
             # Login then redirect to current url
-            return HttpResponseRedirect("%s?url=%s" % (reverse("weblogin"), url))
+            if not url_has_allowed_host_and_scheme(
+                url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+            ):
+                url = reverse("webindex")
+            redirect_url = "%s?url=%s" % (reverse(settings.LOGIN_VIEW), url)
+            if url_has_allowed_host_and_scheme(
+                redirect_url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+            ):
+                return HttpResponseRedirect(redirect_url)
+            else:
+                return HttpResponseRedirect(reverse("webindex"))
 
     # need to be sure that tree will be correct omero.group
     if first_sel is not None:
