@@ -2007,6 +2007,29 @@ def marshal_annotations(
         group_id = -1
     service_opts.setOmeroGroup(group_id)
 
+    # Determine annotation order
+    annotation_order = getattr(settings, "ANNOTATION_ORDER", None)
+    order_by = "ch.ns"
+    if annotation_order == "date":
+        order_by = "ch.details.creationEvent.time"
+
+    elif isinstance(annotation_order, (list, tuple)) and len(annotation_order):
+        # build a case statement to order by the configured namespaces
+        case_parts = []
+
+        for pos, namespace in enumerate(annotation_order):
+            namespace = namespace.replace("'", "''")
+            case_parts.append("when ch.ns = '%s' then %d" % (namespace, pos))
+
+        # Sort by configured position first, then namespace
+        order_by = """
+            case
+                %s
+                else 999999
+            end,
+            ch.ns
+        """ % "\n".join(case_parts)
+
     where_clause = ["pa.id in (:ids)"]
     # if experimenter_id is not None and experimenter_id != -1:
     #     params.addId('eid', rlong(experimenter_id))
@@ -2069,11 +2092,13 @@ def marshal_annotations(
             join fetch ch.details.creationEvent
             join fetch ch.details.owner %s
             left outer join fetch ch.file as file
-            where %s order by ch.ns
+            where %s
+            order by %s
             """ % (
             dtype,
             "join fetch pa.plate" if dtype == "Well" else "",
             " and ".join(where_clause),
+            order_by,
         )
 
         for link in qs.findAllByQuery(q, params, service_opts):
