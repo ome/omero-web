@@ -86,12 +86,28 @@ def api_base(request, api_version=None, **kwargs):
         "url:screens": build_url(request, "api_screens", v),
         "url:plates": build_url(request, "api_plates", v),
         "url:rois": build_url(request, "api_rois", v),
+        "url:annotations": build_url(request, "api_annotations", v),
         "url:token": build_url(request, "api_token", v),
         "url:servers": build_url(request, "api_servers", v),
         "url:login": build_url(request, "api_login", v),
         "url:save": build_url(request, "api_save", v),
         "url:schema": OME_SCHEMA_URL,
     }
+    for atype in (
+        "file",
+        "map",
+        "tag",
+        "long",
+        "timestamp",
+        "comment",
+        "boolean",
+        "double",
+        "xml",
+        "term",
+    ):
+        rv["url:%sannotations" % atype] = build_url(
+            request, "api_namedannotations", v, ann_type=atype
+        )
     return rv
 
 
@@ -441,6 +457,10 @@ class ExperimenterGroupView(ObjectView):
 class ObjectsView(ApiView):
     """Base class for listing objects."""
 
+    def get_omero_type(self, request):
+        """Allow dynamic omero type, e.g. for AnnotationsView."""
+        return self.OMERO_TYPE
+
     def get_opts(self, request, **kwargs):
         """Return an options dict based on request parameters."""
         try:
@@ -468,7 +488,9 @@ class ObjectsView(ApiView):
         group = getIntOrDefault(request, "group", -1)
         normalize = request.GET.get("normalize", False) == "true"
         # Get the data
-        marshalled = query_objects(conn, self.OMERO_TYPE, group, opts, normalize)
+        marshalled = query_objects(
+            conn, self.get_omero_type(request), group, opts, normalize
+        )
         for m in marshalled["data"]:
             self.add_data(m, request, conn, self.urls, **kwargs)
         return marshalled
@@ -785,6 +807,97 @@ class ShapesView(ObjectsView):
             marshalled["url:roi"] = url
 
         return marshalled
+
+
+class AnnotationsView(ObjectsView):
+    """Handles GET for /annotations/ to list available Annotations."""
+
+    OMERO_TYPE = "Annotation"
+
+    def get_opts(self, request, **kwargs):
+        """Add extra parameters to the opts dict."""
+        opts = super(AnnotationsView, self).get_opts(request, **kwargs)
+
+        # All annotatable objects
+        otypes = [
+            "Annotation",
+            "Channel",
+            "Dataset",
+            "Detector",
+            "Dichroic",
+            "Experimenter",
+            "ExperimenterGroup",
+            "Fileset",
+            "Filter",
+            "Folder",
+            "Image",
+            "Instrument",
+            "LightPath",
+            "LightSource",
+            "Namespace",
+            "Node",
+            "Objective",
+            "OriginalFile",
+            "PlaneInfo",
+            "PlateAcquisition",
+            "Plate",
+            "Project",
+            "Reagent",
+            "Roi",
+            "Screen",
+            "Session",
+            "Shape",
+            "Well",
+        ]
+        request_otypes = {}
+        for key in otypes:
+            # parent_type is case-insensitive...
+            # but the JSON api expects lower-case
+            key = key.lower()
+            ids = request.GET.getlist(key)
+            if len(ids) > 0:
+                request_otypes[key] = [int(i) for i in ids]
+        # Check that only ONE parent type is specified
+        if len(request_otypes) > 1:
+            raise BadRequestError(
+                "Can only filter by one parent type at a time. "
+                "Found: %s" % ", ".join(request_otypes.keys())
+            )
+        elif len(request_otypes) == 1:
+            opts["parent_type"] = list(request_otypes.keys())[0]
+            opts["parent_ids"] = request_otypes[opts["parent_type"]]
+
+        if request.GET.get("ns") is not None:
+            opts["ns"] = request.GET.get("ns")
+
+        return opts
+
+    def get(self, request, conn=None, **kwargs):
+        """Override get() to allow filtering by annotation type."""
+
+        # set self.OMERO_TYPE, then call super().get() to get the list of Annotations
+        # E.g. conn.getObjects("TagAnnotation") - not actually case-sensitive
+        # We support /tagannotations/
+        ann_type = kwargs.get("ann_type", None)
+        # OR /annotations/?type=tag
+        if ann_type is None:
+            ann_type = request.GET.get("type")
+        if ann_type in (
+            "file",
+            "map",
+            "tag",
+            "long",
+            "timestamp",
+            "comment",
+            "boolean",
+            "double",
+            "xml",
+            "term",
+        ):
+            self.OMERO_TYPE = ann_type.capitalize() + "Annotation"
+        elif ann_type is not None:
+            raise BadRequestError("Invalid annotation type: %s" % ann_type)
+        return super(AnnotationsView, self).get(request, conn, **kwargs)
 
 
 class ExperimentersView(ObjectsView):
