@@ -117,8 +117,8 @@
             }
             jQuery.ajax({
                 type: "POST",
-                url: viewport.viewport_server + '/saveImgRDef/'+viewport.loadedImg.id+'/?'+viewport.getQuery(true),
-                data: {},
+                url: viewport.viewport_server + '/saveImgRDef/'+viewport.loadedImg.id+'/',
+                data: viewport.getQuery(true),
                 success: cb(true),
                 error: cb(false),
                 dataType: "jsonp",

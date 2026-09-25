@@ -268,9 +268,13 @@ class WebclientLoginView(LoginView):
                 url = parse_url(settings.LOGIN_REDIRECT)
             except Exception:
                 url = reverse("webindex")
+
+        if url_has_allowed_host_and_scheme(
+            url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+        ):
+            return HttpResponseRedirect(url)
         else:
-            url = validate_redirect_url(url)
-        return HttpResponseRedirect(url)
+            return HttpResponseRedirect(reverse("webindex"))
 
     def handle_not_logged_in(self, request, error=None, form=None):
         """
@@ -353,8 +357,12 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     # avoid recursive calls
     if url is None or url.startswith(reverse("change_active_group")):
         url = reverse("webindex")
-    url = validate_redirect_url(url)
-    return HttpResponseRedirect(url)
+    if url_has_allowed_host_and_scheme(
+        url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+    ):
+        return HttpResponseRedirect(url)
+    else:
+        return HttpResponseRedirect(reverse("webindex"))
 
 
 def switch_active_group(request, active_group=None, conn=None):
@@ -469,7 +477,17 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
         ):
             # this is likely a regular user who needs to log in as themselves.
             # Login then redirect to current url
-            return HttpResponseRedirect("%s?url=%s" % (reverse("weblogin"), url))
+            if not url_has_allowed_host_and_scheme(
+                url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+            ):
+                url = reverse("webindex")
+            redirect_url = "%s?url=%s" % (reverse(settings.LOGIN_VIEW), url)
+            if url_has_allowed_host_and_scheme(
+                redirect_url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+            ):
+                return HttpResponseRedirect(redirect_url)
+            else:
+                return HttpResponseRedirect(reverse("webindex"))
 
     # need to be sure that tree will be correct omero.group
     if first_sel is not None:
@@ -4678,6 +4696,45 @@ def chgrp(request, conn=None, **kwargs):
     """
     if not request.method == "POST":
         return JsonResponse({"Error": "Need to POST to chgrp"}, status=405)
+
+    # JSON response contains a list of images/containers that need to be
+    # updated, based on the POST info and initial state BEFORE chgrp
+
+    project_ids = request.POST.get("Project", [])
+    dataset_ids = request.POST.get("Dataset", [])
+    image_ids = request.POST.get("Image", [])
+    screen_ids = request.POST.get("Screen", [])
+    plate_ids = request.POST.get("Plate", [])
+
+    if project_ids:
+        project_ids = [int(x) for x in project_ids.split(",")]
+    if dataset_ids:
+        dataset_ids = [int(x) for x in dataset_ids.split(",")]
+    if image_ids:
+        image_ids = [int(x) for x in image_ids.split(",")]
+    if screen_ids:
+        screen_ids = [int(x) for x in screen_ids.split(",")]
+    if plate_ids:
+        plate_ids = [int(x) for x in plate_ids.split(",")]
+
+    # TODO Change this user_id to be an experimenter_id in the request as it
+    # is possible that a user is chgrping data from another user so it is
+    # that users orphaned that will need updating. Or maybe all orphaned
+    # directories could potentially need updating?
+
+    # Create a list of objects that have been changed by this operation. This
+    # can be used by the client to visually update.
+    to_be_updated = getAllObjects(
+        conn,
+        project_ids,
+        dataset_ids,
+        image_ids,
+        screen_ids,
+        plate_ids,
+        request.session.get("user_id"),
+    )
+
+    # THEN we do the actual chgrp submission...
     # Get the target group_id
     group_id = getIntOrDefault(request, "group_id", None)
     if group_id is None:
@@ -4744,45 +4801,7 @@ def chgrp(request, conn=None, **kwargs):
             }
             request.session.modified = True
 
-    # Update contains a list of images/containers that need to be
-    # updated.
-
-    project_ids = request.POST.get("Project", [])
-    dataset_ids = request.POST.get("Dataset", [])
-    image_ids = request.POST.get("Image", [])
-    screen_ids = request.POST.get("Screen", [])
-    plate_ids = request.POST.get("Plate", [])
-
-    if project_ids:
-        project_ids = [int(x) for x in project_ids.split(",")]
-    if dataset_ids:
-        dataset_ids = [int(x) for x in dataset_ids.split(",")]
-    if image_ids:
-        image_ids = [int(x) for x in image_ids.split(",")]
-    if screen_ids:
-        screen_ids = [int(x) for x in screen_ids.split(",")]
-    if plate_ids:
-        plate_ids = [int(x) for x in plate_ids.split(",")]
-
-    # TODO Change this user_id to be an experimenter_id in the request as it
-    # is possible that a user is chgrping data from another user so it is
-    # that users orphaned that will need updating. Or maybe all orphaned
-    # directories could potentially need updating?
-
-    # Create a list of objects that have been changed by this operation. This
-    # can be used by the client to visually update.
-    update = getAllObjects(
-        conn,
-        project_ids,
-        dataset_ids,
-        image_ids,
-        screen_ids,
-        plate_ids,
-        request.session.get("user_id"),
-    )
-
-    # return HttpResponse("OK")
-    return JsonResponse({"update": update})
+    return JsonResponse({"update": to_be_updated})
 
 
 @login_required()
