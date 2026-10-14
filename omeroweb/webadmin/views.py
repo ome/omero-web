@@ -29,6 +29,7 @@ returns a Web response. This response can be the HTML contents of a Web page,
 or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything."""
 
+from html import escape
 import traceback
 import logging
 import datetime
@@ -893,7 +894,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
                     url = reverse("wamanageexperimenterid", args=["edit", e.id])
                     msgs.append(
                         "Can't remove user <a href='%s'>%s</a> from"
-                        " their only group" % (url, e.getFullName())
+                        " their only group" % (url, escape(e.getFullName()))
                     )
                 # Refresh form (ignore POST data)
                 context["form"] = GroupForm(
@@ -1006,7 +1007,7 @@ def manage_group_owner(request, action, gid, conn=None, **kwargs):
                     url = reverse("wamanageexperimenterid", args=["edit", e.id])
                     msgs.append(
                         "Can't remove user <a href='%s'>%s</a> from"
-                        " their only group" % (url, e.getFullName())
+                        " their only group" % (url, escape(e.getFullName()))
                     )
                 # refresh the form and add messages
                 context = getEditFormContext()
