@@ -47,7 +47,6 @@
             <b>Linked by:</b> <%- tag.link.owner.firstName %> <%- tag.link.owner.lastName %><br />
             <b>On:</b> <% print(OME.formatDate(tag.link.date)) %><br />
         <% } %>
-        <b>Tagset:</b> PLACEHOLDER_TAGSET<br />
         <b>Description:</b> <%- tag.description %><br />
         <% if (isInherited && tag.links) { %>
             <b>Inherited by:</b><br />
