@@ -872,9 +872,13 @@
                     font-family: 'Helvetica-Bold';
                 }
         
-        
+
     
-        
+        #tags_container > hr + h2,
+        #mapAnnContainer > hr + h2,
+        #comments_container > hr + h2 {
+            color: #505050;
+        }
         
         /* Tags */
         

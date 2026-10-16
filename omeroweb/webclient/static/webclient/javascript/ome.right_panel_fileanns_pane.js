@@ -285,7 +285,7 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
                     html += "</ul>";
                 }
                 if (inh_anns.length > 0) {
-                    html += "<div class='file_ann_section_label file_ann_section_label_inherited'>Inherited annotations</div>";
+                    html += "<div class='file_ann_section_label file_ann_section_label_inherited'>Inherited attachments</div>";
                     html += "<ul class='lnfiles file_ann_list'>";
                     html += filesTempl({'anns': inh_anns,
                                         'webindex': WEBCLIENT.URLS.webindex,
