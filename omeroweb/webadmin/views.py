@@ -871,7 +871,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
                                 "Downgrade to private group not" " currently possible"
                             )
                         else:
-                            msgs.append(ex.message)
+                            msgs.append(escape(ex.message))
 
                 removalFails = []
                 if can_add_member:
@@ -990,14 +990,14 @@ def manage_group_owner(request, action, gid, conn=None, **kwargs):
                     try:
                         msg = conn.updatePermissions(group, perm)
                         if msg is not None:
-                            msgs.append(msg)
+                            msgs.append(escape(msg))
                     except omero.SecurityViolation as ex:
                         if ex.message.startswith("Cannot change permissions"):
                             msgs.append(
                                 "Downgrade to private group not" " currently possible"
                             )
                         else:
-                            msgs.append(ex.message)
+                            msgs.append(escape(ex.message))
 
                 if len(removalFails) == 0 and len(msgs) == 0:
                     return HttpResponseRedirect(reverse("wamyaccount"))
