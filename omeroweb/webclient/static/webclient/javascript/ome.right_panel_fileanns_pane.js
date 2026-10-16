@@ -276,16 +276,22 @@ var FileAnnsPane = function FileAnnsPane($element, opts) {
                 // Update html...
                 var html = "";
                 if (anns.length > 0) {
-                    html = filesTempl({'anns': anns,
-                                       'webindex': WEBCLIENT.URLS.webindex,
-                                       'userId': WEBCLIENT.USER.id,
-                                       'isInherited': false});
+                    html += "<div class='file_ann_section_label'> </div>";
+                    html += "<ul class='lnfiles file_ann_list'>";
+                    html += filesTempl({'anns': anns,
+                                        'webindex': WEBCLIENT.URLS.webindex,
+                                        'userId': WEBCLIENT.USER.id,
+                                        'isInherited': false});
+                    html += "</ul>";
                 }
                 if (inh_anns.length > 0) {
-                    html = html + filesTempl({'anns': inh_anns,
-                                              'webindex': WEBCLIENT.URLS.webindex,
-                                              'userId': WEBCLIENT.USER.id,
-                                              'isInherited': true});
+                    html += "<div class='file_ann_section_label file_ann_section_label_inherited'>Inherited annotations</div>";
+                    html += "<ul class='lnfiles file_ann_list'>";
+                    html += filesTempl({'anns': inh_anns,
+                                        'webindex': WEBCLIENT.URLS.webindex,
+                                        'userId': WEBCLIENT.USER.id,
+                                        'isInherited': true});
+                    html += "</ul>";
                 }
                 $fileanns_container.html(html);
 
