@@ -23,7 +23,7 @@
 # Version: 1.0
 #
 
-""" A view functions is simply a Python function that takes a Web request and
+"""A view functions is simply a Python function that takes a Web request and
 returns a Web response. This response can be the HTML contents of a Web page,
 or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything."""
@@ -177,13 +177,7 @@ def csrf_failure(request, reason=""):
     Always return Json response
     since this is accepted by browser and API users
     """
-    error = (
-        "CSRF Error. You need to include valid CSRF tokens for any"
-        " POST, PUT, PATCH or DELETE operations."
-        " You have to include CSRF token in the POST data or"
-        " add the token to the HTTP header."
-    )
-    return JsonResponse({"message": error}, status=403)
+    return JsonResponse({"message": f"CSRF Failed: {reason}"}, status=403)
 
 
 def handler500(request):

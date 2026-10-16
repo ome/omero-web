@@ -18,8 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-   Library for Web integration tests
+Library for Web integration tests
 """
+
 import json
 import warnings
 

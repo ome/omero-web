@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-   Plugin for our configuring the OMERO.web installation
+Plugin for our configuring the OMERO.web installation
 
-   Copyright 2009-2016 University of Dundee. All rights reserved.
-   Use is subject to license terms supplied in LICENSE.txt
+Copyright 2009-2016 University of Dundee. All rights reserved.
+Use is subject to license terms supplied in LICENSE.txt
 
 """
 
@@ -21,7 +21,7 @@ from functools import wraps
 from omero_ext.argparse import SUPPRESS
 
 from omero_ext.path import path
-from pkg_resources import resource_string
+from importlib_resources import files
 
 from omero.install.windows_warning import windows_warning, WINDOWS_WARNING
 
@@ -62,20 +62,11 @@ APACHE_MOD_WSGI_ERR = (
 
 
 def config_required(func):
-    """Decorator validating Django dependencies and omeroweb/settings.py"""
+    """Decorator validating and injecting omeroweb/settings.py"""
 
     def import_django_settings(func):
         @windows_warning
         def wrapper(self, *args, **kwargs):
-            try:
-                import django  # NOQA
-            except Exception:
-                self.ctx.die(681, "ERROR: Django not installed!")
-            if django.VERSION < (3, 2) or django.VERSION >= (4, 3):
-                self.ctx.err(
-                    "ERROR: Django version %s is not "
-                    "supported!" % django.get_version()
-                )
             if not os.environ.get("OMERODIR"):
                 self.ctx.die(101, "ERROR: OMERODIR not set")
             try:
@@ -342,8 +333,8 @@ class WebControl(DiagnosticsControl):
         if settings.APPLICATION_SERVER not in settings.WSGI_TYPES:
             self.ctx.die(679, "Web template configuration requires" "wsgi or wsgi-tcp.")
 
-        template_file = "%s.conf.template" % server
-        c = resource_string("omeroweb", "templates/" + template_file).decode("utf-8")
+        template_file = "templates/%s.conf.template" % server
+        c = files("omeroweb").joinpath(template_file).read_text()
         self.ctx.out(c % d)
 
     def syncmedia(self, args):

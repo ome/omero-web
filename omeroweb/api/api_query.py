@@ -19,14 +19,12 @@
 
 """Helper functions for views that handle object trees."""
 
-
 from omero.rtypes import unwrap, wrap, rlong
 from omero.sys import ParametersI
 from . import api_settings
 
 from .api_marshal import marshal_objects
 from copy import deepcopy
-
 
 MAX_LIMIT = max(1, api_settings.API_MAX_LIMIT)
 DEFAULT_LIMIT = max(1, api_settings.API_LIMIT)

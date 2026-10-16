@@ -194,6 +194,20 @@ class BaseContainer(BaseController):
         obj = self._get_object()
         return obj is not None and obj.id or None
 
+    def external_info(self):
+        obj = self._get_object()
+        if obj is None:
+            return None
+        extinfo = obj.getDetails().getExternalInfo()
+        if extinfo is None:
+            return None
+        return {
+            "id": extinfo.id,
+            "lsid": extinfo.lsid,
+            "entityType": extinfo.entityType,
+            "entityId": extinfo.entityId,
+        }
+
     def getWellSampleImage(self):
         """Returns Image if Well is not None
 

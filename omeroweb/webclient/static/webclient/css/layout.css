@@ -665,6 +665,11 @@
 		
 		padding:10px 0 5px 0;
 	}
+
+    .description .data_heading {
+        max-height: 40vh;
+        overflow: auto;
+    }
 	
 	
 	    .data_heading h1 {
@@ -672,6 +677,7 @@
 			width:85%;
 			display:inline-block;
 			padding:5px 0;
+            word-wrap: break-word;
 	    }
     
 	        .data_heading span {
@@ -679,6 +685,7 @@
 	            line-height:1.2em;
 	            float:left;
 	            overflow:hidden;
+                width: 100%;
 	        }
             
 	            .data_heading img {

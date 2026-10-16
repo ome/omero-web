@@ -60,7 +60,6 @@ from omeroweb.webgateway.templatetags.common_filters import (
 from hashlib import sha1 as hash_sha1
 from PIL import Image
 
-
 NSEXPERIMENTERPHOTO = omero.constants.namespaces.NSEXPERIMENTERPHOTO
 
 logger = logging.getLogger(__name__)
@@ -1574,7 +1573,7 @@ class OmeroWebGateway(omero.gateway.BlitzGateway):
         try:
             cb = self.c.submit(command, loops=120)
         except omero.CmdError as ex:
-            message = ex.err.message
+            message = str(ex)
         finally:
             if cb:
                 cb.close(True)

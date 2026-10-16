@@ -53,11 +53,9 @@
 
                         // When hover or click on a Group, show Users...
                         $( "#groupList" ).on( "mouseenter click", "li a", function(event) {
-                            event.preventDefault();
                             var gid = $(this).attr("data-gid");
                             $usersList.hide();
                             $("#groupMembers-" + gid).show();
-                            return false;
                         });
                     });
                 }

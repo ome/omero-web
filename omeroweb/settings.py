@@ -25,8 +25,7 @@
 #
 # Version: 1.0
 #
-
-
+import importlib
 import os.path
 import sys
 import logging
@@ -538,8 +537,8 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "A list of hosts which are trusted origins for unsafe requests. "
             "When starting with '.', all subdomains are included. "
-            """Example ``'[".example.com", "another.example.net"]'``. """
-            "For more details see :djangodoc:`CSRF trusted origins <ref/"
+            """e.g. ``'["https://*.example.com", "https://another.example.net"]'``."""
+            " For more details see :djangodoc:`CSRF trusted origins <ref/"
             "settings/#csrf-trusted-origins>`."
         ),
     ],
@@ -574,7 +573,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "A string representing Gunicorn additional arguments. "
             "Check Gunicorn Documentation "
-            "https://docs.gunicorn.org/en/latest/settings.html"
+            "https://gunicorn.org/reference/settings/"
         ),
     ],
     "omero.web.wsgi_workers": [
@@ -584,7 +583,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "The number of worker processes for handling requests. "
             "Check Gunicorn Documentation "
-            "https://docs.gunicorn.org/en/stable/settings.html#workers"
+            "https://gunicorn.org/reference/settings/#worker-processes"
         ),
     ],
     "omero.web.wsgi_timeout": [
@@ -594,12 +593,12 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "Workers silent for more than this many seconds are killed "
             "and restarted. Check Gunicorn Documentation "
-            "https://docs.gunicorn.org/en/stable/settings.html#timeout"
+            "https://gunicorn.org/reference/settings/#timeout"
         ),
     ],
     "omero.web.session_serializer": [
         "SESSION_SERIALIZER",
-        "django.contrib.sessions.serializers.PickleSerializer",
+        "django.contrib.sessions.serializers.JSONSerializer",
         str,
         (
             "You can use this setting to customize the session "
@@ -715,6 +714,13 @@ CUSTOM_SETTINGS_MAPPINGS = {
         int,
         "Prevent download of OMERO.tables exceeding this number of rows "
         "in a single request.",
+    ],
+    "omero.web.max_table_slice_size": [
+        "MAX_TABLE_SLICE_SIZE",
+        1_000_000,
+        int,
+        "Maximum number of cells that can be retrieved in a single call "
+        "to the table slicing endpoint.",
     ],
     # VIEWER
     "omero.web.viewer.view": [
@@ -977,7 +983,7 @@ CUSTOM_SETTINGS_MAPPINGS = {
             "Number of thumbnails retrieved to prevent from loading them"
             " all at once. Make sure the size is not too big, otherwise"
             " you may exceed limit request line, see"
-            " https://docs.gunicorn.org/en/latest/settings.html"
+            " https://gunicorn.org/reference/settings/"
             "?highlight=limit_request_line"
         ),
     ],
@@ -1268,7 +1274,7 @@ DEVELOPMENT_SETTINGS_MAPPINGS = {
         (
             "The default OMERO.web uses sync workers to handle most “normal” "
             "types of workloads. Check Gunicorn Design Documentation "
-            "https://docs.gunicorn.org/en/stable/design.html"
+            "https://gunicorn.org/design"
         ),
     ],
     "omero.web.wsgi_worker_connections": [
@@ -1277,8 +1283,8 @@ DEVELOPMENT_SETTINGS_MAPPINGS = {
         int,
         (
             "(ASYNC WORKERS only) The maximum number of simultaneous clients. "
-            "Check Gunicorn Documentation https://docs.gunicorn.org"
-            "/en/stable/settings.html#worker-connections"
+            "Check Gunicorn Documentation https://gunicorn.org/asgi"
+            "/#worker-connections"
         ),
     ],
     "omero.web.wsgi_threads": [
@@ -1288,7 +1294,7 @@ DEVELOPMENT_SETTINGS_MAPPINGS = {
         (
             "(SYNC WORKERS only) The number of worker threads for handling "
             "requests. Check Gunicorn Documentation "
-            "https://docs.gunicorn.org/en/stable/settings.html#threads"
+            "https://gunicorn.org/design/#how-many-threads"
         ),
     ],
 }
@@ -1589,9 +1595,9 @@ for app in ADDITIONAL_APPS:  # from CUSTOM_SETTINGS_MAPPINGS  # noqa
         INSTALLED_APPS += (app,)
     try:
         logger.debug("Attempting to import additional app settings for app: %s" % app)
-        module = __import__("%s.settings" % app)
-        process_custom_settings(module.settings)
-        report_settings(module.settings)
+        module = importlib.import_module("%s.settings" % app)
+        process_custom_settings(module)
+        report_settings(module)
     except ImportError:
         logger.debug("Couldn't import settings from app: %s" % app)
 

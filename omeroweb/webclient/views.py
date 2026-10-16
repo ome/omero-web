@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-""" A view functions is simply a Python function that takes a Web request and
+"""A view functions is simply a Python function that takes a Web request and
 returns a Web response. This response can be the HTML contents of a Web page,
 or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything."""
@@ -126,7 +126,6 @@ from omero import ApiUsageException, ServerError, CmdError
 from omeroweb.webgateway.views import LoginView
 
 from . import tree
-
 
 logger = logging.getLogger(__name__)
 
@@ -269,9 +268,13 @@ class WebclientLoginView(LoginView):
                 url = parse_url(settings.LOGIN_REDIRECT)
             except Exception:
                 url = reverse("webindex")
+
+        if url_has_allowed_host_and_scheme(
+            url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+        ):
+            return HttpResponseRedirect(url)
         else:
-            url = validate_redirect_url(url)
-        return HttpResponseRedirect(url)
+            return HttpResponseRedirect(reverse("webindex"))
 
     def handle_not_logged_in(self, request, error=None, form=None):
         """
@@ -350,25 +353,36 @@ def change_active_group(request, conn=None, url=None, **kwargs):
     queries.
     Finally this redirects to the 'url'.
     """
-    switch_active_group(request)
+    switch_active_group(request, conn=conn)
     # avoid recursive calls
     if url is None or url.startswith(reverse("change_active_group")):
         url = reverse("webindex")
-    url = validate_redirect_url(url)
-    return HttpResponseRedirect(url)
+    if url_has_allowed_host_and_scheme(
+        url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+    ):
+        return HttpResponseRedirect(url)
+    else:
+        return HttpResponseRedirect(reverse("webindex"))
 
 
-def switch_active_group(request, active_group=None):
+def switch_active_group(request, active_group=None, conn=None):
     """
     Simply changes the request.session['active_group'] which is then used by
     the @login_required decorator to configure conn for any group-based
     queries.
     """
     if active_group is None:
-        active_group = get_long_or_default(request, "active_group", None)
+        try:
+            active_group = get_long_or_default(request, "active_group", None)
+        except ValueError:
+            pass
     if active_group is None:
         return
-    active_group = int(active_group)
+    # validate group exists and user is a member of this group (or admin)
+    if conn is not None:
+        group = conn.getObject("ExperimenterGroup", active_group)
+        if group is None or not conn.isValidGroup(active_group):
+            return
     if (
         "active_group" not in request.session
         or active_group != request.session["active_group"]
@@ -463,7 +477,17 @@ def _load_template(request, menu, conn=None, url=None, **kwargs):
         ):
             # this is likely a regular user who needs to log in as themselves.
             # Login then redirect to current url
-            return HttpResponseRedirect("%s?url=%s" % (reverse("weblogin"), url))
+            if not url_has_allowed_host_and_scheme(
+                url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+            ):
+                url = reverse("webindex")
+            redirect_url = "%s?url=%s" % (reverse(settings.LOGIN_VIEW), url)
+            if url_has_allowed_host_and_scheme(
+                redirect_url, allowed_hosts=settings.REDIRECT_ALLOWED_HOSTS
+            ):
+                return HttpResponseRedirect(redirect_url)
+            else:
+                return HttpResponseRedirect(reverse("webindex"))
 
     # need to be sure that tree will be correct omero.group
     if first_sel is not None:
@@ -929,13 +953,10 @@ def get_object_links(conn, parent_type, parent_id, child_type, child_ids):
     qs = conn.getQueryService()
     # Need to fetch child and parent, otherwise
     # AnnotationAnnotationLink is not loaded
-    q = (
-        """
+    q = """
         from %s olink join fetch olink.child join fetch olink.parent
         where olink.child.id in (:ids)
-        """
-        % link_type
-    )
+        """ % link_type
     if parent_id:
         params.add("pid", rlong(parent_id))
         q += " and olink.parent.id = :pid"
@@ -3136,7 +3157,7 @@ def manage_action_containers(
                 "status": "in progress",
                 "error": 0,
                 "dreport": _formatReport(handle),
-                "start_time": datetime.datetime.now(),
+                "start_time": str(datetime.datetime.now()),
             }
             request.session.modified = True
         except Exception as x:
@@ -3172,7 +3193,7 @@ def manage_action_containers(
                         key = "Plate Run"  # for nicer user message
                     dMap = {
                         "job_type": "delete",
-                        "start_time": datetime.datetime.now(),
+                        "start_time": str(datetime.datetime.now()),
                         "status": "in progress",
                         "error": 0,
                         "dreport": _formatReport(handle),
@@ -3946,9 +3967,9 @@ def activities(request, conn=None, **kwargs):
     # return json (used for testing)
     if "template" in kwargs and kwargs["template"] == "json":
         for cbString in request.session.get("callback").keys():
-            rv[cbString]["start_time"] = str(
-                request.session["callback"][cbString]["start_time"]
-            )
+            rv[cbString]["start_time"] = request.session["callback"][cbString][
+                "start_time"
+            ]
         rv["inprogress"] = in_progress
         rv["failure"] = failure
         rv["jobs"] = len(request.session["callback"])
@@ -3972,7 +3993,7 @@ def activities(request, conn=None, **kwargs):
                 new_errors = True
         jobs.append(rv[key])
 
-    jobs.sort(key=lambda x: x["start_time"], reverse=True)
+    jobs.sort(key=lambda x: str(x["start_time"]), reverse=True)
     context = {
         "sizeOfJobs": len(request.session["callback"]),
         "jobs": jobs,
@@ -4410,6 +4431,11 @@ def figure_script(request, scriptName, conn=None, **kwargs):
     if scriptId < 0:
         raise AttributeError("No script found for path '%s'" % scriptPath)
 
+    if scriptName == "SplitView":
+        # Check we have script that supports custom labels
+        params = scriptService.getParams(scriptId)
+        context["custom_labels_supported"] = "All_labels" in params.inputs
+
     context["template"] = template
     context["scriptId"] = scriptId
     return context
@@ -4566,8 +4592,7 @@ def getAllObjects(
                                    )
                                """
 
-        q = (
-            """
+        q = """
             select distinct dilink.parent.id
             from Image image
             left outer join image.datasetLinks dilink
@@ -4577,9 +4602,7 @@ def getAllObjects(
                  from DatasetImageLink dilink2
                  where dilink2.parent.id = dilink.parent.id
                  and dilink2.child.id not in (:iids)) = 0
-            """
-            % exclude_datasets
-        )
+            """ % exclude_datasets
 
         for e in qs.projection(q, params, conn.SERVICE_OPTS):
             if e:
@@ -4599,8 +4622,7 @@ def getAllObjects(
             params.map["pids"] = rlist([rlong(x) for x in project_ids])
             exclude_projects = "and pdlink.parent.id not in (:pids)"
 
-        q = (
-            """
+        q = """
             select distinct pdlink.parent.id
             from ProjectDatasetLink pdlink
             where pdlink.child.id in (:dids)
@@ -4609,9 +4631,7 @@ def getAllObjects(
                  from ProjectDatasetLink pdlink2
                  where pdlink2.parent.id = pdlink.parent.id
                  and pdlink2.child.id not in (:dids)) = 0
-            """
-            % exclude_projects
-        )
+            """ % exclude_projects
 
         for e in qs.projection(q, params, conn.SERVICE_OPTS):
             extra_project_ids.add(e[0].val)
@@ -4676,6 +4696,45 @@ def chgrp(request, conn=None, **kwargs):
     """
     if not request.method == "POST":
         return JsonResponse({"Error": "Need to POST to chgrp"}, status=405)
+
+    # JSON response contains a list of images/containers that need to be
+    # updated, based on the POST info and initial state BEFORE chgrp
+
+    project_ids = request.POST.get("Project", [])
+    dataset_ids = request.POST.get("Dataset", [])
+    image_ids = request.POST.get("Image", [])
+    screen_ids = request.POST.get("Screen", [])
+    plate_ids = request.POST.get("Plate", [])
+
+    if project_ids:
+        project_ids = [int(x) for x in project_ids.split(",")]
+    if dataset_ids:
+        dataset_ids = [int(x) for x in dataset_ids.split(",")]
+    if image_ids:
+        image_ids = [int(x) for x in image_ids.split(",")]
+    if screen_ids:
+        screen_ids = [int(x) for x in screen_ids.split(",")]
+    if plate_ids:
+        plate_ids = [int(x) for x in plate_ids.split(",")]
+
+    # TODO Change this user_id to be an experimenter_id in the request as it
+    # is possible that a user is chgrping data from another user so it is
+    # that users orphaned that will need updating. Or maybe all orphaned
+    # directories could potentially need updating?
+
+    # Create a list of objects that have been changed by this operation. This
+    # can be used by the client to visually update.
+    to_be_updated = getAllObjects(
+        conn,
+        project_ids,
+        dataset_ids,
+        image_ids,
+        screen_ids,
+        plate_ids,
+        request.session.get("user_id"),
+    )
+
+    # THEN we do the actual chgrp submission...
     # Get the target group_id
     group_id = getIntOrDefault(request, "group_id", None)
     if group_id is None:
@@ -4737,50 +4796,12 @@ def chgrp(request, conn=None, **kwargs):
                 "dtype": dtype,
                 "obj_ids": obj_ids,
                 "job_name": "Change group",
-                "start_time": datetime.datetime.now(),
+                "start_time": str(datetime.datetime.now()),
                 "status": "in progress",
             }
             request.session.modified = True
 
-    # Update contains a list of images/containers that need to be
-    # updated.
-
-    project_ids = request.POST.get("Project", [])
-    dataset_ids = request.POST.get("Dataset", [])
-    image_ids = request.POST.get("Image", [])
-    screen_ids = request.POST.get("Screen", [])
-    plate_ids = request.POST.get("Plate", [])
-
-    if project_ids:
-        project_ids = [int(x) for x in project_ids.split(",")]
-    if dataset_ids:
-        dataset_ids = [int(x) for x in dataset_ids.split(",")]
-    if image_ids:
-        image_ids = [int(x) for x in image_ids.split(",")]
-    if screen_ids:
-        screen_ids = [int(x) for x in screen_ids.split(",")]
-    if plate_ids:
-        plate_ids = [int(x) for x in plate_ids.split(",")]
-
-    # TODO Change this user_id to be an experimenter_id in the request as it
-    # is possible that a user is chgrping data from another user so it is
-    # that users orphaned that will need updating. Or maybe all orphaned
-    # directories could potentially need updating?
-
-    # Create a list of objects that have been changed by this operation. This
-    # can be used by the client to visually update.
-    update = getAllObjects(
-        conn,
-        project_ids,
-        dataset_ids,
-        image_ids,
-        screen_ids,
-        plate_ids,
-        request.session.get("user_id"),
-    )
-
-    # return HttpResponse("OK")
-    return JsonResponse({"update": update})
+    return JsonResponse({"update": to_be_updated})
 
 
 @login_required()
@@ -4819,7 +4840,7 @@ def chown(request, conn=None, **kwargs):
                 "dtype": dtype,
                 "obj_ids": obj_ids,
                 "job_name": "Change owner",
-                "start_time": datetime.datetime.now(),
+                "start_time": str(datetime.datetime.now()),
                 "status": "in progress",
             }
             request.session.modified = True
@@ -5045,7 +5066,7 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
         request.session["callback"][jobId] = {
             "job_type": "script",
             "job_name": scriptName,
-            "start_time": datetime.datetime.now(),
+            "start_time": str(datetime.datetime.now()),
             "status": status,
         }
         request.session.modified = True
@@ -5071,7 +5092,7 @@ def run_script(request, conn, sId, inputMap, scriptName="Script"):
         request.session["callback"][jobId] = {
             "job_type": "script",
             "job_name": scriptName,
-            "start_time": datetime.datetime.now(),
+            "start_time": str(datetime.datetime.now()),
             "status": status,
             "Message": message,
             "error": error,

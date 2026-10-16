@@ -232,23 +232,72 @@ $(document).ready(function() {
 
     // Image Labels
     var $Image_Labels = $("select[name=Image_Labels]"),
+        $Custom_Label = $("input[name=Custom_Label]"),
+        $Image_Custom_Label_List = $("select[name=Image_Custom_Label_List]"),
         $rowLabels = $(".rowLabel>div"),
         $imgName = $("div.imgName"),
         $imgTags = $("div.imgTags"),
-        $imgDatasets = $("div.imgDatasets");
+        $imgDatasets = $("div.imgDatasets"),
+        $customLabelInput = $("div.customLabelInput"),
+        currentSelectedImage = "All";
+
     $Image_Labels.on('change', function(){
         var labels = $(this).val();
         $rowLabels.hide(); // hide all then show one...
         if (labels == "Image Name") {
             $imgName.show();
+            $customLabelInput.hide();
+            $Image_Custom_Label_List.hide();
         } else if (labels == "Datasets") {
             $imgDatasets.show();
+            $customLabelInput.hide();
+            $Image_Custom_Label_List.hide();
         } else if (labels == "Tags") {
             $imgTags.show();
+            $customLabelInput.hide();
+            $Image_Custom_Label_List.hide();
+        } else if(labels == "Custom"){
+            $customLabelInput.show();
+            $Image_Custom_Label_List.show();
+            var len = $Image_Custom_Label_List[0].options.length
+            for(var i = 0; i < len; i++){
+                var opt = $Image_Custom_Label_List[0].options[i]
+                var customLabelDiv = 'div.customLabel' + opt.value
+                var $customLabel = $(customLabelDiv);
+                $customLabel.show()
+            }
         }
         updateColWidths();
+        updateCustomLabels($Image_Custom_Label_List);
     });
 
+    $Custom_Label.on('input', (e) => {
+        if (currentSelectedImage == "All"){
+            var len = $Image_Custom_Label_List[0].options.length
+            for(var i = 0; i < len; i++){
+                var opt = $Image_Custom_Label_List[0].options[i]
+                var currentDiv = '.customLabel' + opt.value
+                $(currentDiv + ' #customLabelText').text(e.target.value);
+                $(currentDiv).show(); 
+            }
+        } else {
+            var currentDiv = '.customLabel'+currentSelectedImage
+            $(currentDiv + ' #customLabelText').text(e.target.value);
+            $(currentDiv).show(); 
+        }
+            
+        updateColWidths();
+        updateCustomLabels($Image_Custom_Label_List);
+    });
+
+    $Image_Custom_Label_List.on('change', function(){
+        currentSelectedImage = $(this).val();
+        if (currentSelectedImage != "All"){
+            var currentDiv = '.customLabel'+currentSelectedImage+' #customLabelText'
+            var currentLabel = $(currentDiv).text();
+            $Custom_Label.val(currentLabel)
+        }
+    })
 
     // Drag and Drop to re-order rows
     $('table tbody').sortable({
@@ -275,6 +324,20 @@ $(document).ready(function() {
                 $td.attr('width', $td.width());
             });
     }
+
+    var updateCustomLabels = function(labelList) {
+        var len = labelList[0].options.length
+        var allLabels = [];
+        for(var i = 0; i < len; i++){
+            var opt = labelList[0].options[i]
+            var currentDiv = '.customLabel' + opt.value
+            var text = $(currentDiv + ' #customLabelText').text();
+            allLabels.push(""+opt.value+"//s"+text)
+        }
+        var $allLabels = $("input[name=All_labels]")
+        $allLabels.val(allLabels.join("//n"))
+    }
+
 
     // Lets sync everything to start with:
     updateChannelNames();

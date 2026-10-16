@@ -52,6 +52,7 @@ class LoginForm(forms.Form):
         widget=forms.TextInput(attrs={"size": 22, "autofocus": "autofocus"}),
     )
     password = forms.CharField(
+        strip=False,
         widget=forms.PasswordInput(attrs={"size": 22, "autocomplete": "off"}),
     )
 
@@ -544,14 +545,17 @@ class UploadPhotoForm(forms.Form):
 
 class ChangePassword(forms.Form):
     old_password = forms.CharField(
+        strip=False,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
         label="Current password",
     )
     password = forms.CharField(
+        strip=False,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
         label="New password",
     )
     confirmation = forms.CharField(
+        strip=False,
         widget=forms.PasswordInput(attrs={"size": 30, "autocomplete": "off"}),
         label="Confirm password",
     )

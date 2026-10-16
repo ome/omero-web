@@ -6,15 +6,14 @@
 # Use is subject to license terms supplied in LICENSE.txt
 
 """
-   Module to encapsulate operations concerned with displaying the contents of a
-   plate as a grid.
+Module to encapsulate operations concerned with displaying the contents of a
+plate as a grid.
 """
 
 import logging
 
 import omero.sys
 from omero.rtypes import rint, rlong
-
 
 logger = logging.getLogger(__name__)
 

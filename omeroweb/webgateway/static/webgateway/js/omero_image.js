@@ -117,8 +117,8 @@
             }
             jQuery.ajax({
                 type: "POST",
-                url: viewport.viewport_server + '/saveImgRDef/'+viewport.loadedImg.id+'/?'+viewport.getQuery(true),
-                data: {},
+                url: viewport.viewport_server + '/saveImgRDef/'+viewport.loadedImg.id+'/',
+                data: viewport.getQuery(true),
                 success: cb(true),
                 error: cb(false),
                 dataType: "jsonp",
@@ -195,7 +195,7 @@
       if (OME && OME.LUTS) {
         for (var l=0; l<OME.LUTS.length; l++) {
           if (OME.LUTS[l].name === lutName) {
-            return OME.LUTS[l].png_index;
+            return OME.LUTS[l].png_index_new;
           }
         }
       }

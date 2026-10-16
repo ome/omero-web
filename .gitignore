@@ -2,3 +2,4 @@ dist/
 *.egg-info/
 *.pyc
 .tox/
+.DS_Store

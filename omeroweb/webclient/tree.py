@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-""" Helper functions for views that handle object trees """
+"""Helper functions for views that handle object trees"""
 
 import logging
 import time
@@ -238,9 +238,7 @@ def marshal_experimenters(conn, group_id=-1, page=1, limit=settings.PAGE):
                experimenter.email
         from Experimenter experimenter %s
         order by lower(experimenter.omeName), experimenter.id
-        """ % (
-        where_clause
-    )
+        """ % (where_clause)
     for e in qs.projection(q, params, service_opts):
         experimenters.append(_marshal_experimenter(conn, e[0:5]))
     return experimenters
@@ -364,9 +362,7 @@ def marshal_projects(
         from Project project
         %s
         order by lower(project.name), project.id
-        """ % (
-        where_clause
-    )
+        """ % (where_clause)
 
     for e in qs.projection(q, params, service_opts):
         e = unwrap(e)
@@ -476,21 +472,17 @@ def marshal_datasets(
 
     # If this is a query to get datasets with no parent project
     elif orphaned:
-        where_clause.append(
-            """
+        where_clause.append("""
             not exists (
                 select pdlink from ProjectDatasetLink as pdlink
                 where pdlink.child = dataset.id
             )
-            """
-        )
+            """)
 
     q += """
         %s
         order by lower(dataset.name), dataset.id
-        """ % build_clause(
-        where_clause, "where", "and"
-    )
+        """ % build_clause(where_clause, "where", "and")
 
     for e in qs.projection(q, params, service_opts):
         e = unwrap(e)
@@ -550,20 +542,73 @@ def _marshal_image(
     @type row_pixels L{list}
     """
     image_id, name, owner_id, permissions, fileset_id = row
-    image = dict()
-    image["id"] = unwrap(image_id)
-    image["name"] = unwrap_to_str(name)
-    image["ownerId"] = unwrap(owner_id)
-    image["permsCss"] = parse_permissions_css(permissions, unwrap(owner_id), conn)
-    fileset_id_val = unwrap(fileset_id)
-    if fileset_id_val is not None:
-        image["filesetId"] = fileset_id_val
+    data = {
+        "id": image_id,
+        "name": name,
+        "ownerId": owner_id,
+        "image_details_permissions": permissions,
+        "filesetId": fileset_id,
+    }
     if row_pixels:
         sizeX, sizeY, sizeZ, sizeT = row_pixels
-        image["sizeX"] = unwrap(sizeX)
-        image["sizeY"] = unwrap(sizeY)
-        image["sizeZ"] = unwrap(sizeZ)
-        image["sizeT"] = unwrap(sizeT)
+        data["sizeX"] = sizeX
+        data["sizeY"] = sizeY
+        data["sizeZ"] = sizeZ
+        data["sizeT"] = sizeT
+    return _marshal_image_map(
+        conn,
+        data,
+        share_id=share_id,
+        date=date,
+        acqDate=acqDate,
+        thumbVersion=thumbVersion,
+    )
+
+
+def _marshal_image_map(
+    conn,
+    data,
+    share_id=None,
+    date=None,
+    acqDate=None,
+    thumbVersion=None,
+):
+    """Given an Image data dictionary marshals it into a dictionary.  Suppored keys are:
+      * id (rlong)
+      * archived (boolean; optional)
+      * name (rstring)
+      * ownerId (rlong)
+      * image_details_permissions (dict)
+      * filesetId (rlong)
+      * sizeX (rlong; optional)
+      * sizeY (rlong; optional)
+      * sizeZ (rlong; optional)
+      * sizeT (rlong; optional)
+
+    @param conn OMERO gateway.
+    @type conn L{omero.gateway.BlitzGateway}
+    @param data The data to marshal
+    @type row L{dict}
+    """
+    image = dict()
+    image["id"] = unwrap(data["id"])
+    image["archived"] = unwrap(data.get("archived")) is True
+    image["name"] = unwrap_to_str(data["name"])
+    image["ownerId"] = unwrap(data["ownerId"])
+    image["permsCss"] = parse_permissions_css(
+        data["image_details_permissions"], unwrap(data["ownerId"]), conn
+    )
+    fileset_id_val = unwrap(data["filesetId"])
+    if fileset_id_val is not None:
+        image["filesetId"] = fileset_id_val
+    if "sizeX" in data:
+        image["sizeX"] = unwrap(data["sizeX"])
+    if "sizeY" in data:
+        image["sizeY"] = unwrap(data["sizeY"])
+    if "sizeZ" in data:
+        image["sizeZ"] = unwrap(data["sizeZ"])
+    if "sizeT" in data:
+        image["sizeT"] = unwrap(data["sizeT"])
     if share_id is not None:
         image["shareId"] = share_id
     if date is not None:
@@ -667,16 +712,14 @@ def marshal_images(
             image.acquisitionDate as acqDate
             """
 
-    q = (
-        """
+    q = """
         select new map(image.id as id,
+               image.archived as archived,
                image.name as name,
                image.details.owner.id as ownerId,
                image as image_details_permissions,
                image.fileset.id as filesetId %s)
-        """
-        % extraValues
-    )
+        """ % extraValues
 
     from_join_clauses.append("Image image")
 
@@ -714,14 +757,12 @@ def marshal_images(
         # Also discount any images which are part of a screen. No need to
         # take owner into account on this because we don't want them in
         # orphans either way
-        where_clause.append(
-            """
+        where_clause.append("""
             not exists (
                 select ws from WellSample ws
                 where ws.image.id = image.id
             )
-            """
-        )
+            """)
 
     # If this is a query to get images in a share
     if share_id is not None:
@@ -750,30 +791,20 @@ def marshal_images(
     )
 
     for e in qs.projection(q, params, service_opts):
-        e = unwrap(e)[0]
-        d = [
-            e["id"],
-            e["name"],
-            e["ownerId"],
-            e["image_details_permissions"],
-            e["filesetId"],
-        ]
-        kwargs = {"conn": conn, "row": d[0:5]}
-        if load_pixels:
-            d = [e["sizeX"], e["sizeY"], e["sizeZ"], e["sizeT"]]
-            kwargs["row_pixels"] = d
+        data = unwrap(e)[0]
+        kwargs = {}
         if date:
-            kwargs["acqDate"] = e["acqDate"]
-            kwargs["date"] = e["date"]
+            kwargs["acqDate"] = data["acqDate"]
+            kwargs["date"] = data["date"]
 
         # While marshalling the images, determine if there are any
         # images mentioned in shares that are not in the results
         # because they have been deleted
-        if share_id is not None and image_rids and e["id"] in image_rids:
-            image_rids.remove(e["id"])
+        if share_id is not None and image_rids and data["id"] in image_rids:
+            image_rids.remove(data["id"])
             kwargs["share_id"] = share_id
 
-        images.append(_marshal_image(**kwargs))
+        images.append(_marshal_image_map(conn, data, **kwargs))
 
     # Load thumbnails separately
     # We want version of most recent thumbnail (max thumbId) owned by user
@@ -872,8 +903,7 @@ def marshal_screens(conn, group_id=-1, experimenter_id=-1, page=1, limit=setting
         params.addId(experimenter_id)
         where_clause = "where screen.details.owner.id = :id"
     qs = conn.getQueryService()
-    q = (
-        """
+    q = """
         select new map(screen.id as id,
                screen.name as name,
                screen.details.owner.id as ownerId,
@@ -883,9 +913,7 @@ def marshal_screens(conn, group_id=-1, experimenter_id=-1, page=1, limit=setting
                from Screen screen
                %s
                order by lower(screen.name), screen.id
-        """
-        % where_clause
-    )
+        """ % where_clause
 
     for e in qs.projection(q, params, service_opts):
         e = unwrap(e)
@@ -996,21 +1024,17 @@ def marshal_plates(
         where_clause.append("slink.parent.id = :sid")
     # If this is a query to get plates with no parent screens
     elif orphaned:
-        where_clause.append(
-            """
+        where_clause.append("""
             not exists (
                 select splink from ScreenPlateLink as splink
                 where splink.child = plate.id
             )
-            """
-        )
+            """)
 
     q += """
         %s
         order by lower(plate.name), plate.id
-        """ % build_clause(
-        where_clause, "where", "and"
-    )
+        """ % build_clause(where_clause, "where", "and")
 
     for e in qs.projection(q, params, service_opts):
         e = unwrap(e)
@@ -1054,6 +1078,9 @@ def _marshal_plate_acquisition(conn, row):
         start_time = datetime.utcfromtimestamp(unwrap(start_time) / 1000.0)
         end_time = datetime.utcfromtimestamp(unwrap(end_time) / 1000.0)
         plate_acquisition["name"] = "%s - %s" % (start_time, end_time)
+    elif start_time is not None:
+        start_time = datetime.utcfromtimestamp(unwrap(start_time) / 1000.0)
+        plate_acquisition["name"] = "%s" % start_time
     else:
         plate_acquisition["name"] = "Run %d" % unwrap(pa_id)
 
@@ -1202,6 +1229,8 @@ def _marshal_tag(conn, row):
       * details.owner.id (rlong)
       * details.permissions (dict)
       * namespace (rstring)
+      * tag child count (rint)
+      * image child count (rint)
 
     @param conn OMERO gateway.
     @type conn L{omero.gateway.BlitzGateway}
@@ -1209,7 +1238,16 @@ def _marshal_tag(conn, row):
     @type row L{list}
 
     """
-    tag_id, text_value, description, owner_id, permissions, namespace, child_count = row
+    (
+        tag_id,
+        text_value,
+        description,
+        owner_id,
+        permissions,
+        namespace,
+        tag_child_count,
+        image_child_count,
+    ) = row
 
     tag = dict()
     tag["id"] = unwrap(tag_id)
@@ -1225,10 +1263,10 @@ def _marshal_tag(conn, row):
         and unwrap_to_str(namespace) == omero.constants.metadata.NSINSIGHTTAGSET
     ):
         tag["set"] = True
+        tag["childCount"] = unwrap(tag_child_count)
     else:
         tag["set"] = False
-
-    tag["childCount"] = unwrap(child_count)
+        tag["childCount"] = unwrap(image_child_count)
 
     return tag
 
@@ -1291,7 +1329,10 @@ def marshal_tags(
                    (select count(aalink2)
                     from AnnotationAnnotationLink aalink2
                     where aalink2.child.class=TagAnnotation
-                    and aalink2.parent.id=aalink.child.id) as childCount)
+                    and aalink2.parent.id=aalink.child.id) as tagChildCount,
+                   (select count(aalink3)
+                    from ImageAnnotationLink aalink3
+                    where aalink3.child.id=aalink.child.id) as imageChildCount)
             from AnnotationAnnotationLink aalink
             where aalink.parent.class=TagAnnotation
             and aalink.child.class=TagAnnotation
@@ -1321,36 +1362,32 @@ def marshal_tags(
                    (select count(aalink2)
                     from AnnotationAnnotationLink aalink2
                     where aalink2.child.class=TagAnnotation
-                    and aalink2.parent.id=tag.id) as childCount)
+                    and aalink2.parent.id=tag.id) as tagChildCount,
+                   (select count(aalink3)
+                    from ImageAnnotationLink aalink3
+                    where aalink3.child.id=tag.id) as imageChildCount)
             from TagAnnotation tag
             """
 
         # Orphaned tags are those not tagged by a 'tagset'
         if orphaned:
-            where_clause.append(
-                """
+            where_clause.append("""
                 not exists (
                     select aalink from AnnotationAnnotationLink as aalink
                     where aalink.child = tag.id
                     and aalink.parent.ns = '%s'
                 )
-                """
-                % omero.constants.metadata.NSINSIGHTTAGSET
-            )
+                """ % omero.constants.metadata.NSINSIGHTTAGSET)
         # Restricted by the specified user
         if experimenter_id is not None and experimenter_id != -1:
             params.addId(experimenter_id)
-            where_clause.append(
-                """
+            where_clause.append("""
                 tag.details.owner.id = :id
-                """
-            )
+                """)
         q += """
         %s
         order by tag.id
-        """ % build_clause(
-            where_clause, "where", "and"
-        )
+        """ % build_clause(where_clause, "where", "and")
 
     for e in qs.projection(q, params, service_opts):
         e = unwrap(e)
@@ -1361,9 +1398,10 @@ def marshal_tags(
             e[0]["ownerId"],
             e[0]["tag_details_permissions"],
             e[0]["ns"],
-            e[0]["childCount"],
+            e[0]["tagChildCount"],
+            e[0]["imageChildCount"],
         ]
-        tags.append(_marshal_tag(conn, e[0:7]))
+        tags.append(_marshal_tag(conn, e[0:8]))
 
     return tags
 
@@ -1433,8 +1471,7 @@ def marshal_tagged(
     params.add("tid", rlong(tag_id))
 
     # Projects
-    q = (
-        """
+    q = """
         select distinct new map(obj.id as id,
             obj.name as name,
             lower(obj.name) as lowername,
@@ -1446,9 +1483,7 @@ def marshal_tagged(
             join obj.annotationLinks alink
             where alink.child.id=:tid
         %s
-        """
-        % common_clause
-    )
+        """ % common_clause
 
     projects = []
     for e in qs.projection(q, params, service_opts):
@@ -1464,8 +1499,7 @@ def marshal_tagged(
     tagged["projects"] = projects
 
     # Datasets
-    q = (
-        """
+    q = """
         select distinct new map(obj.id as id,
             obj.name as name,
             lower(obj.name) as lowername,
@@ -1477,9 +1511,7 @@ def marshal_tagged(
             join obj.annotationLinks alink
             where alink.child.id=:tid
         %s
-        """
-        % common_clause
-    )
+        """ % common_clause
 
     datasets = []
     for e in qs.projection(q, params, service_opts):
@@ -1514,6 +1546,7 @@ def marshal_tagged(
 
     q = """
         select distinct new map(obj.id as id,
+               obj.archived as archived,
                obj.name as name,
                lower(obj.name) as lowername,
                obj.details.owner.id as ownerId,
@@ -1531,27 +1564,16 @@ def marshal_tagged(
 
     images = []
     for e in qs.projection(q, params, service_opts):
-        e = unwrap(e)
-        row = [
-            e[0]["id"],
-            e[0]["name"],
-            e[0]["ownerId"],
-            e[0]["image_details_permissions"],
-            e[0]["filesetId"],
-        ]
+        data = unwrap(e)[0]
         kwargs = {}
-        if load_pixels:
-            d = [e[0]["sizeX"], e[0]["sizeY"], e[0]["sizeZ"], e[0]["sizeT"]]
-            kwargs["row_pixels"] = d
         if date:
-            kwargs["acqDate"] = e[0]["acqDate"]
-            kwargs["date"] = e[0]["date"]
-        images.append(_marshal_image(conn, row, **kwargs))
+            kwargs["acqDate"] = data["acqDate"]
+            kwargs["date"] = data["date"]
+        images.append(_marshal_image_map(conn, data, **kwargs))
     tagged["images"] = images
 
     # Screens
-    q = (
-        """
+    q = """
         select distinct new map(obj.id as id,
             obj.name as name,
             lower(obj.name) as lowername,
@@ -1563,9 +1585,7 @@ def marshal_tagged(
             join obj.annotationLinks alink
             where alink.child.id=:tid
         %s
-        """
-        % common_clause
-    )
+        """ % common_clause
 
     screens = []
     for e in qs.projection(q, params, service_opts):
@@ -1581,8 +1601,7 @@ def marshal_tagged(
     tagged["screens"] = screens
 
     # Plate
-    q = (
-        """
+    q = """
         select distinct new map(obj.id as id,
             obj.name as name,
             lower(obj.name) as lowername,
@@ -1594,9 +1613,7 @@ def marshal_tagged(
             join obj.annotationLinks alink
             where alink.child.id=:tid
         %s
-        """
-        % common_clause
-    )
+        """ % common_clause
 
     plates = []
     for e in qs.projection(q, params, service_opts):
@@ -1612,8 +1629,7 @@ def marshal_tagged(
     tagged["plates"] = plates
 
     # Plate Acquisitions
-    q = (
-        """
+    q = """
         select distinct new map(obj.id as id,
             obj.name as name,
             lower(obj.name) as lowername,
@@ -1625,9 +1641,7 @@ def marshal_tagged(
             join obj.annotationLinks alink
             where alink.child.id=:tid
         %s
-        """
-        % common_clause
-    )
+        """ % common_clause
 
     plate_acquisitions = []
     for e in qs.projection(q, params, service_opts):
@@ -1772,8 +1786,7 @@ def marshal_shares(conn, member_id=-1, owner_id=-1, page=1, limit=settings.PAGE)
         where_clause += " and mem.parent.owner.id=:owid "
 
     qs = conn.getQueryService()
-    q = (
-        """
+    q = """
         select distinct mem.parent.id,
             mem.parent.active,
             extract(epoch from mem.parent.started)
@@ -1784,9 +1797,7 @@ def marshal_shares(conn, member_id=-1, owner_id=-1, page=1, limit=settings.PAGE)
         where mem.parent.itemCount > 0
         %s
         order by mem.parent.id
-        """
-        % where_clause
-    )
+        """ % where_clause
 
     for e in qs.projection(q, params, service_opts):
         shares.append(_marshal_share(conn, e[0:5]))
@@ -1852,8 +1863,7 @@ def marshal_discussions(conn, member_id=-1, owner_id=-1, page=1, limit=settings.
         where_clause += " and mem.parent.owner.id=:owid "
 
     qs = conn.getQueryService()
-    q = (
-        """
+    q = """
         select distinct mem.parent.id,
             mem.parent.active,
             extract(epoch from mem.parent.started)
@@ -1864,9 +1874,7 @@ def marshal_discussions(conn, member_id=-1, owner_id=-1, page=1, limit=settings.
         where mem.parent.itemCount = 0
         %s
         order by mem.parent.id
-        """
-        % where_clause
-    )
+        """ % where_clause
 
     for e in qs.projection(q, params, service_opts):
         discussions.append(_marshal_discussion(conn, e[0:4]))
@@ -2019,10 +2027,8 @@ def marshal_annotations(
         where_clause.append("ch.class!=TagAnnotation")
         where_clause.append("ch.class!=FileAnnotation")
         where_clause.append("ch.class!=CommentAnnotation")
-        where_clause.append(
-            """(ch.ns=null or
-            ch.ns!='openmicroscopy.org/omero/insight/rating')"""
-        )
+        where_clause.append("""(ch.ns=null or
+            ch.ns!='openmicroscopy.org/omero/insight/rating')""")
     if ns is not None:
         where_clause.append("ch.ns=:ns")
 

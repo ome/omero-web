@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-   Copyright 2008-2020 The Open Microscopy Environment, Glencoe Software, Inc.
-   All rights reserved.
+Copyright 2008-2020 The Open Microscopy Environment, Glencoe Software, Inc.
+All rights reserved.
 
-   Use is subject to license terms supplied in LICENSE.txt
+Use is subject to license terms supplied in LICENSE.txt
 
 """
 
@@ -48,14 +48,14 @@ setup(
     url="https://github.com/ome/omero-web/",
     license="GPLv2+",
     packages=find_packages(exclude=("test",)) + ["omero.plugins"],
-    python_requires=">=3.8",
+    python_requires=">=3.10,<3.15",
     install_requires=[
         # requires Ice (use wheel for faster installs)
         "omero-py>=5.19.0",
         # minimum requirements for `omero web start`
         "concurrent-log-handler>=0.9.20",
-        "Django>=4.2.3,<4.3",
-        "django-pipeline==2.1.0",
+        "Django>=5.2.9,<5.3",
+        "django-pipeline>=4.1.0",
         "django-cors-headers==3.7.0",
         "whitenoise>=5.3.0",
         "gunicorn>=19.3",
@@ -64,10 +64,11 @@ setup(
         "pytz",
         "portalocker",
         "packaging",
+        "importlib-resources",
     ],
     include_package_data=True,
     tests_require=["pytest"],
     extras_require={
-        "redis": ["django-redis==5.3.0"],
+        "redis": ["django-redis>=6"],
     },
 )
