@@ -478,7 +478,6 @@ button::-moz-focus-inner {
     
 .tag_annotation_wrapper .tag, .imagefilter .tag {
 	 display:inline-block;
-	 float:left;
 	 margin:1px 3px;
 	 position:relative;
 	 

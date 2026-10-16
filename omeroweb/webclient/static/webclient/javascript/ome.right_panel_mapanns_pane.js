@@ -206,8 +206,10 @@ var MapAnnsPane = function MapAnnsPane($element, opts) {
                         'showTableHead': false, 'showNs': false, 'clientMapAnn': true, 'showParent': showParent});
                     html = html + mapAnnsTempl({'anns': map_annotations, 'isInherited': false,
                         'showTableHead': false, 'showNs': true, 'clientMapAnn': false, 'showParent': showParent});
-                    html = html + mapAnnsTempl({'anns': inh_map_annotations, 'isInherited': true,
-                        'showTableHead': false, 'showNs': true, 'clientMapAnn': false, 'showParent': showParent});
+                    if (inh_map_annotations.length > 0) {
+                        html = html + mapAnnsTempl({'anns': inh_map_annotations, 'isInherited': true,
+                            'showTableHead': false, 'showNs': true, 'clientMapAnn': false, 'showParent': showParent});
+                    }
                     $mapAnnContainer.html(html);
 
                     // re-use the ajaxdata to set Object IDS data on the parent container
