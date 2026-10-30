@@ -23,6 +23,7 @@
 <!-- Include script for filtering center panel -->
 <script src="{% static 'webclient/javascript/ome.center_plugin_filter.js'|add:url_suffix %}" type="text/javascript"></script>
 
+{{ thumbnails_batch|default:50|json_script:"thumbnails-batch-script" }}
 <script>
 /**
  * This script is included in the main containers.html page as well as public.html,
@@ -298,7 +299,7 @@ $(document).ready(function() {
         setIconSize();
 
         // load thumbnails in a batches
-        thumbnailsBatch = {{ thumbnails_batch|default:50|json_dumps|safe }};
+        thumbnailsBatch = JSON.parse(document.getElementById("thumbnails-batch-script").textContent);
         iids = $.map(imgJson, function(img){
             return img.id;
         });

@@ -22,6 +22,7 @@
 -->
 {% endcomment %}
 
+    {{ thumbnails_batch|default:50|json_script:"thumbnails-batch-script" }}
     <script type="text/javascript">
         $(document).ready(function(){
 
@@ -34,7 +35,7 @@
             $(".search_thumb").each(function(){
                 iids.push(this.id);
             });
-            var thumbnailsBatch = {{ thumbnails_batch|default:50|json_dumps|safe }};
+            var thumbnailsBatch = JSON.parse(document.getElementById("thumbnails-batch-script").textContent);
 
             OME.load_thumbnails(
                 "{% url 'get_thumbnails_json' %}",

@@ -89,7 +89,7 @@
       }
     </style>
 
-
+    {{ thumbnails_batch|default:50|json_script:"thumbnails-batch-script" }}
     <script type="text/javascript">
 
         var PLATE_LINKS_URL_999 = '{% url 'webgateway_object_table_query' 'Screen.plateLinks.child.wells' 999 %}';
@@ -200,7 +200,7 @@
                      'ignorePreview': true,
                      'thumbnail_url': "{% url 'get_thumbnails_json' %}",
                      'defaultThumbnail': "{% static 'webgateway/img/image128.png' %}",
-                     'thumbnailsBatch': {{ thumbnails_batch|default:50|json_dumps|safe }},
+                     'thumbnailsBatch': JSON.parse(document.getElementById("thumbnails-batch-script").textContent),
                     }
                 );
                 updateMyRdef(OME.preview_viewport.getQuery());

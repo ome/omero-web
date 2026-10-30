@@ -25,6 +25,7 @@
 
     <link rel="stylesheet" type="text/css" href="{% static "webgateway/css/ome.plateview.css"|add:url_suffix %}" media="all" />
 
+    {{ thumbnails_batch|default:50|json_script:"thumbnails-batch-script" }}
     <script type="text/javascript">
 
         $(document).ready(function() {
@@ -150,7 +151,7 @@
                   width: spw_thumb_size,
                   staticurl: staticurl,
                   useParentPrefix: false,
-                  thumbnailsBatch: {{ thumbnails_batch|default:50|json_dumps|safe }},
+                  thumbnailsBatch: JSON.parse(document.getElementById("thumbnails-batch-script").textContent),
                   defaultThumb: "{% static 'webgateway/img/image128.png' %}"
                  });
             var $selected;
@@ -285,7 +286,7 @@
                             return i.id;
                         });
                         // Load thumbnails
-                        var thumbnailsBatch = {{ thumbnails_batch|default:50|json_dumps|safe }};
+                        var thumbnailsBatch = JSON.parse(document.getElementById("thumbnails-batch-script").textContent);
                         OME.load_thumbnails("{% url 'get_thumbnails_json' %}",
                                             iids, thumbnailsBatch,
                                             "{% static 'webgateway/img/image128.png' %}"
