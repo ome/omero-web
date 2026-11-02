@@ -1387,7 +1387,6 @@ def api_annotations(request, conn=None, **kwargs):
 
     annotation_order = settings.ANNOTATION_ORDER
 
-
     if annotation_order == "namespace":
         annotation_order_type = "namespace"
     elif annotation_order == "date":
@@ -1398,7 +1397,13 @@ def api_annotations(request, conn=None, **kwargs):
         annotation_order_type = "custom"
 
     if not with_parents:
-        return JsonResponse({"annotations": all_anns, "experimenters": exps, "annotation_order": annotation_order_type})
+        return JsonResponse(
+            {
+                "annotations": all_anns,
+                "experimenters": exps,
+                "annotation_order": annotation_order_type,
+            }
+        )
 
     anns = []
     parent_anns = {"annotations": [], "lineage": defaultdict(dict)}
@@ -1414,7 +1419,12 @@ def api_annotations(request, conn=None, **kwargs):
                 parent_anns["lineage"][pclass][pid] = lineage
 
     return JsonResponse(
-        {"annotations": anns, "parents": parent_anns, "experimenters": exps, "annotation_order": annotation_order_type}
+        {
+            "annotations": anns,
+            "parents": parent_anns,
+            "experimenters": exps,
+            "annotation_order": annotation_order_type,
+        }
     )
 
 
