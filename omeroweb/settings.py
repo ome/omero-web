@@ -223,6 +223,17 @@ def check_session_engine(s):
     return s
 
 
+def parse_annotation_order(value):
+    try:
+        parsed = json.loads(value)
+        if isinstance(parsed, list):
+            return parsed
+    except Exception:
+        pass
+
+    return str(value)
+
+
 CUSTOM_HOST = CUSTOM_SETTINGS.get("Ice.Default.Host", "localhost")
 CUSTOM_HOST = CUSTOM_SETTINGS.get("omero.master.host", CUSTOM_HOST)
 # DO NOT EDIT!
@@ -1006,6 +1017,16 @@ CUSTOM_SETTINGS_MAPPINGS = {
         (
             "ID of the group to pre-select in search form. "
             "A value of 0 or -1 pre-selects All groups."
+        ),
+    ],
+    "omero.web.annotation_order": [
+        "ANNOTATION_ORDER",
+        "namespace",
+        parse_annotation_order,
+        (
+            "Controls annotation ordering. "
+            "Allowed values are 'namespace', 'date', or a JSON list "
+            "of namespaces defining a custom order"
         ),
     ],
     "omero.web.ui.top_links": [
