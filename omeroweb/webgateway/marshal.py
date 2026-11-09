@@ -185,11 +185,17 @@ def imageMarshal(image, key=None, request=None):
     rv["tiles"] = tiles
     if tiles:
         width, height = image._re.getTileSize()
-        zoomLevelScaling = image.getZoomLevelScaling()
-
         rv.update({"tile_size": {"width": width, "height": height}, "levels": levels})
-        if zoomLevelScaling is not None:
-            rv["zoomLevelScaling"] = zoomLevelScaling
+
+        resolution_descriptions = image._re.getResolutionDescriptions()
+        rv["resolutions"] = {
+            index: {"sizeX": r.sizeX, "sizeY": r.sizeY}
+            for index, r in enumerate(resolution_descriptions)
+        }
+        rv["zoomLevelScaling"] = {
+            index: r.sizeX / resolution_descriptions[0].sizeX
+            for index, r in enumerate(resolution_descriptions)
+        }
 
     nominalMagnification = (
         image.getObjectiveSettings() is not None
@@ -444,8 +450,8 @@ def graphResponseMarshal(conn, rsp):
     rv = {}
     if isinstance(rsp, omero.cmd.ERR):
         rsp_params = ", ".join(["%s: %s" % (k, v) for k, v in rsp.parameters.items()])
-        rv["error"] = rsp.message
-        rv["report"] = "%s %s" % (rsp.name, rsp_params)
+        rv["error"] = str(rsp.name)
+        rv["report"] = rsp_params
     else:
         included = rsp.responses[0].includedObjects
         deleted = rsp.responses[0].deletedObjects

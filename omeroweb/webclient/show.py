@@ -970,9 +970,7 @@ def paths_to_tag(conn, experimenter_id=None, tagset_id=None, tag_id=None):
             left outer join tagset.annotationLinks ttlink
             left outer join ttlink.child.details.owner towner
             where %s
-        """ % " and ".join(
-            where_clause
-        )
+        """ % " and ".join(where_clause)
 
         tagsets = qs.projection(q, params, service_opts)
         for e in tagsets:
@@ -1004,9 +1002,7 @@ def paths_to_tag(conn, experimenter_id=None, tagset_id=None, tag_id=None):
             from TagAnnotation tag
             left outer join tag.details.owner towner
             where %s
-        """ % " and ".join(
-            where_clause
-        )
+        """ % " and ".join(where_clause)
 
         tagsets = qs.projection(q, params, service_opts)
         for e in tagsets:

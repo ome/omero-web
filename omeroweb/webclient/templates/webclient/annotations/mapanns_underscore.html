@@ -69,7 +69,9 @@
                             &nbsp <%- cname %><br />
                           <% }) %>
                         <% } %>
-                      <b>Namespace:</b> <%- ann.ns.slice(0, 50) %><br />
+                      <% if (ann.ns) { %>
+                        <b>Namespace:</b> <%- ann.ns.slice(0, 50) %><br />
+                      <% } %>
                     <% } %>
                 </span>
             <% } else if (objCount && objCount > 1) { %>

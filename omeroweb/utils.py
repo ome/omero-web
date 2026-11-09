@@ -27,7 +27,6 @@ from django.utils.http import urlencode
 from django.urls import reverse
 from django.urls import NoReverseMatch
 
-
 logger = logging.getLogger(__name__)
 
 

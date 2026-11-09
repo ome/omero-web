@@ -19,7 +19,6 @@
 
 """Helper functions for views that handle object trees."""
 
-
 from omero_marshal import get_encoder
 
 

@@ -15,7 +15,6 @@ import logging
 import omero.sys
 from omero.rtypes import rint, rlong
 
-
 logger = logging.getLogger(__name__)
 
 

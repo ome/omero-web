@@ -150,6 +150,11 @@
                 });
 
               {% endif %}
+
+              $("#show_ext_info").on("click", function() {
+                var $panel = $("#externalInfo");
+                $panel.toggle();
+              });
             
         });
     </script>
@@ -348,7 +353,7 @@
               </li>
               {% endwith %}
               {% endif %}
-            {% endif %}
+            {% endif %}  <!-- endif image -->
         </ul>
     </div>
 
@@ -375,7 +380,21 @@
     {% include "webclient/annotations/includes/figure_scripts_menu.html" %}
     {% endif %}
     {% endif %}
-    
+
+    <!-- External Info -->
+    {% with extinfo=manager.external_info %}
+      {% block extinfo_button %}
+      {% if extinfo %}
+        <button id="show_ext_info" class="btn silver btn_extinfo" title="External Info" >
+          <span style="margin: 3px 2px 1px 2px; background: transparent; box-shadow: none; font-size: 11px; padding: 0px;">
+          {% block extinfo_button_title %}
+            Ext&nbsp;Info
+          {% endblock extinfo_button_title %}
+          </span>
+        </button>
+      {% endif %}
+      {% endblock extinfo_button %}
+    {% endwith %}
 
 
     <div style="position: absolute; left: 0">
@@ -423,4 +442,32 @@
 <div id="link_info_popup" class="info_popup" style="right:0px; top:30px; padding:4px; display:none">
     <input type="text" size="30">
     <img title="Close" src="{% static 'webgateway/img/close.gif' %}" />
+</div>
+
+<!-- This is hidden initially -->
+<div id="externalInfo" style="display: none; margin-top: 15px; font-size: 13px;">
+{% with extinfo=manager.external_info %}
+  {% block extinfo %}
+  {% if extinfo %}
+    <div style="background: white; padding: 7px; border: 1px solid rgb(221, 221, 221); overflow: auto; border-radius: 4px;">
+      <h3>External Info</h3>
+      <div style="margin: 8px 0; word-wrap: break-word"><strong>
+        {% block extinfo_lsid %}
+          {{ extinfo.lsid }}
+        {% endblock extinfo_lsid %}
+      </strong></div>
+      <details>
+        <summary>Details</summary>
+        {% block extinfo_details %}
+          <ul style="margin: 5px">
+            <li>externalInfo ID: <strong>{{ extinfo.id }}</strong></li>
+            <li>entityType: <strong>{{ extinfo.entityType }}</strong></li>
+            <li>entityId: <strong>{{ extinfo.entityId }}</strong></li>
+          </ul>
+        {% endblock extinfo_details %}
+      </details>
+    </div>
+  {% endif %}
+  {% endblock extinfo %}
+{% endwith %}
 </div>

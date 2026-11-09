@@ -2652,7 +2652,7 @@ class MetadataDetectorForm(forms.Form):
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
-                            "onchange": save_metadata(detector.id, "voltage"),
+                            "onchange": save_metadata(detector.id, "zoom"),
                         }
                     ),
                     initial=detector.zoom,
@@ -2664,7 +2664,7 @@ class MetadataDetectorForm(forms.Form):
                     widget=forms.TextInput(
                         attrs={
                             "size": 25,
-                            "onchange": save_metadata(detector.id, "voltage"),
+                            "onchange": save_metadata(detector.id, "zoom"),
                         }
                     ),
                     required=False,

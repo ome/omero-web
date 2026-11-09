@@ -29,6 +29,7 @@ returns a Web response. This response can be the HTML contents of a Web page,
 or a redirect, or the 404 and 500 error, or an XML document, or an image...
 or anything."""
 
+from html import escape
 import traceback
 import logging
 import datetime
@@ -870,7 +871,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
                                 "Downgrade to private group not" " currently possible"
                             )
                         else:
-                            msgs.append(ex.message)
+                            msgs.append(escape(ex.message))
 
                 removalFails = []
                 if can_add_member:
@@ -893,7 +894,7 @@ def manage_group(request, action, gid=None, conn=None, **kwargs):
                     url = reverse("wamanageexperimenterid", args=["edit", e.id])
                     msgs.append(
                         "Can't remove user <a href='%s'>%s</a> from"
-                        " their only group" % (url, e.getFullName())
+                        " their only group" % (url, escape(e.getFullName()))
                     )
                 # Refresh form (ignore POST data)
                 context["form"] = GroupForm(
@@ -989,14 +990,14 @@ def manage_group_owner(request, action, gid, conn=None, **kwargs):
                     try:
                         msg = conn.updatePermissions(group, perm)
                         if msg is not None:
-                            msgs.append(msg)
+                            msgs.append(escape(msg))
                     except omero.SecurityViolation as ex:
                         if ex.message.startswith("Cannot change permissions"):
                             msgs.append(
                                 "Downgrade to private group not" " currently possible"
                             )
                         else:
-                            msgs.append(ex.message)
+                            msgs.append(escape(ex.message))
 
                 if len(removalFails) == 0 and len(msgs) == 0:
                     return HttpResponseRedirect(reverse("wamyaccount"))
@@ -1006,7 +1007,7 @@ def manage_group_owner(request, action, gid, conn=None, **kwargs):
                     url = reverse("wamanageexperimenterid", args=["edit", e.id])
                     msgs.append(
                         "Can't remove user <a href='%s'>%s</a> from"
-                        " their only group" % (url, e.getFullName())
+                        " their only group" % (url, escape(e.getFullName()))
                     )
                 # refresh the form and add messages
                 context = getEditFormContext()
@@ -1198,7 +1199,7 @@ def email(request, conn=None, **kwargs):
                     "job_type": "send_email",
                     "status": "in progress",
                     "error": 0,
-                    "start_time": datetime.datetime.now(),
+                    "start_time": str(datetime.datetime.now()),
                 }
             form = EmailForm(experimenter_list, group_list, conn, request)
             context["non_field_errors"] = "Email sent." " Check status in activities."

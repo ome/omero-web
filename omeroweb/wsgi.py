@@ -20,12 +20,12 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
+
 import os
 import sys
 
 
 from django.core.wsgi import get_wsgi_application
-
 
 # OMERO.web is set up with the "omeroweb" package also on the PYTHONPATH
 sys.path.append(os.path.dirname(__file__))

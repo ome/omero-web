@@ -16,7 +16,6 @@
 from django.urls import re_path
 from omeroweb.webgateway import views
 
-
 COMPACT_JSON = {"_json_dumps_params": {"separators": (",", ":")}}
 
 

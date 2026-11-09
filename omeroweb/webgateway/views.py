@@ -71,7 +71,6 @@ from omeroweb.connector import Connector, Server
 
 import glob
 
-
 # from models import StoredConnection
 
 from omeroweb.webgateway.webgateway_tempfile import webgateway_tempfile
@@ -89,7 +88,6 @@ from omeroweb.webgateway.util import get_longs, getIntOrDefault
 
 from PIL import Image, ImageDraw
 import numpy
-
 
 logger = logging.getLogger(__name__)
 
@@ -213,6 +211,9 @@ def validate_rdef_query(func):
         r = None
         try:
             r = request.GET
+            # POST may include request params in URL (GET), so we check...
+            if "c" not in r and request.method == "POST":
+                r = request.POST
         except Exception:
             return HttpResponseServerError("Endpoint improperly configured")
 
@@ -252,6 +253,65 @@ def validate_rdef_query(func):
         return func(request, *args, **kwargs)
 
     return wrapper_validate
+
+
+def jsonp(f):
+    """
+    Decorator for adding connection debugging and returning function result as
+    json, depending on values in kwargs
+
+    @param f:       The function to wrap
+    @return:        The wrapped function, which will return json
+    """
+
+    @wraps(f)
+    def wrap(request, *args, **kwargs):
+        logger.debug("jsonp")
+        try:
+            server_id = kwargs.get("server_id", None)
+            if server_id is None and request.session.get("connector"):
+                server_id = request.session["connector"]["server_id"]
+            kwargs["server_id"] = server_id
+            rv = f(request, *args, **kwargs)
+            if kwargs.get("_raw", False):
+                return rv
+            if isinstance(rv, HttpResponse):
+                return rv
+            c = request.GET.get("callback", None)
+            if c is not None and not kwargs.get("_internal", False):
+                if not VALID_JS_VARIABLE.match(c):
+                    return HttpResponseBadRequest("Invalid callback")
+                rv = json.dumps(rv)
+                rv = "%s(%s)" % (c, rv)
+                # mimetype for JSONP is application/javascript
+                return HttpJavascriptResponse(rv)
+            if kwargs.get("_internal", False):
+                return rv
+            # mimetype for JSON is application/json
+            # NB: To support old api E.g. /get_rois_json/
+            # We need to support lists
+            safe = type(rv) is dict
+            # Allow optional JSON dumps parameters
+            json_params = kwargs.get("_json_dumps_params", None)
+            return JsonResponse(rv, safe=safe, json_dumps_params=json_params)
+        except Exception as ex:
+            # Default status is 500 'server error'
+            # But we try to handle all 'expected' errors appropriately
+            # TODO: handle omero.ConcurrencyException
+            status = 500
+            if isinstance(ex, omero.SecurityViolation):
+                status = 403
+            elif isinstance(ex, omero.ApiUsageException):
+                status = 400
+            trace = traceback.format_exc()
+            logger.debug(trace)
+            if kwargs.get("_raw", False) or kwargs.get("_internal", False):
+                raise
+            return JsonResponse(
+                {"message": str(ex), "stacktrace": trace}, status=status
+            )
+
+    return wrap
 
 
 def _split_channel_info(rchannels):
@@ -892,6 +952,8 @@ def _get_prepared_image(
     @return:            Tuple (L{omero.gateway.ImageWrapper} image, quality)
     """
     r = request.GET
+    if "c" not in r and request.method == "POST":
+        r = request.POST
     logger.debug(
         "Preparing Image:%r saveDefs=%r "
         "retry=%r request=%r conn=%s" % (iid, saveDefs, retry, r, str(conn))
@@ -1029,11 +1091,8 @@ def render_image_region(request, iid, z, t, conn=None, **kwargs):
             else:
                 level = levels - v
                 if level < 0:
-                    msg = (
-                        "Invalid resolution level, \
-                    %s > number of available levels %s "
-                        % (v, levels)
-                    )
+                    msg = "Invalid resolution level, \
+                    %s > number of available levels %s " % (v, levels)
                     logger.debug(msg, exc_info=True)
                     return HttpResponseBadRequest(msg)
             x = int(zxyt[1]) * w
@@ -1137,6 +1196,7 @@ def render_image_region_rdef(request, iid, z=None, t=None, conn=None, **kwargs):
 
 
 @login_required()
+@jsonp
 def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
     """
     Renders the OME-TIFF representation of the image(s) with id cid in ctx
@@ -1199,11 +1259,7 @@ def render_ome_tiff(request, ctx, cid, conn=None, **kwargs):
     imgs = [x for x in imgs if not x.requiresPixelsPyramid()]
 
     if request.GET.get("dryrun", False):
-        rv = json.dumps(len(imgs))
-        c = request.GET.get("callback", None)
-        if c is not None and not kwargs.get("_internal", False):
-            rv = "%s(%s)" % (c, rv)
-        return HttpJavascriptResponse(rv)
+        return len(imgs)
     if len(imgs) == 0:
         raise Http404
     if len(imgs) == 1:
@@ -1424,65 +1480,6 @@ def debug(f):
         if "error" in debug:
             raise AttributeError("Debug requested error")
         return f(request, *args, **kwargs)
-
-    return wrap
-
-
-def jsonp(f):
-    """
-    Decorator for adding connection debugging and returning function result as
-    json, depending on values in kwargs
-
-    @param f:       The function to wrap
-    @return:        The wrapped function, which will return json
-    """
-
-    @wraps(f)
-    def wrap(request, *args, **kwargs):
-        logger.debug("jsonp")
-        try:
-            server_id = kwargs.get("server_id", None)
-            if server_id is None and request.session.get("connector"):
-                server_id = request.session["connector"]["server_id"]
-            kwargs["server_id"] = server_id
-            rv = f(request, *args, **kwargs)
-            if kwargs.get("_raw", False):
-                return rv
-            if isinstance(rv, HttpResponse):
-                return rv
-            c = request.GET.get("callback", None)
-            if c is not None and not kwargs.get("_internal", False):
-                if not VALID_JS_VARIABLE.match(c):
-                    return HttpResponseBadRequest("Invalid callback")
-                rv = json.dumps(rv)
-                rv = "%s(%s)" % (c, rv)
-                # mimetype for JSONP is application/javascript
-                return HttpJavascriptResponse(rv)
-            if kwargs.get("_internal", False):
-                return rv
-            # mimetype for JSON is application/json
-            # NB: To support old api E.g. /get_rois_json/
-            # We need to support lists
-            safe = type(rv) is dict
-            # Allow optional JSON dumps parameters
-            json_params = kwargs.get("_json_dumps_params", None)
-            return JsonResponse(rv, safe=safe, json_dumps_params=json_params)
-        except Exception as ex:
-            # Default status is 500 'server error'
-            # But we try to handle all 'expected' errors appropriately
-            # TODO: handle omero.ConcurrencyException
-            status = 500
-            if isinstance(ex, omero.SecurityViolation):
-                status = 403
-            elif isinstance(ex, omero.ApiUsageException):
-                status = 400
-            trace = traceback.format_exc()
-            logger.debug(trace)
-            if kwargs.get("_raw", False) or kwargs.get("_internal", False):
-                raise
-            return JsonResponse(
-                {"message": str(ex), "stacktrace": trace}, status=status
-            )
 
     return wrap
 
@@ -1832,7 +1829,7 @@ def listDatasets_json(request, pid, conn=None, **kwargs):
 
     project = conn.getObject("Project", pid)
     if project is None:
-        return HttpJavascriptResponse("[]")
+        return []
     return [x.simpleMarshal(xtra={"childCount": 0}) for x in project.listChildren()]
 
 
@@ -2041,6 +2038,7 @@ def search_json(request, conn=None, **kwargs):
 
 @require_POST
 @login_required()
+@jsonp
 @validate_rdef_query
 def save_image_rdef_json(request, iid, conn=None, **kwargs):
     """
@@ -2064,9 +2062,7 @@ def save_image_rdef_json(request, iid, conn=None, **kwargs):
     else:
         pi[0].getThumbnail()
         json_data = "true"
-    if request.GET.get("callback", None):
-        json_data = "%s(%s)" % (request.GET["callback"], json_data)
-    return HttpJavascriptResponse(json_data)
+    return json_data
 
 
 @login_required(omero_group=None)
@@ -2206,6 +2202,7 @@ def luts_png(request, conn=None, **kwargs):
 
 
 @login_required()
+@jsonp
 def list_compatible_imgs_json(request, iid, conn=None, **kwargs):
     """
     Lists the images on the same project that would be viable targets for
@@ -2221,7 +2218,6 @@ def list_compatible_imgs_json(request, iid, conn=None, **kwargs):
     """
 
     json_data = "false"
-    r = request.GET
     if conn is None:
         img = None
     else:
@@ -2257,9 +2253,7 @@ def list_compatible_imgs_json(request, iid, conn=None, **kwargs):
         imgs = filter(compat, imgs)
         json_data = json.dumps([x.getId() for x in imgs])
 
-    if r.get("callback", None):
-        json_data = "%s(%s)" % (r["callback"], json_data)
-    return HttpJavascriptResponse(json_data)
+    return json_data
 
 
 @require_POST
@@ -3003,9 +2997,7 @@ def _bulk_file_annotations(request, objtype, objid, conn=None, **kwargs):
         join fetch links.details.owner
         join fetch links.details.creationEvent
         where obj%d.id=:id and
-        (f.ns=:ns or f.file.mimetype=:mt)""" % (
-        len(objtype) - 1
-    )
+        (f.ns=:ns or f.file.mimetype=:mt)""" % (len(objtype) - 1)
 
     ctx = conn.createServiceOptsDict()
     ctx.setOmeroGroup("-1")
@@ -3685,7 +3677,7 @@ def table_get_where_list(request, fileid, conn=None, **kwargs):
         table.close()
 
 
-@login_required()
+@login_required(allowPublicPost=True)
 @jsonp
 def table_slice(request, fileid, conn=None, **kwargs):
     """
