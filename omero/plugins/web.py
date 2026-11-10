@@ -665,7 +665,7 @@ class WebControl(DiagnosticsControl):
                     if pid_path.exists():
                         pid_path.remove()
                         self.ctx.out("Removed stale %s" % pid_path)
-                    return True
+                return True
             else:
                 self.ctx.out("[NOT STARTED]")
                 return True
