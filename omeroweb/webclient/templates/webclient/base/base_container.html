@@ -143,6 +143,12 @@
     <script type="text/javascript" src="{% static "webgateway/js/ome.plateview.js"|add:url_suffix %}"></script>
     <script type="text/javascript" src="{% static "webgateway/js/ome.spwgridview.js"|add:url_suffix %}"></script>
 
+    {{ member_of_groups|json_script:"member-of-groups-script" }}
+    {{ ome.can_create|json_script:"can-create-script" }}
+    {{ current_admin_privileges|json_script:"current-admin-privileges-script" }}
+    {{ leader_of_groups|json_script:"leader-of-groups-script" }}
+    {{ initially_select|json_script:"initially-select-script" }}
+    {{ initially_open|json_script:"initially-open-script" }}
     <script>
 
         // OMERO constants
@@ -166,11 +172,11 @@
         WEBCLIENT.active_group_id = {{ active_group.id }};
         WEBCLIENT.USER = {'id': {{ ome.user.id }}, 'fullName': "{{ ome.user.getFullName }}"};
         WEBCLIENT.active_user = {'id': {{ ome.active_user }}, 'fullName': "{{ active_user.getFullName }}"};
-        WEBCLIENT.member_of_groups = {{ member_of_groups|json_dumps|safe }};
+        WEBCLIENT.member_of_groups = JSON.parse(document.getElementById("member-of-groups-script").textContent);
         WEBCLIENT.isAdmin = {% if ome.user.isAdmin %}true{% else %}false{% endif %};
-        WEBCLIENT.CAN_CREATE = {{ ome.can_create|json_dumps|safe }};
-        WEBCLIENT.current_admin_privileges = {{ current_admin_privileges|json_dumps|safe }};
-        WEBCLIENT.leader_of_groups = {{ leader_of_groups|json_dumps|safe }};
+        WEBCLIENT.CAN_CREATE = JSON.parse(document.getElementById("can-create-script").textContent);
+        WEBCLIENT.current_admin_privileges = JSON.parse(document.getElementById("current-admin-privileges-script").textContent);
+        WEBCLIENT.leader_of_groups = JSON.parse(document.getElementById("leader-of-groups-script").textContent);
 
         WEBCLIENT.URLS = {};
         WEBCLIENT.URLS.webindex = "{% url 'webindex' %}";
@@ -194,8 +200,8 @@
         // jsTree code in ome.tree.js and center panel code in center_plugin.thumbs.js.html uses initially_select
         // instead of browser URL since URL may be /webclient/?path=plate.name-barcode|well.name-A1
 
-        WEBCLIENT.initially_select = {{ initially_select|json_dumps|safe }};
-        WEBCLIENT.initially_open = {{ initially_open|json_dumps|safe }};
+        WEBCLIENT.initially_select = JSON.parse(document.getElementById("initially-select-script").textContent);
+        WEBCLIENT.initially_open = JSON.parse(document.getElementById("initially-open-script").textContent);
 
         {% if menu == 'usertags' %}
             WEBCLIENT.TAG_TREE = true;
